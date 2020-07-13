@@ -32,12 +32,16 @@ target_compile_options(tvedit PRIVATE
     -O2 -g --std=c++17 -fpermissive
 )
 
+find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision/include")
+
 target_include_directories(tvedit
-    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    PRIVATE source/tvedit
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source/tvedit"
+    PRIVATE "${TVISION_INCLUDE}"
+    PRIVATE "${TVISION_INCLUDE}/override"
 )
 
-file(GLOB_RECURSE TVEDIT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/source/**/*.cc")
+file(GLOB_RECURSE TVEDIT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc")
 target_sources(tvedit PRIVATE ${TVEDIT_SRC})
 
 # Dependency 'tvision'
