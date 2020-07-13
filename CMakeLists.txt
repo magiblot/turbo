@@ -14,10 +14,16 @@ target_compile_definitions(scintilla PRIVATE
     CURSES
 )
 
+FILE(GLOB_RECURSE tmp LIST_DIRECTORIES true "${CMAKE_CURRENT_SOURCE_DIR}/scintilla/**")
+SET(SCINTILLA_INC "")
+FOREACH(entry ${tmp})
+    IF(IS_DIRECTORY ${entry})
+        LIST(APPEND SCINTILLA_INC ${entry})
+    ENDIF()
+ENDFOREACH()
+
 target_include_directories(scintilla PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/scintilla/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/scintilla/lexlib"
-    "${CMAKE_CURRENT_SOURCE_DIR}/scintilla/src"
+    ${SCINTILLA_INC}
 )
 
 file(GLOB_RECURSE SCINTILLA_SRC "${CMAKE_CURRENT_SOURCE_DIR}/scintilla/**/*.cxx")
@@ -34,15 +40,27 @@ target_compile_options(tvedit PRIVATE
 
 find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision/include")
 
-target_include_directories(tvedit
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/source/tvedit"
-    PRIVATE "${TVISION_INCLUDE}"
-    PRIVATE "${TVISION_INCLUDE}/override"
+target_include_directories(tvedit PRIVATE
+    ${SCINTILLA_INC}
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/tvedit"
+    "${TVISION_INCLUDE}"
+    "${TVISION_INCLUDE}/override"
 )
 
-file(GLOB_RECURSE TVEDIT_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc")
-target_sources(tvedit PRIVATE ${TVEDIT_SRC})
+target_sources(tvedit PRIVATE
+    "src/app.cc"
+    "src/main.cc"
+    "src/tscintilla.cc"
+    "src/platform/font.cc"
+    "src/platform/listbox.cc"
+    "src/platform/menu.cc"
+    "src/platform/platform.cc"
+    "src/platform/surface.cc"
+    "src/platform/window.cc"
+)
+
+set_target_properties(tvedit PROPERTIES UNITY_BUILD ON)
 
 # Dependency 'tvision'
 # Requires building manually if not installed.
