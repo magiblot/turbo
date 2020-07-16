@@ -70,6 +70,7 @@ inline TDrawCell::operator ushort&()
 class TDrawableView : public TView {
 
     std::vector<TDrawCell> drawArea;
+    TDrawCell fill {0};
 
 protected:
 
@@ -82,10 +83,18 @@ public:
     virtual void draw() override;
     virtual void changeBounds(const TRect &bounds) override;
 
+    void setFillColor(TCellAttribs fillColor);
     TDrawCell& at(int y, int x);
     TRect clipRect(TRect r);
 
 };
+
+inline void TDrawableView::setFillColor(TCellAttribs fillColor)
+{
+    fill.cell.attr = fillColor;
+    for (TDrawCell &cell : drawArea)
+        cell = fill;
+}
 
 inline TDrawCell& TDrawableView::at(int y, int x)
 {

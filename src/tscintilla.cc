@@ -169,3 +169,9 @@ void TScintillaEditor::draw(TDrawableView &d) {
     s.view = &d;
     Editor::Paint(&s, PRectangle(0, 0, d.size.x, d.size.y));
 }
+
+void TScintillaEditor::setTextColor(TCellAttribs attr)
+{
+    WndProc(SCI_STYLESETFORE, STYLE_DEFAULT, TScintillaSurface::convertColor(attr.colors.fg).AsInteger());
+    WndProc(SCI_STYLESETBACK, STYLE_DEFAULT, TScintillaSurface::convertColor(attr.colors.bg).AsInteger());
+}

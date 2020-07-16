@@ -20,6 +20,7 @@ namespace Scintilla {
         static TDrawCell makeCell(uchar ch, ColourDesired fore, ColourDesired back);
         static TCellAttribs convertColor(ColourDesired c);
         static TCellAttribs convertColorPair(ColourDesired fore, ColourDesired back);
+        static ColourDesired convertColor(uchar c);
 
         void Init(WindowID wid) override;
         void Init(SurfaceID sid, WindowID wid) override;
@@ -103,6 +104,15 @@ namespace Scintilla {
             }
         }
         return attr;
+    }
+
+    inline __attribute__((noinline)) ColourDesired TScintillaSurface::convertColor(uchar c)
+    {
+        TCellAttribs attr {c};
+        uchar red = attr.bits.fgRed ? attr.bits.fgBright ? 0xFF : 0x7F : 0x00;
+        uchar green = attr.bits.fgGreen ? attr.bits.fgBright ? 0xFF : 0x7F : 0x00;
+        uchar blue = attr.bits.fgBlue ? attr.bits.fgBright ? 0xFF : 0x7F : 0x00;
+        return ColourDesired(red, green, blue);
     }
 
 }

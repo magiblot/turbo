@@ -2,7 +2,8 @@
 
 TDrawableView::TDrawableView(const TRect &bounds) :
     TView(bounds),
-    drawArea(size.x*size.y)
+    drawArea(size.x*size.y),
+    fill(0)
 {
 }
 
@@ -20,5 +21,5 @@ void TDrawableView::changeBounds(const TRect &bounds)
 
 void TDrawableView::resizeBuffer()
 {
-    drawArea.resize(size.x*size.y);
+    drawArea.resize(size.x*size.y, fill);
 }
