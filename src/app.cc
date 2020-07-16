@@ -8,11 +8,14 @@
 #define Uses_TStatusLine
 #define Uses_TSubMenu
 #define Uses_TWindow
+#define Uses_TFrame
 #include <tvision/tv.h>
 
 #include "app.h"
+#include "editwindow.h"
 
 using namespace tvedit;
+using namespace Scintilla;
 
 TVEditApp* tvedit::app = 0;
 
@@ -63,8 +66,8 @@ void TVEditApp::handleEvent(TEvent& event)
 
 void TVEditApp::newEditorWindow()
 {
-    TWindow *w = new TWindow(deskTop->getExtent(), "Editor Window", wnNoNumber);
-    w = (TWindow *) validView(w);
+    EditorWindow *w = new EditorWindow(deskTop->getExtent());
+    w = (EditorWindow *) validView(w);
     if (w) {
         deskTop->insert(w);
     }

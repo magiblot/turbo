@@ -4,22 +4,22 @@ using namespace Scintilla;
 
 ColourDesired Platform::Chrome()
 {
-    return {};
+    return {0x7F, 0x7F, 0x7F};
 }
 
 ColourDesired Platform::ChromeHighlight()
 {
-    return {};
+    return {0xFF, 0xFF, 0xFF};
 }
 
 const char* Platform::DefaultFont()
 {
-    return 0;
+    return "";
 }
 
 int Platform::DefaultFontSize()
 {
-    return 0;
+    return 1;
 }
 
 unsigned int Platform::DoubleClickTime()

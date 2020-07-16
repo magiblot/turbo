@@ -3,7 +3,7 @@
 using namespace Scintilla;
 
 Font::Font() noexcept :
-    fid(0)
+    fid(nullptr)
 {
 }
 

@@ -43,7 +43,8 @@ find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvis
 target_include_directories(tvedit PRIVATE
     ${SCINTILLA_INC}
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/source/tvedit"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/platform"
     "${TVISION_INCLUDE}"
     "${TVISION_INCLUDE}/override"
 )
@@ -51,6 +52,9 @@ target_include_directories(tvedit PRIVATE
 target_sources(tvedit PRIVATE
     "src/app.cc"
     "src/main.cc"
+    "src/docview.cc"
+    "src/drawview.cc"
+    "src/editwindow.cc"
     "src/tscintilla.cc"
     "src/platform/font.cc"
     "src/platform/listbox.cc"
@@ -61,6 +65,7 @@ target_sources(tvedit PRIVATE
 )
 
 set_target_properties(tvedit PROPERTIES UNITY_BUILD ON)
+target_precompile_headers(tvedit PRIVATE "include/ScintillaHeaders.h")
 
 # Dependency 'tvision'
 # Requires building manually if not installed.
