@@ -22,6 +22,9 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void redrawEditor();
     void setActive(Boolean enable);
 
+    void handleEvent(TEvent &ev) override;
+
+    bool scrollBarChanged(TScrollBar *bar);
     void setVerticalScrollPos(int delta, int limit, int size) override;
 
 };

@@ -76,6 +76,25 @@ void EditorWindow::setActive(Boolean enable)
     vScrollBar->setState(sfVisible, enable);
 }
 
+void EditorWindow::handleEvent(TEvent &ev) {
+    if (ev.what == evBroadcast && ev.message.command == cmScrollBarChanged) {
+        if (scrollBarChanged((TScrollBar *) ev.message.infoPtr)) {
+            redrawEditor();
+            clearEvent(ev);
+        }
+    }
+    TWindow::handleEvent(ev);
+}
+
+bool EditorWindow::scrollBarChanged(TScrollBar *bar)
+{
+    if (bar == vScrollBar) {
+        editor.WndProc(SCI_SETFIRSTVISIBLELINE, bar->value, 0U);
+        return true;
+    }
+    return false;
+}
+
 void EditorWindow::setVerticalScrollPos(int delta, int limit, int size)
 {
     vScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
