@@ -13,9 +13,32 @@ struct TCellAttribs;
 
 namespace Scintilla {
 
+    struct TPRect : public TRect {
+
+        using TRect::TRect;
+        TPRect(PRectangle rc);
+        TPRect& operator=(const TRect &r);
+
+    };
+
+    inline TPRect::TPRect(PRectangle rc) :
+        TRect({(int) rc.left, (int) rc.top, (int) rc.right, (int) rc.bottom})
+    {
+    }
+
+    inline TPRect& TPRect::operator=(const TRect &r)
+    {
+        a = r.a;
+        b = r.b;
+        return *this;
+    }
+
     struct TScintillaSurface : public Surface {
 
         TDrawableView *view {0};
+        TPRect clip {0, 0, 0, 0};
+
+        TPRect clipRect(TPRect r);
 
         static TDrawCell makeCell(uchar ch, ColourDesired fore, ColourDesired back);
         static TCellAttribs convertColor(ColourDesired c);
@@ -73,6 +96,13 @@ namespace Scintilla {
 
 namespace Scintilla {
 
+    inline TPRect TScintillaSurface::clipRect(TPRect r) {
+        // The 'clip' member is already intersected with the view's extent.
+        // See SetClip().
+        r.intersect(clip);
+        return r;
+    }
+
     inline TDrawCell TScintillaSurface::makeCell(uchar ch, ColourDesired fore, ColourDesired back)
     {
         uchar color = convertColorPair(fore, back);
@@ -106,7 +136,7 @@ namespace Scintilla {
         return attr;
     }
 
-    inline __attribute__((noinline)) ColourDesired TScintillaSurface::convertColor(uchar c)
+    inline ColourDesired TScintillaSurface::convertColor(uchar c)
     {
         TCellAttribs attr {c};
         uchar red = attr.bits.fgRed ? attr.bits.fgBright ? 0xFF : 0x7F : 0x00;

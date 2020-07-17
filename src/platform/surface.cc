@@ -68,7 +68,7 @@ void TScintillaSurface::RectangleDraw(PRectangle rc, ColourDesired fore, ColourD
 void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
 {
     // Used to draw text selections. Do not overwrite the foreground color.
-    TRect r = view->clipRect({(int) rc.left, (int) rc.top, (int) rc.right, (int) rc.bottom});
+    auto r = clipRect(rc);
     uchar bg = convertColor(back);
     uchar fg = view->getFillColor().colors.fg;
     for (int y = r.a.y; y < r.b.y; ++y)
@@ -93,7 +93,7 @@ void TScintillaSurface::RoundedRectangle(PRectangle rc, ColourDesired fore, Colo
 void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
         ColourDesired outline, int alphaOutline, int flags)
 {
-    TRect r = view->clipRect({(int) rc.left, (int) rc.top, (int) rc.right, (int) rc.bottom});
+    auto r = clipRect(rc);
     TCellAttribs attr = convertColorPair(outline, fill);
     for (int y = r.a.y; y < r.b.y; ++y)
         for (int x = r.a.x; x < r.b.x; ++x)
@@ -125,7 +125,17 @@ void TScintillaSurface::DrawTextNoClip( PRectangle rc, Font &font_,
                                         XYPOSITION ybase, std::string_view text,
                                         ColourDesired fore, ColourDesired back )
 {
-    TRect r = view->clipRect({(int) rc.left, (int) rc.top, (int) rc.right, (int) rc.bottom});
+    auto clip_ = clip;
+    clip = view->getExtent();
+    DrawTextClipped(rc, font_, ybase, text, fore, back);
+    clip = clip_;
+}
+
+void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
+                                         XYPOSITION ybase, std::string_view text,
+                                         ColourDesired fore, ColourDesired back )
+{
+    auto r = clipRect(rc);
     uchar color = convertColorPair(fore, back);
     for (int y = r.a.y; y < r.b.y; ++y) {
         int x = r.a.x;
@@ -140,16 +150,9 @@ void TScintillaSurface::DrawTextNoClip( PRectangle rc, Font &font_,
     }
 }
 
-void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
-                                         XYPOSITION ybase, std::string_view text,
-                                         ColourDesired fore, ColourDesired back )
-{
-    DrawTextNoClip(rc, font_, ybase, text, fore, back);
-}
-
 void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore)
 {
-    TRect r = view->clipRect({(int) rc.left, (int) rc.top, (int) rc.right, (int) rc.bottom});
+    auto r = clipRect(rc);
     uchar fg = convertColor(fore);
     for (int y = r.a.y; y < r.b.y; ++y) {
         int x = r.a.x;
@@ -202,6 +205,8 @@ XYPOSITION TScintillaSurface::AverageCharWidth(Font &font_)
 
 void TScintillaSurface::SetClip(PRectangle rc)
 {
+    clip = rc;
+    clip.intersect(view->getExtent());
 }
 
 void TScintillaSurface::FlushCachedState()

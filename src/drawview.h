@@ -86,7 +86,6 @@ public:
     void setFillColor(TCellAttribs fillColor);
     TCellAttribs getFillColor();
     TDrawCell& at(int y, int x);
-    TRect clipRect(TRect r);
 
 };
 
@@ -105,13 +104,6 @@ inline TCellAttribs TDrawableView::getFillColor()
 inline TDrawCell& TDrawableView::at(int y, int x)
 {
     return drawArea[y*size.x + x];
-}
-
-inline TRect TDrawableView::clipRect(TRect r)
-{
-    TRect extent = getExtent();
-    extent.intersect(r);
-    return extent;
 }
 
 #endif
