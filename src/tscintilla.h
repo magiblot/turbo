@@ -20,7 +20,7 @@ struct TScintillaEditor : public ScintillaBase {
 
     friend class DocumentView;
 
-    TScintillaWindow *parent;
+    TScintillaWindow *parent {0};
 
     TScintillaEditor();
 

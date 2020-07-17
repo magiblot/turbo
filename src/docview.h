@@ -4,13 +4,22 @@
 #include "tscintilla.h"
 #include "drawview.h"
 
+class TScrollBar;
+class EditorWindow;
+
 struct DocumentView : public TDrawableView {
 
     Scintilla::TScintillaEditor &editor;
+    EditorWindow &window;
 
-    DocumentView(const TRect &bounds, Scintilla::TScintillaEditor &editor_);
+    DocumentView( const TRect &bounds,
+                  Scintilla::TScintillaEditor &aEditor,
+                  EditorWindow &aWindow );
 
     void handleEvent(TEvent &ev) override;
+    void changeBounds(const TRect &bounds) override;
+    void setState(ushort aState, Boolean enable) override;
+
     void doUpdate();
 
 };

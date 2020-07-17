@@ -1,10 +1,17 @@
+#define Uses_TScrollBar
+#include <tvision/tv.h>
+
 #include "docview.h"
+#include "editwindow.h"
 
 using namespace Scintilla;
 
-DocumentView::DocumentView(const TRect &bounds, Scintilla::TScintillaEditor &editor_) :
+DocumentView::DocumentView( const TRect &bounds,
+                            Scintilla::TScintillaEditor &aEditor,
+                            EditorWindow &aWindow ) :
     TDrawableView(bounds),
-    editor(editor_)
+    editor(aEditor),
+    window(aWindow)
 {
     growMode = gfGrowHiX | gfGrowHiY;
     options |= ofSelectable;
@@ -22,8 +29,32 @@ void DocumentView::handleEvent(TEvent &ev)
                     break;
             }
             editor.KeyDownWithModifiers(ev.keyDown, nullptr);
+            window.redrawEditor();
+            clearEvent(ev);
             break;
         default:
+            break;
+    }
+}
+
+
+void DocumentView::changeBounds(const TRect &bounds)
+{
+    TDrawableView::changeBounds(bounds);
+    window.redrawEditor();
+    // If redrawEditor() did no changes to margin sizes, the following
+    // would have to be called first:
+//     editor.changeSize();
+}
+
+void DocumentView::setState(ushort aState, Boolean enable)
+{
+    TView::setState(aState, enable);
+    switch (aState) {
+        // We handle this here as the lifetime of DocumentView
+        // never exceeds that of EditorWindow.
+        case sfActive:
+            window.setActive(enable);
             break;
     }
 }

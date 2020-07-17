@@ -59,7 +59,8 @@ void TScintillaEditor::NotifyChange()
 
 void TScintillaEditor::NotifyParent(SCNotification scn)
 {
-    parent->notify(scn);
+    if (parent)
+        parent->notify(scn);
 }
 
 void TScintillaEditor::CopyToClipboard(const SelectionText &selectedText)

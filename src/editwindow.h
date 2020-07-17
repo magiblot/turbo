@@ -5,26 +5,22 @@
 #include <tvision/tv.h>
 
 #include "tscintilla.h"
-#include "docview.h"
 
-struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
+class DocumentView;
+
+struct EditorWindow : public TWindow {
 
     EditorWindow(const TRect &bounds);
 
     DocumentView *docView;
     TDrawableView *leftMargin;
-
-    bool needsRedraw;
+    TScrollBar *hScrollBar, *vScrollBar;
 
     Scintilla::TScintillaEditor editor;
 
     void setUpEditor();
     void redrawEditor();
-
-    void handleEvent(TEvent &ev) override;
-    void changeBounds(const TRect &bounds) override;
-
-    void notify(SCNotification scn) override;
+    void setActive(Boolean enable);
 
 };
 
