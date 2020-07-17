@@ -50,6 +50,7 @@ struct TScintillaEditor : public ScintillaBase {
 
     void setWindow(TDrawableView *wid);
     void setParent(TScintillaWindow *parent_);
+    void changeSize();
     TPoint getCaretPosition();
 
 };
@@ -62,6 +63,11 @@ inline void TScintillaEditor::setWindow(TDrawableView *wid)
 inline void TScintillaEditor::setParent(TScintillaWindow *parent_)
 {
     parent = parent_;
+}
+
+inline void TScintillaEditor::changeSize()
+{
+    ScintillaBase::ChangeSize();
 }
 
 inline TPoint TScintillaEditor::getCaretPosition()

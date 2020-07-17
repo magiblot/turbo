@@ -81,6 +81,9 @@ void EditorWindow::handleEvent(TEvent &ev)
 void EditorWindow::changeBounds(const TRect &bounds)
 {
     TWindow::changeBounds(bounds);
+    // If redrawEditor() did no changes to margin sizes, the following
+    // would be necessary:
+//     editor.changeSize();
     redrawEditor();
 }
 

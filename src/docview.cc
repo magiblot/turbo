@@ -30,8 +30,10 @@ void DocumentView::handleEvent(TEvent &ev)
 
 void DocumentView::doUpdate()
 {
+    editor.draw(*this);
+    // It is important to draw first. Otherwise, the caret position could
+    // be affected by margins present in the editor's previous last draw.
     auto [x, y] = editor.getCaretPosition();
     setCursor(x, y);
-    editor.draw(*this);
     drawView();
 }
