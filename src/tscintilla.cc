@@ -12,9 +12,8 @@ TScintillaEditor::TScintillaEditor()
 
     // Block caret for both Insertion and Overwrite mode.
     WndProc(SCI_SETCARETSTYLE, CARETSTYLE_BLOCK | CARETSTYLE_OVERSTRIKE_BLOCK, nil);
-    // Show line numbers
-    WndProc(SCI_SETMARGINS, 0, nil);
-    WndProc(SCI_SETMARGINWIDTHN, 0, 5);
+    // Disable margin on line numbers.
+    vs.marginNumberPadding = 0;
     // Disable margin pixels
     WndProc(SCI_SETMARGINLEFT, nil, 0);
     WndProc(SCI_SETMARGINRIGHT, nil, 0);

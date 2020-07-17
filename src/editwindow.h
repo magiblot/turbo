@@ -11,9 +11,8 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     EditorWindow(const TRect &bounds);
 
-    TView *leftSideBar;
-    TView *bottomArea;
     DocumentView *docView;
+    TDrawableView *leftMargin;
 
     bool needsRedraw;
 
