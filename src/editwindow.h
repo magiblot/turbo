@@ -8,7 +8,7 @@
 
 class DocumentView;
 
-struct EditorWindow : public TWindow {
+struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     EditorWindow(const TRect &bounds);
 
@@ -21,6 +21,8 @@ struct EditorWindow : public TWindow {
     void setUpEditor();
     void redrawEditor();
     void setActive(Boolean enable);
+
+    void setVerticalScrollPos(int delta, int limit, int size) override;
 
 };
 

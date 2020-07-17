@@ -30,6 +30,11 @@ TScintillaEditor::TScintillaEditor()
 
 void TScintillaEditor::SetVerticalScrollPos()
 {
+    if (parent) {
+        auto size = LinesOnScreen();
+        auto limit = size + MaxScrollPos();
+        parent->setVerticalScrollPos(topLine, limit, size);
+    }
 }
 
 void TScintillaEditor::SetHorizontalScrollPos()
@@ -38,6 +43,7 @@ void TScintillaEditor::SetHorizontalScrollPos()
 
 bool TScintillaEditor::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 {
+    SetVerticalScrollPos();
     return false;
 }
 

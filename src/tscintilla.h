@@ -80,7 +80,8 @@ class TScintillaWindow {
 
 public:
 
-    virtual void notify(SCNotification scn) = 0;
+    virtual void notify(SCNotification scn) {};
+    virtual void setVerticalScrollPos(int delta, int limit, int size) = 0;
 
 };
 

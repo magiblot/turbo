@@ -35,6 +35,8 @@ void EditorWindow::setUpEditor()
 {
     // Editor should take into account the size of docView.
     editor.setWindow(docView);
+    // But should send notifications to this window.
+    editor.setParent(this);
 
     // Colors
     uchar color = 0x1E; // Blue & Light Yellow.
@@ -64,6 +66,7 @@ void EditorWindow::redrawEditor()
     editor.draw(*leftMargin);
     editor.WndProc(SCI_SETMARGINWIDTHN, 0, 0);
     leftMargin->drawView();
+    vScrollBar->drawView();
     unlock();
 }
 
@@ -71,4 +74,9 @@ void EditorWindow::setActive(Boolean enable)
 {
     hScrollBar->setState(sfVisible, enable);
     vScrollBar->setState(sfVisible, enable);
+}
+
+void EditorWindow::setVerticalScrollPos(int delta, int limit, int size)
+{
+    vScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
 }
