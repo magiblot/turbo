@@ -10,10 +10,6 @@ EditorWindow::EditorWindow(const TRect &bounds) :
     options |= ofTileable;
     setState(sfShadow, False);
 
-    hScrollBar = new TScrollBar(TRect( 18, size.y - 1, size.x - 2, size.y ));
-    hScrollBar->hide();
-    insert(hScrollBar);
-
     vScrollBar = new TScrollBar(TRect( size.x - 1, 1, size.x, size.y - 1 ));
     vScrollBar->hide();
     insert(vScrollBar);
@@ -72,7 +68,6 @@ void EditorWindow::redrawEditor()
 
 void EditorWindow::setActive(Boolean enable)
 {
-    hScrollBar->setState(sfVisible, enable);
     vScrollBar->setState(sfVisible, enable);
 }
 

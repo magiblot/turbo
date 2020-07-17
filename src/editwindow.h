@@ -14,7 +14,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     DocumentView *docView;
     TDrawableView *leftMargin;
-    TScrollBar *hScrollBar, *vScrollBar;
+    TScrollBar *vScrollBar;
 
     Scintilla::TScintillaEditor editor;
 
