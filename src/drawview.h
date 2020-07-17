@@ -84,6 +84,7 @@ public:
     virtual void changeBounds(const TRect &bounds) override;
 
     void setFillColor(TCellAttribs fillColor);
+    TCellAttribs getFillColor();
     TDrawCell& at(int y, int x);
     TRect clipRect(TRect r);
 
@@ -94,6 +95,11 @@ inline void TDrawableView::setFillColor(TCellAttribs fillColor)
     fill.cell.attr = fillColor;
     for (TDrawCell &cell : drawArea)
         cell = fill;
+}
+
+inline TCellAttribs TDrawableView::getFillColor()
+{
+    return fill.cell.attr;
 }
 
 inline TDrawCell& TDrawableView::at(int y, int x)

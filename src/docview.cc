@@ -9,8 +9,9 @@ DocumentView::DocumentView(const TRect &bounds, Scintilla::TScintillaEditor &edi
     growMode = gfGrowHiX | gfGrowHiY;
     options |= ofSelectable;
     setFillColor(0x1E); // Screw palettes, they are too hard to understand.
-    editor.setTextColor(0x1E);
+    editor.setStyleColor(STYLE_DEFAULT, 0x1E);
     editor.WndProc(SCI_STYLECLEARALL, 0U, 0U);
+    editor.setSelectionColor(0x71);
     editor.setWindow(this);
     showCursor();
 }

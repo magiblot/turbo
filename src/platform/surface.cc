@@ -70,10 +70,12 @@ void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
     // Used to draw text selections. Do not overwrite the foreground color.
     TRect r = view->clipRect({(int) rc.left, (int) rc.top, (int) rc.right, (int) rc.bottom});
     uchar bg = convertColor(back);
+    uchar fg = view->getFillColor().colors.fg;
     for (int y = r.a.y; y < r.b.y; ++y)
         for (int x = r.a.x; x < r.b.x; ++x) {
             auto c = view->at(y, x);
             c.cell.attr.colors.bg = bg;
+            c.cell.attr.colors.fg = fg;
             c.cell.character = '\0';
             view->at(y, x) = c;
         }

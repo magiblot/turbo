@@ -41,7 +41,8 @@ struct TScintillaEditor : public ScintillaBase {
     int KeyDefault(int key, int modifiers) override;
     void KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed);
     void draw(TDrawableView &drawView);
-    void setTextColor(TCellAttribs attr);
+    void setStyleColor(int style, TCellAttribs attr);
+    void setSelectionColor(TCellAttribs attr);
 
     void setWindow(WindowID wid);
     TPoint getCaretPosition();

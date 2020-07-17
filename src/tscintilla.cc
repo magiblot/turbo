@@ -170,8 +170,14 @@ void TScintillaEditor::draw(TDrawableView &d) {
     Editor::Paint(&s, PRectangle(0, 0, d.size.x, d.size.y));
 }
 
-void TScintillaEditor::setTextColor(TCellAttribs attr)
+void TScintillaEditor::setStyleColor(int style, TCellAttribs attr)
 {
-    WndProc(SCI_STYLESETFORE, STYLE_DEFAULT, TScintillaSurface::convertColor(attr.colors.fg).AsInteger());
-    WndProc(SCI_STYLESETBACK, STYLE_DEFAULT, TScintillaSurface::convertColor(attr.colors.bg).AsInteger());
+    WndProc(SCI_STYLESETFORE, style, TScintillaSurface::convertColor(attr.colors.fg).AsInteger());
+    WndProc(SCI_STYLESETBACK, style, TScintillaSurface::convertColor(attr.colors.bg).AsInteger());
+}
+
+void TScintillaEditor::setSelectionColor(TCellAttribs attr)
+{
+    WndProc(SCI_SETSELFORE, true, TScintillaSurface::convertColor(attr.colors.fg).AsInteger());
+    WndProc(SCI_SETSELBACK, true, TScintillaSurface::convertColor(attr.colors.bg).AsInteger());
 }
