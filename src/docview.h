@@ -11,7 +11,7 @@ struct DocumentView : public TDrawableView {
     DocumentView(const TRect &bounds, Scintilla::TScintillaEditor &editor_);
 
     void handleEvent(TEvent &ev) override;
-    void draw() override;
+    void doUpdate();
 
 };
 

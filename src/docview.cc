@@ -8,18 +8,12 @@ DocumentView::DocumentView(const TRect &bounds, Scintilla::TScintillaEditor &edi
 {
     growMode = gfGrowHiX | gfGrowHiY;
     options |= ofSelectable;
-    setFillColor(0x1E); // Screw palettes, they are too hard to understand.
-    editor.setStyleColor(STYLE_DEFAULT, 0x1E);
-    editor.WndProc(SCI_STYLECLEARALL, 0U, 0U);
-    editor.setSelectionColor(0x71);
-    editor.setWindow(this);
     showCursor();
 }
 
 void DocumentView::handleEvent(TEvent &ev)
 {
     TView::handleEvent(ev);
-    bool handled = true;
     switch (ev.what) {
         case evKeyDown:
             switch (ev.keyDown.keyCode) {
@@ -30,18 +24,14 @@ void DocumentView::handleEvent(TEvent &ev)
             editor.KeyDownWithModifiers(ev.keyDown, nullptr);
             break;
         default:
-            handled = false;
-    }
-    if (handled) {
-        clearEvent(ev);
-        drawView();
+            break;
     }
 }
 
-void DocumentView::draw()
+void DocumentView::doUpdate()
 {
     auto [x, y] = editor.getCaretPosition();
     setCursor(x, y);
     editor.draw(*this);
-    TDrawableView::draw();
+    drawView();
 }
