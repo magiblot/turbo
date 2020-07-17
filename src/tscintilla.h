@@ -14,9 +14,13 @@ class TCellAttribs;
 
 namespace Scintilla {
 
+class TScintillaWindow;
+
 struct TScintillaEditor : public ScintillaBase {
 
     friend class DocumentView;
+
+    TScintillaWindow *parent;
 
     TScintillaEditor();
 
@@ -44,14 +48,20 @@ struct TScintillaEditor : public ScintillaBase {
     void setStyleColor(int style, TCellAttribs attr);
     void setSelectionColor(TCellAttribs attr);
 
-    void setWindow(WindowID wid);
+    void setWindow(TDrawableView *wid);
+    void setParent(TScintillaWindow *parent_);
     TPoint getCaretPosition();
 
 };
 
-inline void TScintillaEditor::setWindow(WindowID wid)
+inline void TScintillaEditor::setWindow(TDrawableView *wid)
 {
     wMain = wid;
+}
+
+inline void TScintillaEditor::setParent(TScintillaWindow *parent_)
+{
+    parent = parent_;
 }
 
 inline TPoint TScintillaEditor::getCaretPosition()
@@ -59,6 +69,14 @@ inline TPoint TScintillaEditor::getCaretPosition()
     auto [x, y] = PointMainCaret();
     return {(int) x, (int) y};
 }
+
+class TScintillaWindow {
+
+public:
+
+    virtual void notify(SCNotification scn) = 0;
+
+};
 
 }
 

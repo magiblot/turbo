@@ -1,8 +1,9 @@
-#define Uses_TView
 #define Uses_TProgram
 #include <tvision/tv.h>
 
 #include <ScintillaHeaders.h>
+
+#include "drawview.h"
 
 using namespace Scintilla;
 
@@ -16,7 +17,7 @@ void Window::Destroy()
 
 PRectangle Window::GetPosition() const
 {
-    TView *v = (TView *) wid;
+    TDrawableView *v = (TDrawableView *) wid;
     if (v) {
         TRect r = v->getBounds(); // Relative to parent.
         return PRectangle::FromInts(r.a.x, r.a.y, r.b.x, r.b.y);
@@ -26,7 +27,7 @@ PRectangle Window::GetPosition() const
 
 void Window::SetPosition(PRectangle rc)
 {
-    TView *v = (TView *) wid;
+    TDrawableView *v = (TDrawableView *) wid;
     if (v)
         v->changeBounds({{(int) rc.left, (int) rc.top}, {(int) rc.right, (int) rc.bottom}});
 }
@@ -38,7 +39,7 @@ void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
 
 PRectangle Window::GetClientPosition() const
 {
-    TView *v = (TView *) wid;
+    TDrawableView *v = (TDrawableView *) wid;
     if (v) {
         TRect r = v->getExtent(); // r.a is {0, 0}.
         return PRectangle::FromInts(r.a.x, r.a.y, r.b.x, r.b.y);
@@ -48,7 +49,7 @@ PRectangle Window::GetClientPosition() const
 
 void Window::Show(bool show)
 {
-    TView *v = (TView *) wid;
+    TDrawableView *v = (TDrawableView *) wid;
     if (v) {
         if (show)
             v->show();
