@@ -56,12 +56,24 @@ bool TScintillaEditor::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
     return false;
 }
 
+// Clipboard actions copied from ScinTerm.
+
 void TScintillaEditor::Copy()
 {
+    if (!sel.Empty())
+        CopySelectionRange(&clipboard);
 }
 
 void TScintillaEditor::Paste()
 {
+    if (!clipboard.Empty()) {
+        ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
+        InsertPasteShape( clipboard.Data(),
+                          (int) clipboard.Length(),
+                          clipboard.rectangular ? pasteRectangular
+                                                : pasteStream );
+        EnsureCaretVisible();
+    }
 }
 
 void TScintillaEditor::ClaimSelection()
