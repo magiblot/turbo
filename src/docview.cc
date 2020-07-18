@@ -7,9 +7,10 @@
 using namespace Scintilla;
 
 DocumentView::DocumentView( const TRect &bounds,
+                            const TDrawableView &view,
                             Scintilla::TScintillaEditor &aEditor,
                             EditorWindow &aWindow ) :
-    TDrawableView(bounds),
+    TDrawSubView(bounds, view),
     editor(aEditor),
     window(aWindow)
 {
@@ -32,17 +33,18 @@ void DocumentView::handleEvent(TEvent &ev)
             break;
         case evMouseDown:
             do {
+                TPoint where = makeLocal(ev.mouse.where) + delta;
                 if (ev.what == evMouseWheel) {
                     // Mouse wheel while holding button down.
                     window.scrollBarEvent(ev);
-                    ev.mouse.where = makeLocal(ev.mouse.where);
+                    ev.mouse.where = where;
                     ev.what = evMouseMove;
                     // For some reason, the caret is not always updated
                     // unless this is invoked twice.
                     editor.MouseEvent(ev);
                     editor.MouseEvent(ev);
                 } else {
-                    ev.mouse.where = makeLocal(ev.mouse.where);
+                    ev.mouse.where = where;
                     if (!editor.MouseEvent(ev))
                         break;
                 }
@@ -69,12 +71,9 @@ void DocumentView::setState(ushort aState, Boolean enable)
     }
 }
 
-void DocumentView::doUpdate()
+void DocumentView::draw()
 {
-    editor.draw(*this);
-    // It is important to draw first. Otherwise, the caret position could
-    // be affected by margins present in the editor's previous last draw.
     auto [x, y] = editor.getCaretPosition();
-    setCursor(x, y);
-    drawView();
+    setCursor(x - delta.x, y - delta.y);
+    TDrawSubView::draw();
 }

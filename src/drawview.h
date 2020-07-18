@@ -67,7 +67,11 @@ inline TDrawCell::operator ushort&()
     return asShort;
 }
 
+class TDrawSubView;
+
 class TDrawableView : public TView {
+
+    friend class TDrawSubView;
 
     std::vector<TDrawCell> drawArea;
     TDrawCell fill {0};
@@ -86,6 +90,7 @@ public:
     void setFillColor(TCellAttribs fillColor);
     TCellAttribs getFillColor() const;
     TDrawCell& at(int y, int x);
+    const TDrawCell& at(int y, int x) const;
 
 };
 
@@ -104,6 +109,39 @@ inline TCellAttribs TDrawableView::getFillColor() const
 inline TDrawCell& TDrawableView::at(int y, int x)
 {
     return drawArea[y*size.x + x];
+}
+
+inline const TDrawCell& TDrawableView::at(int y, int x) const
+{
+    return drawArea[y*size.x + x];
+}
+
+class TDrawSubView : public TView {
+
+protected:
+
+    const TDrawableView &view;
+    TPoint delta {0, 0};
+
+public:
+
+    TDrawSubView( const TRect &bounds,
+                  const TDrawableView &aView );
+
+    virtual void draw() override;
+
+    void setDelta(TPoint aDelta);
+
+};
+
+inline void TDrawSubView::setDelta(TPoint aDelta)
+{
+    // Negative delta not supported.
+    if (aDelta.x < 0)
+        aDelta.x = 0;
+    if (aDelta.y < 0)
+        aDelta.y = 0;
+    delta = aDelta;
 }
 
 #endif
