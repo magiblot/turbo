@@ -1480,12 +1480,8 @@ void EditView::DrawCarets(Surface *surface, const EditModel &model, const ViewSt
 				if (xposCaret > 0)
 					caretWidthOffset = 0.51f;	// Move back so overlaps both character cells.
 				xposCaret += xStart;
-				const ViewStyle::CaretShape caretShape = drawDrag ? ViewStyle::CaretShape::line : vsDraw.CaretShapeForMode(model.inOverstrike);
-				if (drawDrag) {
-					/* Dragging text, use a line caret */
-					rcCaret.left = std::round(xposCaret - caretWidthOffset);
-					rcCaret.right = rcCaret.left + vsDraw.caretWidth;
-				} else if ((caretShape == ViewStyle::CaretShape::bar) && drawOverstrikeCaret) {
+				const ViewStyle::CaretShape caretShape = vsDraw.CaretShapeForMode(model.inOverstrike && !drawDrag);
+				if ((caretShape == ViewStyle::CaretShape::bar) && drawOverstrikeCaret) {
 					/* Overstrike (insert mode), use a modified bar caret */
 					rcCaret.top = rcCaret.bottom - 2;
 					rcCaret.left = xposCaret + 1;

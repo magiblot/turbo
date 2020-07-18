@@ -4286,7 +4286,7 @@ void Editor::DisplayCursor(Window::Cursor c) {
 bool Editor::DragThreshold(Point ptStart, Point ptNow) {
 	const Point ptDiff = ptStart - ptNow;
 	const XYPOSITION distanceSquared = ptDiff.x * ptDiff.x + ptDiff.y * ptDiff.y;
-	return distanceSquared > 16.0f;
+	return distanceSquared >= 0.0f;
 }
 
 void Editor::StartDrag() {
@@ -4647,12 +4647,14 @@ void Editor::ButtonDownWithModifiers(Point pt, unsigned int curTime, int modifie
 				NotifyHotSpotClicked(newCharPos.Position(), modifiers);
 				hotSpotClickPos = newCharPos.Position();
 			}
+#if 0
 			if (!shift) {
 				if (PointInSelection(pt) && !SelectionEmpty())
 					inDragDrop = ddInitial;
 				else
 					inDragDrop = ddNone;
 			}
+#endif
 			SetMouseCapture(true);
 			FineTickerStart(tickScroll, 100, 10);
 			if (inDragDrop != ddInitial) {
@@ -4772,7 +4774,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 	SelectionPosition movePos = SPositionFromLocation(pt, false, false,
 		AllowVirtualSpace(virtualSpaceOptions, sel.IsRectangular()));
 	movePos = MovePositionOutsideChar(movePos, sel.MainCaret() - movePos.Position());
-
+#if 0
 	if (inDragDrop == ddInitial) {
 		if (DragThreshold(ptMouseLast, pt)) {
 			SetMouseCapture(false);
@@ -4783,7 +4785,7 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 		}
 		return;
 	}
-
+#endif
 	ptMouseLast = pt;
 	PRectangle rcClient = GetClientRectangle();
 	const Point ptOrigin = GetVisibleOriginInMain();
