@@ -1,3 +1,8 @@
+#include <chrono>
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
+
 #include "tscintilla.h"
 
 using namespace Scintilla;
@@ -26,6 +31,10 @@ TScintillaEditor::TScintillaEditor()
     // Use single-byte character set.
     WndProc(SCI_SETCODEPAGE, SC_CHARSET_ANSI, nil);
     WndProc(SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, SC_CHARSET_ANSI);
+    // Process mouse down events:
+    WndProc(SCI_SETMOUSEDOWNCAPTURES, true, nil);
+    // Double clicks only in the same cell.
+    doubleClickCloseThreshold = Point(0, 0);
 }
 
 void TScintillaEditor::SetVerticalScrollPos()
@@ -92,7 +101,7 @@ void TScintillaEditor::SetMouseCapture(bool on)
 
 bool TScintillaEditor::HaveMouseCapture()
 {
-    return false;
+    return true;
 }
 
 sptr_t TScintillaEditor::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
@@ -116,7 +125,7 @@ int TScintillaEditor::KeyDefault(int key, int modifiers) {
     return 0;
 }
 
-void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed)
+int TScintillaEditor::convertModifiers(ulong controlKeyState)
 {
     struct { ushort tv; int scmod; } static constexpr modifiersTable[] = {
         {kbShift,       SCMOD_SHIFT},
@@ -124,6 +133,15 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
         {kbAltShift,    SCMOD_ALT}
     };
 
+    int modifiers = 0;
+    for (const auto [tv, scmod] : modifiersTable)
+        if (controlKeyState & tv)
+            modifiers |= scmod;
+    return modifiers;
+}
+
+void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed)
+{
     struct { ushort tv; int sck; } static constexpr keysTable[] = {
         {kbDown,        SCK_DOWN},
         {kbUp,          SCK_UP},
@@ -151,10 +169,7 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
         {kbCtrlBack,    '\b'}
     };
 
-    int modifiers = 0;
-    for (const auto [tv, scmod] : modifiersTable)
-        if (keyDown.controlKeyState & tv)
-            modifiers |= scmod;
+    int modifiers = convertModifiers(keyDown.controlKeyState);
 
     int key;
     if (keyDown.keyCode <= kbCtrlZ)
@@ -169,6 +184,27 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
     }
 
     Editor::KeyDownWithModifiers(key, modifiers, consumed);
+}
+
+void TScintillaEditor::MouseEvent(const TEvent &ev) {
+    auto where = ev.mouse.where;
+    auto pt = Point::FromInts(where.x, where.y);
+    uint time = duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
+    int modifiers = convertModifiers(ev.mouse.controlKeyState); // This will actually be 0.
+    switch (ev.what) {
+        case evMouseDown:
+            if (ev.mouse.buttons & mbLeftButton)
+                return Editor::ButtonDownWithModifiers(pt, time, modifiers);
+            break;
+        case evMouseUp:
+            return Editor::ButtonUpWithModifiers(pt, time, modifiers);
+        case evMouseMove:
+        case evMouseAuto:
+            return Editor::ButtonMoveWithModifiers(pt, time, modifiers);
+        default:
+            break;
+    }
+
 }
 
 void TScintillaEditor::draw(TDrawableView &d) {

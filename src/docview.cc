@@ -15,25 +15,33 @@ DocumentView::DocumentView( const TRect &bounds,
 {
     growMode = gfGrowHiX | gfGrowHiY;
     options |= ofSelectable;
+    eventMask |= evMouseUp | evMouseMove | evMouseAuto;
     showCursor();
 }
 
 void DocumentView::handleEvent(TEvent &ev)
 {
     TView::handleEvent(ev);
+    bool handled = false;
     switch (ev.what) {
         case evKeyDown:
-            switch (ev.keyDown.keyCode) {
-                case kbIns:
-                    setState(sfCursorIns, Boolean(!getState(sfCursorIns)));
-                    break;
-            }
+            if (ev.keyDown.keyCode == kbIns)
+                setState(sfCursorIns, Boolean(!getState(sfCursorIns)));
             editor.KeyDownWithModifiers(ev.keyDown, nullptr);
-            window.redrawEditor();
-            clearEvent(ev);
+            handled = true;
             break;
-        default:
+        case evMouseDown:
+        case evMouseUp:
+        case evMouseMove:
+        case evMouseAuto:
+            ev.mouse.where = makeLocal(ev.mouse.where);
+            editor.MouseEvent(ev);
+            handled = true;
             break;
+    }
+    if (handled) {
+        window.redrawEditor();
+        clearEvent(ev);
     }
 }
 

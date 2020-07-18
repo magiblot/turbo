@@ -24,7 +24,7 @@ int Platform::DefaultFontSize()
 
 unsigned int Platform::DoubleClickTime()
 {
-    return 0;
+    return 500;
 }
 
 void Platform::DebugDisplay(const char *s)

@@ -43,7 +43,9 @@ struct TScintillaEditor : public ScintillaBase {
     void AddToPopUp(const char *label, int cmd=0, bool enabled=true) override;
 
     int KeyDefault(int key, int modifiers) override;
+    int convertModifiers(ulong controlKeyState);
     void KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed);
+    void MouseEvent(const TEvent &ev);
     void draw(TDrawableView &drawView);
     void setStyleColor(int style, TCellAttribs attr);
     void setSelectionColor(TCellAttribs attr);
