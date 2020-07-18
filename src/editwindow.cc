@@ -5,7 +5,8 @@
 
 EditorWindow::EditorWindow(const TRect &bounds) :
     TWindow(bounds, "Editor Window", wnNoNumber),
-    TWindowInit(&initFrame)
+    TWindowInit(&initFrame),
+    drawing(false)
 {
     options |= ofTileable;
     setState(sfShadow, False);
@@ -54,16 +55,22 @@ void EditorWindow::setUpEditor()
 
 void EditorWindow::redrawEditor()
 {
-    lock();
-    // Draw on docView's surface
-    docView->doUpdate();
-    // Temporally enable margin width to draw line numbers
-    editor.WndProc(SCI_SETMARGINWIDTHN, 0, 5);
-    editor.draw(*leftMargin);
-    editor.WndProc(SCI_SETMARGINWIDTHN, 0, 0);
-    leftMargin->drawView();
-    vScrollBar->drawView();
-    unlock();
+    if (!drawing) {
+        drawing = true;
+        lock();
+        // Temporally enable margin width to draw line numbers. This must be
+        // done first or else mouse positions will be later clipped
+        // as if the margin was still being shown.
+        editor.WndProc(SCI_SETMARGINWIDTHN, 0, 5);
+        editor.draw(*leftMargin);
+        editor.WndProc(SCI_SETMARGINWIDTHN, 0, 0);
+        leftMargin->drawView();
+        // Draw on docView's surface
+        docView->doUpdate();
+        vScrollBar->drawView();
+        unlock();
+        drawing = false;
+    }
 }
 
 void EditorWindow::setActive(Boolean enable)
