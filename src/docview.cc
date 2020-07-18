@@ -57,16 +57,6 @@ void DocumentView::handleEvent(TEvent &ev)
     }
 }
 
-
-void DocumentView::changeBounds(const TRect &bounds)
-{
-    TDrawableView::changeBounds(bounds);
-    window.redrawEditor();
-    // If redrawEditor() did no changes to margin sizes, the following
-    // would have to be called first:
-//     editor.changeSize();
-}
-
 void DocumentView::setState(ushort aState, Boolean enable)
 {
     TView::setState(aState, enable);

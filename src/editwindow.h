@@ -24,6 +24,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void setActive(Boolean enable);
 
     void handleEvent(TEvent &ev) override;
+    void changeBounds(const TRect &bounds) override;
 
     void scrollBarEvent(TEvent ev);
     bool scrollBarChanged(TScrollBar *bar);

@@ -17,7 +17,6 @@ struct DocumentView : public TDrawableView {
                   EditorWindow &aWindow );
 
     void handleEvent(TEvent &ev) override;
-    void changeBounds(const TRect &bounds) override;
     void setState(ushort aState, Boolean enable) override;
 
     void doUpdate();

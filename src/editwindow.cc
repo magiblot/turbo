@@ -88,6 +88,14 @@ void EditorWindow::handleEvent(TEvent &ev) {
     TWindow::handleEvent(ev);
 }
 
+void EditorWindow::changeBounds(const TRect &bounds)
+{
+    lock();
+    TWindow::changeBounds(bounds);
+    redrawEditor();
+    unlock();
+}
+
 void EditorWindow::scrollBarEvent(TEvent ev)
 {
     vScrollBar->handleEvent(ev);
