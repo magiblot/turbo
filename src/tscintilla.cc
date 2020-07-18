@@ -203,20 +203,20 @@ void TScintillaEditor::MouseEvent(const TEvent &ev) {
     auto pt = Point::FromInts(where.x, where.y);
     uint time = duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
     int modifiers = convertModifiers(ev.mouse.controlKeyState); // This will actually be 0.
-    switch (ev.what) {
-        case evMouseDown:
-            if (ev.mouse.buttons & mbLeftButton)
+    if (ev.mouse.buttons & mbLeftButton) {
+        // Scintilla actually assumes these functions are invoked only for the
+        // left button mouse. Note that the original Turbo Vision does not set
+        // the 'buttons' mask for evMouseUp.
+        switch (ev.what) {
+            case evMouseDown:
                 return Editor::ButtonDownWithModifiers(pt, time, modifiers);
-            break;
-        case evMouseUp:
-            return Editor::ButtonUpWithModifiers(pt, time, modifiers);
-        case evMouseMove:
-        case evMouseAuto:
-            return Editor::ButtonMoveWithModifiers(pt, time, modifiers);
-        default:
-            break;
+            case evMouseUp:
+                return Editor::ButtonUpWithModifiers(pt, time, modifiers);
+            case evMouseMove:
+            case evMouseAuto:
+                return Editor::ButtonMoveWithModifiers(pt, time, modifiers);
+        }
     }
-
 }
 
 void TScintillaEditor::draw(TDrawableView &d) {
