@@ -17,14 +17,15 @@ void FileEditor::loadFile()
             editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
         if (fSize) {
             const size_t blockSize = 1 << 20; // Read in chunks of 1 MiB.
-            std::unique_ptr<char[]> buffer {new char[std::min(fSize, blockSize)]};
+            size_t readSize = std::min(fSize, blockSize);
+            std::unique_ptr<char[]> buffer {new char[readSize]};
             sptr_t wParam = reinterpret_cast<sptr_t>(buffer.get());
-            do {
-                const size_t readSize = std::min(fSize, blockSize);
-                f.read(buffer.get(), readSize);
+            while (fSize > 0 && f.read(buffer.get(), readSize)) {
                 editor.WndProc(SCI_APPENDTEXT, readSize, wParam);
                 fSize -= readSize;
-            } while (fSize > 0);
+                if (fSize < readSize)
+                    readSize = fSize;
+            };
         }
     }
 }

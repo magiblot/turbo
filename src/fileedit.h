@@ -21,8 +21,10 @@ inline FileEditor::FileEditor(std::string_view aFileName, Args&& ...args) :
     DocumentView(std::forward<Args>(args)...)
 {
     strnzcpy(fileName, aFileName, MAXPATH);
-    fexpand(fileName);
-    loadFile();
+    if (!aFileName.empty()) {
+        fexpand(fileName);
+        loadFile();
+    }
 }
 
 #endif
