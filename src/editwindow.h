@@ -5,7 +5,7 @@
 #include <tvision/tv.h>
 
 #include "tscintilla.h"
-#include "drawview.h"
+#include "drawviews.h"
 
 class DocumentView;
 

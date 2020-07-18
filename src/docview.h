@@ -2,9 +2,7 @@
 #define TVEDIT_DOCVIEW_H
 
 #include "tscintilla.h"
-#include "drawview.h"
 
-class TScrollBar;
 class EditorWindow;
 
 struct DocumentView : public TDrawSubView {

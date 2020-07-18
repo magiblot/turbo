@@ -7,7 +7,7 @@ using std::chrono::steady_clock;
 
 using namespace Scintilla;
 
-#include "drawview.h"
+#include "drawviews.h"
 #include "surface.h"
 
 TScintillaEditor::TScintillaEditor()

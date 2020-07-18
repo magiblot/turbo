@@ -1,5 +1,5 @@
-#ifndef TVEDIT_DRAWVIEW_H
-#define TVEDIT_DRAWVIEW_H
+#ifndef TVEDIT_DRAWVIEWS_H
+#define TVEDIT_DRAWVIEWS_H
 
 #define Uses_TView
 #include <tvision/tv.h>

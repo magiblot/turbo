@@ -92,7 +92,7 @@ namespace Scintilla {
 
 }
 
-#include "drawview.h"
+#include "drawviews.h"
 
 namespace Scintilla {
 

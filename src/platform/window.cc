@@ -3,7 +3,7 @@
 
 #include <ScintillaHeaders.h>
 
-#include "drawview.h"
+#include "drawviews.h"
 
 using namespace Scintilla;
 

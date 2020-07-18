@@ -35,7 +35,7 @@ add_executable(tvedit)
 
 target_compile_options(tvedit PRIVATE
     -Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder
-    -O2 -g --std=c++17 -fpermissive
+    -O0 -g --std=c++17 -fpermissive
 )
 
 find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision/include")
@@ -53,7 +53,7 @@ target_sources(tvedit PRIVATE
     "src/app.cc"
     "src/main.cc"
     "src/docview.cc"
-    "src/drawview.cc"
+    "src/drawviews.cc"
     "src/editwindow.cc"
     "src/tscintilla.cc"
     "src/platform/font.cc"
