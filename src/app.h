@@ -4,13 +4,17 @@
 #define Uses_TApplication
 #include <tvision/tv.h>
 
-#include <memory>
+#include <string_view>
+
+class EditorWindow;
 
 namespace tvedit {
 
 struct TVEditApp: public TApplication {
 
-    void newEditorWindow();
+    void fileNew();
+    void fileOpen();
+    EditorWindow* openEditor(std::string_view fileName);
 
     TVEditApp();
     static TMenuBar* initMenuBar(TRect r);

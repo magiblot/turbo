@@ -56,6 +56,7 @@ target_sources(tvedit PRIVATE
     "src/drawviews.cc"
     "src/editwindow.cc"
     "src/tscintilla.cc"
+    "src/util.cc"
     "src/platform/font.cc"
     "src/platform/listbox.cc"
     "src/platform/menu.cc"

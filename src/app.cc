@@ -9,10 +9,12 @@
 #define Uses_TSubMenu
 #define Uses_TWindow
 #define Uses_TFrame
+#define Uses_TFileDialog
 #include <tvision/tv.h>
 
 #include "app.h"
 #include "editwindow.h"
+#include "util.h"
 
 using namespace tvedit;
 using namespace Scintilla;
@@ -33,8 +35,9 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
     return new TMenuBar( r,
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl+N" ) +
+            *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl+O" ) +
             newLine() +
-            *new TMenuItem( "E~x~it", cmQuit, kbNoKey, hcNoContext, "Alt-X" )
+            *new TMenuItem( "E~x~it", cmQuit, kbNoKey, hcNoContext, "Alt+X" )
             );
 
 }
@@ -44,7 +47,7 @@ TStatusLine *TVEditApp::initStatusLine( TRect r )
     r.a.y = r.b.y-1;
     return new TStatusLine( r,
         *new TStatusDef( 0, 0xFFFF ) +
-            *new TStatusItem( "~Alt-X~ Exit", kbAltX, cmQuit ) +
+            *new TStatusItem( "~Alt+X~ Exit", kbAltX, cmQuit ) +
             *new TStatusItem( 0, kbF10, cmMenu )
             );
 }
@@ -52,23 +55,43 @@ TStatusLine *TVEditApp::initStatusLine( TRect r )
 void TVEditApp::handleEvent(TEvent& event)
 {
     TApplication::handleEvent(event);
+    bool handled = false;
     if (event.what == evCommand) {
+        handled = true;
         switch (event.message.command) {
-            case cmNew:
-                newEditorWindow();
-                clearEvent(event);
-                break;
+            case cmNew: fileNew(); break;
+            case cmOpen: fileOpen(); break;
             default:
+                handled = false;
                 break;
         }
     }
+    if (handled)
+        clearEvent(event);
 }
 
-void TVEditApp::newEditorWindow()
+void TVEditApp::fileNew()
+{
+    openEditor({});
+}
+
+void TVEditApp::fileOpen()
+{
+    // MAXPATH as assumed by TFileDialog.
+    char fileName[MAXPATH] = "*.*";
+    auto *dialog = new TFileDialog( "*.*",
+                                    "Open file",
+                                    "~N~ame",
+                                    fdOpenButton,
+                                    0 );
+    if (execDialog(dialog, fileName) != cmCancel)
+        openEditor(fileName);
+}
+
+EditorWindow* TVEditApp::openEditor(std::string_view fileName)
 {
     EditorWindow *w = new EditorWindow(deskTop->getExtent());
     w = (EditorWindow *) validView(w);
-    if (w) {
-        deskTop->insert(w);
-    }
+    deskTop->insert(w);
+    return w;
 }
