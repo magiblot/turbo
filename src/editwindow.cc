@@ -100,11 +100,13 @@ void EditorWindow::handleEvent(TEvent &ev) {
 
 void EditorWindow::changeBounds(const TRect &bounds)
 {
+    lock();
     lockSubViews();
     TWindow::changeBounds(bounds);
     editorView.changeBounds(editorBounds());
     unlockSubViews();
     redrawEditor();
+    unlock();
 }
 
 void EditorWindow::lockSubViews()
