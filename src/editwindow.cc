@@ -88,6 +88,11 @@ void EditorWindow::handleEvent(TEvent &ev) {
     TWindow::handleEvent(ev);
 }
 
+void EditorWindow::scrollBarEvent(TEvent ev)
+{
+    vScrollBar->handleEvent(ev);
+}
+
 bool EditorWindow::scrollBarChanged(TScrollBar *bar)
 {
     if (bar == vScrollBar) {

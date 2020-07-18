@@ -31,12 +31,24 @@ void DocumentView::handleEvent(TEvent &ev)
             handled = true;
             break;
         case evMouseDown:
-        case evMouseUp:
-        case evMouseMove:
-        case evMouseAuto:
-            ev.mouse.where = makeLocal(ev.mouse.where);
-            editor.MouseEvent(ev);
-            handled = true;
+            do {
+                if (ev.what == evMouseWheel) {
+                    // Mouse wheel while holding button down.
+                    window.scrollBarEvent(ev);
+                    ev.mouse.where = makeLocal(ev.mouse.where);
+                    ev.what = evMouseMove;
+                    // For some reason, the caret is not always updated
+                    // unless this is invoked twice.
+                    editor.MouseEvent(ev);
+                    editor.MouseEvent(ev);
+                } else {
+                    ev.mouse.where = makeLocal(ev.mouse.where);
+                    if (!editor.MouseEvent(ev))
+                        break;
+                }
+                window.redrawEditor();
+                handled = true;
+            } while (mouseEvent(ev, evMouseDown | evMouseMove | evMouseAuto | evMouseWheel));
             break;
     }
     if (handled) {

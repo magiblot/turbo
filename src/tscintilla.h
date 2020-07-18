@@ -46,7 +46,7 @@ struct TScintillaEditor : public ScintillaBase {
     int KeyDefault(int key, int modifiers) override;
     int convertModifiers(ulong controlKeyState);
     void KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed);
-    void MouseEvent(const TEvent &ev);
+    bool MouseEvent(const TEvent &ev);
     void draw(TDrawableView &drawView);
     void setStyleColor(int style, TCellAttribs attr);
     void setSelectionColor(TCellAttribs attr);

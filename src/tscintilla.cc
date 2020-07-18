@@ -198,7 +198,7 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
     Editor::KeyDownWithModifiers(key, modifiers, consumed);
 }
 
-void TScintillaEditor::MouseEvent(const TEvent &ev) {
+bool TScintillaEditor::MouseEvent(const TEvent &ev) {
     auto where = ev.mouse.where;
     auto pt = Point::FromInts(where.x, where.y);
     uint time = duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
@@ -209,14 +209,19 @@ void TScintillaEditor::MouseEvent(const TEvent &ev) {
         // the 'buttons' mask for evMouseUp.
         switch (ev.what) {
             case evMouseDown:
-                return Editor::ButtonDownWithModifiers(pt, time, modifiers);
+                Editor::ButtonDownWithModifiers(pt, time, modifiers);
+                break;
             case evMouseUp:
-                return Editor::ButtonUpWithModifiers(pt, time, modifiers);
+                Editor::ButtonUpWithModifiers(pt, time, modifiers);
+                break;
             case evMouseMove:
             case evMouseAuto:
-                return Editor::ButtonMoveWithModifiers(pt, time, modifiers);
+                Editor::ButtonMoveWithModifiers(pt, time, modifiers);
+                break;
         }
+        return true;
     }
+    return false;
 }
 
 void TScintillaEditor::draw(TDrawableView &d) {
