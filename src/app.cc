@@ -77,18 +77,20 @@ void TVEditApp::fileNew()
 
 void TVEditApp::fileOpen()
 {
-    // MAXPATH as assumed by TFileDialog.
-    char fileName[MAXPATH] = "*.*";
     auto *dialog = new TFileDialog( "*.*",
                                     "Open file",
                                     "~N~ame",
                                     fdOpenButton,
                                     0 );
-    if (execDialog(dialog, fileName) != cmCancel)
-        openEditor(fileName);
+    execDialog(dialog, nullptr, [this] (ushort, TView *dialog) {
+        // MAXPATH as assumed by TFileDialog.
+        char fileName[MAXPATH];
+        dialog->getData(fileName);
+        return openEditor(fileName);
+    });
 }
 
-EditorWindow* TVEditApp::openEditor(std::string_view fileName)
+bool TVEditApp::openEditor(std::string_view fileName)
 {
     EditorWindow *w = new EditorWindow(deskTop->getExtent(), fileName);
     w = (EditorWindow *) validView(w);

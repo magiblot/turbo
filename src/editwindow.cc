@@ -1,4 +1,5 @@
 #define Uses_TScrollBar
+#define Uses_MsgBox
 #include <tvision/tv.h>
 
 #include "editwindow.h"
@@ -109,6 +110,15 @@ void EditorWindow::changeBounds(const TRect &bounds)
     unlockSubViews();
     redrawEditor();
     unlock();
+}
+
+Boolean EditorWindow::valid(ushort command)
+{
+    if (command == cmValid && !error.empty()) {
+        messageBox(error.c_str(), mfError | mfOKButton);
+        return False;
+    }
+    return True;
 }
 
 void EditorWindow::lockSubViews()

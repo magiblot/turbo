@@ -14,7 +14,7 @@ struct TVEditApp: public TApplication {
 
     void fileNew();
     void fileOpen();
-    EditorWindow* openEditor(std::string_view fileName);
+    bool openEditor(std::string_view fileName);
 
     TVEditApp();
     static TMenuBar* initMenuBar(TRect r);

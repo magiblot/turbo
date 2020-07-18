@@ -7,6 +7,7 @@
 #include "tscintilla.h"
 #include "drawviews.h"
 #include <string_view>
+#include <string>
 
 class DocumentView;
 
@@ -18,6 +19,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TDrawSubView *leftMargin;
     TScrollBar *vScrollBar;
     bool drawing;
+    std::string error;
 
     Scintilla::TScintillaEditor editor;
     TDrawableView editorView;
@@ -29,6 +31,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     void handleEvent(TEvent &ev) override;
     void changeBounds(const TRect &bounds) override;
+    Boolean valid(ushort command) override;
 
     void lockSubViews();
     void unlockSubViews();
