@@ -90,7 +90,7 @@ void TVEditApp::fileOpen()
 
 EditorWindow* TVEditApp::openEditor(std::string_view fileName)
 {
-    EditorWindow *w = new EditorWindow(deskTop->getExtent());
+    EditorWindow *w = new EditorWindow(deskTop->getExtent(), fileName);
     w = (EditorWindow *) validView(w);
     deskTop->insert(w);
     return w;

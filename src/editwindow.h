@@ -6,12 +6,13 @@
 
 #include "tscintilla.h"
 #include "drawviews.h"
+#include <string_view>
 
 class DocumentView;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
-    EditorWindow(const TRect &bounds);
+    EditorWindow(const TRect &bounds, std::string_view aFileName);
 
     DocumentView *docView;
     TDrawSubView *leftMargin;

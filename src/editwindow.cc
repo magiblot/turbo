@@ -2,8 +2,9 @@
 #include <tvision/tv.h>
 
 #include "editwindow.h"
+#include "fileedit.h"
 
-EditorWindow::EditorWindow(const TRect &bounds) :
+EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFileName) :
     TWindow(bounds, "Editor Window", wnNoNumber),
     TWindowInit(&initFrame),
     drawing(false),
@@ -23,10 +24,11 @@ EditorWindow::EditorWindow(const TRect &bounds) :
     leftMargin->growMode = gfGrowHiY | gfFixed;
     insert(leftMargin);
 
-    docView = new DocumentView( TRect( 7, 1, size.x - 1, size.y - 1 ),
-                                editorView,
-                                editor,
-                                *this );
+    docView = new FileEditor( aFileName,
+                              TRect( 7, 1, size.x - 1, size.y - 1 ),
+                              editorView,
+                              editor,
+                              *this );
     insert(docView);
 
     setUpEditor();
