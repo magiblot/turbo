@@ -12,21 +12,21 @@
 #include <string>
 #include <filesystem>
 
-class FileEditor;
+class DocumentView;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     EditorWindow(const TRect &bounds, std::string_view aFile);
     ~EditorWindow();
 
-    FileEditor *docView;
+    // Subviews
+
+    DocumentView *docView;
     TDrawSubView *leftMargin;
     TScrollBar *hScrollBar, *vScrollBar;
     bool drawing;
-    std::string error;
-    std::string title;
-    std::filesystem::path file;
-    list_head<EditorWindow> MRUhead;
+
+    // Scintilla
 
     Scintilla::TScintillaEditor editor;
     TDrawableView editorView;
@@ -49,6 +49,19 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void scrollTo(TPoint delta);
     void setHorizontalScrollPos(int delta, int limit) override;
     void setVerticalScrollPos(int delta, int limit) override;
+
+    // TVEditApp integration
+
+    list_head<EditorWindow> MRUhead;
+
+    // File management
+
+    std::filesystem::path file;
+    std::string error;
+    std::string title; // Later set by TVEditApp
+
+    void tryLoadFile();
+    void loadFile();
 
     static constexpr TPoint minEditWinSize {24, 6};
 

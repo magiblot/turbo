@@ -3,7 +3,7 @@
 #include <tvision/tv.h>
 
 #include "editwindow.h"
-#include "fileedit.h"
+#include "docview.h"
 #include "app.h"
 
 EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
@@ -32,12 +32,13 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     leftMargin->growMode = gfGrowHiY | gfFixed;
     insert(leftMargin);
 
-    docView = new FileEditor( TRect( 7, 1, size.x - 1, size.y - 1 ),
-                              editorView,
-                              editor,
-                              *this );
+    docView = new DocumentView( TRect( 7, 1, size.x - 1, size.y - 1 ),
+                                editorView,
+                                editor,
+                                *this );
     insert(docView);
 
+    tryLoadFile();
     setUpEditor();
 }
 
@@ -218,4 +219,57 @@ void EditorWindow::setVerticalScrollPos(int delta, int limit)
 {
     int size = docView->size.y;
     vScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
+}
+
+/////////////////////////////////////////////////////////////////////////
+// File opening and saving.
+
+// Note: the 'error' variable set here is later checked in valid() for
+// command cmValid. If there was an error, a messageBox will be shown and
+// valid() will return False, thus resulting in the EditorWindow being destroyed.
+
+#include <memory>
+#include <fstream>
+
+void EditorWindow::tryLoadFile()
+{
+    if (!file.empty()) {
+        std::error_code ec;
+        file.assign(std::filesystem::absolute(file, ec));
+        if (!ec)
+            loadFile();
+        else
+            error = fmt::format("'{}' is not a valid path.", file.native());
+    }
+}
+
+void EditorWindow::loadFile()
+{
+    std::ifstream f(file, ios::in | ios::binary);
+    if (f) {
+        bool ok;
+        f.seekg(0, ios::end);
+        size_t fSize = f.tellg();
+        f.seekg(0);
+        // Allocate 1000 extra bytes, as in SciTE.
+        editor.WndProc(SCI_ALLOCATE, fSize + 1000, 0U);
+        if (fSize > (1 << 20))
+            // Disable word wrap on big files.
+            editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
+        if (fSize) {
+            constexpr size_t blockSize = 1 << 20; // Read in chunks of 1 MiB.
+            size_t readSize = std::min(fSize, blockSize);
+            std::unique_ptr<char[]> buffer {new char[readSize]};
+            sptr_t wParam = reinterpret_cast<sptr_t>(buffer.get());
+            while (fSize > 0 && (ok = bool(f.read(buffer.get(), readSize)))) {
+                editor.WndProc(SCI_APPENDTEXT, readSize, wParam);
+                fSize -= readSize;
+                if (fSize < readSize)
+                    readSize = fSize;
+            };
+            if (!ok)
+                error = fmt::format("An error occurred while reading file '{}'.", file.native());
+        }
+    } else
+        error = fmt::format("Unable to open file '{}'.", file.native());
 }
