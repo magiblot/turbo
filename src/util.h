@@ -33,13 +33,13 @@ template<typename T>
 struct list_head
 {
     T *self;
-    list_head *next_;
-    list_head *prev_;
+    list_head *next;
+    list_head *prev;
 
     list_head()
     {
        self = 0;
-       next_ = prev_ = 0;
+       next = prev = this;
     }
 
     ~list_head()
@@ -50,31 +50,26 @@ struct list_head
     list_head(T *self_)
     {
         self = self_;
-        next_ = prev_ = 0;
+        next = prev = 0;
     }
 
     void insert_after(list_head *other)
     {
-        prev_ = other;
-        next_ = other->next_;
-        other->next_ = this;
-        if (next_)
-            next_->prev_ = this;
+        prev = other;
+        next = other->next;
+        other->next = this;
+        if (next)
+            next->prev = this;
     }
 
     void remove() {
-        if (next_)
-            next_->prev_ = prev_;
-        if (prev_)
-            prev_->next_ = next_;
-        next_ = prev_ = 0;
+        if (next)
+            next->prev = prev;
+        if (prev)
+            prev->next = next;
+        next = prev = 0;
     }
 
-    T* next() {
-        if (next_)
-            return next_->self;
-        return 0;
-    }
 };
 
 struct active_counter {

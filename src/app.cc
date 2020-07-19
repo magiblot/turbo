@@ -171,8 +171,12 @@ void TVEditApp::tellFocusedEditor(EditorWindow *w)
 
 std::filesystem::path TVEditApp::getMostRecentDir()
 {
-    EditorWindow *first = MRUlist.next();
-    if (first)
-        return first->file.parent_path();
+    auto *head = MRUlist.next;
+    // Iterate over the list to skip Untitled editors.
+    while (head->self) {
+        if (!head->self->file.empty())
+            return head->self->file.parent_path();
+        head = head->next;
+    }
     return ".";
 }
