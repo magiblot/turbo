@@ -29,6 +29,10 @@ TScintillaEditor::TScintillaEditor()
     // Use single-byte character set.
     WndProc(SCI_SETCODEPAGE, SC_CHARSET_ANSI, nil);
     WndProc(SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, SC_CHARSET_ANSI);
+    // Disable representations, because they won't be drawn properly and
+    // because I hate them. Note that this has to be done after setting the
+    // codepage.
+    reprs.Clear();
     // Process mouse down events:
     WndProc(SCI_SETMOUSEDOWNCAPTURES, true, nil);
     // Double clicks only in the same cell.
