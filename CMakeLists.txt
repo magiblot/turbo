@@ -58,6 +58,7 @@ target_sources(tvedit PRIVATE
     "src/fileedit.cc"
     "src/tscintilla.cc"
     "src/util.cc"
+    "src/widgets.cc"
     "src/platform/font.cc"
     "src/platform/listbox.cc"
     "src/platform/menu.cc"

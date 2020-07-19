@@ -2,6 +2,8 @@
 #define TVEDIT_UTIL_H
 
 #define Uses_TDialog
+#define Uses_TProgram
+#define Uses_TDeskTop
 #include <tvision/tv.h>
 
 #include <string_view>

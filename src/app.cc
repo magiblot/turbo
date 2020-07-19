@@ -15,6 +15,7 @@
 #include "app.h"
 #include "editwindow.h"
 #include "util.h"
+#include "widgets.h"
 
 using namespace tvedit;
 using namespace Scintilla;
@@ -28,6 +29,13 @@ TVEditApp::TVEditApp() :
                &TApplication::initDeskTop
              )
 {
+    // Create the clock view.
+    TRect r = getExtent();
+    r.a.x = r.b.x - 9;
+    r.b.y = r.a.y + 1;
+    clock = new TClockView(r);
+    clock->growMode = gfGrowLoX | gfGrowHiX;
+    insert(clock);
 }
 
 TMenuBar *TVEditApp::initMenuBar(TRect r)
@@ -56,6 +64,11 @@ TStatusLine *TVEditApp::initStatusLine( TRect r )
             *new TStatusItem( "~Ctrl+W~ Close", kbCtrlW, cmClose ) +
             *new TStatusItem( "~F10~ Menu" , kbF10, cmMenu )
             );
+}
+
+void TVEditApp::idle()
+{
+    clock->update();
 }
 
 void TVEditApp::handleEvent(TEvent& event)

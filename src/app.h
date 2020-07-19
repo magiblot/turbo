@@ -9,12 +9,14 @@
 #include <vector>
 
 class EditorWindow;
+class TClockView;
 
 namespace tvedit {
 
 struct TVEditApp: public TApplication {
 
     std::unordered_map<std::string, uint> editorTitles;
+    TClockView *clock;
 
     void fileNew();
     void fileOpen();
@@ -24,6 +26,8 @@ struct TVEditApp: public TApplication {
     TVEditApp();
     static TMenuBar* initMenuBar(TRect r);
     static TStatusLine* initStatusLine(TRect r);
+
+    void idle() override;
     void handleEvent(TEvent& event) override;
 
 };
