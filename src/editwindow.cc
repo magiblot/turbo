@@ -19,6 +19,10 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
 
     editorView.hide();
 
+    hScrollBar = new TScrollBar(TRect( 18, size.y - 1, size.x - 2, size.y ));
+    hScrollBar->hide();
+    insert(hScrollBar);
+
     vScrollBar = new TScrollBar(TRect( size.x - 1, 1, size.x, size.y - 1 ));
     vScrollBar->hide();
     insert(vScrollBar);
@@ -76,6 +80,17 @@ void EditorWindow::setUpEditor()
     // The document view does not contain the margin.
     docView->setDelta({marginWidth, 0});
 
+    // Dynamic horizontal scroll
+    editor.WndProc(SCI_SETSCROLLWIDTHTRACKING, true, 0U);
+    editor.WndProc(SCI_SETSCROLLWIDTH, 1, 0U);
+    editor.WndProc(SCI_SETXCARETPOLICY, CARET_EVEN, 0);
+    // Trick so that the scroll width gets computed.
+    editor.WndProc(SCI_SETFIRSTVISIBLELINE, 1, 0U);
+    editor.WndProc(SCI_SETFIRSTVISIBLELINE, 0, 0U);
+
+    // If we wanted line wrapping, we would enable this:
+//     WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, nil);
+
     redrawEditor();
 }
 
@@ -88,6 +103,7 @@ void EditorWindow::redrawEditor()
         editor.draw(editorView);
         leftMargin->drawView();
         docView->drawView();
+        hScrollBar->drawView();
         vScrollBar->drawView();
         unlock();
         drawing = false;
@@ -123,6 +139,7 @@ void EditorWindow::setState(ushort aState, Boolean enable)
         // subviews could have already been free'd.
         switch (aState) {
             case sfActive:
+                hScrollBar->setState(sfVisible, enable);
                 vScrollBar->setState(sfVisible, enable);
                 if (enable && TVEditApp::app)
                     TVEditApp::app->tellFocusedEditor(this);
@@ -149,6 +166,12 @@ const char* EditorWindow::getTitle(short)
     return nullptr;
 }
 
+void EditorWindow::sizeLimits( TPoint& min, TPoint& max )
+{
+    TView::sizeLimits(min, max);
+    min = minEditWinSize;
+}
+
 void EditorWindow::lockSubViews()
 {
     for (auto *v : std::initializer_list<TView *> {docView, leftMargin, vScrollBar})
@@ -163,6 +186,7 @@ void EditorWindow::unlockSubViews()
 
 void EditorWindow::scrollBarEvent(TEvent ev)
 {
+    hScrollBar->handleEvent(ev);
     vScrollBar->handleEvent(ev);
 }
 
@@ -171,11 +195,21 @@ bool EditorWindow::scrollBarChanged(TScrollBar *bar)
     if (bar == vScrollBar) {
         editor.WndProc(SCI_SETFIRSTVISIBLELINE, bar->value, 0U);
         return true;
+    } else if (bar == hScrollBar) {
+        editor.WndProc(SCI_SETXOFFSET, bar->value, 0U);
+        return true;
     }
     return false;
 }
 
-void EditorWindow::setVerticalScrollPos(int delta, int limit, int size)
+void EditorWindow::setHorizontalScrollPos(int delta, int limit)
 {
+    int size = docView->size.x;
+    hScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
+}
+
+void EditorWindow::setVerticalScrollPos(int delta, int limit)
+{
+    int size = docView->size.y;
     vScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
 }

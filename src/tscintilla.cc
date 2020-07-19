@@ -24,8 +24,6 @@ TScintillaEditor::TScintillaEditor()
     WndProc(SCI_SETMARGINRIGHT, nil, 0);
     // Disable buffered fraw
     WndProc(SCI_SETBUFFEREDDRAW, 0, nil);
-    // Enable line wrapping
-    WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, nil);
     // Disable space between lines
     WndProc(SCI_SETEXTRADESCENT, -1, nil);
     // Use single-byte character set.
@@ -40,19 +38,21 @@ TScintillaEditor::TScintillaEditor()
 void TScintillaEditor::SetVerticalScrollPos()
 {
     if (parent) {
-        auto size = LinesOnScreen();
-        auto limit = size + MaxScrollPos();
-        parent->setVerticalScrollPos(topLine, limit, size);
+        auto limit = LinesOnScreen() + MaxScrollPos();
+        parent->setVerticalScrollPos(topLine, limit);
     }
 }
 
 void TScintillaEditor::SetHorizontalScrollPos()
 {
+    if (parent)
+        parent->setHorizontalScrollPos(xOffset, scrollWidth);
 }
 
 bool TScintillaEditor::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 {
     SetVerticalScrollPos();
+    SetHorizontalScrollPos();
     return false;
 }
 

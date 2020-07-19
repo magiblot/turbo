@@ -21,7 +21,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     FileEditor *docView;
     TDrawSubView *leftMargin;
-    TScrollBar *vScrollBar;
+    TScrollBar *hScrollBar, *vScrollBar;
     bool drawing;
     std::string error;
     std::string title;
@@ -40,12 +40,16 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void setState(ushort aState, Boolean enable) override;
     Boolean valid(ushort command) override;
     const char* getTitle(short) override;
+    void sizeLimits(TPoint &min, TPoint &max);
 
     void lockSubViews();
     void unlockSubViews();
     void scrollBarEvent(TEvent ev);
     bool scrollBarChanged(TScrollBar *bar);
-    void setVerticalScrollPos(int delta, int limit, int size) override;
+    void setHorizontalScrollPos(int delta, int limit) override;
+    void setVerticalScrollPos(int delta, int limit) override;
+
+    static constexpr TPoint minEditWinSize {24, 6};
 
 };
 
