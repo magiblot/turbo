@@ -34,10 +34,10 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TRect editorBounds() const;
     void setUpEditor();
     void redrawEditor();
-    void setActive(Boolean enable);
 
     void handleEvent(TEvent &ev) override;
     void changeBounds(const TRect &bounds) override;
+    void setState(ushort aState, Boolean enable) override;
     Boolean valid(ushort command) override;
     const char* getTitle(short) override;
 

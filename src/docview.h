@@ -16,9 +16,7 @@ struct DocumentView : public TDrawSubView {
                   EditorWindow &aWindow );
 
     void handleEvent(TEvent &ev) override;
-    void setState(ushort aState, Boolean enable) override;
     void draw() override;
-
 
 };
 

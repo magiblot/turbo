@@ -59,18 +59,6 @@ void DocumentView::handleEvent(TEvent &ev)
     }
 }
 
-void DocumentView::setState(ushort aState, Boolean enable)
-{
-    TView::setState(aState, enable);
-    switch (aState) {
-        // We handle this here as the lifetime of DocumentView
-        // never exceeds that of EditorWindow.
-        case sfActive:
-            window.setActive(enable);
-            break;
-    }
-}
-
 void DocumentView::draw()
 {
     auto [x, y] = editor.getCaretPosition();

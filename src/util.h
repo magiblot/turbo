@@ -44,7 +44,7 @@ struct list_head
 
     ~list_head()
     {
-        erase();
+        remove();
     }
 
     list_head(T *self_)
@@ -62,7 +62,7 @@ struct list_head
             next_->prev_ = this;
     }
 
-    void erase() {
+    void remove() {
         if (next_)
             next_->prev_ = prev_;
         if (prev_)

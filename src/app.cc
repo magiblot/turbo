@@ -162,6 +162,13 @@ void TVEditApp::removeEditor(EditorWindow *w)
     --getFileCounter(w->file.native());
 }
 
+void TVEditApp::tellFocusedEditor(EditorWindow *w)
+{
+    // w has been focused, so it becomes the first of our MRU list.
+    w->MRUhead.remove();
+    w->MRUhead.insert_after(&MRUlist);
+}
+
 std::filesystem::path TVEditApp::getMostRecentDir()
 {
     EditorWindow *first = MRUlist.next();

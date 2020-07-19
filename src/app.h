@@ -25,6 +25,7 @@ struct TVEditApp : public TApplication {
     active_counter& getFileCounter(std::string_view file);
     void addEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
+    void tellFocusedEditor(EditorWindow *w);
     std::filesystem::path getMostRecentDir();
 
     TVEditApp();

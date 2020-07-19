@@ -94,11 +94,6 @@ void EditorWindow::redrawEditor()
     }
 }
 
-void EditorWindow::setActive(Boolean enable)
-{
-    vScrollBar->setState(sfVisible, enable);
-}
-
 void EditorWindow::handleEvent(TEvent &ev) {
     if (ev.what == evBroadcast && ev.message.command == cmScrollBarChanged) {
         if (scrollBarChanged((TScrollBar *) ev.message.infoPtr)) {
@@ -118,6 +113,22 @@ void EditorWindow::changeBounds(const TRect &bounds)
     unlockSubViews();
     redrawEditor();
     unlock();
+}
+
+void EditorWindow::setState(ushort aState, Boolean enable)
+{
+    TWindow::setState(aState, enable);
+    if (state & sfExposed) {
+        // Otherwise, we could be in the middle of shutdown and our
+        // subviews could have already been free'd.
+        switch (aState) {
+            case sfActive:
+                vScrollBar->setState(sfVisible, enable);
+                if (enable && TVEditApp::app)
+                    TVEditApp::app->tellFocusedEditor(this);
+                break;
+        }
+    }
 }
 
 Boolean EditorWindow::valid(ushort command)
