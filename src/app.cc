@@ -44,12 +44,12 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
     r.b.y = r.a.y+1;
     return new TMenuBar( r,
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
-            *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl+N" ) +
-            *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl+O" ) +
+            *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
+            *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
             newLine() +
-            *new TMenuItem( "~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl+W" ) +
+            *new TMenuItem( "~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl-W" ) +
             newLine() +
-            *new TMenuItem( "E~x~it", cmQuit, kbNoKey, hcNoContext, "Alt+X" )
+            *new TMenuItem( "E~x~it", cmQuit, kbNoKey, hcNoContext, "Alt-X" )
             );
 
 }
@@ -59,10 +59,10 @@ TStatusLine *TVEditApp::initStatusLine( TRect r )
     r.a.y = r.b.y-1;
     return new TStatusLine( r,
         *new TStatusDef( 0, 0xFFFF ) +
-            *new TStatusItem( "~Alt+X~ Exit", kbAltX, cmQuit ) +
-            *new TStatusItem( "~Ctrl+N~ New", kbCtrlN, cmNew ) +
-            *new TStatusItem( "~Ctrl+O~ Open", kbCtrlO, cmOpen ) +
-            *new TStatusItem( "~Ctrl+W~ Close", kbCtrlW, cmClose ) +
+            *new TStatusItem( "~Alt-X~ Exit", kbAltX, cmQuit ) +
+            *new TStatusItem( "~Ctrl-N~ New", kbCtrlN, cmNew ) +
+            *new TStatusItem( "~Ctrl-O~ Open", kbCtrlO, cmOpen ) +
+            *new TStatusItem( "~Ctrl-W~ Close", kbCtrlW, cmClose ) +
             *new TStatusItem( "~F10~ Menu" , kbF10, cmMenu )
             );
 }
