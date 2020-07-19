@@ -18,6 +18,7 @@
 
 using namespace tvedit;
 using namespace Scintilla;
+using namespace std::literals;
 
 TVEditApp* tvedit::app = 0;
 
@@ -94,6 +95,29 @@ bool TVEditApp::openEditor(std::string_view fileName)
 {
     EditorWindow *w = new EditorWindow(deskTop->getExtent(), fileName);
     w = (EditorWindow *) validView(w);
-    deskTop->insert(w);
+    if (w) {
+        setEditorTitle(w);
+        deskTop->insert(w);
+    }
     return w;
+}
+
+void TVEditApp::setEditorTitle(EditorWindow *w)
+{
+    char buf[12];
+    uint number;
+    const char *file = w->getTitle(0U);
+    if (file) {
+        w->title.assign(file);
+        number = ++editorTitles[file];
+    } else {
+        w->title.assign("Untitled"s);
+        number = ++editorTitles[""];
+    }
+    if (number > 1) {
+        std::string_view n = {buf, fast_utoa(number, buf)};
+        w->title.append(" ("sv);
+        w->title.append(n);
+        w->title.push_back(')');
+    }
 }

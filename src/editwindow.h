@@ -9,17 +9,18 @@
 #include <string_view>
 #include <string>
 
-class DocumentView;
+class FileEditor;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     EditorWindow(const TRect &bounds, std::string_view aFileName);
 
-    DocumentView *docView;
+    FileEditor *docView;
     TDrawSubView *leftMargin;
     TScrollBar *vScrollBar;
     bool drawing;
     std::string error;
+    std::string title;
 
     Scintilla::TScintillaEditor editor;
     TDrawableView editorView;
@@ -32,6 +33,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void handleEvent(TEvent &ev) override;
     void changeBounds(const TRect &bounds) override;
     Boolean valid(ushort command) override;
+    const char* getTitle(short) override;
 
     void lockSubViews();
     void unlockSubViews();

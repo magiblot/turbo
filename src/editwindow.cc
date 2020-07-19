@@ -6,7 +6,7 @@
 #include "fileedit.h"
 
 EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFileName) :
-    TWindow(bounds, "Editor Window", wnNoNumber),
+    TWindow(bounds, nullptr, wnNoNumber),
     TWindowInit(&initFrame),
     drawing(false),
     editorView(editorBounds())
@@ -119,6 +119,15 @@ Boolean EditorWindow::valid(ushort command)
         return False;
     }
     return True;
+}
+
+const char* EditorWindow::getTitle(short)
+{
+    if (!title.empty())
+        return title.c_str();
+    if (!*docView->fileName)
+        return nullptr;
+    return docView->fileName;
 }
 
 void EditorWindow::lockSubViews()
