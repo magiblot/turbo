@@ -136,12 +136,13 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
                                          ColourDesired fore, ColourDesired back )
 {
     auto r = clipRect(rc);
+    int textBegin = std::max(clip.a.x - (int) rc.left, 0);
+    int textEnd = textBegin + std::min(r.b.x - r.a.x, (int) text.size() - textBegin);
     uchar color = convertColorPair(fore, back);
     for (int y = r.a.y; y < r.b.y; ++y) {
         int x = r.a.x;
-        int i = 0;
-        int count = std::min(r.b.x - r.a.x, (int) text.size());
-        for (; i < count; ++i, ++x) {
+        int i = textBegin;
+        for (; i < textEnd; ++i, ++x) {
             auto c = view->at(y, x);
             c.cell.attr = color;
             c.cell.character = (uchar) text[i];
@@ -153,12 +154,13 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
 void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore)
 {
     auto r = clipRect(rc);
+    int textBegin = std::max(clip.a.x - (int) rc.left, 0);
+    int textEnd = textBegin + std::min(r.b.x - r.a.x, (int) text.size() - textBegin);
     uchar fg = convertColor(fore);
     for (int y = r.a.y; y < r.b.y; ++y) {
         int x = r.a.x;
-        int i = 0;
-        int count = std::min(r.b.x - r.a.x, (int) text.size());
-        for (; i < count; ++i, ++x) {
+        int i = textBegin;
+        for (; i < textEnd; ++i, ++x) {
             auto c = view->at(y, x);
             c.cell.attr.colors.fg = fg;
             c.cell.character = (uchar) text[i];
