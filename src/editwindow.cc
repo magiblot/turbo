@@ -38,8 +38,8 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
 
 EditorWindow::~EditorWindow()
 {
-    if (tvedit::app)
-        tvedit::app->removeEditor(this);
+    if (TVEditApp::app)
+        TVEditApp::app->removeEditor(this);
 }
 
 TRect EditorWindow::editorBounds() const

@@ -1,12 +1,10 @@
 #include "app.h"
 
-using namespace tvedit;
-
 int main()
 {
     TVEditApp app;
-    ::app = &app;
+    TVEditApp::app = &app;
     app.run();
     app.shutDown();
-    ::app = 0;
+    TVEditApp::app = 0;
 }

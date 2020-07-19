@@ -11,7 +11,6 @@
 class EditorWindow;
 class TClockView;
 
-namespace tvedit {
 struct TVEditApp : public TApplication {
 
     std::unordered_map<std::string_view, active_counter> fileCount;
@@ -32,10 +31,8 @@ struct TVEditApp : public TApplication {
     void idle() override;
     void handleEvent(TEvent& event) override;
 
+    static TVEditApp *app;
+
 };
-
-extern TVEditApp *app;
-
-}
 
 #endif

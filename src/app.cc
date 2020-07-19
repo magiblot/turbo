@@ -19,11 +19,10 @@
 #include "util.h"
 #include "widgets.h"
 
-using namespace tvedit;
 using namespace Scintilla;
 using namespace std::literals;
 
-TVEditApp* tvedit::app = 0;
+TVEditApp* TVEditApp::app = 0;
 
 TVEditApp::TVEditApp() :
     TProgInit( &TVEditApp::initStatusLine,
