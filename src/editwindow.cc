@@ -4,11 +4,13 @@
 
 #include "editwindow.h"
 #include "fileedit.h"
+#include "app.h"
 
-EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFileName) :
+EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     TWindow(bounds, nullptr, wnNoNumber),
     TWindowInit(&initFrame),
     drawing(false),
+    file(aFile),
     editorView(editorBounds())
 {
     options |= ofTileable;
@@ -25,14 +27,19 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFileName) :
     leftMargin->growMode = gfGrowHiY | gfFixed;
     insert(leftMargin);
 
-    docView = new FileEditor( aFileName,
-                              TRect( 7, 1, size.x - 1, size.y - 1 ),
+    docView = new FileEditor( TRect( 7, 1, size.x - 1, size.y - 1 ),
                               editorView,
                               editor,
                               *this );
     insert(docView);
 
     setUpEditor();
+}
+
+EditorWindow::~EditorWindow()
+{
+    if (tvedit::app)
+        tvedit::app->removeEditor(this);
 }
 
 TRect EditorWindow::editorBounds() const
@@ -125,9 +132,9 @@ const char* EditorWindow::getTitle(short)
 {
     if (!title.empty())
         return title.c_str();
-    if (!*docView->fileName)
-        return nullptr;
-    return docView->fileName;
+    if (!file.empty())
+        return file.c_str();
+    return nullptr;
 }
 
 void EditorWindow::lockSubViews()

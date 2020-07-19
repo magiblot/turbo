@@ -1,12 +1,11 @@
 #include "fileedit.h"
 #include <memory>
 #include <fstream>
-#include <string>
-using namespace std::literals;
 
 void FileEditor::loadFile()
 {
-    std::ifstream f(fileName, ios::in | ios::binary);
+    auto &file = window.file;
+    std::ifstream f(file, ios::in | ios::binary);
     if (f) {
         bool ok;
         f.seekg(0, ios::end);
@@ -29,8 +28,8 @@ void FileEditor::loadFile()
                     readSize = fSize;
             };
             if (!ok)
-                window.error = "An error occurred while reading file '"s+fileName+"'.";
+                window.error = fmt::format("An error occurred while reading file '{}'.", file.native());
         }
     } else
-        window.error = "Unable to open file '"s+fileName+"'.";
+        window.error = fmt::format("Unable to open file '{}'.", file.native());
 }

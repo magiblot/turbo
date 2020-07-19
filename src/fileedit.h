@@ -3,27 +3,31 @@
 
 #include "docview.h"
 #include <string>
+#include <filesystem>
+#include <fmt/core.h>
 
 struct FileEditor : public DocumentView {
 
-    char fileName[MAXPATH];
-
     template<class ...Args>
-    FileEditor(std::string_view aFileName, Args&& ...args);
+    FileEditor(Args&& ...args);
 
-    void setFileName(std::string_view aFileName);
     void loadFile();
 
 };
 
 template<class ...Args>
-inline FileEditor::FileEditor(std::string_view aFileName, Args&& ...args) :
+inline FileEditor::FileEditor(Args&& ...args) :
     DocumentView(std::forward<Args>(args)...)
 {
-    strnzcpy(fileName, aFileName, MAXPATH);
-    if (!aFileName.empty()) {
-        fexpand(fileName);
-        loadFile();
+    // fileName stored in the window as it has a longer lifetime.
+    auto &fileName = window.file;
+    if (!fileName.empty()) {
+        std::error_code ec;
+        fileName.assign(std::filesystem::absolute(fileName, ec));
+        if (!ec)
+            loadFile();
+        else
+            window.error = fmt::format("'{}' is not a valid path.", fileName.native());
     }
 }
 

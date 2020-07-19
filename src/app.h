@@ -6,22 +6,24 @@
 
 #include <string_view>
 #include <unordered_map>
-#include <vector>
+#include "util.h"
 
 class EditorWindow;
 class TClockView;
 
 namespace tvedit {
+struct TVEditApp : public TApplication {
 
-struct TVEditApp: public TApplication {
-
-    std::unordered_map<std::string, uint> editorTitles;
+    std::unordered_map<std::string_view, active_counter> fileCount;
+    std::vector<std::string> files; // Storage for the strings referenced by fileCount;
     TClockView *clock;
 
     void fileNew();
     void fileOpen();
     bool openEditor(std::string_view fileName);
     void setEditorTitle(EditorWindow *w);
+    active_counter& getFileCounter(std::string_view file);
+    void removeEditor(EditorWindow *w);
 
     TVEditApp();
     static TMenuBar* initMenuBar(TRect r);

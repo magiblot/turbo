@@ -8,12 +8,14 @@
 #include "drawviews.h"
 #include <string_view>
 #include <string>
+#include <filesystem>
 
 class FileEditor;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
-    EditorWindow(const TRect &bounds, std::string_view aFileName);
+    EditorWindow(const TRect &bounds, std::string_view aFile);
+    ~EditorWindow();
 
     FileEditor *docView;
     TDrawSubView *leftMargin;
@@ -21,6 +23,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     bool drawing;
     std::string error;
     std::string title;
+    std::filesystem::path file;
 
     Scintilla::TScintillaEditor editor;
     TDrawableView editorView;

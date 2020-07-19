@@ -29,4 +29,25 @@ ushort execDialog(TDialog *d, void *data, Func &&callback)
     return cmCancel;
 }
 
+struct active_counter {
+    // Counter for enumerating editors opened in the same file.
+    // 'count' is only reset when the number of editors reaches zero.
+    uint count {0};
+    uint active {0};
+
+    uint operator++()
+    {
+        ++count;
+        ++active;
+        return count;
+    }
+
+    void operator--()
+    {
+        --active;
+        if (active < 1)
+            count = active;
+    }
+};
+
 #endif

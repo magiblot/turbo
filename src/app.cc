@@ -12,6 +12,8 @@
 #define Uses_TFileDialog
 #include <tvision/tv.h>
 
+#include <fmt/core.h>
+
 #include "app.h"
 #include "editwindow.h"
 #include "util.h"
@@ -122,20 +124,34 @@ bool TVEditApp::openEditor(std::string_view fileName)
 
 void TVEditApp::setEditorTitle(EditorWindow *w)
 {
-    char buf[12];
     uint number;
-    const char *file = w->getTitle(0U);
-    if (file) {
+    std::string_view file = w->file.native();
+    if (!file.empty()) {
         w->title.assign(file);
-        number = ++editorTitles[file];
+        number = ++getFileCounter(file);
     } else {
         w->title.assign("Untitled"s);
-        number = ++editorTitles[""];
+        number = ++fileCount[{}];
     }
-    if (number > 1) {
-        std::string_view n = {buf, fast_utoa(number, buf)};
-        w->title.append(" ("sv);
-        w->title.append(n);
-        w->title.push_back(')');
+    if (number > 1)
+        w->title.append(fmt::format(" ({})", number));
+}
+
+active_counter& TVEditApp::getFileCounter(std::string_view file)
+{
+    // We need to keep at least one copy of the 'file' string alive.
+    // This is because I don't want fileCount to be a map of std::string.
+    auto it = fileCount.find(file);
+    if (it == fileCount.end()) {
+        // Allocate string for the filename.
+        const auto &s = files.emplace_back(file);
+        file = s; // Make file point to the allocated string.
+        it = fileCount.emplace(file, active_counter()).first;
     }
+    return it->second;
+}
+
+void TVEditApp::removeEditor(EditorWindow *w)
+{
+    --getFileCounter(w->file.native());
 }
