@@ -97,6 +97,8 @@ void TVEditApp::fileNew()
 
 void TVEditApp::fileOpen()
 {
+    // Unfortunately, TFileDialog relies on the current directory.
+    chdir(getMostRecentDir().c_str());
     auto *dialog = new TFileDialog( "*.*",
                                     "Open file",
                                     "~N~ame",
@@ -158,4 +160,12 @@ void TVEditApp::addEditor(EditorWindow *w)
 void TVEditApp::removeEditor(EditorWindow *w)
 {
     --getFileCounter(w->file.native());
+}
+
+std::filesystem::path TVEditApp::getMostRecentDir()
+{
+    EditorWindow *first = MRUlist.next();
+    if (first)
+        return first->file.parent_path();
+    return ".";
 }

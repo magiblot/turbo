@@ -18,7 +18,7 @@ ushort execDialog(TDialog *d, void *data, Func &&callback)
     TView *p = TProgram::application->validView(d);
     if (p) {
         if (data)
-            p->setData( data );
+            p->setData(data);
         ushort result;
         do {
             result = TProgram::deskTop->execView(p);
