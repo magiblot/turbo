@@ -77,8 +77,9 @@ find_library(LIBTVISION tvision HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision")
 
 # Other dependencies
 find_library(LIBNCURSESW ncursesw)
+find_library(FMT fmt)
 
-set(LIBS scintilla ${LIBTVISION} ${LIBNCURSESW})
+set(LIBS scintilla ${LIBTVISION} ${FMT} ${LIBNCURSESW})
 
 # Optional dependencies, compulsory if found when building 'tvision'
 find_library(GPM gpm)
