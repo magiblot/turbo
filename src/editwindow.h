@@ -25,6 +25,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TDrawSubView *leftMargin;
     TScrollBar *hScrollBar, *vScrollBar;
     bool drawing;
+    TPoint lastSize;
 
     // Scintilla
 

@@ -10,6 +10,7 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     TWindow(bounds, nullptr, wnNoNumber),
     TWindowInit(&initFrame),
     drawing(false),
+    lastSize(size),
     file(aFile),
     MRUhead(this),
     editorView(editorBounds())
@@ -126,9 +127,12 @@ void EditorWindow::changeBounds(const TRect &bounds)
     lock();
     lockSubViews();
     TWindow::changeBounds(bounds);
-    editorView.changeBounds(editorBounds());
     unlockSubViews();
-    redrawEditor();
+    if (size != lastSize) {
+        editorView.changeBounds(editorBounds());
+        redrawEditor();
+        lastSize = size;
+    }
     unlock();
 }
 
