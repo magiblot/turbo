@@ -46,6 +46,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void unlockSubViews();
     void scrollBarEvent(TEvent ev);
     bool scrollBarChanged(TScrollBar *bar);
+    void scrollTo(TPoint delta);
     void setHorizontalScrollPos(int delta, int limit) override;
     void setVerticalScrollPos(int delta, int limit) override;
 

@@ -202,6 +202,12 @@ bool EditorWindow::scrollBarChanged(TScrollBar *bar)
     return false;
 }
 
+void EditorWindow::scrollTo(TPoint delta)
+{
+    editor.WndProc(SCI_SETXOFFSET, std::clamp(delta.x, 0, hScrollBar->maxVal), 0U);
+    editor.WndProc(SCI_SETFIRSTVISIBLELINE, delta.y, 0U);
+}
+
 void EditorWindow::setHorizontalScrollPos(int delta, int limit)
 {
     int size = docView->size.x;

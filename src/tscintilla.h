@@ -55,6 +55,7 @@ struct TScintillaEditor : public ScintillaBase {
     void setParent(TScintillaWindow *parent_);
     void changeSize();
     TPoint getCaretPosition();
+    TPoint getDelta();
 
 };
 
@@ -77,6 +78,11 @@ inline TPoint TScintillaEditor::getCaretPosition()
 {
     auto [x, y] = PointMainCaret();
     return {(int) x, (int) y};
+}
+
+inline TPoint TScintillaEditor::getDelta()
+{
+    return {xOffset, (int) topLine};
 }
 
 class TScintillaWindow {

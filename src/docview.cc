@@ -32,6 +32,20 @@ void DocumentView::handleEvent(TEvent &ev)
             handled = true;
             break;
         case evMouseDown:
+            // Middle button drag
+            if (ev.mouse.buttons & mbMiddleButton) {
+                TPoint lastMouse = makeLocal(ev.mouse.where);
+                while (mouseEvent(ev, evMouse)) {
+                    TPoint mouse = makeLocal(ev.mouse.where);
+                    TPoint d = editor.getDelta() + (lastMouse - mouse);
+                    window.scrollTo(d);
+                    window.redrawEditor();
+                    lastMouse = mouse;
+                }
+                handled = true;
+                break;
+            }
+            // Text selection
             do {
                 TPoint where = makeLocal(ev.mouse.where) + delta;
                 if (ev.what == evMouseWheel) {
