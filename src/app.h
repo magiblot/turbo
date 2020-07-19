@@ -15,6 +15,7 @@ struct TVEditApp : public TApplication {
 
     std::unordered_map<std::string_view, active_counter> fileCount;
     std::vector<std::string> files; // Storage for the strings referenced by fileCount;
+    list_head<EditorWindow> MRUlist;
     TClockView *clock;
 
     void fileNew();
@@ -22,6 +23,7 @@ struct TVEditApp : public TApplication {
     bool openEditor(std::string_view fileName);
     void setEditorTitle(EditorWindow *w);
     active_counter& getFileCounter(std::string_view file);
+    void addEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
 
     TVEditApp();

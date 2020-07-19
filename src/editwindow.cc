@@ -11,6 +11,7 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     TWindowInit(&initFrame),
     drawing(false),
     file(aFile),
+    MRUhead(this),
     editorView(editorBounds())
 {
     options |= ofTileable;

@@ -6,6 +6,8 @@
 
 #include "tscintilla.h"
 #include "drawviews.h"
+#include "util.h"
+
 #include <string_view>
 #include <string>
 #include <filesystem>
@@ -24,6 +26,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     std::string error;
     std::string title;
     std::filesystem::path file;
+    list_head<EditorWindow> MRUhead;
 
     Scintilla::TScintillaEditor editor;
     TDrawableView editorView;

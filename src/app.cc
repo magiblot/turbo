@@ -114,10 +114,8 @@ bool TVEditApp::openEditor(std::string_view fileName)
 {
     EditorWindow *w = new EditorWindow(deskTop->getExtent(), fileName);
     w = (EditorWindow *) validView(w);
-    if (w) {
-        setEditorTitle(w);
-        deskTop->insert(w);
-    }
+    if (w)
+        addEditor(w);
     return w;
 }
 
@@ -148,6 +146,13 @@ active_counter& TVEditApp::getFileCounter(std::string_view file)
         it = fileCount.emplace(file, active_counter()).first;
     }
     return it->second;
+}
+
+void TVEditApp::addEditor(EditorWindow *w)
+{
+    setEditorTitle(w);
+    w->MRUhead.insert_after(&MRUlist);
+    deskTop->insert(w);
 }
 
 void TVEditApp::removeEditor(EditorWindow *w)
