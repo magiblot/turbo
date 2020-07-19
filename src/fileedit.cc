@@ -2,6 +2,19 @@
 #include <memory>
 #include <fstream>
 
+void FileEditor::tryLoadFile()
+{
+    auto &file = window.file;
+    if (!file.empty()) {
+        std::error_code ec;
+        file.assign(std::filesystem::absolute(file, ec));
+        if (!ec)
+            loadFile();
+        else
+            window.error = fmt::format("'{}' is not a valid path.", file.native());
+    }
+}
+
 void FileEditor::loadFile()
 {
     auto &file = window.file;
