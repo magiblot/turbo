@@ -33,14 +33,33 @@ struct TVEditApp : public TApplication {
 
     void fileNew();
     void fileOpen();
+    void fileSave();
     bool openEditor(std::string_view fileName);
     void setEditorTitle(EditorWindow *w);
+    void updateEditorTitle(EditorWindow *w, std::string_view prevFile);
     active_counter& getFileCounter(std::string_view file);
     void addEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
     void tellFocusedEditor(EditorWindow *w);
     std::filesystem::path getMostRecentDir();
+    template<typename Func>
+    void openFileDialog( const char *aWildCard, const char *aTitle,
+                         const char *inputName, ushort aOptions,
+                         uchar histId, Func &&callback );
 
 };
+
+template<typename Func>
+inline void TVEditApp::openFileDialog( const char *aWildCard, const char *aTitle,
+                                       const char *inputName, ushort aOptions,
+                                       uchar histId, Func &&callback )
+{
+    // Unfortunately, TFileDialog relies on the current directory.
+    chdir(getMostRecentDir().c_str());
+    auto *dialog = new TFileDialog( aWildCard, aTitle,
+                                    inputName, aOptions,
+                                    histId );
+    execDialog(dialog, nullptr, callback);
+}
 
 #endif

@@ -22,7 +22,7 @@ ushort execDialog(TDialog *d, void *data, Func &&callback)
         ushort result;
         do {
             result = TProgram::deskTop->execView(p);
-        } while (result != cmCancel && !callback(result, p));
+        } while (result != cmCancel && !callback(p));
         TObject::destroy(p);
         return result;
     }

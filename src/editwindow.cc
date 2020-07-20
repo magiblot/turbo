@@ -11,9 +11,10 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     TWindowInit(&initFrame),
     drawing(false),
     lastSize(size),
+    MRUhead(this),
+    fatalError(false),
     file(aFile),
     inSavePoint(true),
-    MRUhead(this),
     editorView(editorBounds())
 {
     options |= ofTileable;
@@ -94,6 +95,10 @@ void EditorWindow::setUpEditor()
     // If we wanted line wrapping, we would enable this:
 //     WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, nil);
 
+    // Clear the undo buffer created when loading the file,
+    // if that's the case.
+    editor.WndProc(SCI_EMPTYUNDOBUFFER, 0U, 0U);
+
     redrawEditor();
 }
 
@@ -121,6 +126,12 @@ void EditorWindow::handleEvent(TEvent &ev) {
         }
     }
     TWindow::handleEvent(ev);
+    if (ev.what == evCommand) {
+        switch (ev.message.command) {
+            case cmSave: trySaveFile(); break;
+            case cmSaveAs: saveAsDialog(); break;
+        }
+    }
 }
 
 void EditorWindow::changeBounds(const TRect &bounds)
@@ -156,10 +167,8 @@ void EditorWindow::setState(ushort aState, Boolean enable)
 
 Boolean EditorWindow::valid(ushort command)
 {
-    if (command == cmValid && !error.empty()) {
-        messageBox(error.c_str(), mfError | mfOKButton);
-        return False;
-    }
+    if (command == cmValid)
+        return Boolean(!fatalError);
     return True;
 }
 
@@ -234,6 +243,9 @@ void EditorWindow::setVerticalScrollPos(int delta, int limit)
     vScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
 }
 
+/////////////////////////////////////////////////////////////////////////
+// Save point and window title state.
+
 void EditorWindow::setSavePointLeft()
 {
     if (inSavePoint) {
@@ -252,29 +264,37 @@ void EditorWindow::setSavePointReached()
     }
 }
 
+void EditorWindow::setSavePoint()
+{
+    inSavePoint = true;
+    editor.WndProc(SCI_SETSAVEPOINT, 0U, 0U);
+    frame->drawView();
+}
+
 /////////////////////////////////////////////////////////////////////////
 // File opening and saving.
 
-// Note: the 'error' variable set here is later checked in valid() for
-// command cmValid. If there was an error, a messageBox will be shown and
-// valid() will return False, thus resulting in the EditorWindow being destroyed.
-
 #include <memory>
 #include <fstream>
+
+// Note: the 'fatalError' variable set here is later checked in valid() for
+// command cmValid. If there was an error, valid() will return False,
+// thus resulting in the EditorWindow being destroyed in checkValid().
 
 void EditorWindow::tryLoadFile()
 {
     if (!file.empty()) {
         std::error_code ec;
         file.assign(std::filesystem::absolute(file, ec));
-        if (!ec)
-            loadFile();
-        else
-            error = fmt::format("'{}' is not a valid path.", file.native());
+        if (ec) {
+            fatalError = true;
+            showError(fmt::format("'{}' is not a valid path.", file.native()));
+        } else
+            fatalError = !loadFile();
     }
 }
 
-void EditorWindow::loadFile()
+bool EditorWindow::loadFile()
 {
     std::ifstream f(file, ios::in | ios::binary);
     if (f) {
@@ -298,9 +318,90 @@ void EditorWindow::loadFile()
                 if (fSize < readSize)
                     readSize = fSize;
             };
-            if (!ok)
-                error = fmt::format("An error occurred while reading file '{}'.", file.native());
+            if (!ok) {
+                showError(fmt::format("An error occurred while reading from file '{}'.", file.native()));
+                return false;
+            }
         }
-    } else
-        error = fmt::format("Unable to open file '{}'.", file.native());
+    } else {
+        showError(fmt::format("Unable to open file '{}'.", file.native()));
+        return false;
+    }
+    return true;
+}
+
+void EditorWindow::trySaveFile()
+{
+    if (file.empty()) {
+        saveAsDialog(); // Already takes care of updating the title.
+    } else if (saveFile()) {
+        setSavePointReached(); // Update title if necessary.
+        setSavePoint(); // Notify Scintilla.
+    }
+}
+
+bool EditorWindow::saveFile()
+{
+    std::ofstream f(file, ios::out | ios::binary);
+    if (f) {
+        size_t bytesLeft = editor.WndProc(SCI_GETTEXT, 0, 0) - 1;
+        if (bytesLeft) {
+            bool ok = true;
+            constexpr size_t blockSize = 1 << 20; // Write in chunks of 1 MiB.
+            size_t writeSize = std::min(bytesLeft, blockSize);
+            std::unique_ptr<char[]> buffer {new char[writeSize]};
+            sptr_t bufParam = reinterpret_cast<sptr_t>(buffer.get());
+            size_t i = 0;
+            do {
+                editor.WndProc(SCI_SETTARGETRANGE, i, i + writeSize);
+                editor.WndProc(SCI_GETTARGETTEXT, 0U, bufParam);
+                ok = (bool) f.write(buffer.get(), writeSize);
+                i += writeSize;
+                bytesLeft -= writeSize;
+                if (bytesLeft < writeSize)
+                    writeSize = bytesLeft;
+            } while (bytesLeft > 0 && ok);
+            if (!ok) {
+                showError(fmt::format("An error occurred while writing to file '{}'.", file.native()));
+                return false;
+            }
+        }
+    } else {
+        showError(fmt::format("Unable to write to file '{}'.", file.native()));
+        return false;
+    }
+    return true;
+}
+
+bool EditorWindow::saveAsDialog()
+{
+    if (TVEditApp::app) {
+        TVEditApp::app->openFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 0,
+            [this] (TView *dialog) {
+                std::filesystem::path prevFile = std::move(file);
+                char fileName[MAXPATH];
+                dialog->getData(fileName);
+                std::error_code ec;
+                file = std::filesystem::absolute(fileName, ec);
+                if (ec)
+                    showError(fmt::format("'{}' is not a valid path.", fileName));
+                else if (saveFile()) {
+                    // Saving has succeeded, now update the title.
+                    TVEditApp::app->updateEditorTitle(this, prevFile.native());
+                    setSavePoint();
+                    return true;
+                }
+                // Restore the old file path.
+                file = std::move(prevFile);
+                return false;
+            }
+        );
+
+    }
+    return false;
+}
+
+void EditorWindow::showError(const std::string &s)
+{
+    messageBox(s.c_str(), mfError | mfOKButton);
 }

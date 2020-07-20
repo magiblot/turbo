@@ -113,19 +113,14 @@ void TVEditApp::fileNew()
 
 void TVEditApp::fileOpen()
 {
-    // Unfortunately, TFileDialog relies on the current directory.
-    chdir(getMostRecentDir().c_str());
-    auto *dialog = new TFileDialog( "*.*",
-                                    "Open file",
-                                    "~N~ame",
-                                    fdOpenButton,
-                                    0 );
-    execDialog(dialog, nullptr, [this] (ushort, TView *dialog) {
-        // MAXPATH as assumed by TFileDialog.
-        char fileName[MAXPATH];
-        dialog->getData(fileName);
-        return openEditor(fileName);
-    });
+    openFileDialog( "*.*", "Open file", "~N~ame", fdOpenButton, 0,
+        [this] (TView *dialog) {
+            // MAXPATH as assumed by TFileDialog.
+            char fileName[MAXPATH];
+            dialog->getData(fileName);
+            return openEditor(fileName);
+        }
+    );
 }
 
 bool TVEditApp::openEditor(std::string_view fileName)
@@ -150,6 +145,12 @@ void TVEditApp::setEditorTitle(EditorWindow *w)
     }
     if (number > 1)
         w->title.append(fmt::format(" ({})", number));
+}
+
+void TVEditApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
+{
+    --getFileCounter(prevFile);
+    setEditorTitle(w);
 }
 
 active_counter& TVEditApp::getFileCounter(std::string_view file)
