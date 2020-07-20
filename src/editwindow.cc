@@ -251,7 +251,6 @@ void EditorWindow::loadFile()
 {
     std::ifstream f(file, ios::in | ios::binary);
     if (f) {
-        bool ok;
         f.seekg(0, ios::end);
         size_t fSize = f.tellg();
         f.seekg(0);
@@ -261,6 +260,7 @@ void EditorWindow::loadFile()
             // Disable word wrap on big files.
             editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
         if (fSize) {
+            bool ok = true;
             constexpr size_t blockSize = 1 << 20; // Read in chunks of 1 MiB.
             size_t readSize = std::min(fSize, blockSize);
             std::unique_ptr<char[]> buffer {new char[readSize]};
