@@ -48,8 +48,11 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void scrollBarEvent(TEvent ev);
     bool scrollBarChanged(TScrollBar *bar);
     void scrollTo(TPoint delta);
+    void notify(SCNotification scn) override;
     void setHorizontalScrollPos(int delta, int limit) override;
     void setVerticalScrollPos(int delta, int limit) override;
+    void setSavePointLeft();
+    void setSavePointReached();
 
     // TVEditApp integration
 
@@ -60,6 +63,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     std::filesystem::path file;
     std::string error;
     std::string title; // Later set by TVEditApp
+    bool inSavePoint;
 
     void tryLoadFile();
     void loadFile();

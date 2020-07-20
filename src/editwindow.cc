@@ -12,6 +12,7 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     drawing(false),
     lastSize(size),
     file(aFile),
+    inSavePoint(true),
     MRUhead(this),
     editorView(editorBounds())
 {
@@ -213,6 +214,14 @@ void EditorWindow::scrollTo(TPoint delta)
     editor.WndProc(SCI_SETFIRSTVISIBLELINE, delta.y, 0U);
 }
 
+void EditorWindow::notify(SCNotification scn)
+{
+    switch (scn.nmhdr.code) {
+        case SCN_SAVEPOINTLEFT: setSavePointLeft(); break;
+        case SCN_SAVEPOINTREACHED: setSavePointReached(); break;
+    }
+}
+
 void EditorWindow::setHorizontalScrollPos(int delta, int limit)
 {
     int size = docView->size.x;
@@ -223,6 +232,24 @@ void EditorWindow::setVerticalScrollPos(int delta, int limit)
 {
     int size = docView->size.y;
     vScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
+}
+
+void EditorWindow::setSavePointLeft()
+{
+    if (inSavePoint) {
+        inSavePoint = false;
+        title.append("*"sv);
+        frame->drawView();
+    }
+}
+
+void EditorWindow::setSavePointReached()
+{
+    if (!inSavePoint) {
+        inSavePoint = true;
+        title.erase(title.size() - 1, 1);
+        frame->drawView();
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////
