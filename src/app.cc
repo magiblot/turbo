@@ -13,6 +13,7 @@
 #include <tvision/tv.h>
 
 #include <fmt/core.h>
+#include <csignal>
 
 #include "app.h"
 #include "editwindow.h"
@@ -46,9 +47,14 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
             *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
+            *new TMenuItem( "Open ~R~ecent...", cmOpenRecent, kbNoKey, hcNoContext ) +
+            newLine() +
+            *new TMenuItem( "~S~ave", cmSave, kbCtrlS, hcNoContext, "Ctrl-S" ) +
+            *new TMenuItem( "S~a~ve As...", cmSaveAs, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl-W" ) +
             newLine() +
+            *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
             *new TMenuItem( "E~x~it", cmQuit, kbNoKey, hcNoContext, "Alt-X" )
             );
 
@@ -81,6 +87,7 @@ void TVEditApp::handleEvent(TEvent& event)
         switch (event.message.command) {
             case cmNew: fileNew(); break;
             case cmOpen: fileOpen(); break;
+            case cmDosShell: shell(); break;
             default:
                 handled = false;
                 break;
@@ -88,6 +95,15 @@ void TVEditApp::handleEvent(TEvent& event)
     }
     if (handled)
         clearEvent(event);
+}
+
+void TVEditApp::shell()
+{
+    suspend();
+    cout << "The application has been stopped. You can return by entering 'fg'." << endl;
+    raise(SIGTSTP);
+    resume();
+    redraw();
 }
 
 void TVEditApp::fileNew()
