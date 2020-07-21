@@ -159,7 +159,7 @@ void EditorWindow::setState(ushort aState, Boolean enable)
                 hScrollBar->setState(sfVisible, enable);
                 vScrollBar->setState(sfVisible, enable);
                 if (enable && TVEditApp::app)
-                    TVEditApp::app->tellFocusedEditor(this);
+                    TVEditApp::app->getNotifiedFocusedEditor(this);
                 break;
         }
     }

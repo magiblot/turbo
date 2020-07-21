@@ -40,8 +40,13 @@ struct TVEditApp : public TApplication {
     active_counter& getFileCounter(std::string_view file);
     void addEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
-    void tellFocusedEditor(EditorWindow *w);
-    std::filesystem::path getMostRecentDir();
+
+    // The path of the most recently focused editor, so that file dialogs
+    // are opened there.
+
+    std::filesystem::path mostRecentDir;
+    void getNotifiedFocusedEditor(EditorWindow *w); // Set from here.
+
     template<typename Func>
     void openFileDialog( const char *aWildCard, const char *aTitle,
                          const char *inputName, ushort aOptions,
@@ -55,7 +60,7 @@ inline void TVEditApp::openFileDialog( const char *aWildCard, const char *aTitle
                                        uchar histId, Func &&callback )
 {
     // Unfortunately, TFileDialog relies on the current directory.
-    chdir(getMostRecentDir().c_str());
+    chdir(mostRecentDir.c_str());
     auto *dialog = new TFileDialog( aWildCard, aTitle,
                                     inputName, aOptions,
                                     histId );

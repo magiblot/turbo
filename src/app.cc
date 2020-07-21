@@ -179,21 +179,12 @@ void TVEditApp::removeEditor(EditorWindow *w)
     --getFileCounter(w->file.native());
 }
 
-void TVEditApp::tellFocusedEditor(EditorWindow *w)
+void TVEditApp::getNotifiedFocusedEditor(EditorWindow *w)
 {
     // w has been focused, so it becomes the first of our MRU list.
     w->MRUhead.remove();
     w->MRUhead.insert_after(&MRUlist);
-}
-
-std::filesystem::path TVEditApp::getMostRecentDir()
-{
-    auto *head = MRUlist.next;
-    // Iterate over the list to skip Untitled editors.
-    while (head->self) {
-        if (!head->self->file.empty())
-            return head->self->file.parent_path();
-        head = head->next;
-    }
-    return ".";
+    // We keep track of the most recent directory for file dialogs.
+    if (!w->file.empty())
+        mostRecentDir = w->file.parent_path();
 }
