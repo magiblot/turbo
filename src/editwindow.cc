@@ -99,6 +99,12 @@ void EditorWindow::setUpEditor()
     // if that's the case.
     editor.WndProc(SCI_EMPTYUNDOBUFFER, 0U, 0U);
 
+    // Indentation
+    editor.WndProc(SCI_SETUSETABS, false, 0U);
+    editor.WndProc(SCI_SETINDENT, 4, 0U);
+    editor.WndProc(SCI_SETTABINDENTS, true, 0U);
+    editor.WndProc(SCI_SETBACKSPACEUNINDENTS, true, 0U);
+
     redrawEditor();
 }
 
