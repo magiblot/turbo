@@ -66,6 +66,8 @@ void DocumentView::handleEvent(TEvent &ev)
                 handled = true;
             } while (mouseEvent(ev, evMouseDown | evMouseMove | evMouseAuto | evMouseWheel));
             break;
+        default:
+            handled = false;
     }
     if (handled) {
         window.redrawEditor();

@@ -145,6 +145,7 @@ void TVEditApp::setEditorTitle(EditorWindow *w)
     }
     if (number > 1)
         w->title.append(fmt::format(" ({})", number));
+    w->name = w->title; // Copy!
 }
 
 void TVEditApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)

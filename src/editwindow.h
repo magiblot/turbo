@@ -74,9 +74,10 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     // The title of the window. It depends on TVEditApp, which keeps track of
     // things such as the number of editors open on the same file.
-    // The title is also modified when a save point is reached or left.
+    // 'title' and 'name' are the same, except that 'title' is also modified
+    // when a save point is reached or left.
 
-    std::string title;
+    std::string title, name;
     bool inSavePoint;
 
     // These two functions modify the 'title' and 'inSavePoint' variables.
@@ -101,7 +102,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // file or to show a dialog. It also takes care of updating the window
     // title if necessary.
 
-    void trySaveFile();
+    bool trySaveFile();
     bool saveFile();
 
     // saveAsDialog keeps popping out a dialog until the user decides
@@ -109,6 +110,8 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // the window title.
 
     bool saveAsDialog();
+
+    bool tryClose();
 
     // Pops out a msgBox with an error message.
 

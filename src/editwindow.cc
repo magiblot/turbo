@@ -125,13 +125,26 @@ void EditorWindow::handleEvent(TEvent &ev) {
             clearEvent(ev);
         }
     }
-    TWindow::handleEvent(ev);
     if (ev.what == evCommand) {
+        bool handled = true;
         switch (ev.message.command) {
-            case cmSave: trySaveFile(); break;
-            case cmSaveAs: saveAsDialog(); break;
+            case cmClose:
+                if (tryClose())
+                    close();
+                break;
+            case cmSave:
+                trySaveFile();
+                break;
+            case cmSaveAs:
+                saveAsDialog();
+                break;
+            default:
+                handled = false;
         }
+        if (handled)
+            clearEvent(ev);
     }
+    TWindow::handleEvent(ev);
 }
 
 void EditorWindow::changeBounds(const TRect &bounds)
@@ -167,9 +180,16 @@ void EditorWindow::setState(ushort aState, Boolean enable)
 
 Boolean EditorWindow::valid(ushort command)
 {
-    if (command == cmValid)
-        return Boolean(!fatalError);
-    return True;
+    if (TWindow::valid(command)) {
+        switch (command) {
+            case cmValid:
+                return Boolean(!fatalError);
+            case cmQuit:
+                return Boolean(tryClose());
+        }
+        return True;
+    }
+    return False;
 }
 
 const char* EditorWindow::getTitle(short)
@@ -330,14 +350,19 @@ bool EditorWindow::loadFile()
     return true;
 }
 
-void EditorWindow::trySaveFile()
+bool EditorWindow::trySaveFile()
 {
-    if (file.empty()) {
-        saveAsDialog(); // Already takes care of updating the title.
-    } else if (saveFile()) {
-        setSavePointReached(); // Update title if necessary.
-        setSavePoint(); // Notify Scintilla.
+    if (!inSavePoint) {
+        if (file.empty()) {
+            return saveAsDialog(); // Already takes care of updating the title.
+        } else if (saveFile()) {
+            setSavePointReached(); // Update title if necessary.
+            setSavePoint(); // Notify Scintilla.
+            return true;
+        }
+        return false;
     }
+    return true;
 }
 
 bool EditorWindow::saveFile()
@@ -376,8 +401,9 @@ bool EditorWindow::saveFile()
 bool EditorWindow::saveAsDialog()
 {
     if (TVEditApp::app) {
+        bool saved = false;
         TVEditApp::app->openFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 0,
-            [this] (TView *dialog) {
+            [this, &saved] (TView *dialog) {
                 std::filesystem::path prevFile = std::move(file);
                 char fileName[MAXPATH];
                 dialog->getData(fileName);
@@ -389,16 +415,33 @@ bool EditorWindow::saveAsDialog()
                     // Saving has succeeded, now update the title.
                     TVEditApp::app->updateEditorTitle(this, prevFile.native());
                     setSavePoint();
-                    return true;
+                    return saved = true;
                 }
                 // Restore the old file path.
                 file = std::move(prevFile);
                 return false;
             }
         );
-
+        return saved;
     }
     return false;
+}
+
+bool EditorWindow::tryClose()
+{
+    if (!inSavePoint) {
+        auto &&msg = file.empty() ? fmt::format("Save '{}'?", name)
+                                  : fmt::format("'{}' has been modified. Save?", file.native());
+        switch (messageBox(msg.c_str(), mfInformation | mfYesNoCancel)) {
+            case cmYes:
+                return trySaveFile(); // Close only if the file gets saved.
+            case cmNo:
+                return true;
+            default:
+                return false;
+        }
+    }
+    return true;
 }
 
 void EditorWindow::showError(const std::string &s)
