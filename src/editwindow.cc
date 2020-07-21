@@ -358,7 +358,7 @@ bool EditorWindow::loadFile()
 
 bool EditorWindow::trySaveFile()
 {
-    if (!inSavePoint) {
+    if (!inSavePoint || file.empty()) {
         if (file.empty()) {
             return saveAsDialog(); // Already takes care of updating the title.
         } else if (saveFile()) {
