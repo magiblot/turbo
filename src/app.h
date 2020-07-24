@@ -2,10 +2,13 @@
 #define TVEDIT_APP_H
 
 #define Uses_TApplication
+#define Uses_TFileDialog
 #include <tvision/tv.h>
 
 #include <string_view>
 #include <unordered_map>
+#include <vector>
+#include <filesystem>
 #include "util.h"
 
 class EditorWindow;

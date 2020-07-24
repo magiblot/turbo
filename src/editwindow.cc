@@ -5,6 +5,7 @@
 #include "editwindow.h"
 #include "docview.h"
 #include "app.h"
+#include <fmt/core.h>
 
 EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     TWindow(bounds, nullptr, wnNoNumber),

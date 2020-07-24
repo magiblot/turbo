@@ -2,6 +2,7 @@
 #define TVEDIT_DOCVIEW_H
 
 #include "tscintilla.h"
+#include "drawviews.h"
 
 class EditorWindow;
 
