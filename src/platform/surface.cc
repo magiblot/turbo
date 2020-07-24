@@ -137,10 +137,18 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
 {
     auto r = clipRect(rc);
     auto color = convertColorPair(fore, back);
-    size_t textBegin = 0;
-    utf8wseek(text, textBegin, clip.a.x - (int) rc.left);
+    size_t textBegin = 0, overlap = 0;
+    utf8wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
-        size_t x = r.a.x, i = textBegin;
+        size_t x = r.a.x;
+        while (overlap-- && (int) x < r.b.x) {
+            auto c = view->at(y, x).Cell;
+            c.Attr = color;
+            c.Char.asInt = ' ';
+            c.extraWidth = 0;
+            view->at(y, x++).Cell = c;
+        }
+        size_t i = textBegin;
         while (i < text.size() && (int) x < r.b.x) {
             auto &c = view->at(y, x);
             c.Cell.Attr = color;
@@ -153,10 +161,18 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
 {
     auto r = clipRect(rc);
     uchar fg = convertColor(fore);
-    size_t textBegin = 0;
-    utf8wseek(text, textBegin, clip.a.x - (int) rc.left);
+    size_t textBegin = 0, overlap = 0;
+    utf8wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
-        size_t x = r.a.x, i = textBegin;
+        size_t x = r.a.x;
+        while (overlap-- && (int) x < r.b.x) {
+            auto c = view->at(y, x).Cell;
+            c.Attr.colors.fg = fg;
+            c.Char.asInt = ' ';
+            c.extraWidth = 0;
+            view->at(y, x++).Cell = c;
+        }
+        size_t i = textBegin;
         while (i < text.size() && (int) x < r.b.x) {
             auto &c = view->at(y, x);
             c.Cell.Attr.colors.fg = fg;
