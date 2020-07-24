@@ -8,7 +8,7 @@
 #include <ScintillaHeaders.h>
 
 class TDrawableView;
-struct TDrawCell;
+struct TScreenCell;
 struct TCellAttribs;
 
 namespace Scintilla {
@@ -40,7 +40,7 @@ namespace Scintilla {
 
         TPRect clipRect(TPRect r);
 
-        static TDrawCell makeCell(uchar ch, ColourDesired fore, ColourDesired back);
+        static TScreenCell makeCell(uchar ch, ColourDesired fore, ColourDesired back);
         static TCellAttribs convertColor(ColourDesired c);
         static TCellAttribs convertColorPair(ColourDesired fore, ColourDesired back);
         static ColourDesired convertColor(uchar c);
@@ -103,10 +103,12 @@ namespace Scintilla {
         return r;
     }
 
-    inline TDrawCell TScintillaSurface::makeCell(uchar ch, ColourDesired fore, ColourDesired back)
+    inline TScreenCell TScintillaSurface::makeCell(uchar ch, ColourDesired fore, ColourDesired back)
     {
-        uchar color = convertColorPair(fore, back);
-        return ushort ((color << 8) | ch);
+        TScreenCell c {};
+        c.Cell.Char.asInt = ch;
+        c.Cell.Attr = convertColorPair(fore, back);
+        return c;
     }
 
     inline TCellAttribs TScintillaSurface::convertColor(ColourDesired c)
@@ -121,7 +123,9 @@ namespace Scintilla {
 
     inline TCellAttribs TScintillaSurface::convertColorPair(ColourDesired fore, ColourDesired back)
     {
-        TCellAttribs attr = (convertColor(back) << 4) | convertColor(fore);
+        TCellAttribs attr {};
+        attr.colors.fg = convertColor(fore);
+        attr.colors.bg = convertColor(back);
         if (attr.colors.fg == attr.colors.bg && !(fore == back)) {
             uint grayFg = (fore.GetBlue() + fore.GetGreen() + fore.GetRed())/3;
             uint grayBg = (back.GetBlue() + back.GetGreen() + back.GetRed())/3;

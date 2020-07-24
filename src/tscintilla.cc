@@ -26,9 +26,9 @@ TScintillaEditor::TScintillaEditor()
     WndProc(SCI_SETBUFFEREDDRAW, 0, nil);
     // Disable space between lines
     WndProc(SCI_SETEXTRADESCENT, -1, nil);
-    // Use single-byte character set.
-    WndProc(SCI_SETCODEPAGE, SC_CHARSET_ANSI, nil);
-    WndProc(SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, SC_CHARSET_ANSI);
+    // Stay in Unicode mode (experimental).
+//     WndProc(SCI_SETCODEPAGE, SC_CHARSET_ANSI, nil);
+//     WndProc(SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, SC_CHARSET_ANSI);
     // Disable representations, because they won't be drawn properly and
     // because I hate them. Note that this has to be done after setting the
     // codepage.

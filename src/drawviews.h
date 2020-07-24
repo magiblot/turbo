@@ -4,43 +4,7 @@
 #define Uses_TView
 #include <tvision/tv.h>
 
-struct TCellAttribs {
-
-    union {
-        struct {
-            uchar
-                fg : 4,
-                bg : 4;
-        } colors;
-        struct {
-            uchar
-                fgBlue      : 1,
-                fgGreen     : 1,
-                fgRed       : 1,
-                fgBright    : 1,
-                bgBlue      : 1,
-                bgGreen     : 1,
-                bgRed       : 1,
-                bgBright    : 1;
-
-        } bits;
-        uchar asChar;
-    };
-
-    TCellAttribs(uchar c=0);
-    operator uchar&();
-
-};
-
-inline TCellAttribs::TCellAttribs(uchar c) :
-    asChar(c)
-{
-}
-
-inline TCellAttribs::operator uchar&()
-{
-    return asChar;
-}
+#include <vector>
 
 struct TDrawCell {
 
@@ -67,14 +31,12 @@ inline TDrawCell::operator ushort&()
     return asShort;
 }
 
-class TDrawSubView;
-
 class TDrawableView : public TView {
 
     friend class TDrawSubView;
 
-    std::vector<TDrawCell> drawArea;
-    TDrawCell fill {0};
+    std::vector<TScreenCell> drawArea;
+    TScreenCell fill;
 
 protected:
 
@@ -89,29 +51,29 @@ public:
 
     void setFillColor(TCellAttribs fillColor);
     TCellAttribs getFillColor() const;
-    TDrawCell& at(int y, int x);
-    const TDrawCell& at(int y, int x) const;
+    TScreenCell& at(int y, int x);
+    const TScreenCell& at(int y, int x) const;
 
 };
 
 inline void TDrawableView::setFillColor(TCellAttribs fillColor)
 {
-    fill.cell.attr = fillColor;
-    for (TDrawCell &cell : drawArea)
+    fill.Cell.Attr = fillColor;
+    for (TScreenCell &cell : drawArea)
         cell = fill;
 }
 
 inline TCellAttribs TDrawableView::getFillColor() const
 {
-    return fill.cell.attr;
+    return fill.Cell.Attr;
 }
 
-inline TDrawCell& TDrawableView::at(int y, int x)
+inline TScreenCell& TDrawableView::at(int y, int x)
 {
     return drawArea[y*size.x + x];
 }
 
-inline const TDrawCell& TDrawableView::at(int y, int x) const
+inline const TScreenCell& TDrawableView::at(int y, int x) const
 {
     return drawArea[y*size.x + x];
 }

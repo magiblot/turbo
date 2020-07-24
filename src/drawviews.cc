@@ -3,7 +3,7 @@
 TDrawableView::TDrawableView(const TRect &bounds) :
     TView(bounds),
     drawArea(size.x*size.y),
-    fill(0)
+    fill{0}
 {
 }
 

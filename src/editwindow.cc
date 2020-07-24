@@ -68,8 +68,8 @@ void EditorWindow::setUpEditor()
     editor.setParent(this);
 
     // Colors
-    uchar color = 0x1E; // Blue & Light Yellow.
-    uchar colorSel = 0x71; // White & Blue.
+    TCellAttribs color {0x1E}; // Blue & Light Yellow.
+    TCellAttribs colorSel {0x71}; // White & Blue.
     editorView.setFillColor(color); // Screw palettes, they are too hard to understand.
     editor.setStyleColor(STYLE_DEFAULT, color);
     editor.WndProc(SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.

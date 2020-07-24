@@ -74,9 +74,9 @@ void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
     for (int y = r.a.y; y < r.b.y; ++y)
         for (int x = r.a.x; x < r.b.x; ++x) {
             auto c = view->at(y, x);
-            c.cell.attr.colors.bg = bg;
-            c.cell.attr.colors.fg = fg;
-            c.cell.character = '\0';
+            c.Cell.Attr.colors.bg = bg;
+            c.Cell.Attr.colors.fg = fg;
+            c.Cell.Char.asInt = '\0';
             view->at(y, x) = c;
         }
 }
@@ -97,7 +97,7 @@ void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesi
     TCellAttribs attr = convertColorPair(outline, fill);
     for (int y = r.a.y; y < r.b.y; ++y)
         for (int x = r.a.x; x < r.b.x; ++x)
-            view->at(y, x).cell.attr = attr;
+            view->at(y, x).Cell.Attr = attr;
 }
 
 void TScintillaSurface::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options)
@@ -136,17 +136,18 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
                                          ColourDesired fore, ColourDesired back )
 {
     auto r = clipRect(rc);
-    int textBegin = std::max(clip.a.x - (int) rc.left, 0);
-    int textEnd = textBegin + std::min(r.b.x - r.a.x, (int) text.size() - textBegin);
-    uchar color = convertColorPair(fore, back);
+    auto color = convertColorPair(fore, back);
+    std::mbstate_t state {};
+    size_t skipChars = 0;
+    utf8advance(text, skipChars, clip.a.x - (int) rc.left, state);
+    size_t textBegin = skipChars;
     for (int y = r.a.y; y < r.b.y; ++y) {
         int x = r.a.x;
-        int i = textBegin;
-        for (; i < textEnd; ++i, ++x) {
-            auto c = view->at(y, x);
-            c.cell.attr = color;
-            c.cell.character = (uchar) text[i];
-            view->at(y, x) = c;
+        size_t i = textBegin;
+        while (i < text.size() && x < r.b.x) {
+            auto &c = view->at(y, x);
+            c.Cell.Attr = color;
+            utf8read(&c, r.b.x - x, text.substr(i, text.size() - i), i, x, state);
         }
     }
 }
@@ -154,30 +155,45 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
 void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore)
 {
     auto r = clipRect(rc);
-    int textBegin = std::max(clip.a.x - (int) rc.left, 0);
-    int textEnd = textBegin + std::min(r.b.x - r.a.x, (int) text.size() - textBegin);
     uchar fg = convertColor(fore);
+    std::mbstate_t state {};
+    size_t skipChars = 0;
+    utf8advance(text, skipChars, clip.a.x - (int) rc.left, state);
+    size_t textBegin = skipChars;
     for (int y = r.a.y; y < r.b.y; ++y) {
         int x = r.a.x;
-        int i = textBegin;
-        for (; i < textEnd; ++i, ++x) {
-            auto c = view->at(y, x);
-            c.cell.attr.colors.fg = fg;
-            c.cell.character = (uchar) text[i];
-            view->at(y, x) = c;
+        size_t i = textBegin;
+        while (i < text.size() && x < r.b.x) {
+            auto &c = view->at(y, x);
+            c.Cell.Attr.colors.fg = fg;
+            utf8read(&c, r.b.x - x, text.substr(i, text.size() - i), i, x, state);
         }
     }
 }
 
 void TScintillaSurface::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions)
 {
-    for (size_t i = 0; i < text.size(); ++i)
-        positions[i] = i + 1;
+    std::mbstate_t state {};
+    size_t i = 0;
+    int j = 1;
+    while (i < text.size()) {
+        int width = 0;
+        size_t len = 0;
+        utf8len({&text[i], text.size() - i}, len, width, state);
+        while (len--)
+            positions[i++] = j;
+        j += width;
+    }
 }
 
 XYPOSITION TScintillaSurface::WidthText(Font &font_, std::string_view text)
 {
-    return text.size();
+    std::mbstate_t state {};
+    size_t i = 0;
+    int j = 0;
+    while (i < text.size())
+        utf8len({&text[i], text.size() - i}, i, j, state);
+    return j;
 }
 
 XYPOSITION TScintillaSurface::Ascent(Font &font_)
