@@ -171,9 +171,11 @@ void TScintillaSurface::MeasureWidths(Font &font_, std::string_view text, XYPOSI
     while (i < text.size()) {
         size_t width = 0, len = 0;
         utf8next({&text[i], text.size() - i}, len, width);
+        // I don't know why. It just works.
+        j += width - 1;
         while (len--)
             positions[i++] = (int) j;
-        j += width;
+        ++j;
     }
 }
 
