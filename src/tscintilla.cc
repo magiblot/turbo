@@ -169,6 +169,9 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
         {kbPgDn,        SCK_NEXT},
         {kbDel,         SCK_DELETE},
         {kbIns,         SCK_INSERT},
+        {kbTab,         '\t'},
+        {kbEnter,       '\n'},
+        {kbBack,        '\b'},
         {kbShiftDel,    SCK_DELETE},
         {kbShiftIns,    SCK_INSERT},
         {kbShiftTab,    '\t'},
@@ -182,10 +185,12 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
         {kbCtrlPgDn,    SCK_NEXT},
         {kbCtrlDel,     SCK_DELETE},
         {kbCtrlIns,     SCK_INSERT},
+        {kbCtrlEnter,   '\n'},
         {kbCtrlBack,    '\b'}
     };
 
     int modifiers = convertModifiers(keyDown.controlKeyState);
+    bool specialKey = modifiers;
 
     int key;
     if (keyDown.keyCode <= kbCtrlZ)
@@ -195,11 +200,18 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
         for (const auto [tv, sck] : keysTable)
             if (keyDown.keyCode == tv) {
                 key = sck;
+                specialKey = true;
                 break;
             }
     }
 
-    Editor::KeyDownWithModifiers(key, modifiers, consumed);
+    if (specialKey)
+        ScintillaBase::KeyDownWithModifiers(key, modifiers, consumed);
+    else {
+        uint len = 0;
+        while (keyDown.text[len] && ++len < 4);
+        ScintillaBase::InsertCharacter({keyDown.text, len}, CharacterSource::directInput);
+    }
 }
 
 bool TScintillaEditor::MouseEvent(const TEvent &ev) {
