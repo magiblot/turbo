@@ -137,17 +137,14 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
 {
     auto r = clipRect(rc);
     auto color = convertColorPair(fore, back);
-    std::mbstate_t state {};
-    size_t skipChars = 0;
-    utf8advance(text, skipChars, clip.a.x - (int) rc.left, state);
-    size_t textBegin = skipChars;
+    size_t textBegin = 0;
+    utf8wseek(text, textBegin, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
-        int x = r.a.x;
-        size_t i = textBegin;
-        while (i < text.size() && x < r.b.x) {
+        size_t x = r.a.x, i = textBegin;
+        while (i < text.size() && (int) x < r.b.x) {
             auto &c = view->at(y, x);
             c.Cell.Attr = color;
-            utf8read(&c, r.b.x - x, text.substr(i, text.size() - i), i, x, state);
+            utf8read(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
         }
     }
 }
@@ -156,44 +153,36 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
 {
     auto r = clipRect(rc);
     uchar fg = convertColor(fore);
-    std::mbstate_t state {};
-    size_t skipChars = 0;
-    utf8advance(text, skipChars, clip.a.x - (int) rc.left, state);
-    size_t textBegin = skipChars;
+    size_t textBegin = 0;
+    utf8wseek(text, textBegin, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
-        int x = r.a.x;
-        size_t i = textBegin;
-        while (i < text.size() && x < r.b.x) {
+        size_t x = r.a.x, i = textBegin;
+        while (i < text.size() && (int) x < r.b.x) {
             auto &c = view->at(y, x);
             c.Cell.Attr.colors.fg = fg;
-            utf8read(&c, r.b.x - x, text.substr(i, text.size() - i), i, x, state);
+            utf8read(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
         }
     }
 }
 
 void TScintillaSurface::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions)
 {
-    std::mbstate_t state {};
-    size_t i = 0;
-    int j = 1;
+    size_t i = 0, j = 1;
     while (i < text.size()) {
-        int width = 0;
-        size_t len = 0;
-        utf8len({&text[i], text.size() - i}, len, width, state);
+        size_t width = 0, len = 0;
+        utf8next({&text[i], text.size() - i}, len, width);
         while (len--)
-            positions[i++] = j;
+            positions[i++] = (int) j;
         j += width;
     }
 }
 
 XYPOSITION TScintillaSurface::WidthText(Font &font_, std::string_view text)
 {
-    std::mbstate_t state {};
-    size_t i = 0;
-    int j = 0;
+    size_t i = 0, j = 0;
     while (i < text.size())
-        utf8len({&text[i], text.size() - i}, i, j, state);
-    return j;
+        utf8next({&text[i], text.size() - i}, i, j);
+    return (int) j;
 }
 
 XYPOSITION TScintillaSurface::Ascent(Font &font_)
