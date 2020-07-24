@@ -23,16 +23,21 @@ struct TVEditApp : public TApplication {
     std::vector<std::string> files; // Storage for the strings referenced by fileCount;
     list_head<EditorWindow> MRUlist;
     TClockView *clock;
+    bool argsParsed {false};
+    int argc;
+    const char **argv;
 
     static TVEditApp *app;
 
-    TVEditApp();
+    TVEditApp(int argc=0, const char *argv[]=0);
     static TMenuBar* initMenuBar(TRect r);
     static TStatusLine* initStatusLine(TRect r);
 
     void idle() override;
+    void getEvent(TEvent &event) override;
     void handleEvent(TEvent& event) override;
     void shell();
+    void parseArgs();
 
     void fileNew();
     void fileOpen();

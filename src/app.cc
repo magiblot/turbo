@@ -25,11 +25,13 @@ using namespace std::literals;
 
 TVEditApp* TVEditApp::app = 0;
 
-TVEditApp::TVEditApp() :
+TVEditApp::TVEditApp(int argc, const char *argv[]) :
     TProgInit( &TVEditApp::initStatusLine,
                &TVEditApp::initMenuBar,
                &TApplication::initDeskTop
-             )
+             ),
+    argc(argc),
+    argv(argv)
 {
     // Create the clock view.
     TRect r = getExtent();
@@ -78,7 +80,16 @@ void TVEditApp::idle()
     clock->update();
 }
 
-void TVEditApp::handleEvent(TEvent& event)
+void TVEditApp::getEvent(TEvent &event)
+{
+    if (!argsParsed) {
+        argsParsed = true;
+        parseArgs();
+    }
+    TApplication::getEvent(event);
+}
+
+void TVEditApp::handleEvent(TEvent &event)
 {
     TApplication::handleEvent(event);
     bool handled = false;
@@ -104,6 +115,14 @@ void TVEditApp::shell()
     raise(SIGTSTP);
     resume();
     redraw();
+}
+
+void TVEditApp::parseArgs()
+{
+    if (argc && argv) {
+        for (int i = 1; i < argc; ++i)
+            openEditor(argv[i]);
+    }
 }
 
 void TVEditApp::fileNew()
