@@ -77,6 +77,7 @@ TStatusLine *TVEditApp::initStatusLine( TRect r )
 
 void TVEditApp::idle()
 {
+    TApplication::idle();
     clock->update();
 }
 
