@@ -36,6 +36,7 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     TCommandSet ts;
     ts.enableCmd( cmSave );
     ts.enableCmd( cmSaveAs );
+    ts.enableCmd( cmOpenRecent );
     disableCommands( ts );
 
     // Create the clock view.
@@ -62,7 +63,12 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
             *new TMenuItem( "~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl-W" ) +
             newLine() +
             *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
-            *new TMenuItem( "E~x~it", cmQuit, kbNoKey, hcNoContext, "Alt-X" )
+            *new TMenuItem( "E~x~it", cmQuit, kbNoKey, hcNoContext, "Alt-X" ) +
+        *new TSubMenu( "~W~indows", kbAltW ) +
+            *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +
+            *new TMenuItem( "~Z~oom", cmZoom, kbF5, hcNoContext, "F5" ) +
+            *new TMenuItem( "~N~ext", cmNext, kbF6, hcNoContext, "F6" ) +
+            *new TMenuItem( "~P~revious", cmPrev, kbShiftF6, hcNoContext, "Shift-F6" )
             );
 
 }

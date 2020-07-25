@@ -15,7 +15,7 @@ class EditorWindow;
 class TClockView;
 
 const ushort
-    cmOpenRecent    = 1001;
+    cmOpenRecent    = 100;
 
 struct TVEditApp : public TApplication {
 
