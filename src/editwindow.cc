@@ -18,7 +18,7 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     inSavePoint(true),
     editorView(editorBounds())
 {
-    options |= ofTileable;
+    options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
 
     editorView.hide();
