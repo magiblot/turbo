@@ -4795,13 +4795,13 @@ void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
 	}
 	//Platform::DebugPrintf("Move %d %d\n", pt.x, pt.y);
 	if (HaveMouseCapture()) {
-
+#if 0
 		// Slow down autoscrolling/selection
 		autoScrollTimer.ticksToWait -= timer.tickSize;
 		if (autoScrollTimer.ticksToWait > 0)
 			return;
 		autoScrollTimer.ticksToWait = autoScrollDelay;
-
+#endif
 		// Adjust selection
 		if (posDrag.IsValid()) {
 			SetDragPosition(movePos);
