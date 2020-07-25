@@ -55,6 +55,7 @@ struct list_head
 
     void insert_after(list_head *other)
     {
+        remove();
         prev = other;
         next = other->next;
         other->next = this;
@@ -68,6 +69,73 @@ struct list_head
         if (prev)
             prev->next = next;
         next = prev = 0;
+    }
+
+};
+
+template<typename T>
+class list_head_iterator
+{
+
+    list_head<T> *list;
+    size_t listSize;
+    intptr_t it;
+    list_head<T> *itItem;
+
+public:
+
+    list_head_iterator(list_head<T> *list_, size_t size_) :
+        list(list_),
+        listSize(size_),
+        it(-1),
+        itItem(list)
+    {
+    }
+
+    size_t size()
+    {
+        return listSize;
+    }
+
+    void* at(intptr_t i)
+    {
+        if (i > it) {
+            if (i - it <= intptr_t(listSize) - i)
+                return seekF(i);
+            else {
+                it = listSize;
+                itItem = list;
+                return seekB(i);
+            }
+        } else if (it > i) {
+            if (it - i >= i) {
+                it = -1;
+                itItem = list;
+                return seekF(i);
+            } else
+                return seekB(i);
+        }
+        return itItem;
+    }
+
+private:
+
+    void* seekF(intptr_t i)
+    {
+        while (it < i) {
+            itItem = itItem->next;
+            ++it;
+        }
+        return itItem;
+    }
+
+    void* seekB(intptr_t i)
+    {
+        while (it > i) {
+            itItem = itItem->prev;
+            --it;
+        }
+        return itItem;
     }
 
 };

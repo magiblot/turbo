@@ -15,14 +15,18 @@ class EditorWindow;
 class TClockView;
 
 const ushort
-    cmOpenRecent    = 100;
+    cmOpenRecent    = 100,
+    cmEditorNext    = 101,
+    cmEditorPrev    = 102;
 
 struct TVEditApp : public TApplication {
 
     std::unordered_map<std::string_view, active_counter> fileCount;
     std::vector<std::string> files; // Storage for the strings referenced by fileCount;
     list_head<EditorWindow> MRUlist;
+    uint editorCount {0};
     TClockView *clock;
+    TCommandSet editorCmds;
     bool argsParsed {false};
     int argc;
     const char **argv;
@@ -48,6 +52,8 @@ struct TVEditApp : public TApplication {
     active_counter& getFileCounter(std::string_view file);
     void addEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
+
+    void showEditorList(TEvent *ev);
 
     // The path of the most recently focused editor, so that file dialogs
     // are opened there.

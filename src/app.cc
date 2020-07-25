@@ -19,6 +19,7 @@
 #include "editwindow.h"
 #include "util.h"
 #include "widgets.h"
+#include "listviews.h"
 
 using namespace Scintilla;
 using namespace std::literals;
@@ -38,6 +39,10 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     ts += cmSaveAs;
     ts += cmOpenRecent;
     disableCommands(ts);
+
+    editorCmds += cmEditorNext;
+    editorCmds += cmEditorPrev;
+    disableCommands(editorCmds);
 
     // Create the clock view.
     TRect r = getExtent();
@@ -63,12 +68,12 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
             *new TMenuItem( "~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl-W" ) +
             newLine() +
             *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
-            *new TMenuItem( "E~x~it", cmQuit, kbNoKey, hcNoContext, "Alt-X" ) +
+            *new TMenuItem( "E~x~it", cmQuit, kbAltX, hcNoContext, "Alt-X" ) +
         *new TSubMenu( "~W~indows", kbAltW ) +
-            *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +
             *new TMenuItem( "~Z~oom", cmZoom, kbF5, hcNoContext, "F5" ) +
-            *new TMenuItem( "~N~ext", cmNext, kbF6, hcNoContext, "F6" ) +
-            *new TMenuItem( "~P~revious", cmPrev, kbShiftF6, hcNoContext, "Shift-F6" )
+            *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +
+            *new TMenuItem( "~N~ext", cmEditorNext, kbF6, hcNoContext, "F6" ) +
+            *new TMenuItem( "~P~revious", cmEditorPrev, kbShiftF6, hcNoContext, "Shift-F6" )
             );
 
 }
@@ -78,11 +83,12 @@ TStatusLine *TVEditApp::initStatusLine( TRect r )
     r.a.y = r.b.y-1;
     return new TStatusLine( r,
         *new TStatusDef( 0, 0xFFFF ) +
-            *new TStatusItem( "~Alt-X~ Exit", kbAltX, cmQuit ) +
-            *new TStatusItem( "~Ctrl-N~ New", kbCtrlN, cmNew ) +
-            *new TStatusItem( "~Ctrl-O~ Open", kbCtrlO, cmOpen ) +
-            *new TStatusItem( "~Ctrl-W~ Close", kbCtrlW, cmClose ) +
-            *new TStatusItem( "~F10~ Menu" , kbF10, cmMenu )
+            *new TStatusItem( "~Ctrl-N~ New", kbNoKey, cmNew ) +
+            *new TStatusItem( "~Ctrl-O~ Open", kbNoKey, cmOpen ) +
+            *new TStatusItem( "~Ctrl-S~ Save", kbNoKey, cmSave ) +
+            *new TStatusItem( "~F6~ Next", kbF6, cmEditorNext ) +
+            *new TStatusItem( "~F10~ Menu" , kbF10, cmMenu ) +
+            *new TStatusItem( 0, kbShiftF6, cmEditorPrev )
             );
 }
 
@@ -111,6 +117,10 @@ void TVEditApp::handleEvent(TEvent &event)
             case cmNew: fileNew(); break;
             case cmOpen: fileOpen(); break;
             case cmDosShell: shell(); break;
+            case cmEditorNext:
+            case cmEditorPrev:
+                showEditorList(&event);
+                break;
             default:
                 handled = false;
                 break;
@@ -206,17 +216,41 @@ void TVEditApp::addEditor(EditorWindow *w)
     setEditorTitle(w);
     w->MRUhead.insert_after(&MRUlist);
     deskTop->insert(w);
+    if (!editorCount)
+        enableCommands(editorCmds);
+    ++editorCount;
 }
 
 void TVEditApp::removeEditor(EditorWindow *w)
 {
     --getFileCounter(w->file.native());
+    --editorCount;
+    if (!editorCount)
+        disableCommands(editorCmds);
+}
+
+void TVEditApp::showEditorList(TEvent *ev)
+{
+    EditorList list(&MRUlist, editorCount);
+    TRect r {0, 0, 0, 0};
+    r.b.x = std::clamp<int>(list.measureWidth() + 6, 40, deskTop->size.x - 10);
+    r.b.y = std::clamp<int>(editorCount + 3, 3, deskTop->size.y - 4);
+    r.move((deskTop->size.x - r.b.x) / 2,
+           (deskTop->size.y - r.b.y) / 4);
+    ListWindow *lw = new ListWindow(r, "Buffer List", list, &initViewer<EditorListView>);
+    if (ev)
+        lw->putEvent(*ev);
+    if (deskTop->execView(lw) == cmOK) {
+        auto *head = (list_head<EditorWindow> *) lw->getSelected();
+        head->self->focus();
+    }
+
+    destroy(lw);
 }
 
 void TVEditApp::setFocusedEditor(EditorWindow *w)
 {
     // w has been focused, so it becomes the first of our MRU list.
-    w->MRUhead.remove();
     w->MRUhead.insert_after(&MRUlist);
     // We keep track of the most recent directory for file dialogs.
     if (!w->file.empty())
