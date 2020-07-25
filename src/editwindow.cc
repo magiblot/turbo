@@ -42,6 +42,10 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
                                 *this );
     insert(docView);
 
+    // Set the commands that always get enabled when focusing the editor.
+    commandSet += cmSave;
+    commandSet += cmSaveAs;
+
     tryLoadFile();
     setUpEditor();
 }
@@ -176,6 +180,8 @@ void EditorWindow::setState(ushort aState, Boolean enable)
                 vScrollBar->setState(sfVisible, enable);
                 if (enable && TVEditApp::app)
                     TVEditApp::app->setFocusedEditor(this);
+                (enable ? enableCommands
+                        : disableCommands)(commandSet);
                 break;
         }
     }
