@@ -112,6 +112,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     bool saveAsDialog();
 
     bool tryClose();
+    void close() override;
 
     // Pops out a msgBox with an error message.
 

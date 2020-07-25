@@ -135,10 +135,6 @@ void EditorWindow::handleEvent(TEvent &ev) {
     if (ev.what == evCommand) {
         bool handled = true;
         switch (ev.message.command) {
-            case cmClose:
-                if (tryClose())
-                    close();
-                break;
             case cmSave:
                 trySaveFile();
                 break;
@@ -449,6 +445,12 @@ bool EditorWindow::tryClose()
         }
     }
     return true;
+}
+
+void EditorWindow::close()
+{
+    if (tryClose())
+        TWindow::close();
 }
 
 void EditorWindow::showError(const std::string &s)
