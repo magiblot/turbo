@@ -53,7 +53,7 @@ struct TVEditApp : public TApplication {
     // are opened there.
 
     std::filesystem::path mostRecentDir;
-    void getNotifiedFocusedEditor(EditorWindow *w); // Set from here.
+    void setFocusedEditor(EditorWindow *w); // Set from here.
 
     template<typename Func>
     void openFileDialog( const char *aWildCard, const char *aTitle,

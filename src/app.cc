@@ -172,6 +172,8 @@ void TVEditApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
 {
     --getFileCounter(prevFile);
     setEditorTitle(w);
+    if (!w->file.empty())
+        mostRecentDir = w->file.parent_path();
 }
 
 active_counter& TVEditApp::getFileCounter(std::string_view file)
@@ -200,7 +202,7 @@ void TVEditApp::removeEditor(EditorWindow *w)
     --getFileCounter(w->file.native());
 }
 
-void TVEditApp::getNotifiedFocusedEditor(EditorWindow *w)
+void TVEditApp::setFocusedEditor(EditorWindow *w)
 {
     // w has been focused, so it becomes the first of our MRU list.
     w->MRUhead.remove();
