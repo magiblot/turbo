@@ -180,11 +180,17 @@ void EditorWindow::setState(ushort aState, Boolean enable)
                 vScrollBar->setState(sfVisible, enable);
                 if (enable && TVEditApp::app)
                     TVEditApp::app->setFocusedEditor(this);
-                (enable ? enableCommands
-                        : disableCommands)(commandSet);
                 break;
         }
     }
+    switch (aState) {
+        // These actions do not depend on subview lifetime.
+        case sfActive:
+            (enable ? enableCommands
+                    : disableCommands)(commandSet);
+            break;
+    }
+
 }
 
 Boolean EditorWindow::valid(ushort command)

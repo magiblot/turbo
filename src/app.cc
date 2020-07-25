@@ -34,10 +34,10 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     argv(argv)
 {
     TCommandSet ts;
-    ts.enableCmd( cmSave );
-    ts.enableCmd( cmSaveAs );
-    ts.enableCmd( cmOpenRecent );
-    disableCommands( ts );
+    ts += cmSave;
+    ts += cmSaveAs;
+    ts += cmOpenRecent;
+    disableCommands(ts);
 
     // Create the clock view.
     TRect r = getExtent();
