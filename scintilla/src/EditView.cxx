@@ -1858,7 +1858,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							if (!customDrawTabArrow)
 								DrawTabArrow(surface, rcTab, segmentTop, vsDraw);
 							else
-								customDrawTabArrow(surface, rcTab, segmentTop);
+								customDrawTabArrow(surface, rcTab, segmentTop, textFore);
 						}
 					}
 				} else {
