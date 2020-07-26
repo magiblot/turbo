@@ -234,7 +234,7 @@ void TVEditApp::showEditorList(TEvent *ev)
     EditorList list(&MRUlist, editorCount);
     TRect r {0, 0, 0, 0};
     r.b.x = std::clamp<int>(list.measureWidth() + 6, 40, deskTop->size.x - 10);
-    r.b.y = std::clamp<int>(editorCount + 3, 3, deskTop->size.y - 4);
+    r.b.y = std::clamp<int>(editorCount + 2, 6, deskTop->size.y - 4);
     r.move((deskTop->size.x - r.b.x) / 2,
            (deskTop->size.y - r.b.y) / 4);
     ListWindow *lw = new ListWindow(r, "Buffer List", list, &initViewer<EditorListView>);
