@@ -12,6 +12,7 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     TWindowInit(&initFrame),
     drawing(false),
     lastSize(size),
+    lineNumbers(5),
     MRUhead(this),
     fatalError(false),
     file(aFile),
@@ -31,12 +32,12 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     vScrollBar->hide();
     insert(vScrollBar);
 
-    leftMargin = new TDrawSubView(TRect( 1, 1, 6, size.y - 1 ), editorView);
+    leftMargin = new TDrawSubView(TRect( 1, 1, 1, size.y - 1 ), editorView);
     leftMargin->options |= ofFramed;
     leftMargin->growMode = gfGrowHiY | gfFixed;
     insert(leftMargin);
 
-    docView = new DocumentView( TRect( 7, 1, size.x - 1, size.y - 1 ),
+    docView = new DocumentView( TRect( 2, 1, size.x - 1, size.y - 1 ),
                                 editorView,
                                 editor,
                                 *this );
@@ -79,16 +80,6 @@ void EditorWindow::setUpEditor()
     editor.WndProc(SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
     editor.setSelectionColor(colorSel);
 
-    // Line numbers
-    int marginWidth = 5;
-    editor.setStyleColor(STYLE_LINENUMBER, color);
-    editor.WndProc(SCI_SETMARGINS, 1, 0U);
-    editor.WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
-    editor.WndProc(SCI_SETMARGINWIDTHN, 0, marginWidth);
-
-    // The document view does not contain the margin.
-    docView->setDelta({marginWidth, 0});
-
     // Dynamic horizontal scroll
     editor.WndProc(SCI_SETSCROLLWIDTHTRACKING, true, 0U);
     editor.WndProc(SCI_SETSCROLLWIDTH, 1, 0U);
@@ -110,6 +101,12 @@ void EditorWindow::setUpEditor()
     editor.WndProc(SCI_SETTABINDENTS, true, 0U);
     editor.WndProc(SCI_SETBACKSPACEUNINDENTS, true, 0U);
 
+    // Line numbers
+    editor.setStyleColor(STYLE_LINENUMBER, color);
+    editor.WndProc(SCI_SETMARGINS, 1, 0U);
+    editor.WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
+    updateMarginWidth();
+
     redrawEditor();
 }
 
@@ -119,6 +116,7 @@ void EditorWindow::redrawEditor()
         drawing = true;
         lock();
         editor.changeSize();
+        updateMarginWidth();
         editor.draw(editorView);
         leftMargin->drawView();
         docView->drawView();
@@ -126,6 +124,25 @@ void EditorWindow::redrawEditor()
         vScrollBar->drawView();
         unlock();
         drawing = false;
+    }
+}
+
+void EditorWindow::updateMarginWidth()
+{
+    const auto [width, delta] = lineNumbers.update(editor);
+    if (delta) {
+        editor.WndProc(SCI_SETMARGINWIDTHN, 0, width);
+        {
+            TRect r = leftMargin->getBounds();
+            r.b.x += delta;
+            leftMargin->changeBounds(r);
+        }
+        {
+            TRect r = docView->getBounds();
+            r.a.x += delta;
+            docView->changeBounds(r);
+            docView->setDelta({width, 0});
+        }
     }
 }
 

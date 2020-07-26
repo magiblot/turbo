@@ -7,6 +7,7 @@
 #include "tscintilla.h"
 #include "drawviews.h"
 #include "util.h"
+#include "linenumbers.h"
 
 #include <string_view>
 #include <string>
@@ -27,6 +28,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TCommandSet commandSet;
     bool drawing;
     TPoint lastSize;
+    LineNumbersWidth lineNumbers;
 
     // Scintilla
 
@@ -36,6 +38,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TRect editorBounds() const;
     void setUpEditor();
     void redrawEditor();
+    void updateMarginWidth();
 
     void handleEvent(TEvent &ev) override;
     void changeBounds(const TRect &bounds) override;
