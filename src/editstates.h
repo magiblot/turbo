@@ -8,6 +8,8 @@
 #include <tuple>
 #include <fmt/core.h>
 
+#include "tscintilla.h"
+
 class LineNumbersWidth {
 
     const int minWidth;
@@ -47,18 +49,17 @@ public:
 
     bool toggle(Scintilla::TScintillaEditor &editor, bool dialog=true)
     {
-        const int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
-        const int size = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
-        bool documentBig = size >= (1 << 19) && width;
         bool proceed = true;
         if (wrapEnabled) {
+            auto line = editor.getFirstVisibleDocumentLine();
             editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
+            editor.WndProc(SCI_SETFIRSTVISIBLELINE, line, 0U);
             wrapEnabled = false;
-            if (documentBig)
-                // Cursor becomes out of scope in large documents.
-                editor.WndProc(SCI_SCROLLCARET, 0U, 0U);
         }
         else {
+            const int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
+            const int size = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
+            const bool documentBig = size >= (1 << 19) && width > 512;
             if (documentBig && !confirmedOnce) {
                 if (dialog) {
                     auto &&text = fmt::format("This document is very big and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);

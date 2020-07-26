@@ -56,6 +56,7 @@ struct TScintillaEditor : public ScintillaBase {
     void setWindow(TDrawableView *wid);
     void setParent(TScintillaWindow *parent_);
     void changeSize();
+    Sci::Line getFirstVisibleDocumentLine();
     TPoint getCaretPosition();
     TPoint getDelta();
 
@@ -74,6 +75,11 @@ inline void TScintillaEditor::setParent(TScintillaWindow *parent_)
 inline void TScintillaEditor::changeSize()
 {
     ScintillaBase::ChangeSize();
+}
+
+inline Sci::Line TScintillaEditor::getFirstVisibleDocumentLine()
+{
+    return pcs->DocFromDisplay(topLine);
 }
 
 inline TPoint TScintillaEditor::getCaretPosition()
