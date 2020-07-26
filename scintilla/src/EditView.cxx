@@ -1601,6 +1601,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 				if (vsDraw.viewWhitespace != wsInvisible) {
 					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
 						if (ll->chars[cpos + ts.start] == ' ') {
+#if 0
 							if (drawWhitespaceBackground && vsDraw.WhiteSpaceVisible(inIndentation)) {
 								const PRectangle rcSpace(
 									ll->positions[cpos + ts.start] + xStart - static_cast<XYPOSITION>(subLineStart),
@@ -1609,6 +1610,7 @@ void EditView::DrawBackground(Surface *surface, const EditModel &model, const Vi
 									rcSegment.bottom);
 								surface->FillRectangle(rcSpace, vsDraw.whitespaceColours.back);
 							}
+#endif
 						} else {
 							inIndentation = false;
 						}
@@ -1893,6 +1895,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					(inIndentation && vsDraw.viewIndentationGuides != ivNone)) {
 					for (int cpos = 0; cpos <= i - ts.start; cpos++) {
 						if (ll->chars[cpos + ts.start] == ' ') {
+#if 0
 							if (vsDraw.viewWhitespace != wsInvisible) {
 								if (vsDraw.whitespaceColours.fore.isSet)
 									textFore = vsDraw.whitespaceColours.fore;
@@ -1926,6 +1929,7 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 									}
 								}
 							}
+#endif
 						} else {
 							inIndentation = false;
 						}
