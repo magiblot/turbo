@@ -41,8 +41,10 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     ts += cmToggleWrap;
     disableCommands(ts);
 
+    // Actions that only make sense when there is at least one editor.
     editorCmds += cmEditorNext;
     editorCmds += cmEditorPrev;
+    editorCmds += cmCloseAll;
     disableCommands(editorCmds);
 
     // Create the clock view.
@@ -67,6 +69,7 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
             *new TMenuItem( "S~a~ve As...", cmSaveAs, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl-W" ) +
+            *new TMenuItem( "Close All", cmCloseAll, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
             *new TMenuItem( "E~x~it", cmQuit, kbAltX, hcNoContext, "Alt-X" ) +
@@ -124,6 +127,7 @@ void TVEditApp::handleEvent(TEvent &event)
             case cmEditorPrev:
                 showEditorList(&event);
                 break;
+            case cmCloseAll: closeAll(); break;
             default:
                 handled = false;
                 break;
@@ -174,6 +178,18 @@ bool TVEditApp::openEditor(std::string_view fileName)
     if (w)
         addEditor(w);
     return w;
+}
+
+void TVEditApp::closeAll()
+{
+    auto *head = MRUlist.next;
+    while (head != &MRUlist) {
+        auto *next = head->next;
+        message((EditorWindow *) head->self, evCommand, cmClose, 0);
+        if (next->prev == head) // Not removed
+            break;
+        head = next;
+    }
 }
 
 void TVEditApp::setEditorTitle(EditorWindow *w)
