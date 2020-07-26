@@ -33,6 +33,14 @@ TScintillaEditor::TScintillaEditor()
     // because I hate them. Note that this has to be done after setting the
     // codepage.
     reprs.Clear();
+    // Except tabulators. Scintilla does not draw them if we disable the representation.
+    reprs.SetRepresentation("\t", "");
+    // Also set the draw function for tabs.
+    view.customDrawTabArrow = &TScintillaEditor::DrawTabArrow;
+    view.tabWidthMinimumPixels = 0; // Otherwise, tabs will be more than 8 columns wide.
+    view.tabArrowHeight = 0; // Otherwise, we would have to decrease rcTab.top in DrawTabArrow.
+    // Always draw tabulators.
+    WndProc(SCI_SETVIEWWS, SCWS_VISIBLEALWAYS, 0U);
     // Process mouse down events:
     WndProc(SCI_SETMOUSEDOWNCAPTURES, true, nil);
     // Double clicks only in the same cell.
@@ -256,4 +264,15 @@ void TScintillaEditor::setSelectionColor(TCellAttribs attr)
 {
     WndProc(SCI_SETSELFORE, true, TScintillaSurface::convertColor(attr.colors.fg).AsInteger());
     WndProc(SCI_SETSELBACK, true, TScintillaSurface::convertColor(attr.colors.bg).AsInteger());
+}
+
+void TScintillaEditor::setWhitespaceColor(TCellAttribs attr)
+{
+    WndProc(SCI_SETWHITESPACEFORE, true, TScintillaSurface::convertColor(attr.colors.fg).AsInteger());
+    WndProc(SCI_SETWHITESPACEBACK, true, TScintillaSurface::convertColor(attr.colors.bg).AsInteger());
+}
+
+void TScintillaEditor::DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, ColourDesired fore)
+{
+    ((TScintillaSurface *) surface)->DrawTabArrow(rcTab, ymid, fore);
 }

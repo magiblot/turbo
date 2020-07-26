@@ -73,6 +73,7 @@ namespace Scintilla {
         void DrawTextNoClip(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
         void DrawTextClipped(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore, ColourDesired back) override;
         void DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore) override;
+        void DrawTabArrow(PRectangle rcTab, int ymid, ColourDesired fore);
         void MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions) override;
         XYPOSITION WidthText(Font &font_, std::string_view text) override;
         XYPOSITION Ascent(Font &font_) override;
