@@ -17,7 +17,8 @@ class TClockView;
 const ushort
     cmOpenRecent    = 100,
     cmEditorNext    = 101,
-    cmEditorPrev    = 102;
+    cmEditorPrev    = 102,
+    cmToggleWrap    = 103;
 
 struct TVEditApp : public TApplication {
 

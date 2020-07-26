@@ -50,7 +50,7 @@ void TScintillaEditor::SetVerticalScrollPos()
 void TScintillaEditor::SetHorizontalScrollPos()
 {
     if (parent)
-        parent->setHorizontalScrollPos(xOffset, scrollWidth);
+        parent->setHorizontalScrollPos(xOffset, vs.wrapState == SC_WRAP_NONE ? scrollWidth : 1);
 }
 
 bool TScintillaEditor::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)

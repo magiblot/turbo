@@ -46,6 +46,7 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     // Set the commands that always get enabled when focusing the editor.
     commandSet += cmSave;
     commandSet += cmSaveAs;
+    commandSet += cmToggleWrap;
 
     tryLoadFile();
     setUpEditor();
@@ -88,8 +89,8 @@ void EditorWindow::setUpEditor()
     editor.WndProc(SCI_SETFIRSTVISIBLELINE, 1, 0U);
     editor.WndProc(SCI_SETFIRSTVISIBLELINE, 0, 0U);
 
-    // If we wanted line wrapping, we would enable this:
-//     WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, nil);
+    // Enable linew wrapping (if appropiate) by default
+    wrap.toggle(editor, false);
 
     // Clear the undo buffer created when loading the file,
     // if that's the case.
@@ -161,6 +162,10 @@ void EditorWindow::handleEvent(TEvent &ev) {
                 break;
             case cmSaveAs:
                 saveAsDialog();
+                break;
+            case cmToggleWrap:
+                if (wrap.toggle(editor))
+                    redrawEditor();
                 break;
             default:
                 handled = false;
@@ -355,9 +360,6 @@ bool EditorWindow::loadFile()
         f.seekg(0);
         // Allocate 1000 extra bytes, as in SciTE.
         editor.WndProc(SCI_ALLOCATE, fSize + 1000, 0U);
-        if (fSize > (1 << 20))
-            // Disable word wrap on big files.
-            editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
         if (fSize) {
             bool ok = true;
             constexpr size_t blockSize = 1 << 20; // Read in chunks of 1 MiB.

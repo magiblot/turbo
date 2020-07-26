@@ -7,7 +7,7 @@
 #include "tscintilla.h"
 #include "drawviews.h"
 #include "util.h"
-#include "linenumbers.h"
+#include "editstates.h"
 
 #include <string_view>
 #include <string>
@@ -29,6 +29,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     bool drawing;
     TPoint lastSize;
     LineNumbersWidth lineNumbers;
+    WrapMode wrap;
 
     // Scintilla
 
