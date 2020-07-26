@@ -1852,8 +1852,8 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 							if (vsDraw.whitespaceColours.fore.isSet)
 								textFore = vsDraw.whitespaceColours.fore;
 							surface->PenColour(textFore);
-							const PRectangle rcTab(rcSegment.left + 1, rcSegment.top + tabArrowHeight,
-								rcSegment.right - 1, rcSegment.bottom - vsDraw.maxDescent);
+							const PRectangle rcTab(rcSegment.left, rcSegment.top + tabArrowHeight,
+								rcSegment.right, rcSegment.bottom - vsDraw.maxDescent);
 							const int segmentTop = static_cast<int>(rcSegment.top + vsDraw.lineHeight / 2);
 							if (!customDrawTabArrow)
 								DrawTabArrow(surface, rcTab, segmentTop, vsDraw);
