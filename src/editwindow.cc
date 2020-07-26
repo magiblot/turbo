@@ -11,6 +11,7 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     TWindow(bounds, nullptr, wnNoNumber),
     TWindowInit(&initFrame),
     drawing(false),
+    resizeLock(false),
     lastSize(size),
     lineNumbers(5),
     MRUhead(this),
@@ -119,7 +120,8 @@ void EditorWindow::redrawEditor()
     if (!drawing) {
         drawing = true;
         lock();
-        editor.changeSize();
+        if (!resizeLock)
+            editor.changeSize();
         updateMarginWidth();
         editor.draw(editorView);
         leftMargin->drawView();
@@ -191,6 +193,14 @@ void EditorWindow::changeBounds(const TRect &bounds)
         lastSize = size;
     }
     unlock();
+}
+
+void EditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
+{
+    resizeLock = true;
+    TWindow::dragView(event, mode, limits, minSize, maxSize);
+    resizeLock = false;
+    redrawEditor();
 }
 
 void EditorWindow::setState(ushort aState, Boolean enable)

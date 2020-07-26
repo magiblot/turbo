@@ -27,6 +27,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TScrollBar *hScrollBar, *vScrollBar;
     TCommandSet commandSet;
     bool drawing;
+    bool resizeLock;
     TPoint lastSize;
     LineNumbersWidth lineNumbers;
     WrapMode wrap;
@@ -43,6 +44,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     void handleEvent(TEvent &ev) override;
     void changeBounds(const TRect &bounds) override;
+    void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     void setState(ushort aState, Boolean enable) override;
     Boolean valid(ushort command) override;
     const char* getTitle(short) override;
