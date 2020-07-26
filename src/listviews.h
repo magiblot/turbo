@@ -49,10 +49,6 @@ protected:
     ListView *viewer;
     List &list;
 
-private:
-
-    static TPalette palette;
-
 };
 
 class ListView : public TListViewer
@@ -74,10 +70,6 @@ public:
 protected:
 
     ListWindow::List &list;
-
-private:
-
-    static TPalette palette;
 
 };
 

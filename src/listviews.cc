@@ -1,8 +1,6 @@
 #include "listviews.h"
 
-#define cpListWindow "\x13\x13\x15\x18\x17\x13\x14"
-
-TPalette ListWindow::palette(cpListWindow, sizeof(cpListWindow) - 1);
+#define cpListWindow "\x32\x32\x34\x37\x36\x32\x33"
 
 ListWindow::ListWindow(const TRect &bounds, const char *aTitle, List &aList) :
     ListWindow(bounds, aTitle, aList, &initViewer<ListView>)
@@ -15,14 +13,15 @@ ListWindow::ListWindow( const TRect &bounds, const char *aTitle, List &aList,
     TWindowInit( &ListWindow::initFrame),
     list(aList)
 {
-    flags = wfClose;
+    flags = wfClose | wfMove;
     viewer = cListViewer(getExtent(), this, aList);
     insert(viewer);
 }
 
 TPalette& ListWindow::getPalette() const
 {
-    return TWindow::getPalette();
+    static TPalette palette(cpListWindow, sizeof(cpListWindow) - 1);
+    return palette;
 }
 
 void* ListWindow::getSelected()
@@ -41,8 +40,6 @@ void ListWindow::handleEvent(TEvent& event)
 
 #define cpListViewer "\x06\x06\x07\x06\x06"
 
-TPalette ListView::palette(cpListViewer, sizeof(cpListViewer) - 1);
-
 ListView::ListView( const TRect& bounds,
                     TScrollBar *aHScrollBar,
                     TScrollBar *aVScrollBar,
@@ -50,14 +47,16 @@ ListView::ListView( const TRect& bounds,
     TListViewer(bounds, 1, aHScrollBar, aVScrollBar),
     list(aList)
 {
-    setRange( list.size() );
-    if( range > 1 )
-        focusItem( 1 );
-    hScrollBar->setRange( 0, list.measureWidth() - size.x + 3 );
+    growMode = gfGrowHiX | gfGrowHiY;
+    setRange(list.size());
+    if (range > 1)
+        focusItem(1);
+    hScrollBar->setRange(0, list.measureWidth() - size.x + 3);
 }
 
 TPalette& ListView::getPalette() const
 {
+    static TPalette palette(cpListViewer, sizeof(cpListViewer - 1));
     return palette;
 }
 
