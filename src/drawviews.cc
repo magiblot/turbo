@@ -21,7 +21,7 @@ void TDrawableView::changeBounds(const TRect &bounds)
 
 void TDrawableView::resizeBuffer()
 {
-    drawArea.resize(size.x*size.y, fill);
+    drawArea.resize(max(size.x*size.y, 0), fill);
 }
 
 TDrawSubView::TDrawSubView( const TRect &bounds,
