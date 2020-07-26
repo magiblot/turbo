@@ -88,6 +88,7 @@ void EditorWindow::setUpEditor()
     // Trick so that the scroll width gets computed.
     editor.WndProc(SCI_SETFIRSTVISIBLELINE, 1, 0U);
     editor.WndProc(SCI_SETFIRSTVISIBLELINE, 0, 0U);
+    editor.draw(editorView);
 
     // Enable linew wrapping (if appropiate) by default
     wrap.toggle(editor, false);

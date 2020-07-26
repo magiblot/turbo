@@ -79,7 +79,7 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
             *new TMenuItem( "~N~ext", cmEditorNext, kbF6, hcNoContext, "F6" ) +
             *new TMenuItem( "~P~revious", cmEditorPrev, kbShiftF6, hcNoContext, "Shift-F6" ) +
         *new TSubMenu( "~S~ettings", kbAltS ) +
-            *new TMenuItem( "Toggle Line Wrapping", cmToggleWrap, kbF9, hcNoContext, "F9" )
+            *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" )
             );
 
 }

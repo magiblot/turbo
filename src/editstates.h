@@ -47,14 +47,21 @@ public:
 
     bool toggle(Scintilla::TScintillaEditor &editor, bool dialog=true)
     {
+        const int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
+        const int size = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
+        bool documentBig = size >= (1 << 19) && width;
         bool proceed = true;
-        if (wrapEnabled)
+        if (wrapEnabled) {
             editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
+            wrapEnabled = false;
+            if (documentBig)
+                // Cursor becomes out of scope in large documents.
+                editor.WndProc(SCI_SCROLLCARET, 0U, 0U);
+        }
         else {
-            int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
-            if (width > 4096 && !confirmedOnce) {
+            if (documentBig && !confirmedOnce) {
                 if (dialog) {
-                    auto &&text = fmt::format("The longest line in this document is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
+                    auto &&text = fmt::format("This document is very big and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
                     ushort res = messageBox(text.c_str(), mfInformation | mfYesButton | mfNoButton);
                     if (res == cmYes)
                         proceed = confirmedOnce = true;
@@ -63,10 +70,11 @@ public:
                 } else
                     proceed = false;
             }
-            if (proceed)
+            if (proceed) {
                 editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, 0U);
+                wrapEnabled = true;
+            }
         }
-        wrapEnabled = !wrapEnabled;
         return proceed;
     }
 
