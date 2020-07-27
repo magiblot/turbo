@@ -1826,11 +1826,13 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 				}
 			}
 			const int inSelection = hideSelection ? 0 : model.sel.CharacterInSelection(iDoc);
-			if (inSelection && (vsDraw.selColours.fore.isSet)) {
+			const bool usingSelectionColor = inSelection && (vsDraw.selColours.fore.isSet);
+			if (usingSelectionColor) {
 				textFore = (inSelection == 1) ? vsDraw.selColours.fore : vsDraw.selAdditionalForeground;
 			}
 			ColourDesired textBack = TextBackground(model, vsDraw, ll, background, inSelection, inHotspot, styleMain, i);
 			if (ts.representation) {
+#if 0
 				if (ll->chars[i] == '\t') {
 					// Tab display
 					if (phasesDraw == phasesOne) {
@@ -1863,20 +1865,34 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 								customDrawTabArrow(surface, rcTab, segmentTop, textFore);
 						}
 					}
-				} else {
+				} else
+#endif
+				{
 					inIndentation = false;
+					// Using one font for all control characters so it can be controlled independently to ensure
+					// the box goes around the characters tightly. Seems to be no way to work out what height
+					// is taken by an individual character - internal leading gives varying results.
+					FontAlias ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
+					if (!usingSelectionColor) {
+						if (ll->chars[i] == '\t') {
+							if (vsDraw.whitespaceColours.fore.isSet)
+								textFore = vsDraw.whitespaceColours.fore;
+							if (vsDraw.whitespaceColours.back.isSet)
+								textBack = vsDraw.whitespaceColours.back;
+						} else {
+							textFore = vsDraw.styles[STYLE_CONTROLCHAR].fore;
+							textBack = vsDraw.styles[STYLE_CONTROLCHAR].back;
+						}
+					}
 					if (vsDraw.controlCharSymbol >= 32) {
-						// Using one font for all control characters so it can be controlled independently to ensure
-						// the box goes around the characters tightly. Seems to be no way to work out what height
-						// is taken by an individual character - internal leading gives varying results.
-						FontAlias ctrlCharsFont = vsDraw.styles[STYLE_CONTROLCHAR].font;
 						const char cc[2] = { static_cast<char>(vsDraw.controlCharSymbol), '\0' };
 						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
 							rcSegment.top + vsDraw.maxAscent,
-							cc, textBack, textFore);
+							cc, textFore, textBack);
 					} else {
-						DrawTextBlob(surface, vsDraw, rcSegment, ts.representation->stringRep,
-							textBack, textFore, phasesDraw == phasesOne);
+						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
+							rcSegment.top + vsDraw.maxAscent,
+							ts.representation->stringRep, textFore, textBack);
 					}
 				}
 			} else {
