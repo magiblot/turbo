@@ -181,12 +181,6 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
     }
 }
 
-void TScintillaSurface::DrawTabArrow(PRectangle rcTab, int ymid, ColourDesired fore)
-{
-    Font f {};
-    DrawTextTransparent(rcTab, f, rcTab.bottom, "»", fore);
-}
-
 void TScintillaSurface::MeasureWidths(Font &font_, std::string_view text, XYPOSITION *positions)
 {
     size_t i = 0, j = 1;

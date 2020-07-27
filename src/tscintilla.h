@@ -51,7 +51,6 @@ struct TScintillaEditor : public ScintillaBase {
     void setStyleColor(int style, TCellAttribs attr);
     void setSelectionColor(TCellAttribs attr);
     void setWhitespaceColor(TCellAttribs attr);
-    static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, ColourDesired fore);
 
     void setWindow(TDrawableView *wid);
     void setParent(TScintillaWindow *parent_);

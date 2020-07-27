@@ -76,11 +76,13 @@ void EditorWindow::setUpEditor()
 
     // Colors
     TCellAttribs color {0x1E}; // Blue & Light Yellow.
+    TCellAttribs colorCtrl {0x14}; // Blue & Red.
     TCellAttribs colorSel {0x71}; // White & Blue.
     TCellAttribs colorTab {0x17}; // Blue & Dim White.
     editorView.setFillColor(color); // Screw palettes, they are too hard to understand.
     editor.setStyleColor(STYLE_DEFAULT, color);
     editor.WndProc(SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
+    editor.setStyleColor(STYLE_CONTROLCHAR, colorCtrl);
     editor.setSelectionColor(colorSel);
     editor.setWhitespaceColor(colorTab);
 

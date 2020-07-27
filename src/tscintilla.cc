@@ -29,16 +29,23 @@ TScintillaEditor::TScintillaEditor()
     // Stay in Unicode mode (experimental).
 //     WndProc(SCI_SETCODEPAGE, SC_CHARSET_ANSI, nil);
 //     WndProc(SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, SC_CHARSET_ANSI);
-    // Disable representations, because they won't be drawn properly and
-    // because I hate them. Note that this has to be done after setting the
-    // codepage.
+    // Set our custom representations.
     reprs.Clear();
-    // Except tabulators. Scintilla does not draw them if we disable the representation.
-    reprs.SetRepresentation("\t", "");
-    // Also set the draw function for tabs.
-    view.customDrawTabArrow = &TScintillaEditor::DrawTabArrow;
+    {
+        constexpr int ranges[][2] = {{0, ' '}, {0x7F, 0x100}};
+        for (auto [beg, end] : ranges) {
+            for (int i = beg; i < end; ++i) {
+                char c[2] = {(char) i};
+                char r[8] = {};
+                sprintf(r, "\\x%02X", i);
+                reprs.SetRepresentation(c, r);
+            }
+        }
+        reprs.SetRepresentation("\t", "»        ");
+    }
+    // Do not use padding for control characters.
+    vs.ctrlCharPadding = 0;
     view.tabWidthMinimumPixels = 0; // Otherwise, tabs will be more than 8 columns wide.
-    view.tabArrowHeight = 0; // Otherwise, we would have to decrease rcTab.top in DrawTabArrow.
     // Always draw tabulators.
     WndProc(SCI_SETVIEWWS, SCWS_VISIBLEALWAYS, 0U);
     // Process mouse down events:
@@ -270,9 +277,4 @@ void TScintillaEditor::setWhitespaceColor(TCellAttribs attr)
 {
     WndProc(SCI_SETWHITESPACEFORE, true, TScintillaSurface::convertColor(attr.colors.fg).AsInteger());
     WndProc(SCI_SETWHITESPACEBACK, true, TScintillaSurface::convertColor(attr.colors.bg).AsInteger());
-}
-
-void TScintillaEditor::DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, ColourDesired fore)
-{
-    ((TScintillaSurface *) surface)->DrawTabArrow(rcTab, ymid, fore);
 }
