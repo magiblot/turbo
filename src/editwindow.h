@@ -17,7 +17,8 @@ class DocumentView;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
-    EditorWindow(const TRect &bounds, std::string_view aFile);
+    EditorWindow( const TRect &bounds, std::string_view aFile,
+                  bool openCanFail );
     ~EditorWindow();
 
     // Subviews
@@ -102,8 +103,8 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // tryLoadFile is invoked when creating the Window. It decides whether
     // a file should be opened, according to 'file'.
 
-    void tryLoadFile();
-    bool loadFile();
+    void tryLoadFile(bool canFail);
+    bool loadFile(bool canFail);
 
     // trySaveFile gets invoked on cmSave. It decides whether to save the
     // file or to show a dialog. It also takes care of updating the window

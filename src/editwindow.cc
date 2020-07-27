@@ -7,7 +7,8 @@
 #include "app.h"
 #include <fmt/core.h>
 
-EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
+EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
+                            bool openCanFail ) :
     TWindow(bounds, nullptr, wnNoNumber),
     TWindowInit(&initFrame),
     drawing(false),
@@ -49,7 +50,7 @@ EditorWindow::EditorWindow(const TRect &bounds, std::string_view aFile) :
     commandSet += cmSaveAs;
     commandSet += cmToggleWrap;
 
-    tryLoadFile();
+    tryLoadFile(openCanFail);
     setUpEditor();
 }
 
@@ -353,7 +354,7 @@ void EditorWindow::setSavePoint()
 // command cmValid. If there was an error, valid() will return False,
 // thus resulting in the EditorWindow being destroyed in checkValid().
 
-void EditorWindow::tryLoadFile()
+void EditorWindow::tryLoadFile(bool canFail)
 {
     if (!file.empty()) {
         std::error_code ec;
@@ -362,11 +363,11 @@ void EditorWindow::tryLoadFile()
             fatalError = true;
             showError(fmt::format("'{}' is not a valid path.", file.native()));
         } else
-            fatalError = !loadFile();
+            fatalError = !loadFile(canFail);
     }
 }
 
-bool EditorWindow::loadFile()
+bool EditorWindow::loadFile(bool canFail)
 {
     std::ifstream f(file, ios::in | ios::binary);
     if (f) {
@@ -392,7 +393,7 @@ bool EditorWindow::loadFile()
                 return false;
             }
         }
-    } else {
+    } else if (!canFail) {
         showError(fmt::format("Unable to open file '{}'.", file.native()));
         return false;
     }

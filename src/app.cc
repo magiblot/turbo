@@ -150,7 +150,7 @@ void TVEditApp::parseArgs()
 {
     if (argc && argv) {
         for (int i = 1; i < argc; ++i)
-            openEditor(argv[i]);
+            openEditor(argv[i], true);
     }
 }
 
@@ -171,9 +171,9 @@ void TVEditApp::fileOpen()
     );
 }
 
-bool TVEditApp::openEditor(std::string_view fileName)
+bool TVEditApp::openEditor(std::string_view fileName, bool canFail)
 {
-    EditorWindow *w = new EditorWindow(deskTop->getExtent(), fileName);
+    EditorWindow *w = new EditorWindow(deskTop->getExtent(), fileName, canFail);
     w = (EditorWindow *) validView(w);
     if (w)
         addEditor(w);

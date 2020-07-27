@@ -47,7 +47,7 @@ struct TVEditApp : public TApplication {
     void fileNew();
     void fileOpen();
     void fileSave();
-    bool openEditor(std::string_view fileName);
+    bool openEditor(std::string_view fileName, bool canFail=false);
     void closeAll();
     void setEditorTitle(EditorWindow *w);
     void updateEditorTitle(EditorWindow *w, std::string_view prevFile);
