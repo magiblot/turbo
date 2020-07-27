@@ -105,36 +105,36 @@ namespace Scintilla {
 
     inline TScreenCell TScintillaSurface::makeCell(uchar ch, ColourDesired fore, ColourDesired back)
     {
-        TScreenCell c {};
-        c.Cell.Char.asInt = ch;
-        c.Cell.Attr = convertColorPair(fore, back);
+        TScreenCell c {0};
+        c.Char = ch;
+        c.Attr = convertColorPair(fore, back);
         return c;
     }
 
     inline TCellAttribs TScintillaSurface::convertColor(ColourDesired c)
     {
-        TCellAttribs attr {};
-        attr.bits.fgBlue = c.GetBlue() > 0x55;
-        attr.bits.fgGreen = c.GetGreen() > 0x55;
-        attr.bits.fgRed = c.GetRed() > 0x55;
-        attr.bits.fgBright = c.GetBlue() > 0xAA || c.GetGreen() > 0xAA || c.GetRed() > 0xAA;
+        TCellAttribs attr {0};
+        attr.fgBlue = c.GetBlue() > 0x55;
+        attr.fgGreen = c.GetGreen() > 0x55;
+        attr.fgRed = c.GetRed() > 0x55;
+        attr.fgBright = c.GetBlue() > 0xAA || c.GetGreen() > 0xAA || c.GetRed() > 0xAA;
         return attr;
     }
 
     inline TCellAttribs TScintillaSurface::convertColorPair(ColourDesired fore, ColourDesired back)
     {
-        TCellAttribs attr {};
-        attr.colors.fg = convertColor(fore);
-        attr.colors.bg = convertColor(back);
-        if (attr.colors.fg == attr.colors.bg && !(fore == back)) {
+        TCellAttribs attr {0};
+        attr.fgSet(convertColor(fore));
+        attr.bgSet(convertColor(back));
+        if (attr.fgGet() == attr.bgGet() && !(fore == back)) {
             uint grayFg = (fore.GetBlue() + fore.GetGreen() + fore.GetRed())/3;
             uint grayBg = (back.GetBlue() + back.GetGreen() + back.GetRed())/3;
             if (grayFg < grayBg) {
-                attr.bits.fgBright = 0;
-                attr.bits.bgBright = 1;
+                attr.fgBright = 0;
+                attr.bgBright = 1;
             } else {
-                attr.bits.fgBright = 1;
-                attr.bits.bgBright = 0;
+                attr.fgBright = 1;
+                attr.bgBright = 0;
             }
         }
         return attr;
@@ -143,9 +143,9 @@ namespace Scintilla {
     inline ColourDesired TScintillaSurface::convertColor(uchar c)
     {
         TCellAttribs attr {c};
-        uchar red = attr.bits.fgRed ? attr.bits.fgBright ? 0xFF : 0x7F : 0x00;
-        uchar green = attr.bits.fgGreen ? attr.bits.fgBright ? 0xFF : 0x7F : 0x00;
-        uchar blue = attr.bits.fgBlue ? attr.bits.fgBright ? 0xFF : 0x7F : 0x00;
+        uchar red = attr.fgRed ? attr.fgBright ? 0xFF : 0x7F : 0x00;
+        uchar green = attr.fgGreen ? attr.fgBright ? 0xFF : 0x7F : 0x00;
+        uchar blue = attr.fgBlue ? attr.fgBright ? 0xFF : 0x7F : 0x00;
         return ColourDesired(red, green, blue);
     }
 

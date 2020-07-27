@@ -6,31 +6,6 @@
 
 #include <vector>
 
-struct TDrawCell {
-
-    union {
-        struct {
-            uchar character;
-            TCellAttribs attr;
-        } cell;
-        ushort asShort;
-    };
-
-    TDrawCell(ushort s=0);
-    operator ushort&();
-
-};
-
-inline TDrawCell::TDrawCell(ushort s) :
-    asShort(s)
-{
-}
-
-inline TDrawCell::operator ushort&()
-{
-    return asShort;
-}
-
 class TDrawableView : public TView {
 
     friend class TDrawSubView;
@@ -58,14 +33,14 @@ public:
 
 inline void TDrawableView::setFillColor(TCellAttribs fillColor)
 {
-    fill.Cell.Attr = fillColor;
+    fill.Attr = fillColor;
     for (TScreenCell &cell : drawArea)
         cell = fill;
 }
 
 inline TCellAttribs TDrawableView::getFillColor() const
 {
-    return fill.Cell.Attr;
+    return fill.Attr;
 }
 
 inline TScreenCell& TDrawableView::at(int y, int x)

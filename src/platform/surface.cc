@@ -70,13 +70,13 @@ void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
     // Used to draw text selections. Do not overwrite the foreground color.
     auto r = clipRect(rc);
     uchar bg = convertColor(back);
-    uchar fg = view->getFillColor().colors.fg;
+    uchar fg = view->getFillColor().fgGet();
     for (int y = r.a.y; y < r.b.y; ++y)
         for (int x = r.a.x; x < r.b.x; ++x) {
             auto c = view->at(y, x);
-            c.Cell.Attr.colors.bg = bg;
-            c.Cell.Attr.colors.fg = fg;
-            c.Cell.Char.asInt = '\0';
+            c.Attr.bgSet(bg);
+            c.Attr.fgSet(fg);
+            c.Char = '\0';
             view->at(y, x) = c;
         }
 }
@@ -97,7 +97,7 @@ void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesi
     TCellAttribs attr = convertColorPair(outline, fill);
     for (int y = r.a.y; y < r.b.y; ++y)
         for (int x = r.a.x; x < r.b.x; ++x)
-            view->at(y, x).Cell.Attr = attr;
+            view->at(y, x).Attr = attr;
 }
 
 void TScintillaSurface::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options)
@@ -142,16 +142,16 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
     for (int y = r.a.y; y < r.b.y; ++y) {
         size_t x = r.a.x;
         while (overlap-- && (int) x < r.b.x) {
-            auto c = view->at(y, x).Cell;
+            auto c = view->at(y, x);
             c.Attr = color;
-            c.Char.asInt = ' ';
+            c.Char = ' ';
             c.extraWidth = 0;
-            view->at(y, x++).Cell = c;
+            view->at(y, x++) = c;
         }
         size_t i = textBegin;
         while (i < text.size() && (int) x < r.b.x) {
             auto &c = view->at(y, x);
-            c.Cell.Attr = color;
+            c.Attr = color;
             utf8read(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
         }
     }
@@ -166,16 +166,16 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
     for (int y = r.a.y; y < r.b.y; ++y) {
         size_t x = r.a.x;
         while (overlap-- && (int) x < r.b.x) {
-            auto c = view->at(y, x).Cell;
-            c.Attr.colors.fg = fg;
-            c.Char.asInt = ' ';
+            auto c = view->at(y, x);
+            c.Attr.fgSet(fg);
+            c.Char = ' ';
             c.extraWidth = 0;
-            view->at(y, x++).Cell = c;
+            view->at(y, x++) = c;
         }
         size_t i = textBegin;
         while (i < text.size() && (int) x < r.b.x) {
             auto &c = view->at(y, x);
-            c.Cell.Attr.colors.fg = fg;
+            c.Attr.fgSet(fg);
             utf8read(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
         }
     }
