@@ -1886,11 +1886,11 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 					}
 					if (vsDraw.controlCharSymbol >= 32) {
 						const char cc[2] = { static_cast<char>(vsDraw.controlCharSymbol), '\0' };
-						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
+						surface->DrawTextClipped(rcSegment, ctrlCharsFont,
 							rcSegment.top + vsDraw.maxAscent,
 							cc, textFore, textBack);
 					} else {
-						surface->DrawTextNoClip(rcSegment, ctrlCharsFont,
+						surface->DrawTextClipped(rcSegment, ctrlCharsFont,
 							rcSegment.top + vsDraw.maxAscent,
 							ts.representation->stringRep, textFore, textBack);
 					}
