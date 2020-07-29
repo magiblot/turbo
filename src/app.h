@@ -70,6 +70,8 @@ struct TVEditApp : public TApplication {
                          const char *inputName, ushort aOptions,
                          uchar histId, Func &&callback );
 
+    TPalette& getPalette() const override;
+
 };
 
 template<typename Func>

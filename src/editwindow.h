@@ -2,6 +2,7 @@
 #define TVEDIT_EDITWINDOW_H
 
 #define Uses_TWindow
+#define Uses_TPalette
 #include <tvision/tv.h>
 
 #include "tscintilla.h"
@@ -50,6 +51,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void setState(ushort aState, Boolean enable) override;
     Boolean valid(ushort command) override;
     const char* getTitle(short) override;
+    TPalette& getPalette() const override;
 
     // Minimum window size
 

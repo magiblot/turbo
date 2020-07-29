@@ -81,10 +81,16 @@ void EditorWindow::setUpEditor(bool openCanFail)
     tryLoadFile(openCanFail);
 
     // Colors
-    TCellAttribs color {0x1E}; // Blue & Light Yellow.
-    TCellAttribs colorCtrl {0x14}; // Blue & Red.
+    TCellAttribs color {0x07}; // Default FG and BG.
+    color.fgDefault = 1;
+    color.bgDefault = 1;
+    TCellAttribs colorCtrl {0x0D}; // Default BG & Light Magenta.
+    colorCtrl.bgDefault = 1;
     TCellAttribs colorSel {0x71}; // White & Blue.
-    TCellAttribs colorTab {0x17}; // Blue & Dim White.
+    TCellAttribs colorTab {0x08}; // Default BG & Dim White.
+    colorTab.bgDefault = 1;
+    TCellAttribs colorNums {0x06}; // Default BG & Brown.
+    colorNums.bgDefault = 1;
     editorView.setFillColor(color); // Screw palettes, they are too hard to understand.
     editor.setStyleColor(STYLE_DEFAULT, color);
     editor.WndProc(SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
@@ -116,7 +122,7 @@ void EditorWindow::setUpEditor(bool openCanFail)
     editor.WndProc(SCI_SETBACKSPACEUNINDENTS, true, 0U);
 
     // Line numbers
-    editor.setStyleColor(STYLE_LINENUMBER, color);
+    editor.setStyleColor(STYLE_LINENUMBER, colorNums);
     editor.WndProc(SCI_SETMARGINS, 1, 0U);
     editor.WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
     updateMarginWidth();
@@ -536,4 +542,13 @@ void EditorWindow::close()
 void EditorWindow::showError(const std::string &s)
 {
     messageBox(s.c_str(), mfError | mfOKButton);
+}
+
+#define cpEditorWindow "\x88\x89\x8A\x8B\x8C\x8D\x8E\x8F"
+
+
+TPalette& EditorWindow::getPalette() const
+{
+    static TPalette palette(cpEditorWindow, sizeof(cpEditorWindow) - 1);
+    return palette;
 }
