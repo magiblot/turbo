@@ -483,7 +483,7 @@ bool EditorWindow::saveAsDialog()
                 file = std::filesystem::absolute(fileName, ec);
                 if (ec)
                     showError(fmt::format("'{}' is not a valid path.", fileName));
-                else if (saveFile()) {
+                else if (canOverwrite() && saveFile()) {
                     // Saving has succeeded, now update the title.
                     TVEditApp::app->updateEditorTitle(this, prevFile.native());
                     setSavePoint();
@@ -498,6 +498,16 @@ bool EditorWindow::saveAsDialog()
         return saved;
     }
     return false;
+}
+
+bool EditorWindow::canOverwrite() const
+{
+    std::error_code ec;
+    if (std::filesystem::exists(file, ec)) {
+        auto &&text = fmt::format("'{}' already exists. Overwrite?", file.native());
+        return cmYes == messageBox(text.c_str(), mfInformation | mfYesButton | mfNoButton);
+    }
+    return true;
 }
 
 bool EditorWindow::tryClose()

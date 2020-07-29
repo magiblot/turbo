@@ -113,6 +113,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     bool trySaveFile();
     bool saveFile();
+    bool canOverwrite() const;
 
     // saveAsDialog keeps popping out a dialog until the user decides
     // not to save or we succeed in writing to file. It also updates
