@@ -40,7 +40,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TDrawableView editorView;
 
     TRect editorBounds() const;
-    void setUpEditor();
+    void setUpEditor(bool openCanFail);
     void redrawEditor();
     void updateMarginWidth();
 

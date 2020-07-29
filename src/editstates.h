@@ -14,6 +14,7 @@ class LineNumbersWidth {
 
     const int minWidth;
     int lastWidth {0};
+    bool enabled {false};
 
 public:
 
@@ -22,20 +23,39 @@ public:
     {
     }
 
+    void toggle()
+    {
+        setState(!enabled);
+    }
+
+    void setState(bool enable)
+    {
+        enabled = enable;
+    }
+
+    bool isEnabled() const
+    {
+        return enabled;
+    }
+
     std::tuple<int, int> update(Scintilla::TScintillaEditor &editor)
     {
-        size_t newLines = editor.WndProc(SCI_GETLINECOUNT, 0U, 0U);
-        int newWidth = 1;
-        while (newLines /= 10)
-            ++newWidth;
-        if (newWidth < minWidth)
-            newWidth = minWidth;
+        int newWidth;
+        if (enabled) {
+            newWidth = 1;
+            size_t newLines = editor.WndProc(SCI_GETLINECOUNT, 0U, 0U);
+            while (newLines /= 10)
+                ++newWidth;
+            if (newWidth < minWidth)
+                newWidth = minWidth;
+        } else
+            newWidth = 0;
         if (newWidth != lastWidth) {
             int delta = newWidth - lastWidth;
             lastWidth = newWidth;
-            return {lastWidth, delta};
+            return {newWidth, delta};
         }
-        return {lastWidth, 0};
+        return {newWidth, 0};
     }
 
 };

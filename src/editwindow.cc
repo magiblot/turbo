@@ -42,7 +42,7 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     leftMargin->growMode = gfGrowHiY | gfFixed;
     insert(leftMargin);
 
-    docView = new DocumentView( TRect( 2, 1, size.x - 1, size.y - 1 ),
+    docView = new DocumentView( TRect( 1, 1, size.x - 1, size.y - 1 ),
                                 editorView,
                                 editor,
                                 *this );
@@ -53,8 +53,7 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     commandSet += cmSaveAs;
     commandSet += cmToggleWrap;
 
-    tryLoadFile(openCanFail);
-    setUpEditor();
+    setUpEditor(openCanFail);
 }
 
 EditorWindow::~EditorWindow()
@@ -65,18 +64,21 @@ EditorWindow::~EditorWindow()
 
 TRect EditorWindow::editorBounds() const
 {
-    // Editor size: the window's inside minus the line numbers frame.
+    // Editor size: the window's inside.
     TRect r = getExtent().grow(-1, -1);
-    r.b.x--;
+    if (lineNumbers.isEnabled())
+        r.b.x--;
     return r;
 }
 
-void EditorWindow::setUpEditor()
+void EditorWindow::setUpEditor(bool openCanFail)
 {
     // Editor should take into account the size of docView.
     editor.setWindow(&editorView);
     // But should send notifications to this window.
     editor.setParent(this);
+    // Open the current file, if set.
+    tryLoadFile(openCanFail);
 
     // Colors
     TCellAttribs color {0x1E}; // Blue & Light Yellow.
@@ -105,6 +107,7 @@ void EditorWindow::setUpEditor()
     // Clear the undo buffer created when loading the file,
     // if that's the case.
     editor.WndProc(SCI_EMPTYUNDOBUFFER, 0U, 0U);
+    inSavePoint = true;
 
     // Indentation
     editor.WndProc(SCI_SETUSETABS, false, 0U);
@@ -126,9 +129,9 @@ void EditorWindow::redrawEditor()
     if (!drawing) {
         drawing = true;
         lock();
+        updateMarginWidth();
         if (!resizeLock)
             editor.changeSize();
-        updateMarginWidth();
         editor.draw(editorView);
         leftMargin->drawView();
         docView->drawView();
@@ -150,11 +153,21 @@ void EditorWindow::updateMarginWidth()
             leftMargin->changeBounds(r);
         }
         {
-            TRect r = docView->getBounds();
-            r.a.x += delta;
-            docView->changeBounds(r);
+            TRect dv = docView->getBounds();
+            dv.a.x += delta;
+            TRect ev = editorView.getBounds();
+            if (width == 0) { // Line numbers disabled.
+                dv.a.x -= 1;
+                ev.b.x += 1;
+            } else if (width == delta) { // Line numbers enabled.
+                dv.a.x += 1;
+                ev.b.x -= 1;
+            }
+            docView->changeBounds(dv);
             docView->setDelta({width, 0});
+            editorView.changeBounds(ev);
         }
+        frame->drawView();
     }
 }
 
@@ -177,6 +190,10 @@ void EditorWindow::handleEvent(TEvent &ev) {
             case cmToggleWrap:
                 if (wrap.toggle(editor))
                     redrawEditor();
+                break;
+            case cmToggleLineNums:
+                lineNumbers.toggle();
+                redrawEditor();
                 break;
             default:
                 handled = false;

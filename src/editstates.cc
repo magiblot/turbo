@@ -58,8 +58,11 @@ void FileType::detect(EditorWindow &win)
 
     if (!lexer)
         lexer = SCLEX_NULL;
+    else
+        win.lineNumbers.setState(true);
 
     editor.WndProc(SCI_SETLEXER, lexer, 0U);
     editor.WndProc(SCI_COLOURISE, 0, -1);
+    win.redrawEditor();
 
 }

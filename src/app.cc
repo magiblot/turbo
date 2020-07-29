@@ -79,6 +79,7 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
             *new TMenuItem( "~N~ext", cmEditorNext, kbF6, hcNoContext, "F6" ) +
             *new TMenuItem( "~P~revious", cmEditorPrev, kbShiftF6, hcNoContext, "Shift-F6" ) +
         *new TSubMenu( "~S~ettings", kbAltS ) +
+            *new TMenuItem( "Toggle Line ~N~umbers", cmToggleLineNums, kbF8, hcNoContext, "F8" ) +
             *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" )
             );
 
@@ -93,7 +94,7 @@ TStatusLine *TVEditApp::initStatusLine( TRect r )
             *new TStatusItem( "~Ctrl-O~ Open", kbNoKey, cmOpen ) +
             *new TStatusItem( "~Ctrl-S~ Save", kbNoKey, cmSave ) +
             *new TStatusItem( "~F6~ Next", kbF6, cmEditorNext ) +
-            *new TStatusItem( "~F10~ Menu" , kbF10, cmMenu ) +
+            *new TStatusItem( "~F12~ Menu" , kbF12, cmMenu ) +
             *new TStatusItem( 0, kbShiftF6, cmEditorPrev )
             );
 }
