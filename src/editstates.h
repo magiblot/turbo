@@ -85,4 +85,12 @@ public:
 
 };
 
+struct EditorWindow;
+
+struct FileType {
+
+    void detect(EditorWindow &win);
+
+};
+
 #endif

@@ -12,6 +12,7 @@ target_compile_options(scintilla PRIVATE
 
 target_compile_definitions(scintilla PRIVATE
     CURSES
+    SCI_LEXER
 )
 
 FILE(GLOB_RECURSE tmp LIST_DIRECTORIES true "${CMAKE_CURRENT_SOURCE_DIR}/scintilla/**")
@@ -54,12 +55,14 @@ target_sources(tvedit PRIVATE
     "src/main.cc"
     "src/docview.cc"
     "src/drawviews.cc"
+    "src/editstates.cc"
     "src/editwindow.cc"
     "src/listviews.cc"
     "src/tscintilla.cc"
     "src/util.cc"
     "src/widgets.cc"
     "src/platform/font.cc"
+    "src/platform/library.cc"
     "src/platform/listbox.cc"
     "src/platform/menu.cc"
     "src/platform/platform.cc"
@@ -86,6 +89,13 @@ find_library(GPM gpm)
 if (GPM)
     list(APPEND LIBS ${GPM})
     string(APPEND CMAKE_CXX_FLAGS " -DHAVE_GPM")
+endif()
+
+# Other optional dependencies
+find_library(MAGIC magic)
+if (MAGIC)
+    list(APPEND LIBS ${MAGIC})
+    target_compile_definitions(tvedit PRIVATE HAVE_MAGIC)
 endif()
 
 target_link_libraries(tvedit ${LIBS})

@@ -7,6 +7,7 @@
 #include <tvision/tv.h>
 
 #include <string_view>
+#include <unordered_map>
 
 char *strnzcpy(char *dest, std::string_view src, size_t n);
 
@@ -159,6 +160,23 @@ struct active_counter {
         if (active < 1)
             count = active;
     }
+};
+
+template<typename K, typename V>
+class const_unordered_map : public std::unordered_map<K, V>
+{
+public:
+
+    typedef std::unordered_map<K, V> super;
+    using super::unordered_map;
+
+    V operator[](const K &key) const {
+        auto it = super::find(key);
+        if (it == super::end())
+            return V {};
+        return it->second;
+    }
+
 };
 
 #endif

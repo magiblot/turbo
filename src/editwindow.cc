@@ -364,6 +364,8 @@ void EditorWindow::tryLoadFile(bool canFail)
             showError(fmt::format("'{}' is not a valid path.", file.native()));
         } else
             fatalError = !loadFile(canFail);
+        if (!fatalError)
+            type.detect(*this);
     }
 }
 
@@ -465,6 +467,7 @@ bool EditorWindow::saveAsDialog()
                     // Saving has succeeded, now update the title.
                     TVEditApp::app->updateEditorTitle(this, prevFile.native());
                     setSavePoint();
+                    type.detect(*this);
                     return saved = true;
                 }
                 // Restore the old file path.

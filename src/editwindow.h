@@ -32,6 +32,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TPoint lastSize;
     LineNumbersWidth lineNumbers;
     WrapMode wrap;
+    FileType type;
 
     // Scintilla
 
