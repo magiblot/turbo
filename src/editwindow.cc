@@ -24,6 +24,9 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
 
+    if (TVEditApp::app)
+        editor.clipboard = &TVEditApp::app->clipboard;
+
     editorView.hide();
 
     hScrollBar = new TScrollBar(TRect( 18, size.y - 1, size.x - 2, size.y ));

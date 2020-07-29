@@ -31,6 +31,7 @@ struct TVEditApp : public TApplication {
     bool argsParsed {false};
     int argc;
     const char **argv;
+    Scintilla::SelectionText clipboard;
 
     static TVEditApp *app;
 

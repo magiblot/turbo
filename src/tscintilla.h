@@ -21,7 +21,7 @@ struct TScintillaEditor : public ScintillaBase {
     friend class DocumentView;
 
     TScintillaWindow *parent {0};
-    SelectionText clipboard;
+    SelectionText *clipboard;
 
     TScintillaEditor();
 
