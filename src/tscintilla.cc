@@ -52,6 +52,10 @@ TScintillaEditor::TScintillaEditor()
     WndProc(SCI_SETMOUSEDOWNCAPTURES, true, nil);
     // Double clicks only in the same cell.
     doubleClickCloseThreshold = Point(0, 0);
+
+    // Extra key shortcuts
+    WndProc(SCI_ASSIGNCMDKEY, SCK_UP | ((SCMOD_CTRL | SCMOD_SHIFT) << 16), SCI_MOVESELECTEDLINESUP);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_DOWN | ((SCMOD_CTRL | SCMOD_SHIFT) << 16), SCI_MOVESELECTEDLINESDOWN);
 }
 
 void TScintillaEditor::SetVerticalScrollPos()
