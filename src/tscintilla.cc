@@ -267,18 +267,18 @@ void TScintillaEditor::draw(TDrawableView &d) {
 
 void TScintillaEditor::setStyleColor(int style, TCellAttribs attr)
 {
-    WndProc(SCI_STYLESETFORE, style, TScintillaSurface::convertColor(attr.fgGet()).AsInteger());
+    WndProc(SCI_STYLESETFORE, style, TScintillaSurface::convertColor(attr).AsInteger());
     WndProc(SCI_STYLESETBACK, style, TScintillaSurface::convertColor(attr.bgGet()).AsInteger());
 }
 
 void TScintillaEditor::setSelectionColor(TCellAttribs attr)
 {
-    WndProc(SCI_SETSELFORE, true, TScintillaSurface::convertColor(attr.fgGet()).AsInteger());
+    WndProc(SCI_SETSELFORE, true, TScintillaSurface::convertColor(attr).AsInteger());
     WndProc(SCI_SETSELBACK, true, TScintillaSurface::convertColor(attr.bgGet()).AsInteger());
 }
 
 void TScintillaEditor::setWhitespaceColor(TCellAttribs attr)
 {
-    WndProc(SCI_SETWHITESPACEFORE, true, TScintillaSurface::convertColor(attr.fgGet()).AsInteger());
+    WndProc(SCI_SETWHITESPACEFORE, true, TScintillaSurface::convertColor(attr).AsInteger());
     WndProc(SCI_SETWHITESPACEBACK, true, TScintillaSurface::convertColor(attr.bgGet()).AsInteger());
 }

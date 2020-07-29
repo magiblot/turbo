@@ -43,7 +43,7 @@ namespace Scintilla {
         static TScreenCell makeCell(uchar ch, ColourDesired fore, ColourDesired back);
         static TCellAttribs convertColor(ColourDesired c);
         static TCellAttribs convertColorPair(ColourDesired fore, ColourDesired back);
-        static ColourDesired convertColor(uchar c);
+        static ColourDesired convertColor(TCellAttribs c);
 
         void Init(WindowID wid) override;
         void Init(SurfaceID sid, WindowID wid) override;
@@ -114,39 +114,22 @@ namespace Scintilla {
     inline TCellAttribs TScintillaSurface::convertColor(ColourDesired c)
     {
         TCellAttribs attr {0};
-        attr.fgBlue = c.GetBlue() > 0x55;
-        attr.fgGreen = c.GetGreen() > 0x55;
-        attr.fgRed = c.GetRed() > 0x55;
-        attr.fgBright = c.GetBlue() > 0xAA || c.GetGreen() > 0xAA || c.GetRed() > 0xAA;
+        attr = attr | (c.GetGreen() << 8) | c.GetRed();
         return attr;
     }
 
     inline TCellAttribs TScintillaSurface::convertColorPair(ColourDesired fore, ColourDesired back)
     {
         TCellAttribs attr {0};
-        attr.fgSet(convertColor(fore));
-        attr.bgSet(convertColor(back));
-        if (attr.fgGet() == attr.bgGet() && !(fore == back)) {
-            uint grayFg = (fore.GetBlue() + fore.GetGreen() + fore.GetRed())/3;
-            uint grayBg = (back.GetBlue() + back.GetGreen() + back.GetRed())/3;
-            if (grayFg < grayBg) {
-                attr.fgBright = 0;
-                attr.bgBright = 1;
-            } else {
-                attr.fgBright = 1;
-                attr.bgBright = 0;
-            }
-        }
+        attr.fgSet(fore.GetRed());
+        attr.bgSet(back.GetRed());
+        attr = attr | (fore.GetGreen() << 8);
         return attr;
     }
 
-    inline ColourDesired TScintillaSurface::convertColor(uchar c)
+    inline ColourDesired TScintillaSurface::convertColor(TCellAttribs c)
     {
-        TCellAttribs attr {c};
-        uchar red = attr.fgRed ? attr.fgBright ? 0xFF : 0x7F : 0x00;
-        uchar green = attr.fgGreen ? attr.fgBright ? 0xFF : 0x7F : 0x00;
-        uchar blue = attr.fgBlue ? attr.fgBright ? 0xFF : 0x7F : 0x00;
-        return ColourDesired(red, green, blue);
+        return ColourDesired(c & 0xFF, (c & 0xFF00) >> 8, 0);
     }
 
 }

@@ -69,13 +69,12 @@ void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
 {
     // Used to draw text selections. Do not overwrite the foreground color.
     auto r = clipRect(rc);
-    uchar bg = convertColor(back);
-    uchar fg = view->getFillColor().fgGet();
+    auto color = view->getFillColor();
+    color.bgSet(convertColor(back));
     for (int y = r.a.y; y < r.b.y; ++y)
         for (int x = r.a.x; x < r.b.x; ++x) {
             auto c = view->at(y, x);
-            c.Attr.bgSet(bg);
-            c.Attr.fgSet(fg);
+            c.Attr = color;
             c.Char = '\0';
             view->at(y, x) = c;
         }
@@ -94,7 +93,7 @@ void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesi
         ColourDesired outline, int alphaOutline, int flags)
 {
     auto r = clipRect(rc);
-    TCellAttribs attr = convertColorPair(outline, fill);
+    auto attr = convertColorPair(outline, fill);
     for (int y = r.a.y; y < r.b.y; ++y)
         for (int x = r.a.x; x < r.b.x; ++x)
             view->at(y, x).Attr = attr;
@@ -160,7 +159,7 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
 void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore)
 {
     auto r = clipRect(rc);
-    uchar fg = convertColor(fore);
+    auto fg = convertColor(fore);
     size_t textBegin = 0, overlap = 0;
     utf8wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
@@ -168,6 +167,7 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
         while (overlap-- && (int) x < r.b.x) {
             auto c = view->at(y, x);
             c.Attr.fgSet(fg);
+            c.Attr.attrSet(fg);
             c.Char = ' ';
             c.extraWidth = 0;
             view->at(y, x++) = c;
@@ -176,6 +176,7 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
         while (i < text.size() && (int) x < r.b.x) {
             auto &c = view->at(y, x);
             c.Attr.fgSet(fg);
+            c.Attr.attrSet(fg);
             utf8read(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
         }
     }

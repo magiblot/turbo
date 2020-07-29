@@ -4,12 +4,12 @@ using namespace Scintilla;
 
 ColourDesired Platform::Chrome()
 {
-    return {0x7F, 0x7F, 0x7F};
+    return {0x0, 0x0, 0x0};
 }
 
 ColourDesired Platform::ChromeHighlight()
 {
-    return {0xFF, 0xFF, 0xFF};
+    return {0x0, 0x0, 0x0};
 }
 
 const char* Platform::DefaultFont()
