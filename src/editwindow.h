@@ -16,6 +16,7 @@
 
 class DocumentView;
 struct SearchBox;
+class TIndicator;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
@@ -29,6 +30,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TDrawSubView *leftMargin;
     SearchBox *search;
     TScrollBar *hScrollBar, *vScrollBar;
+    TIndicator *indicator;
     TCommandSet commandSet;
     bool drawing;
     bool resizeLock;
@@ -46,6 +48,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void setUpEditor(bool openCanFail);
     void redrawEditor();
     void updateMarginWidth();
+    void updateIndicatorValue();
 
     void handleEvent(TEvent &ev) override;
     void changeBounds(const TRect &bounds) override;

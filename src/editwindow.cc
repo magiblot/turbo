@@ -39,6 +39,10 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     vScrollBar->hide();
     insert(vScrollBar);
 
+    indicator = new TIndicator(TRect( 2, size.y - 1, 18, size.y ));
+    indicator->hide();
+    insert(indicator);
+
     leftMargin = new TDrawSubView(TRect( 1, 1, 1, size.y - 1 ), editorView);
     leftMargin->options |= ofFramed;
     leftMargin->growMode = gfGrowHiY | gfFixed;
@@ -151,6 +155,8 @@ void EditorWindow::redrawEditor()
         docView->drawView();
         hScrollBar->drawView();
         vScrollBar->drawView();
+        updateIndicatorValue();
+        indicator->drawView();
         unlock();
         drawing = false;
     }
@@ -183,6 +189,14 @@ void EditorWindow::updateMarginWidth()
         }
         frame->drawView();
     }
+}
+
+void EditorWindow::updateIndicatorValue()
+{
+    auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
+    auto line = editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U);
+    auto col = editor.WndProc(SCI_GETCOLUMN, pos, 0U);
+    indicator->setValue({(int) line, (int) col}, False);
 }
 
 void EditorWindow::handleEvent(TEvent &ev) {
@@ -250,6 +264,7 @@ void EditorWindow::setState(ushort aState, Boolean enable)
             case sfActive:
                 hScrollBar->setState(sfVisible, enable);
                 vScrollBar->setState(sfVisible, enable);
+                indicator->setState(sfVisible, enable);
                 if (enable && TVEditApp::app)
                     TVEditApp::app->setFocusedEditor(this);
                 break;
