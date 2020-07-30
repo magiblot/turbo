@@ -10,6 +10,7 @@
 #define Uses_TWindow
 #define Uses_TFrame
 #define Uses_TFileDialog
+#define Uses_TIndicator
 #include <tvision/tv.h>
 
 #include <fmt/core.h>
@@ -39,6 +40,11 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     ts += cmSaveAs;
     ts += cmOpenRecent;
     ts += cmToggleWrap;
+    ts += cmToggleLineNums;
+    ts += cmFind;
+    ts += cmReplace;
+    ts += cmSearchAgain;
+    ts += cmSearchPrev;
     disableCommands(ts);
 
     // Actions that only make sense when there is at least one editor.
@@ -73,6 +79,11 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
             newLine() +
             *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
             *new TMenuItem( "E~x~it", cmQuit, kbAltX, hcNoContext, "Alt-X" ) +
+        *new TSubMenu( "~E~dit", kbAltE ) +
+            *new TMenuItem( "~F~ind...", cmFind, kbCtrlF, hcNoContext, "Ctrl-F" ) +
+            *new TMenuItem( "~R~eplace...",cmReplace, kbCtrlR, hcNoContext, "Ctrl-R" ) +
+            *new TMenuItem( "Find ~N~ext", cmSearchAgain, kbF3, hcNoContext, "F3" ) +
+            *new TMenuItem( "Find ~P~revious", cmSearchPrev, kbShiftF3, hcNoContext, "Shift-F3" ) +
         *new TSubMenu( "~W~indows", kbAltW ) +
             *new TMenuItem( "~Z~oom", cmZoom, kbF5, hcNoContext, "F5" ) +
             *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +

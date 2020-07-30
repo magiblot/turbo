@@ -19,7 +19,8 @@ const ushort
     cmEditorNext    = 101,
     cmEditorPrev    = 102,
     cmToggleWrap    = 103,
-    cmToggleLineNums= 104;
+    cmToggleLineNums= 104,
+    cmSearchPrev    = 105;
 
 struct TVEditApp : public TApplication {
 

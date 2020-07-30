@@ -15,6 +15,7 @@
 #include <filesystem>
 
 class DocumentView;
+struct SearchBox;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
@@ -26,6 +27,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     DocumentView *docView;
     TDrawSubView *leftMargin;
+    SearchBox *search;
     TScrollBar *hScrollBar, *vScrollBar;
     TCommandSet commandSet;
     bool drawing;

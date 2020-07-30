@@ -15,7 +15,7 @@ DocumentView::DocumentView( const TRect &bounds,
     window(aWindow)
 {
     growMode = gfGrowHiX | gfGrowHiY;
-    options |= ofSelectable;
+    options |= ofSelectable | ofFirstClick;
     eventMask |= evMouseUp | evMouseMove | evMouseAuto;
     showCursor();
 }

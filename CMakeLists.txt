@@ -58,6 +58,7 @@ target_sources(tvedit PRIVATE
     "src/editstates.cc"
     "src/editwindow.cc"
     "src/listviews.cc"
+    "src/search.cc"
     "src/tscintilla.cc"
     "src/util.cc"
     "src/widgets.cc"

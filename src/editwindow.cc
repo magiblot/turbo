@@ -1,10 +1,12 @@
 #define Uses_TScrollBar
 #define Uses_MsgBox
+#define Uses_TIndicator
 #include <tvision/tv.h>
 
 #include "editwindow.h"
 #include "docview.h"
 #include "app.h"
+#include "search.h"
 #include <fmt/core.h>
 
 EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
@@ -48,10 +50,16 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
                                 *this );
     insert(docView);
 
+    SearchBox::init(*this);
+
     // Set the commands that always get enabled when focusing the editor.
     commandSet += cmSave;
     commandSet += cmSaveAs;
     commandSet += cmToggleWrap;
+    commandSet += cmToggleLineNums;
+    commandSet += cmFind;
+    commandSet += cmSearchAgain;
+    commandSet += cmSearchPrev;
 
     setUpEditor(openCanFail);
 }
