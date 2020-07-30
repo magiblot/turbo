@@ -544,8 +544,9 @@ void EditorWindow::showError(const std::string &s)
     messageBox(s.c_str(), mfError | mfOKButton);
 }
 
-#define cpEditorWindow "\x88\x89\x8A\x8B\x8C\x8D\x8E\x8F"
-
+#define cpEditorWindow \
+    "\x88\x89\x8A\x8B\x8C\x8D\x8E\x8F\x90\x91\x92\x93\x94\x95\x96\x97" \
+    "\x98\x99\x9A\x9B\x9C\x9D\x9E\x9F\xA0\xA1\xA2\xA3\xA4\xA5\xA6\xA7"
 
 TPalette& EditorWindow::getPalette() const
 {
