@@ -1,5 +1,6 @@
 #include "editstates.h"
 #include "editwindow.h"
+#include "styles.h"
 
 /////////////////////////////////////////////////////////////////////////
 // File type detection
@@ -12,7 +13,7 @@ static const const_unordered_map<std::string_view, int> mime2lex = {
     {"text/x-c",                    SCLEX_CPP},
     {"text/x-script.python",        SCLEX_PYTHON},
     {"application/json",            SCLEX_JSON},
-    {"text/x-shellscript",          SCLEX_BASH}
+    {"text/x-shellscript",          SCLEX_BASH},
 };
 
 static const const_unordered_map<std::string_view, int> ext2lex = {
@@ -21,13 +22,20 @@ static const const_unordered_map<std::string_view, int> ext2lex = {
     {".mjs",        SCLEX_COFFEESCRIPT},
     {".asm",        SCLEX_ASM},
     {".s",          SCLEX_ASM},
-    {".S",          SCLEX_ASM}
+    {".S",          SCLEX_ASM},
+    {".c",          SCLEX_CPP},
+    {".cc",         SCLEX_CPP},
+    {".cpp",        SCLEX_CPP},
+    {".cxx",        SCLEX_CPP},
+    {".h",          SCLEX_CPP},
+    {".hh",         SCLEX_CPP},
+    {".hpp",        SCLEX_CPP},
+    {".hxx",        SCLEX_CPP},
 };
 
 void FileType::detect(EditorWindow &win)
 {
     auto &file = win.file;
-    auto &editor = win.editor;
     int lexer = 0;
     int encoding = 0;
 #ifdef HAVE_MAGIC
@@ -61,8 +69,5 @@ void FileType::detect(EditorWindow &win)
     else
         win.lineNumbers.setState(true);
 
-    editor.WndProc(SCI_SETLEXER, lexer, 0U);
-    editor.WndProc(SCI_COLOURISE, 0, -1);
-    win.redrawEditor();
-
+    loadLexer(lexer, win);
 }
