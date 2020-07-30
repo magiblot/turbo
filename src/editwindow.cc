@@ -519,7 +519,7 @@ bool EditorWindow::canOverwrite() const
     std::error_code ec;
     if (std::filesystem::exists(file, ec)) {
         auto &&text = fmt::format("'{}' already exists. Overwrite?", file.native());
-        return cmYes == messageBox(text.c_str(), mfInformation | mfYesButton | mfNoButton);
+        return cmYes == messageBox(text.c_str(), mfConfirmation | mfYesButton | mfNoButton);
     }
     return true;
 }
@@ -529,7 +529,7 @@ bool EditorWindow::tryClose()
     if (!inSavePoint) {
         auto &&msg = file.empty() ? fmt::format("Save '{}'?", name)
                                   : fmt::format("'{}' has been modified. Save?", file.native());
-        switch (messageBox(msg.c_str(), mfInformation | mfYesNoCancel)) {
+        switch (messageBox(msg.c_str(), mfConfirmation | mfYesNoCancel)) {
             case cmYes:
                 return trySaveFile(); // Close only if the file gets saved.
             case cmNo:
