@@ -12,22 +12,19 @@ using namespace Scintilla;
 
 TScintillaEditor::TScintillaEditor()
 {
-    // To discern unused arguments.
-    const sptr_t nil = 0;
-
     // Block caret for both Insertion and Overwrite mode.
-    WndProc(SCI_SETCARETSTYLE, CARETSTYLE_BLOCK | CARETSTYLE_OVERSTRIKE_BLOCK, nil);
+    WndProc(SCI_SETCARETSTYLE, CARETSTYLE_BLOCK | CARETSTYLE_OVERSTRIKE_BLOCK, 0U);
     // Disable margin on line numbers.
     vs.marginNumberPadding = 0;
     // Disable margin pixels
-    WndProc(SCI_SETMARGINLEFT, nil, 0);
-    WndProc(SCI_SETMARGINRIGHT, nil, 0);
+    WndProc(SCI_SETMARGINLEFT, 0U, 0);
+    WndProc(SCI_SETMARGINRIGHT, 0U, 0);
     // Disable buffered fraw
-    WndProc(SCI_SETBUFFEREDDRAW, 0, nil);
+    WndProc(SCI_SETBUFFEREDDRAW, 0, 0U);
     // Disable space between lines
-    WndProc(SCI_SETEXTRADESCENT, -1, nil);
+    WndProc(SCI_SETEXTRADESCENT, -1, 0U);
     // Stay in Unicode mode (experimental).
-//     WndProc(SCI_SETCODEPAGE, SC_CHARSET_ANSI, nil);
+//     WndProc(SCI_SETCODEPAGE, SC_CHARSET_ANSI, 0U);
 //     WndProc(SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, SC_CHARSET_ANSI);
     // Set our custom representations.
     reprs.Clear();
@@ -49,7 +46,7 @@ TScintillaEditor::TScintillaEditor()
     // Always draw tabulators.
     WndProc(SCI_SETVIEWWS, SCWS_VISIBLEALWAYS, 0U);
     // Process mouse down events:
-    WndProc(SCI_SETMOUSEDOWNCAPTURES, true, nil);
+    WndProc(SCI_SETMOUSEDOWNCAPTURES, true, 0U);
     // Double clicks only in the same cell.
     doubleClickCloseThreshold = Point(0, 0);
     // Set our custom function to draw wrap markers.
