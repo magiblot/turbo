@@ -52,6 +52,8 @@ TScintillaEditor::TScintillaEditor()
     WndProc(SCI_SETMOUSEDOWNCAPTURES, true, nil);
     // Double clicks only in the same cell.
     doubleClickCloseThreshold = Point(0, 0);
+    // Set our custom function to draw wrap markers.
+    view.customDrawWrapMarker = drawWrapMarker;
 
     // Extra key shortcuts
     WndProc(SCI_ASSIGNCMDKEY, SCK_UP | ((SCMOD_CTRL | SCMOD_SHIFT) << 16), SCI_MOVESELECTEDLINESUP);
@@ -281,4 +283,14 @@ void TScintillaEditor::setWhitespaceColor(TCellAttribs attr)
 {
     WndProc(SCI_SETWHITESPACEFORE, true, TScintillaSurface::convertColor(attr).AsInteger());
     WndProc(SCI_SETWHITESPACEBACK, true, TScintillaSurface::convertColor(attr.bgGet()).AsInteger());
+}
+
+void TScintillaEditor::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour)
+{
+    auto *s = (TScintillaSurface *) surface;
+    Font f {};
+    if (isEndMarker) {
+        // Imitate the Tilde text editor.
+        s->DrawTextTransparent(rcPlace, f, rcPlace.bottom, "↵", wrapColour);
+    }
 }

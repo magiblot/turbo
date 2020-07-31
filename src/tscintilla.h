@@ -51,6 +51,7 @@ struct TScintillaEditor : public ScintillaBase {
     void setStyleColor(int style, TCellAttribs attr);
     void setSelectionColor(TCellAttribs attr);
     void setWhitespaceColor(TCellAttribs attr);
+    static void drawWrapMarker(Surface *, PRectangle, bool, ColourDesired);
 
     void setWindow(TDrawableView *wid);
     void setParent(TScintillaWindow *parent_);

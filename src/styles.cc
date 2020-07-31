@@ -27,7 +27,7 @@ enum Styles : uchar {
 static const TCellAttribs styleDefaults[] = {
     [sNormal]         = {0x07, afFgDefault | afBgDefault    },
     [sSelection]      = {0x71                               },
-    [sWhitespace]     = {0x08, afBgDefault                  },
+    [sWhitespace]     = {0x05, afBgDefault                  },
     [sCtrlChar]       = {0x0D, afBgDefault                  },
     [sLineNums]       = {0x06, afBgDefault                  },
     [sKeyword1]       = {0x0E, afBgDefault                  },

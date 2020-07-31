@@ -104,8 +104,9 @@ void EditorWindow::setUpEditor(bool openCanFail)
     editor.WndProc(SCI_SETFIRSTVISIBLELINE, 0, 0U);
     editor.draw(editorView);
 
-    // Enable linew wrapping (if appropiate) by default
+    // Enable line wrapping (if appropiate) by default
     wrap.toggle(editor, false);
+    editor.WndProc(SCI_SETWRAPVISUALFLAGS, SC_WRAPVISUALFLAG_END, 0U);
 
     // Clear the undo buffer created when loading the file,
     // if that's the case.
