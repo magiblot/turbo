@@ -83,6 +83,12 @@ inline void putLast(TNode *parent, TNode *child)
     *indirect = child;
 }
 
+inline void putFirst(TNode *parent, TNode *child)
+{
+    child->next = parent->childList ? parent->childList : 0;
+    parent->childList = child;
+}
+
 template <class Func>
 inline TNode* findChild(TNode *parent, Func &&test)
 {

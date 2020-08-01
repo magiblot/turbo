@@ -114,7 +114,7 @@ DirNode* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
             }
             return false;
         });
-        putLast(parent, dir);
+        putFirst(parent, dir);
     }
     return dir;
 }
