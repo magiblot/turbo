@@ -189,19 +189,6 @@ DocumentTreeWindow::~DocumentTreeWindow()
         *ptr = nullptr;
 }
 
-void DocumentTreeWindow::setState(ushort state, Boolean enable)
-{
-    TWindow::setState(state, enable);
-    if (state == sfFocused && !enable) {
-        // Put at the end of the list so that we don't get selected
-        // automatically.
-        auto *owner_ = owner;
-        owner_->remove(this);
-        owner_->insertBefore(this, owner_->last);
-    }
-
-}
-
 void DocumentTreeWindow::close()
 {
     message(TVEditApp::app, evCommand, cmToggleTree, 0);

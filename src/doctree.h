@@ -66,7 +66,6 @@ struct DocumentTreeWindow : public TWindow {
     DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow **ptr);
     ~DocumentTreeWindow();
 
-    void setState(ushort state, Boolean enable) override;
     void close() override;
 
 };
