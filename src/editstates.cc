@@ -14,6 +14,8 @@ static const const_unordered_map<std::string_view, int> mime2lex = {
     {"text/x-script.python",        SCLEX_PYTHON},
     {"application/json",            SCLEX_JSON},
     {"text/x-shellscript",          SCLEX_BASH},
+    {"text/x-makefile",             SCLEX_MAKEFILE},
+    {"text/x-diff",                 SCLEX_DIFF},
 };
 
 static const const_unordered_map<std::string_view, int> ext2lex = {
@@ -31,6 +33,33 @@ static const const_unordered_map<std::string_view, int> ext2lex = {
     {".hh",         SCLEX_CPP},
     {".hpp",        SCLEX_CPP},
     {".hxx",        SCLEX_CPP},
+    {".py",         SCLEX_PYTHON},
+    {".htm",        SCLEX_HTML},
+    {".html",       SCLEX_HTML},
+    {".mhtml",      SCLEX_HTML},
+    {".xml",        SCLEX_XML},
+    {".vb",         SCLEX_VB},
+    {".pl",         SCLEX_PERL},
+    {".pm",         SCLEX_PERL},
+    {".bat",        SCLEX_BATCH},
+    {".tex",        SCLEX_LATEX},
+    {".lua",        SCLEX_LUA},
+    {".diff",       SCLEX_DIFF},
+    {".ads",        SCLEX_ADA},
+    {".adb",        SCLEX_ADA},
+    {".lsp",        SCLEX_LISP},
+    {".rb",         SCLEX_RUBY},
+    {".tcl",        SCLEX_TCL},
+    {".vbs",        SCLEX_VBSCRIPT},
+    {".m",          SCLEX_MATLAB},
+    {".css",        SCLEX_CSS},
+    {".yaml",       SCLEX_YAML},
+    {".erl",        SCLEX_ERLANG},
+    {".hrl",        SCLEX_ERLANG},
+    {".st",         SCLEX_SMALLTALK},
+    {".md",         SCLEX_MARKDOWN},
+    {".rs",         SCLEX_RUST},
+    {".java",       SCLEX_CPP},
 };
 
 void FileType::detect(EditorWindow &win)

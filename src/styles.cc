@@ -87,9 +87,85 @@ static constexpr pair<uchar, const char *> keywordsC[] = {
 
 static constexpr pair<const char *, const char *> propertiesC[] = {
     {"styling.within.preprocessor",         "1"},
-    {"lexer.cpp.track.preprocessor",        "1"},
+    {"lexer.cpp.track.preprocessor",        "0"},
     {"lexer.cpp.escape.sequence",           "1"},
     {nullptr, nullptr},
+};
+
+
+static constexpr pair<uchar, Styles> stylesMake[] = {
+    {SCE_MAKE_DEFAULT,              sNormal},
+    {SCE_MAKE_COMMENT,              sComment},
+    {SCE_MAKE_TARGET,               sKeyword1},
+    {SCE_MAKE_IDENTIFIER,           sPreprocessor},
+    {SCE_MAKE_PREPROCESSOR,         sPreprocessor},
+    {SCE_MAKE_OPERATOR,             sOperator},
+    {(uchar) -1, {}},
+};
+
+static constexpr pair<uchar, Styles> stylesAsm[] = {
+    {SCE_ASM_DEFAULT,               sNormal},
+    {SCE_ASM_COMMENT,               sComment},
+    {SCE_ASM_COMMENTBLOCK,          sComment},
+    {SCE_ASM_NUMBER,                sNumberLiteral},
+    {SCE_ASM_CPUINSTRUCTION,        sKeyword1},
+    {SCE_ASM_MATHINSTRUCTION,       sKeyword1},
+    {SCE_ASM_STRING,                sStringLiteral},
+    {SCE_ASM_CHARACTER,             sCharLiteral},
+    {SCE_ASM_DIRECTIVE,             sPreprocessor},
+    {(uchar) -1, {}},
+};
+
+static constexpr pair<uchar, Styles> stylesCoffeeScript[] = {
+    {SCE_C_DEFAULT,                 sNormal},
+    {SCE_COFFEESCRIPT_COMMENT,      sComment},
+    {SCE_COFFEESCRIPT_COMMENTLINE,  sComment},
+    {SCE_COFFEESCRIPT_COMMENTDOC,   sComment},
+    {SCE_COFFEESCRIPT_NUMBER,       sNumberLiteral},
+    {SCE_COFFEESCRIPT_WORD,         sKeyword1},
+    {SCE_COFFEESCRIPT_STRING,       sStringLiteral},
+    {SCE_COFFEESCRIPT_CHARACTER,    sCharLiteral},
+    {SCE_COFFEESCRIPT_PREPROCESSOR, sPreprocessor},
+    {SCE_COFFEESCRIPT_OPERATOR,     sOperator},
+    {SCE_COFFEESCRIPT_COMMENTLINEDOC,sComment},
+    {SCE_COFFEESCRIPT_WORD2,        sKeyword2},
+    {SCE_COFFEESCRIPT_GLOBALCLASS,  sGlobals},
+    {SCE_COFFEESCRIPT_COMMENTBLOCK, sComment},
+    {(uchar) -1, {}},
+};
+
+static constexpr pair<uchar, Styles> stylesRust[] = {
+    {SCE_RUST_DEFAULT,              sNormal},
+    {SCE_RUST_COMMENTBLOCK,         sComment},
+    {SCE_RUST_COMMENTLINE,          sComment},
+    {SCE_RUST_COMMENTBLOCKDOC,      sComment},
+    {SCE_RUST_COMMENTLINEDOC,       sComment},
+    {SCE_RUST_NUMBER,               sNumberLiteral},
+    {SCE_RUST_WORD,                 sKeyword1},
+    {SCE_RUST_WORD2,                sKeyword2},
+    {SCE_RUST_STRING,               sStringLiteral},
+    {SCE_RUST_STRINGR,              sStringLiteral},
+    {SCE_RUST_CHARACTER,            sCharLiteral},
+    {SCE_RUST_MACRO,                sPreprocessor},
+    {SCE_RUST_OPERATOR,             sOperator},
+    {SCE_RUST_LIFETIME,             sGlobals},
+    {SCE_RUST_BYTESTRING,           sEscapeSequence},
+    {SCE_RUST_BYTESTRINGR,          sEscapeSequence},
+    {SCE_RUST_BYTECHARACTER,        sEscapeSequence},
+    {(uchar) -1, {}},
+};
+
+static constexpr pair<uchar, const char *> keywordsRust[] = {
+    {0,
+"as break const continue crate dyn else enum extern false fn for if impl in let "
+"loop match mod move mut pub ref return self Self static struct super trait true "
+"type unsafe use where while "
+    },
+    {1,
+"bool u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64 usize isize char str Pair "
+"Box String List"
+    },
+    {(uchar) -1, nullptr},
 };
 
 struct LexerInfo {
@@ -100,6 +176,10 @@ struct LexerInfo {
 
 static const const_unordered_map<uchar, LexerInfo> lexerStyles = {
     {SCLEX_CPP, {stylesC, keywordsC, propertiesC}},
+    {SCLEX_MAKEFILE, {stylesMake, nullptr, nullptr}},
+    {SCLEX_ASM, {stylesAsm, nullptr, nullptr}},
+    {SCLEX_COFFEESCRIPT, {stylesCoffeeScript, nullptr, nullptr}},
+    {SCLEX_RUST, {stylesRust, keywordsRust, nullptr}},
 };
 
 void loadLexer(int lexerId, EditorWindow &win)
