@@ -73,7 +73,6 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
         if (r.b.x > 30)
             r.b.x = 30;
         docTree = new DocumentTreeWindow(r, &docTree);
-        docTree->options |= ofFirstClick;
         docTree->flags &= ~wfZoom;
         docTree->growMode = 0;
         deskTop->insert(docTree);
