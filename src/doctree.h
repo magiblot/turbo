@@ -73,10 +73,12 @@ struct DocumentTreeWindow : public TWindow {
 inline void remove(TNode *parent, TNode *child)
 {
     auto **indirect = &parent->childList;
-    while (*indirect != child)
+    while (*indirect && *indirect != child)
         indirect = &(*indirect)->next;
-    *indirect = child->next;
-    child->next = 0;
+    if (*indirect == child) {
+        *indirect = child->next;
+        child->next = 0;
+    }
 }
 
 inline void putLast(TNode *parent, TNode *child)
