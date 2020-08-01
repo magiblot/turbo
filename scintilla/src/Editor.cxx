@@ -3980,10 +3980,10 @@ void Editor::Indent(bool forwards) {
 						const Sci::Position lengthInserted = pdoc->InsertString(caretPosition, "\t", 1);
 						sel.Range(r) = SelectionRange(caretPosition + lengthInserted);
 					} else {
-						int numSpaces = (pdoc->tabInChars) -
-								(pdoc->GetColumn(caretPosition) % (pdoc->tabInChars));
+						int numSpaces = (pdoc->IndentSize()) -
+								(pdoc->GetColumn(caretPosition) % (pdoc->IndentSize()));
 						if (numSpaces < 1)
-							numSpaces = pdoc->tabInChars;
+							numSpaces = pdoc->IndentSize();
 						const std::string spaceText(numSpaces, ' ');
 						const Sci::Position lengthInserted = pdoc->InsertString(caretPosition, spaceText.c_str(),
 							spaceText.length());
