@@ -65,6 +65,7 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     commandSet += cmFind;
     commandSet += cmSearchAgain;
     commandSet += cmSearchPrev;
+    commandSet += cmToggleIndent;
 
     setUpEditor(openCanFail);
 }
@@ -208,6 +209,9 @@ void EditorWindow::handleEvent(TEvent &ev) {
                 lineNumbers.toggle();
                 redrawEditor();
                 break;
+            case cmToggleIndent:
+                indent.toggle();
+                break;
             default:
                 handled = false;
         }
@@ -335,6 +339,9 @@ void EditorWindow::notify(SCNotification scn)
     switch (scn.nmhdr.code) {
         case SCN_SAVEPOINTLEFT: setSavePointLeft(); break;
         case SCN_SAVEPOINTREACHED: setSavePointReached(); break;
+        case SCN_CHARADDED:
+            if (scn.ch == '\n')
+                indent.autoIndentCurrentLine(editor);
     }
 }
 

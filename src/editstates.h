@@ -113,4 +113,30 @@ struct FileType {
 
 };
 
+struct Indent {
+
+    bool autoIndent {true};
+
+    void toggle()
+    {
+        autoIndent = !autoIndent;
+    }
+
+    void autoIndentCurrentLine(Scintilla::TScintillaEditor &editor)
+    {
+        if (autoIndent) {
+            auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
+            auto line = editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U);
+            if (line > 0) {
+                auto indentation = editor.WndProc(SCI_GETLINEINDENTATION, line - 1, 0U);
+                if (indentation > 0) {
+                    editor.WndProc(SCI_SETLINEINDENTATION, line, indentation);
+                    editor.WndProc(SCI_VCHOME, 0U, 0U);
+                }
+            }
+        }
+    }
+
+};
+
 #endif

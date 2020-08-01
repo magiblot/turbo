@@ -46,6 +46,7 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     ts += cmReplace;
     ts += cmSearchAgain;
     ts += cmSearchPrev;
+    ts += cmToggleIndent;
     disableCommands(ts);
 
     // Actions that only make sense when there is at least one editor.
@@ -108,6 +109,7 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
         *new TSubMenu( "~S~ettings", kbAltS ) +
             *new TMenuItem( "Toggle Line ~N~umbers", cmToggleLineNums, kbF8, hcNoContext, "F8" ) +
             *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" ) +
+            *new TMenuItem( "Toggle Auto ~I~ndent", cmToggleIndent, kbNoKey, hcNoContext ) +
             *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext )
             );
 

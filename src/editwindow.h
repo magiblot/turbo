@@ -38,6 +38,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     LineNumbersWidth lineNumbers;
     WrapMode wrap;
     FileType type;
+    Indent indent;
 
     // Scintilla
 

@@ -21,7 +21,8 @@ const ushort
     cmEditorPrev    = 102,
     cmToggleWrap    = 103,
     cmToggleLineNums= 104,
-    cmSearchPrev    = 105;
+    cmSearchPrev    = 105,
+    cmToggleIndent  = 106;
 
 // Commands that cannot be deactivated.
 const ushort
