@@ -10,7 +10,7 @@ const callback_t *DocumentTreeView::searchCallback {nullptr};
 
 
 DirNode::DirNode() :
-    TNode(""),
+    TNode("\xC2"),
     parent(nullptr)
 {
 }
