@@ -11,6 +11,8 @@
 #define Uses_TFrame
 #define Uses_TFileDialog
 #define Uses_TIndicator
+#define Uses_TStaticText
+#define Uses_TParamText
 #include <tvision/tv.h>
 
 #include <fmt/core.h>
@@ -193,8 +195,23 @@ void TVEditApp::shell()
 void TVEditApp::parseArgs()
 {
     if (argc && argv) {
-        for (int i = 1; i < argc; ++i)
+        auto *w = new TWindow(TRect(15, 8, 65, 19), "Please Wait...", wnNoNumber);
+        w->flags = 0;
+        w->options |= ofCentered;
+        w->palette = wpGrayWindow;
+        w->insert( new TStaticText(TRect(2, 2, 48, 3), "Opening file:"));
+        auto *current = new TParamText(TRect(2, 3, 48, 9));
+        w->insert(current);
+        insert(w);
+        for (int i = 1; i < argc; ++i) {
+            char str[256] = {0}; // TParamText is limited to this size.
+            strncpy(str, argv[i], 255);
+            current->setText(str);
+            TScreen::flushScreen();
             openEditor(argv[i], true);
+        }
+        remove(w);
+        TObject::destroy(w);
     }
 }
 
