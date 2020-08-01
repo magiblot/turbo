@@ -295,11 +295,17 @@ void TVEditApp::addEditor(EditorWindow *w)
 void TVEditApp::removeEditor(EditorWindow *w)
 {
     --getFileCounter(w->file.native());
-    if (docTree)
-        docTree->tree->removeEditor(w);
     --editorCount;
     if (!editorCount)
         disableCommands(editorCmds);
+    if (docTree) {
+        docTree->tree->removeEditor(w);
+        // We need to set the focus again as it had already been set before
+        // removing the editor, and so it would stay on the same position
+        // but not on the same element.
+        if (editorCount)
+            docTree->tree->focusEditor(MRUlist.next->self);
+    }
 }
 
 void TVEditApp::showEditorList(TEvent *ev)
