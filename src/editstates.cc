@@ -6,7 +6,10 @@
 // File type detection
 
 #include "util.h"
+
+#ifdef HAVE_MAGIC
 #include <magic.h>
+#endif
 
 static const const_unordered_map<std::string_view, int> mime2lex = {
     {"text/x-c++",                  SCLEX_CPP},
@@ -67,8 +70,12 @@ void FileType::detect(EditorWindow &win)
     auto &file = win.file;
     int lexer = 0;
     int encoding = 0;
-#ifdef HAVE_MAGIC
     {
+        auto &&ext = file.extension();
+        lexer = ext2lex[ext.native()];
+    }
+#ifdef HAVE_MAGIC
+    if (!lexer) {
         magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
         if (magic_cookie) {
             if (magic_load(magic_cookie, nullptr) == 0)
@@ -88,11 +95,6 @@ void FileType::detect(EditorWindow &win)
         magic_close(magic_cookie);
     }
 #endif
-    if (!lexer) {
-        auto &&ext = file.extension();
-        lexer = ext2lex[ext.native()];
-    }
-
     if (!lexer)
         lexer = SCLEX_NULL;
     else
