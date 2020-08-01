@@ -69,7 +69,6 @@ void DocumentTreeView::focusEditor(EditorWindow *w)
     int i;
     if (findFirst(hasEditor(w, &i)))
         focused(i);
-    update();
     drawView();
 }
 
@@ -80,6 +79,35 @@ void DocumentTreeView::removeEditor(EditorWindow *w)
         update();
         drawView();
     };
+}
+
+void DocumentTreeView::focusNext()
+{
+    findFirst([this] (auto *node, auto pos) {
+        if (dynamic_cast<FileNode*>(node) && pos > foc) {
+            focused(pos);
+            drawView();
+            return true;
+        }
+        return false;
+    });
+}
+
+void DocumentTreeView::focusPrev()
+{
+    int prevPos = -1;
+    findFirst([this, &prevPos] (auto *node, auto pos) {
+        if (dynamic_cast<FileNode*>(node)) {
+            if (pos < foc)
+                prevPos = pos;
+            else if (prevPos > 0) {
+                focused(prevPos);
+                drawView();
+                return true;
+            }
+        }
+        return false;
+    });
 }
 
 DirNode* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)

@@ -49,6 +49,8 @@ struct DocumentTreeView : public TOutline {
     void addEditor(EditorWindow *w);
     void focusEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
+    void focusNext();
+    void focusPrev();
     DirNode *getDirNode(const std::filesystem::path &dirPath);
     TNode *findFirst(const callback_t &cb);
     static Boolean applyCallback(TOutlineViewer *, TNode *, int, int, long, ushort);

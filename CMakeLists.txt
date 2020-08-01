@@ -53,6 +53,7 @@ target_include_directories(tvedit PRIVATE
 target_sources(tvedit PRIVATE
     "src/app.cc"
     "src/main.cc"
+    "src/doctree.cc"
     "src/docview.cc"
     "src/drawviews.cc"
     "src/editstates.cc"

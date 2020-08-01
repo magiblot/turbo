@@ -22,7 +22,9 @@ const ushort
     cmToggleWrap    = 103,
     cmToggleLineNums= 104,
     cmSearchPrev    = 105,
-    cmToggleIndent  = 106;
+    cmToggleIndent  = 106,
+    cmTreeNext      = 107,
+    cmTreePrev      = 108;
 
 // Commands that cannot be deactivated.
 const ushort

@@ -52,6 +52,8 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     // Actions that only make sense when there is at least one editor.
     editorCmds += cmEditorNext;
     editorCmds += cmEditorPrev;
+    editorCmds += cmTreeNext;
+    editorCmds += cmTreePrev;
     editorCmds += cmCloseAll;
     disableCommands(editorCmds);
 
@@ -106,6 +108,8 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
             *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +
             *new TMenuItem( "~N~ext", cmEditorNext, kbF6, hcNoContext, "F6" ) +
             *new TMenuItem( "~P~revious", cmEditorPrev, kbShiftF6, hcNoContext, "Shift-F6" ) +
+            *new TMenuItem( "Previous (in tree)", cmTreePrev, kbAltUp, hcNoContext, "Alt-Up" ) +
+            *new TMenuItem( "Next (in tree)", cmTreeNext, kbAltDown, hcNoContext, "Alt-Down" ) +
         *new TSubMenu( "~S~ettings", kbAltS ) +
             *new TMenuItem( "Toggle Line ~N~umbers", cmToggleLineNums, kbF8, hcNoContext, "F8" ) +
             *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" ) +
@@ -160,6 +164,14 @@ void TVEditApp::handleEvent(TEvent &event)
                 break;
             case cmCloseAll: closeAll(); break;
             case cmToggleTree: toggleTreeView(); break;
+            case cmTreeNext:
+                if (docTree)
+                    docTree->tree->focusNext();
+                break;
+            case cmTreePrev:
+                if (docTree)
+                    docTree->tree->focusPrev();
+                break;
             default:
                 handled = false;
                 break;
