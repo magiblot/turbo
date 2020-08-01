@@ -72,6 +72,15 @@ struct list_head
         next = prev = 0;
     }
 
+    template<class Func>
+    void forEach(Func &&callback) {
+        list_head *head = next;
+        while (head != this) {
+            callback(head->self);
+            head = head->next;
+        }
+    }
+
 };
 
 template<typename T>

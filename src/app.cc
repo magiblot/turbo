@@ -21,6 +21,7 @@
 #include "util.h"
 #include "widgets.h"
 #include "listviews.h"
+#include "doctree.h"
 
 using namespace Scintilla;
 using namespace std::literals;
@@ -60,6 +61,21 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     clock = new TClockView(r);
     clock->growMode = gfGrowLoX | gfGrowHiX;
     insert(clock);
+
+    // Create the document tree view
+    {
+        TRect r = deskTop->getExtent();
+        if (r.b.x > 30)
+            r.b.x = 30;
+        docTree = new DocumentTreeWindow(r, &docTree);
+        docTree->options |= ofFirstClick;
+        docTree->flags &= ~wfZoom;
+        docTree->growMode = 0;
+        deskTop->insert(docTree);
+        // Show by default only on large terminals.
+        if (deskTop->size.x < 90)
+            docTree->hide();
+    }
 }
 
 TMenuBar *TVEditApp::initMenuBar(TRect r)
@@ -91,7 +107,8 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
             *new TMenuItem( "~P~revious", cmEditorPrev, kbShiftF6, hcNoContext, "Shift-F6" ) +
         *new TSubMenu( "~S~ettings", kbAltS ) +
             *new TMenuItem( "Toggle Line ~N~umbers", cmToggleLineNums, kbF8, hcNoContext, "F8" ) +
-            *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" )
+            *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" ) +
+            *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext )
             );
 
 }
@@ -140,6 +157,7 @@ void TVEditApp::handleEvent(TEvent &event)
                 showEditorList(&event);
                 break;
             case cmCloseAll: closeAll(); break;
+            case cmToggleTree: toggleTreeView(); break;
             default:
                 handled = false;
                 break;
@@ -185,7 +203,8 @@ void TVEditApp::fileOpen()
 
 bool TVEditApp::openEditor(std::string_view fileName, bool canFail)
 {
-    EditorWindow *w = new EditorWindow(deskTop->getExtent(), fileName, canFail);
+    TRect r = adjustEditorBounds(deskTop->getExtent());
+    EditorWindow *w = new EditorWindow(r, fileName, canFail);
     w = (EditorWindow *) validView(w);
     if (w)
         addEditor(w);
@@ -204,13 +223,27 @@ void TVEditApp::closeAll()
     }
 }
 
+TRect TVEditApp::adjustEditorBounds(TRect r)
+{
+    if (docTree->state & sfVisible) {
+        TRect t = docTree->getBounds();
+        // Align left.
+        if (t.a.x > r.b.x - t.b.x)
+            r.b.x = max(t.a.x, EditorWindow::minEditWinSize.x);
+        // Align right.
+        else
+            r.a.x = min(t.b.x, r.b.x - EditorWindow::minEditWinSize.x);
+    }
+    return r;
+}
+
 void TVEditApp::setEditorTitle(EditorWindow *w)
 {
     uint number;
-    std::string_view file = w->file.native();
+    auto &&file = w->file.filename();
     if (!file.empty()) {
         w->title.assign(file);
-        number = ++getFileCounter(file);
+        number = ++getFileCounter(file.native());
     } else {
         w->title.assign("Untitled"s);
         number = ++fileCount[{}];
@@ -224,6 +257,11 @@ void TVEditApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
 {
     --getFileCounter(prevFile);
     setEditorTitle(w);
+    if (docTree) {
+        docTree->tree->removeEditor(w);
+        docTree->tree->addEditor(w);
+        docTree->tree->focusEditor(w);
+    }
     if (!w->file.empty())
         mostRecentDir = w->file.parent_path();
 }
@@ -245,6 +283,8 @@ active_counter& TVEditApp::getFileCounter(std::string_view file)
 void TVEditApp::addEditor(EditorWindow *w)
 {
     setEditorTitle(w);
+    if (docTree)
+        docTree->tree->addEditor(w);
     w->MRUhead.insert_after(&MRUlist);
     deskTop->insert(w);
     if (!editorCount)
@@ -255,6 +295,8 @@ void TVEditApp::addEditor(EditorWindow *w)
 void TVEditApp::removeEditor(EditorWindow *w)
 {
     --getFileCounter(w->file.native());
+    if (docTree)
+        docTree->tree->removeEditor(w);
     --editorCount;
     if (!editorCount)
         disableCommands(editorCmds);
@@ -279,10 +321,37 @@ void TVEditApp::showEditorList(TEvent *ev)
     destroy(lw);
 }
 
+void TVEditApp::toggleTreeView()
+{
+    if (docTree->state & sfVisible) {
+        docTree->hide();
+        TRect dr = docTree->getBounds();
+        MRUlist.forEach([dr] (auto *win) {
+            TRect r = win->getBounds();
+            if (r.a.x == dr.b.x)
+                r.a.x = dr.a.x;
+            else if (r.b.x == dr.a.x)
+                r.b.x = dr.b.x;
+            win->locate(r);
+        });
+    } else {
+        deskTop->lock();
+        docTree->show();
+        MRUlist.forEach([this] (auto *win) {
+            TRect r = win->getBounds();
+            r = adjustEditorBounds(r);
+            win->locate(r);
+        });
+        deskTop->unlock();
+    }
+}
+
 void TVEditApp::setFocusedEditor(EditorWindow *w)
 {
     // w has been focused, so it becomes the first of our MRU list.
     w->MRUhead.insert_after(&MRUlist);
+    if (docTree)
+        docTree->tree->focusEditor(w);
     // We keep track of the most recent directory for file dialogs.
     if (!w->file.empty())
         mostRecentDir = w->file.parent_path();

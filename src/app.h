@@ -10,6 +10,7 @@
 #include <vector>
 #include <filesystem>
 #include "util.h"
+#include "doctree.h"
 
 class EditorWindow;
 class TClockView;
@@ -22,6 +23,10 @@ const ushort
     cmToggleLineNums= 104,
     cmSearchPrev    = 105;
 
+// Commands that cannot be deactivated.
+const ushort
+    cmToggleTree    = 1000;
+
 struct TVEditApp : public TApplication {
 
     std::unordered_map<std::string_view, active_counter> fileCount;
@@ -29,6 +34,7 @@ struct TVEditApp : public TApplication {
     list_head<EditorWindow> MRUlist;
     uint editorCount {0};
     TClockView *clock;
+    DocumentTreeWindow *docTree;
     TCommandSet editorCmds;
     bool argsParsed {false};
     int argc;
@@ -52,6 +58,7 @@ struct TVEditApp : public TApplication {
     void fileSave();
     bool openEditor(std::string_view fileName, bool canFail=false);
     void closeAll();
+    TRect adjustEditorBounds(TRect r);
     void setEditorTitle(EditorWindow *w);
     void updateEditorTitle(EditorWindow *w, std::string_view prevFile);
     active_counter& getFileCounter(std::string_view file);
@@ -59,6 +66,7 @@ struct TVEditApp : public TApplication {
     void removeEditor(EditorWindow *w);
 
     void showEditorList(TEvent *ev);
+    void toggleTreeView();
 
     // The path of the most recently focused editor, so that file dialogs
     // are opened there.

@@ -1,6 +1,7 @@
 #define Uses_TLabel
 #define Uses_TIndicator
 #define Uses_TButton
+#define Uses_TFrame
 #include <tvision/tv.h>
 
 #include "app.h"
