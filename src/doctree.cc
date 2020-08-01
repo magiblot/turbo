@@ -1,5 +1,6 @@
 #include "doctree.h"
 #include "editwindow.h"
+#include "app.h"
 
 const void *DocumentTreeView::searchArg {nullptr};
 void *DocumentTreeView::searchResult {nullptr};
@@ -169,5 +170,5 @@ void DocumentTreeWindow::setState(ushort state, Boolean enable)
 
 void DocumentTreeWindow::close()
 {
-    hide(); // This window cannot be closed.
+    message(TVEditApp::app, evCommand, cmToggleTree, 0);
 }

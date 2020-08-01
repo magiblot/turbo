@@ -74,7 +74,7 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
         docTree->growMode = 0;
         deskTop->insert(docTree);
         // Show by default only on large terminals.
-        if (deskTop->size.x < 90)
+        if (deskTop->size.x < 100)
             docTree->hide();
     }
 }
@@ -334,12 +334,12 @@ void TVEditApp::toggleTreeView()
     if (docTree->state & sfVisible) {
         docTree->hide();
         TRect dr = docTree->getBounds();
-        MRUlist.forEach([dr] (auto *win) {
+        MRUlist.forEach([this, dr] (auto *win) {
             TRect r = win->getBounds();
-            if (r.a.x == dr.b.x)
-                r.a.x = dr.a.x;
-            else if (r.b.x == dr.a.x)
-                r.b.x = dr.b.x;
+            if (r.a.x >= dr.b.x)
+                r.a.x -= docTree->size.x;
+            else if (r.b.x <= dr.a.x)
+                r.b.x += docTree->size.x;
             win->locate(r);
         });
     } else {
