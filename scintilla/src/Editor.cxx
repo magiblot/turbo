@@ -3990,23 +3990,10 @@ void Editor::Indent(bool forwards) {
 						sel.Range(r) = SelectionRange(caretPosition + lengthInserted);
 					}
 				}
-			} else {
-				if (pdoc->GetColumn(caretPosition) <= pdoc->GetLineIndentation(lineCurrentPos) &&
-						pdoc->tabIndents) {
-					const int indentation = pdoc->GetLineIndentation(lineCurrentPos);
-					const int indentationStep = pdoc->IndentSize();
-					const Sci::Position posSelect = pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
-					sel.Range(r) = SelectionRange(posSelect);
-				} else {
-					Sci::Position newColumn = ((pdoc->GetColumn(caretPosition) - 1) / pdoc->tabInChars) *
-							pdoc->tabInChars;
-					if (newColumn < 0)
-						newColumn = 0;
-					Sci::Position newPos = caretPosition;
-					while (pdoc->GetColumn(newPos) > newColumn)
-						newPos--;
-					sel.Range(r) = SelectionRange(newPos);
-				}
+			} else if (pdoc->backspaceUnindents) {
+				const int indentation = pdoc->GetLineIndentation(lineCurrentPos);
+				const int indentationStep = pdoc->IndentSize();
+				pdoc->SetLineIndentation(lineCurrentPos, indentation - indentationStep);
 			}
 		} else {	// Multiline
 			const Sci::Position anchorPosOnLine = sel.Range(r).anchor.Position() -
