@@ -2,11 +2,12 @@
 #include "editwindow.h"
 #include "app.h"
 
-const void *DocumentTreeView::searchArg {nullptr};
-void *DocumentTreeView::searchResult {nullptr};
-
 using DirNode = DocumentTreeView::DirNode;
 using FileNode = DocumentTreeView::FileNode;
+using callback_t = DocumentTreeView::callback_t;
+
+const callback_t *DocumentTreeView::searchCallback {nullptr};
+
 
 DirNode::DirNode() :
     TNode(""),
@@ -66,25 +67,19 @@ void DocumentTreeView::addEditor(EditorWindow *w)
 void DocumentTreeView::focusEditor(EditorWindow *w)
 {
     int i;
-    searchArg = w;
-    searchResult = &i;
-    if (firstThat(hasEditor))
+    if (findFirst(hasEditor(w, &i)))
         focused(i);
-    searchArg = nullptr;
-    searchResult = nullptr;
     update();
     drawView();
 }
 
 void DocumentTreeView::removeEditor(EditorWindow *w)
 {
-    searchArg = w;
-    if (auto *f = (FileNode *) firstThat(hasEditor)) {
+    if (auto *f = (FileNode *) findFirst(hasEditor(w))) {
         f->dispose();
         update();
         drawView();
     };
-    searchArg = nullptr;
 }
 
 DirNode* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
@@ -93,9 +88,11 @@ DirNode* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
     DirNode *parent;
     {
         auto &&parentPath = dirPath.parent_path();
-        searchArg = &parentPath;
-        parent = (DirNode *) firstThat(isSameDir);
-        searchArg = nullptr;
+        auto &&cb = [&parentPath] (auto *node, ...) {
+            auto *dir = dynamic_cast<DirNode *>(node);
+            return dir && dir->path == parentPath;
+        };
+        parent = (DirNode *) findFirst(std::move(cb));
     }
     if (!parent)
         parent = (DirNode *) root;
@@ -120,21 +117,30 @@ DirNode* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
     return dir;
 }
 
-Boolean DocumentTreeView::isSameDir(TOutlineViewer *, TNode *node, int, int, long, ushort)
+TNode *DocumentTreeView::findFirst(const callback_t &cb)
 {
-    auto *dir = dynamic_cast<DirNode *>(node);
-    return Boolean(dir && dir->path == *(const std::filesystem::path *) searchArg);
+    searchCallback = &cb;
+    auto *ret = firstThat(applyCallback);
+    searchCallback = nullptr;
+    return ret;
 }
 
-Boolean DocumentTreeView::hasEditor(TOutlineViewer *, TNode *node, int, int position, long, ushort)
+Boolean DocumentTreeView::applyCallback(TOutlineViewer *, TNode *node, int, int position, long, ushort)
 {
-    auto *file = dynamic_cast<FileNode *>(node);
-    if (file && file->w == (EditorWindow *) searchArg) {
-        if (searchResult)
-            *(int *) searchResult = position;
-        return True;
-    }
-    return False;
+    return Boolean((*searchCallback)(node, position));
+}
+
+callback_t DocumentTreeView::hasEditor(const EditorWindow *w, int *pos)
+{
+    return [w, pos] (auto *node, auto position) {
+        auto *file = dynamic_cast<FileNode *>(node);
+        if (file && file->w == w) {
+            if (pos)
+                *pos = position;
+            return true;
+        }
+        return false;
+    };
 }
 
 DocumentTreeWindow::DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow **ptr) :

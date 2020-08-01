@@ -6,6 +6,7 @@
 #include <tvision/tv.h>
 
 #include <filesystem>
+#include <functional>
 
 struct EditorWindow;
 
@@ -33,12 +34,13 @@ struct DocumentTreeView : public TOutline {
 
     };
 
-    // The limited TOutline interface does not allow providing custom
-    // parameters to seach functions, so we store them externally.
-    // This doesn't support concurrent searches.
+    typedef std::function<bool(TNode *, int)> callback_t;
 
-    static const void *searchArg;
-    static void *searchResult;
+    // The limited TOutline interface does not allow providing custom
+    // parameters to search functions, so we must store them externally.
+    // This is not thread-safe.
+
+    static const callback_t *searchCallback;
 
     using TOutline::TOutline;
 
@@ -48,8 +50,9 @@ struct DocumentTreeView : public TOutline {
     void focusEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
     DirNode *getDirNode(const std::filesystem::path &dirPath);
-    static Boolean isSameDir(TOutlineViewer *, TNode *, int, int, long, ushort);
-    static Boolean hasEditor(TOutlineViewer *, TNode *, int, int, long, ushort);
+    TNode *findFirst(const callback_t &cb);
+    static Boolean applyCallback(TOutlineViewer *, TNode *, int, int, long, ushort);
+    static callback_t hasEditor(const EditorWindow *node, int *pos=nullptr);
 
 };
 
