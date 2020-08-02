@@ -123,7 +123,7 @@ void DocumentTreeView::focusPrev()
         if (((Node *) node)->hasEditor()) {
             if (pos < foc)
                 prevPos = pos;
-            else if (prevPos > 0) {
+            else if (prevPos >= 0) {
                 focused(prevPos);
                 drawView();
                 return true;
