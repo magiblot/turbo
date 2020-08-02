@@ -75,6 +75,7 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
         docTree = new DocumentTreeWindow(r, &docTree);
         docTree->flags &= ~wfZoom;
         docTree->growMode = 0;
+        docTree->setState(sfShadow, False);
         deskTop->insert(docTree);
         // Show by default only on large terminals.
         if (deskTop->size.x < 100)
