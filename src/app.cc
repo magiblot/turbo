@@ -247,6 +247,7 @@ void TVEditApp::closeAll()
     while (head != &MRUlist) {
         auto *next = head->next;
         message((EditorWindow *) head->self, evCommand, cmClose, 0);
+        TScreen::flushScreen();
         if (next->prev == head) // Not removed
             break;
         head = next;
