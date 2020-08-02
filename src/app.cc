@@ -13,6 +13,7 @@
 #define Uses_TIndicator
 #define Uses_TStaticText
 #define Uses_TParamText
+#define Uses_TScreen
 #include <tvision/tv.h>
 
 #include <fmt/core.h>

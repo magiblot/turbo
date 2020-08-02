@@ -69,7 +69,7 @@ void FileType::detect(EditorWindow &win)
 {
     auto &file = win.file;
     int lexer = 0;
-    int encoding = 0;
+    [[maybe_unused]] int encoding = 0;
     {
         auto &&ext = file.extension();
         lexer = ext2lex[ext.native()];

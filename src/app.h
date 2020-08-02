@@ -92,7 +92,7 @@ inline void TVEditApp::openFileDialog( const char *aWildCard, const char *aTitle
                                        uchar histId, Func &&callback )
 {
     // Unfortunately, TFileDialog relies on the current directory.
-    chdir(mostRecentDir.c_str());
+    [[maybe_unused]] int rr = chdir(mostRecentDir.c_str());
     auto *dialog = new TFileDialog( aWildCard, aTitle,
                                     inputName, aOptions,
                                     histId );
