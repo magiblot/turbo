@@ -7,29 +7,24 @@
 
 #include <filesystem>
 #include <functional>
+#include <variant>
 
 struct EditorWindow;
 
 struct DocumentTreeView : public TOutline {
 
-    struct DirNode : public TNode {
+    struct Node : public TNode {
 
-        DirNode *parent;
-        const std::filesystem::path path;
+        TNode **ptr;
+        Node *parent;
+        std::variant<std::filesystem::path, EditorWindow *> data;
 
-        DirNode();
-        DirNode(DirNode *parent, const std::filesystem::path &path);
-        void remove(TNode *child);
-        void dispose();
-
-    };
-
-    struct FileNode : public TNode {
-
-        DirNode *dir;
-        EditorWindow *w;
-
-        FileNode(DirNode *dir, EditorWindow *w);
+        Node(Node *parent, const std::filesystem::path &path);
+        Node(Node *parent, EditorWindow *w);
+        bool hasEditor() const;
+        EditorWindow* getEditor();
+        void setParent(Node *parent);
+        void remove();
         void dispose();
 
     };
@@ -51,10 +46,11 @@ struct DocumentTreeView : public TOutline {
     void removeEditor(EditorWindow *w);
     void focusNext();
     void focusPrev();
-    DirNode *getDirNode(const std::filesystem::path &dirPath);
+    Node *getDirNode(const std::filesystem::path &dirPath);
     TNode *findFirst(const callback_t &cb);
     static Boolean applyCallback(TOutlineViewer *, TNode *, int, int, long, ushort);
     static callback_t hasEditor(const EditorWindow *node, int *pos=nullptr);
+    static callback_t hasPath(const std::filesystem::path &path, int *pos=nullptr);
 
 };
 
@@ -70,39 +66,35 @@ struct DocumentTreeWindow : public TWindow {
 
 };
 
-inline void remove(TNode *parent, TNode *child)
+inline void putLast(TNode **indirect, DocumentTreeView::Node *node)
 {
-    auto **indirect = &parent->childList;
-    while (*indirect && *indirect != child)
-        indirect = &(*indirect)->next;
-    if (*indirect == child) {
-        *indirect = child->next;
-        child->next = 0;
-    }
-}
-
-inline void putLast(TNode *parent, TNode *child)
-{
-    auto **indirect = &parent->childList;
+    // Warning: if you want to change the parent of a node, use
+    // setParent() instead. Otherwise, node->parent will be a dangling pointer.
+    node->next = nullptr;
     while (*indirect)
         indirect = &(*indirect)->next;
-    *indirect = child;
+    *indirect = node;
+    node->ptr = indirect;
 }
 
-inline void putFirst(TNode *parent, TNode *child)
+inline void putFirst(TNode **indirect, DocumentTreeView::Node *node)
 {
-    child->next = parent->childList ? parent->childList : 0;
-    parent->childList = child;
+    node->next = *indirect;
+    if (*indirect)
+        ((DocumentTreeView::Node *) *indirect)->ptr = &node->next;
+    *indirect = node;
+    node->ptr = indirect;
 }
 
 template <class Func>
-inline TNode* findChild(TNode *parent, Func &&test)
+inline TNode* findInList(TNode **list, Func &&test)
 {
-    auto *node = parent->childList;
+    auto *node = *list;
     while (node) {
-        if (test(node))
+        auto *next = node->next;
+        if (test((DocumentTreeView::Node *) node))
             return node;
-        node = node->next;
+        node = next;
     }
     return nullptr;
 }

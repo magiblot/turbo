@@ -36,7 +36,7 @@ add_executable(tvedit)
 
 target_compile_options(tvedit PRIVATE
     -Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder
-    -O0 -g --std=c++17 -fpermissive
+    -O2 -g --std=c++17 -fpermissive
 )
 
 find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision/include")

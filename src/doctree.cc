@@ -1,65 +1,88 @@
 #include "doctree.h"
 #include "editwindow.h"
 #include "app.h"
-
-using DirNode = DocumentTreeView::DirNode;
-using FileNode = DocumentTreeView::FileNode;
+#include <cassert>
+using Node = DocumentTreeView::Node;
 using callback_t = DocumentTreeView::callback_t;
 
 const callback_t *DocumentTreeView::searchCallback {nullptr};
 
-
-DirNode::DirNode() :
-    TNode("\xC2"),
-    parent(nullptr)
-{
-}
-
-DirNode::DirNode(DirNode *parent, const std::filesystem::path &p) :
+Node::Node(Node *parent, const std::filesystem::path &p) :
     TNode(p.filename().c_str()),
+    ptr(nullptr),
     parent(parent),
-    path(p)
+    data(p)
 {
 }
 
-void DirNode::remove(TNode *child)
+Node::Node(Node *parent, EditorWindow *w) :
+    TNode(w->title.c_str()),
+    ptr(nullptr),
+    parent(parent),
+    data(w)
 {
-    ::remove(this, child);
-    if (!childList)
-        dispose();
 }
 
-void DirNode::dispose() {
-    // The root node should not be disposed.
-    if (parent) {
-        parent->remove(this);
-        delete this;
+bool Node::hasEditor() const {
+    return std::holds_alternative<EditorWindow *>(data);
+}
+
+EditorWindow* Node::getEditor() {
+    if (auto **pw = std::get_if<EditorWindow *>(&data))
+        return *pw;
+    return nullptr;
+}
+
+void Node::setParent(Node *parent_) {
+    if (parent != parent_) {
+        remove();
+        parent = parent_;
+        if (parent)
+            putLast(&parent->childList, this);
     }
 }
 
-FileNode::FileNode(DirNode *dir, EditorWindow *w) :
-    TNode(w->title.c_str()),
-    dir(dir),
-    w(w)
+
+void Node::remove()
 {
+    if (next)
+        ((Node *) next)->ptr = ptr;
+    if (ptr) {
+        *ptr = next;
+        ptr = nullptr;
+    }
+    if (parent && !parent->childList)
+        parent->dispose();
 }
 
-void FileNode::dispose() {
-    dir->remove(this);
+void Node::dispose()
+{
+    assert(!childList);
+    remove();
     delete this;
 }
 
 void DocumentTreeView::focused(int i)
 {
     TOutline::focused(i);
-    if (auto *f = dynamic_cast<FileNode *>(getNode(i)))
-        f->w->focus();
+    if (auto *node = (Node *) getNode(i)) {
+        if (auto *w = node->getEditor())
+            w->focus();
+    }
 }
 
 void DocumentTreeView::addEditor(EditorWindow *w)
 {
-    auto *dir = w->file.empty() ? (DirNode *) root : getDirNode(w->file.parent_path());
-    putLast(dir, new FileNode(dir, w));
+    Node *parent;
+    TNode **list;
+    if (w->file.empty()) {
+        parent = nullptr;
+        list = &root;
+    } else {
+        parent = getDirNode(w->file.parent_path());
+        list = &parent->childList;
+    }
+    putLast(list, new Node(parent, w));
     update();
     drawView();
 }
@@ -74,7 +97,7 @@ void DocumentTreeView::focusEditor(EditorWindow *w)
 
 void DocumentTreeView::removeEditor(EditorWindow *w)
 {
-    if (auto *f = (FileNode *) findFirst(hasEditor(w))) {
+    if (auto *f = (Node *) findFirst(hasEditor(w))) {
         f->dispose();
         update();
         drawView();
@@ -84,7 +107,7 @@ void DocumentTreeView::removeEditor(EditorWindow *w)
 void DocumentTreeView::focusNext()
 {
     findFirst([this] (auto *node, auto pos) {
-        if (dynamic_cast<FileNode*>(node) && pos > foc) {
+        if (((Node *) node)->hasEditor() && pos > foc) {
             focused(pos);
             drawView();
             return true;
@@ -97,7 +120,7 @@ void DocumentTreeView::focusPrev()
 {
     int prevPos = -1;
     findFirst([this, &prevPos] (auto *node, auto pos) {
-        if (dynamic_cast<FileNode*>(node)) {
+        if (((Node *) node)->hasEditor()) {
             if (pos < foc)
                 prevPos = pos;
             else if (prevPos > 0) {
@@ -110,37 +133,34 @@ void DocumentTreeView::focusPrev()
     });
 }
 
-DirNode* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
+Node* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
 {
-    // The parent of the directory we are searching for.
-    DirNode *parent;
+    // The list where the dir will be inserted.
+    TNode **list {nullptr};
+    Node *parent {nullptr};
     {
         auto &&parentPath = dirPath.parent_path();
-        auto &&cb = [&parentPath] (auto *node, ...) {
-            auto *dir = dynamic_cast<DirNode *>(node);
-            return dir && dir->path == parentPath;
-        };
-        parent = (DirNode *) findFirst(std::move(cb));
+        if ((parent = (Node *) findFirst(hasPath(parentPath))))
+            list = &parent->childList;
     }
-    if (!parent)
-        parent = (DirNode *) root;
+    if (!list)
+        list = &root;
     // The directory we are searching for.
-    DirNode *dir = nullptr;
-    dir = (DirNode *) findChild(parent, [&dirPath] (TNode *node) {
-        DirNode *dir = dynamic_cast<DirNode *>(node);
-        return dir && dirPath == dir->path;
+    auto *dir = (Node *) findInList(list, [&dirPath] (Node *node) {
+        auto *ppath = std::get_if<std::filesystem::path>(&node->data);
+        return ppath && *ppath == dirPath;
     });
     if (!dir) {
-        dir = new DirNode(parent, dirPath);
-        findChild(root, [this, dir, &dirPath] (TNode *node) {
-            auto *child = dynamic_cast<DirNode *>(node);
-            if (child && child->path.parent_path() == dirPath) {
-                ((DirNode *) root)->remove(child);
-                putLast(dir, child);
-            }
+        dir = new Node(parent, dirPath);
+        // Place already existing subdirectories under this dir.
+        findInList(&root, [this, dir, &dirPath] (Node *node) {
+            auto *ppath = std::get_if<std::filesystem::path>(&node->data);
+            if (ppath && ppath->parent_path() == dirPath)
+                node->setParent(dir);
             return false;
         });
-        putFirst(parent, dir);
+        // Directories are put at the beginning of their list.
+        putFirst(list, dir);
     }
     return dir;
 }
@@ -161,8 +181,21 @@ Boolean DocumentTreeView::applyCallback(TOutlineViewer *, TNode *node, int, int 
 callback_t DocumentTreeView::hasEditor(const EditorWindow *w, int *pos)
 {
     return [w, pos] (auto *node, auto position) {
-        auto *file = dynamic_cast<FileNode *>(node);
-        if (file && file->w == w) {
+        auto *w_ = ((Node *) node)->getEditor();
+        if (w_ && w_ == w) {
+            if (pos)
+                *pos = position;
+            return true;
+        }
+        return false;
+    };
+}
+
+callback_t DocumentTreeView::hasPath(const std::filesystem::path &path, int *pos)
+{
+    return [&path, pos] (auto *node, auto position) {
+        auto *ppath = std::get_if<std::filesystem::path>(&((Node *) node)->data);
+        if (ppath && *ppath == path) {
             if (pos)
                 *pos = position;
             return true;
@@ -178,7 +211,7 @@ DocumentTreeWindow::DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow *
 {
     auto *hsb = standardScrollBar(sbHorizontal),
          *vsb = standardScrollBar(sbVertical);
-    tree = new DocumentTreeView(getExtent().grow(-1, -1), hsb, vsb, new DirNode);
+    tree = new DocumentTreeView(getExtent().grow(-1, -1), hsb, vsb, nullptr);
     tree->growMode = gfGrowHiX | gfGrowHiY;
     insert(tree);
 }
