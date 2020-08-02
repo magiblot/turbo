@@ -76,6 +76,7 @@ void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
             auto c = view->at(y, x);
             c.Attr = color;
             c.Char = '\0';
+            c.extraWidth = 0;
             view->at(y, x) = c;
         }
 }
