@@ -362,6 +362,11 @@ void TVEditApp::showEditorList(TEvent *ev)
 
 void TVEditApp::toggleTreeView()
 {
+    MRUlist.forEach([] (auto *win) {
+        // Set exposed=False to prevent Turbo Vision from attempting
+        // to draw all views, which can lead to polinomial complexity.
+        win->setState(sfExposed, False);
+    });
     TRect dr = docTree->getBounds();
     if (docTree->state & sfVisible) {
         docTree->hide();
@@ -374,7 +379,6 @@ void TVEditApp::toggleTreeView()
             win->locate(r);
         });
     } else {
-        deskTop->lock();
         docTree->show();
         MRUlist.forEach([this, dr] (auto *win) {
             TRect r = win->getBounds();
@@ -384,8 +388,11 @@ void TVEditApp::toggleTreeView()
                 r.b.x -= docTree->size.x;
             win->locate(r);
         });
-        deskTop->unlock();
     }
+    MRUlist.forEach([] (auto *win) {
+        win->setState(sfExposed, True);
+    });
+    deskTop->redraw();
 }
 
 void TVEditApp::setFocusedEditor(EditorWindow *w)
