@@ -225,11 +225,8 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
 
     if (specialKey)
         ScintillaBase::KeyDownWithModifiers(key, modifiers, consumed);
-    else {
-        uint len = 0;
-        while (keyDown.text[len] && ++len < 4);
-        ScintillaBase::InsertCharacter({keyDown.text, len}, CharacterSource::directInput);
-    }
+    else
+        ScintillaBase::InsertCharacter({keyDown.text, keyDown.textLength}, CharacterSource::directInput);
 }
 
 bool TScintillaEditor::MouseEvent(const TEvent &ev) {
