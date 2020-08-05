@@ -72,7 +72,7 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     {
         TRect r = deskTop->getExtent();
         if (r.b.x > 30)
-            r.b.x = 30;
+            r.a.x = r.b.x - 30;
         docTree = new DocumentTreeWindow(r, &docTree);
         docTree->flags &= ~wfZoom;
         docTree->growMode = 0;
@@ -362,9 +362,9 @@ void TVEditApp::showEditorList(TEvent *ev)
 
 void TVEditApp::toggleTreeView()
 {
+    TRect dr = docTree->getBounds();
     if (docTree->state & sfVisible) {
         docTree->hide();
-        TRect dr = docTree->getBounds();
         MRUlist.forEach([this, dr] (auto *win) {
             TRect r = win->getBounds();
             if (r.a.x >= dr.b.x)
@@ -376,9 +376,12 @@ void TVEditApp::toggleTreeView()
     } else {
         deskTop->lock();
         docTree->show();
-        MRUlist.forEach([this] (auto *win) {
+        MRUlist.forEach([this, dr] (auto *win) {
             TRect r = win->getBounds();
-            r = adjustEditorBounds(r);
+            if (r.a.x + docTree->size.x >= dr.b.x)
+                r.a.x += docTree->size.x;
+            else if (r.b.x - docTree->size.x <= dr.a.x)
+                r.b.x -= docTree->size.x;
             win->locate(r);
         });
         deskTop->unlock();
