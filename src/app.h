@@ -1,5 +1,5 @@
-#ifndef TVEDIT_APP_H
-#define TVEDIT_APP_H
+#ifndef TURBO_APP_H
+#define TURBO_APP_H
 
 #define Uses_TApplication
 #define Uses_TFileDialog
@@ -30,7 +30,7 @@ const ushort
 const ushort
     cmToggleTree    = 1000;
 
-struct TVEditApp : public TApplication {
+struct TurboApp : public TApplication {
 
     std::unordered_map<std::string_view, active_counter> fileCount;
     std::vector<std::string> files; // Storage for the strings referenced by fileCount;
@@ -44,9 +44,9 @@ struct TVEditApp : public TApplication {
     const char **argv;
     Scintilla::SelectionText clipboard;
 
-    static TVEditApp *app;
+    static TurboApp *app;
 
-    TVEditApp(int argc=0, const char *argv[]=0);
+    TurboApp(int argc=0, const char *argv[]=0);
     static TMenuBar* initMenuBar(TRect r);
     static TStatusLine* initStatusLine(TRect r);
 
@@ -87,7 +87,7 @@ struct TVEditApp : public TApplication {
 };
 
 template<typename Func>
-inline void TVEditApp::openFileDialog( const char *aWildCard, const char *aTitle,
+inline void TurboApp::openFileDialog( const char *aWildCard, const char *aTitle,
                                        const char *inputName, ushort aOptions,
                                        uchar histId, Func &&callback )
 {

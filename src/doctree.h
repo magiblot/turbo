@@ -1,5 +1,5 @@
-#ifndef TVEDIT_DOCTREE_H
-#define TVEDIT_DOCTREE_H
+#ifndef TURBO_DOCTREE_H
+#define TURBO_DOCTREE_H
 
 #define Uses_TWindow
 #define Uses_TOutline

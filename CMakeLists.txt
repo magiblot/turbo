@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
-project (tvedit)
+project (turbo)
 
 # Target 'scintilla'
 
@@ -30,18 +30,18 @@ target_include_directories(scintilla PRIVATE
 file(GLOB_RECURSE SCINTILLA_SRC "${CMAKE_CURRENT_SOURCE_DIR}/scintilla/**/*.cxx")
 target_sources(scintilla PRIVATE ${SCINTILLA_SRC})
 
-# Target 'tvedit'
+# Target 'turbo'
 
-add_executable(tvedit)
+add_executable(turbo)
 
-target_compile_options(tvedit PRIVATE
+target_compile_options(turbo PRIVATE
     -Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder
     -O2 -g --std=c++17 -fpermissive
 )
 
 find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision/include")
 
-target_include_directories(tvedit PRIVATE
+target_include_directories(turbo PRIVATE
     ${SCINTILLA_INC}
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
@@ -50,7 +50,7 @@ target_include_directories(tvedit PRIVATE
     "${TVISION_INCLUDE}/override"
 )
 
-target_sources(tvedit PRIVATE
+target_sources(turbo PRIVATE
     "src/app.cc"
     "src/main.cc"
     "src/doctree.cc"
@@ -73,8 +73,10 @@ target_sources(tvedit PRIVATE
     "src/platform/window.cc"
 )
 
-set_target_properties(tvedit PROPERTIES UNITY_BUILD ON)
-target_precompile_headers(tvedit PRIVATE "include/ScintillaHeaders.h")
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+    set_target_properties(turbo PROPERTIES UNITY_BUILD ON)
+    target_precompile_headers(turbo PRIVATE "include/ScintillaHeaders.h")
+endif()
 
 # Dependency 'tvision'
 # Requires building manually if not installed.
@@ -98,7 +100,8 @@ endif()
 find_library(MAGIC magic)
 if (MAGIC)
     list(APPEND LIBS ${MAGIC})
-    target_compile_definitions(tvedit PRIVATE HAVE_MAGIC)
+    target_compile_definitions(turbo PRIVATE HAVE_MAGIC)
 endif()
 
-target_link_libraries(tvedit ${LIBS})
+target_link_libraries(turbo ${LIBS})
+

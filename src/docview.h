@@ -1,5 +1,5 @@
-#ifndef TVEDIT_DOCVIEW_H
-#define TVEDIT_DOCVIEW_H
+#ifndef TURBO_DOCVIEW_H
+#define TURBO_DOCVIEW_H
 
 #include "tscintilla.h"
 #include "drawviews.h"

@@ -224,5 +224,5 @@ DocumentTreeWindow::~DocumentTreeWindow()
 
 void DocumentTreeWindow::close()
 {
-    message(TVEditApp::app, evCommand, cmToggleTree, 0);
+    message(TurboApp::app, evCommand, cmToggleTree, 0);
 }

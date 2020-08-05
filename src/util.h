@@ -1,5 +1,5 @@
-#ifndef TVEDIT_UTIL_H
-#define TVEDIT_UTIL_H
+#ifndef TURBO_UTIL_H
+#define TURBO_UTIL_H
 
 #define Uses_TDialog
 #define Uses_TProgram

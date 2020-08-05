@@ -1,5 +1,5 @@
-#ifndef TVEDIT_STYLES_H
-#define TVEDIT_STYLES_H
+#ifndef TURBO_STYLES_H
+#define TURBO_STYLES_H
 
 struct EditorWindow;
 

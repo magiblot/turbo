@@ -1,5 +1,5 @@
-#ifndef TVEDIT_EDITSTATES_H
-#define TVEDIT_EDITSTATES_H
+#ifndef TURBO_EDITSTATES_H
+#define TURBO_EDITSTATES_H
 
 #define Uses_MsgBox
 #include <tvision/tv.h>

@@ -1,5 +1,5 @@
-#ifndef TVEDIT_SURFACE_H
-#define TVEDIT_SURFACE_H
+#ifndef TURBO_SURFACE_H
+#define TURBO_SURFACE_H
 
 #define Uses_TPoint
 #define Uses_TRect

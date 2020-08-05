@@ -1,5 +1,5 @@
-#ifndef TVEDIT_TSCINTILLA_H
-#define TVEDIT_TSCINTILLA_H
+#ifndef TURBO_TSCINTILLA_H
+#define TURBO_TSCINTILLA_H
 
 #define Uses_TKeys
 #define Uses_TView

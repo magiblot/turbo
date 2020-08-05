@@ -27,8 +27,8 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
 
-    if (TVEditApp::app)
-        editor.clipboard = &TVEditApp::app->clipboard;
+    if (TurboApp::app)
+        editor.clipboard = &TurboApp::app->clipboard;
 
     editorView.hide();
 
@@ -72,8 +72,8 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
 
 EditorWindow::~EditorWindow()
 {
-    if (TVEditApp::app)
-        TVEditApp::app->removeEditor(this);
+    if (TurboApp::app)
+        TurboApp::app->removeEditor(this);
 }
 
 TRect EditorWindow::editorBounds() const
@@ -254,8 +254,8 @@ void EditorWindow::setState(ushort aState, Boolean enable)
                 hScrollBar->setState(sfVisible, enable);
                 vScrollBar->setState(sfVisible, enable);
                 indicator->setState(sfVisible, enable);
-                if (enable && TVEditApp::app)
-                    TVEditApp::app->setFocusedEditor(this);
+                if (enable && TurboApp::app)
+                    TurboApp::app->setFocusedEditor(this);
                 break;
         }
     }
@@ -493,9 +493,9 @@ bool EditorWindow::saveFile()
 
 bool EditorWindow::saveAsDialog()
 {
-    if (TVEditApp::app) {
+    if (TurboApp::app) {
         bool saved = false;
-        TVEditApp::app->openFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 0,
+        TurboApp::app->openFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 0,
             [this, &saved] (TView *dialog) {
                 std::filesystem::path prevFile = std::move(file);
                 char fileName[MAXPATH];
@@ -506,7 +506,7 @@ bool EditorWindow::saveAsDialog()
                     showError(fmt::format("'{}' is not a valid path.", fileName));
                 else if (canOverwrite() && saveFile()) {
                     // Saving has succeeded, now update the title.
-                    TVEditApp::app->updateEditorTitle(this, prevFile.native());
+                    TurboApp::app->updateEditorTitle(this, prevFile.native());
                     setSavePoint();
                     type.detect(*this);
                     return saved = true;

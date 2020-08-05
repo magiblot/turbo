@@ -2,9 +2,9 @@
 
 int main(int argc, const char *argv[])
 {
-    TVEditApp app(argc, argv);
-    TVEditApp::app = &app;
+    TurboApp app(argc, argv);
+    TurboApp::app = &app;
     app.run();
     app.shutDown();
-    TVEditApp::app = 0;
+    TurboApp::app = 0;
 }

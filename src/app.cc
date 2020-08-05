@@ -29,11 +29,11 @@
 using namespace Scintilla;
 using namespace std::literals;
 
-TVEditApp* TVEditApp::app = 0;
+TurboApp* TurboApp::app = 0;
 
-TVEditApp::TVEditApp(int argc, const char *argv[]) :
-    TProgInit( &TVEditApp::initStatusLine,
-               &TVEditApp::initMenuBar,
+TurboApp::TurboApp(int argc, const char *argv[]) :
+    TProgInit( &TurboApp::initStatusLine,
+               &TurboApp::initMenuBar,
                &TApplication::initDeskTop
              ),
     argc(argc),
@@ -84,7 +84,7 @@ TVEditApp::TVEditApp(int argc, const char *argv[]) :
     }
 }
 
-TMenuBar *TVEditApp::initMenuBar(TRect r)
+TMenuBar *TurboApp::initMenuBar(TRect r)
 {
     r.b.y = r.a.y+1;
     return new TMenuBar( r,
@@ -122,7 +122,7 @@ TMenuBar *TVEditApp::initMenuBar(TRect r)
 
 }
 
-TStatusLine *TVEditApp::initStatusLine( TRect r )
+TStatusLine *TurboApp::initStatusLine( TRect r )
 {
     r.a.y = r.b.y-1;
     return new TStatusLine( r,
@@ -136,13 +136,13 @@ TStatusLine *TVEditApp::initStatusLine( TRect r )
             );
 }
 
-void TVEditApp::idle()
+void TurboApp::idle()
 {
     TApplication::idle();
     clock->update();
 }
 
-void TVEditApp::getEvent(TEvent &event)
+void TurboApp::getEvent(TEvent &event)
 {
     if (!argsParsed) {
         argsParsed = true;
@@ -151,7 +151,7 @@ void TVEditApp::getEvent(TEvent &event)
     TApplication::getEvent(event);
 }
 
-void TVEditApp::handleEvent(TEvent &event)
+void TurboApp::handleEvent(TEvent &event)
 {
     TApplication::handleEvent(event);
     bool handled = false;
@@ -184,7 +184,7 @@ void TVEditApp::handleEvent(TEvent &event)
         clearEvent(event);
 }
 
-void TVEditApp::shell()
+void TurboApp::shell()
 {
     suspend();
     cout << "The application has been stopped. You can return by entering 'fg'." << endl;
@@ -193,7 +193,7 @@ void TVEditApp::shell()
     redraw();
 }
 
-void TVEditApp::parseArgs()
+void TurboApp::parseArgs()
 {
     if (argc && argv) {
         auto *w = new TWindow(TRect(15, 8, 65, 19), "Please Wait...", wnNoNumber);
@@ -216,12 +216,12 @@ void TVEditApp::parseArgs()
     }
 }
 
-void TVEditApp::fileNew()
+void TurboApp::fileNew()
 {
     openEditor({});
 }
 
-void TVEditApp::fileOpen()
+void TurboApp::fileOpen()
 {
     openFileDialog( "*.*", "Open file", "~N~ame", fdOpenButton, 0,
         [this] (TView *dialog) {
@@ -233,7 +233,7 @@ void TVEditApp::fileOpen()
     );
 }
 
-bool TVEditApp::openEditor(std::string_view fileName, bool canFail)
+bool TurboApp::openEditor(std::string_view fileName, bool canFail)
 {
     TRect r = adjustEditorBounds(deskTop->getExtent());
     EditorWindow *w = new EditorWindow(r, fileName, canFail);
@@ -243,7 +243,7 @@ bool TVEditApp::openEditor(std::string_view fileName, bool canFail)
     return w;
 }
 
-void TVEditApp::closeAll()
+void TurboApp::closeAll()
 {
     auto *head = MRUlist.next;
     while (head != &MRUlist) {
@@ -256,7 +256,7 @@ void TVEditApp::closeAll()
     }
 }
 
-TRect TVEditApp::adjustEditorBounds(TRect r)
+TRect TurboApp::adjustEditorBounds(TRect r)
 {
     if (docTree->state & sfVisible) {
         TRect t = docTree->getBounds();
@@ -270,7 +270,7 @@ TRect TVEditApp::adjustEditorBounds(TRect r)
     return r;
 }
 
-void TVEditApp::setEditorTitle(EditorWindow *w)
+void TurboApp::setEditorTitle(EditorWindow *w)
 {
     uint number;
     auto &&file = w->file.filename();
@@ -286,7 +286,7 @@ void TVEditApp::setEditorTitle(EditorWindow *w)
     w->name = w->title; // Copy!
 }
 
-void TVEditApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
+void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
 {
     --getFileCounter(prevFile);
     setEditorTitle(w);
@@ -299,7 +299,7 @@ void TVEditApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
         mostRecentDir = w->file.parent_path();
 }
 
-active_counter& TVEditApp::getFileCounter(std::string_view file)
+active_counter& TurboApp::getFileCounter(std::string_view file)
 {
     // We need to keep at least one copy of the 'file' string alive.
     // This is because I don't want fileCount to be a map of std::string.
@@ -313,7 +313,7 @@ active_counter& TVEditApp::getFileCounter(std::string_view file)
     return it->second;
 }
 
-void TVEditApp::addEditor(EditorWindow *w)
+void TurboApp::addEditor(EditorWindow *w)
 {
     setEditorTitle(w);
     if (docTree)
@@ -325,7 +325,7 @@ void TVEditApp::addEditor(EditorWindow *w)
     ++editorCount;
 }
 
-void TVEditApp::removeEditor(EditorWindow *w)
+void TurboApp::removeEditor(EditorWindow *w)
 {
     --getFileCounter(w->file.native());
     --editorCount;
@@ -341,7 +341,7 @@ void TVEditApp::removeEditor(EditorWindow *w)
     }
 }
 
-void TVEditApp::showEditorList(TEvent *ev)
+void TurboApp::showEditorList(TEvent *ev)
 {
     EditorList list(&MRUlist, editorCount);
     TRect r {0, 0, 0, 0};
@@ -360,7 +360,7 @@ void TVEditApp::showEditorList(TEvent *ev)
     destroy(lw);
 }
 
-void TVEditApp::toggleTreeView()
+void TurboApp::toggleTreeView()
 {
     MRUlist.forEach([] (auto *win) {
         // Set exposed=False to prevent Turbo Vision from attempting
@@ -395,7 +395,7 @@ void TVEditApp::toggleTreeView()
     deskTop->redraw();
 }
 
-void TVEditApp::setFocusedEditor(EditorWindow *w)
+void TurboApp::setFocusedEditor(EditorWindow *w)
 {
     // w has been focused, so it becomes the first of our MRU list.
     w->MRUhead.insert_after(&MRUlist);
@@ -406,7 +406,7 @@ void TVEditApp::setFocusedEditor(EditorWindow *w)
         mostRecentDir = w->file.parent_path();
 }
 
-#define cpTVEditAppColor \
+#define cpTurboAppColor \
     /* 1 = TBackground, 2-7 = TMenuView and TStatusLine */ \
     "\x71\x70\x78\x74\x20\x28\x24" \
     /* 8-15 = TWindow(Blue) */ \
@@ -430,7 +430,7 @@ void TVEditApp::setFocusedEditor(EditorWindow *w)
     "\x07\x0F\x0A\x30\x30\x0F\x08\x0F\x06\x20\x2B\x2F\x78\x2E\x08\x30" \
     "\x3F\x3E\x1F\x2F\x1A\x20\x72\x31\x31\x30\x2F\x3E\x31\x13\x38\x00"
 
-TPalette& TVEditApp::getPalette() const {
-    static TPalette palette(cpTVEditAppColor, sizeof(cpTVEditAppColor) - 1);
+TPalette& TurboApp::getPalette() const {
+    static TPalette palette(cpTurboAppColor, sizeof(cpTurboAppColor) - 1);
     return palette;
 }

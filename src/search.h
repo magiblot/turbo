@@ -1,5 +1,5 @@
-#ifndef TVEDIT_SEARCHBOX_H
-#define TVEDIT_SEARCHBOX_H
+#ifndef TURBO_SEARCHBOX_H
+#define TURBO_SEARCHBOX_H
 
 #define Uses_TGroup
 #define Uses_TPalette

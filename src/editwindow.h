@@ -1,5 +1,5 @@
-#ifndef TVEDIT_EDITWINDOW_H
-#define TVEDIT_EDITWINDOW_H
+#ifndef TURBO_EDITWINDOW_H
+#define TURBO_EDITWINDOW_H
 
 #define Uses_TWindow
 #define Uses_TPalette
@@ -73,7 +73,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void setHorizontalScrollPos(int delta, int limit) override;
     void setVerticalScrollPos(int delta, int limit) override;
 
-    // TVEditApp integration
+    // TurboApp integration
 
     list_head<EditorWindow> MRUhead;
 
@@ -89,7 +89,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     bool fatalError;
 
-    // The title of the window. It depends on TVEditApp, which keeps track of
+    // The title of the window. It depends on TurboApp, which keeps track of
     // things such as the number of editors open on the same file.
     // 'title' and 'name' are the same, except that 'title' is also modified
     // when a save point is reached or left.

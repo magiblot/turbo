@@ -1,5 +1,5 @@
-#ifndef TVEDIT_WIDGETS_H
-#define TVEDIT_WIDGETS_H
+#ifndef TURBO_WIDGETS_H
+#define TURBO_WIDGETS_H
 
 #define Uses_TView
 #include <tvision/tv.h>
