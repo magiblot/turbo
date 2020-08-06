@@ -206,7 +206,7 @@ callback_t DocumentTreeView::hasPath(const std::filesystem::path &path, int *pos
 
 DocumentTreeWindow::DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow **ptr) :
     TWindowInit(&DocumentTreeWindow::initFrame),
-    TWindow(bounds, "Documents", wnNoNumber),
+    TWindow(bounds, "Open Editors", wnNoNumber),
     ptr(ptr)
 {
     auto *hsb = standardScrollBar(sbHorizontal),
