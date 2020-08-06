@@ -138,7 +138,7 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
     auto r = clipRect(rc);
     auto color = convertColorPair(fore, back);
     size_t textBegin = 0, overlap = 0;
-    utf8wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
+    TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
         size_t x = r.a.x;
         while (overlap-- && (int) x < r.b.x) {
@@ -152,7 +152,7 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
         while (i < text.size() && (int) x < r.b.x) {
             auto &c = view->at(y, x);
             c.Attr = color;
-            utf8read(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
+            TText::eat(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
         }
     }
 }
@@ -162,7 +162,7 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
     auto r = clipRect(rc);
     auto fg = convertColor(fore);
     size_t textBegin = 0, overlap = 0;
-    utf8wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
+    TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
         size_t x = r.a.x;
         while (overlap-- && (int) x < r.b.x) {
@@ -178,7 +178,7 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
             auto &c = view->at(y, x);
             c.Attr.fgSet(fg);
             c.Attr.attrSet(fg);
-            utf8read(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
+            TText::eat(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
         }
     }
 }
@@ -188,7 +188,7 @@ void TScintillaSurface::MeasureWidths(Font &font_, std::string_view text, XYPOSI
     size_t i = 0, j = 1;
     while (i < text.size()) {
         size_t width = 0, len = 0;
-        utf8next({&text[i], text.size() - i}, len, width);
+        TText::next({&text[i], text.size() - i}, len, width);
         // I don't know why. It just works.
         j += width - 1;
         while (len--)
@@ -201,7 +201,7 @@ XYPOSITION TScintillaSurface::WidthText(Font &font_, std::string_view text)
 {
     size_t i = 0, j = 0;
     while (i < text.size())
-        utf8next({&text[i], text.size() - i}, i, j);
+        TText::next({&text[i], text.size() - i}, i, j);
     return (int) j;
 }
 
