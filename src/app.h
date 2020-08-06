@@ -12,7 +12,7 @@
 #include "util.h"
 #include "doctree.h"
 
-class EditorWindow;
+struct EditorWindow;
 class TClockView;
 
 const ushort

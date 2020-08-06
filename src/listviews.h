@@ -65,7 +65,7 @@ public:
     virtual void getText(char *dest, short item, short maxLen) override;
     virtual void handleEvent(TEvent& ev) override;
 
-    virtual TPalette& getPalette() const;
+    virtual TPalette& getPalette() const override;
 
 protected:
 

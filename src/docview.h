@@ -4,7 +4,7 @@
 #include "tscintilla.h"
 #include "drawviews.h"
 
-class EditorWindow;
+struct EditorWindow;
 
 struct DocumentView : public TDrawSubView {
 

@@ -153,7 +153,7 @@ Node* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
     if (!dir) {
         dir = new Node(parent, dirPath);
         // Place already existing subdirectories under this dir.
-        findInList(&root, [this, dir, &dirPath] (Node *node) {
+        findInList(&root, [dir, &dirPath] (Node *node) {
             auto *ppath = std::get_if<std::filesystem::path>(&node->data);
             if (ppath && ppath->parent_path() == dirPath)
                 node->setParent(dir);

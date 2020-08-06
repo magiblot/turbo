@@ -56,7 +56,7 @@ ListView::ListView( const TRect& bounds,
 
 TPalette& ListView::getPalette() const
 {
-    static TPalette palette(cpListViewer, sizeof(cpListViewer - 1));
+    static TPalette palette(cpListViewer, sizeof(cpListViewer) - 1);
     return palette;
 }
 

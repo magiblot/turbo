@@ -176,8 +176,8 @@ class const_unordered_map : public std::unordered_map<K, V>
 {
 public:
 
-    typedef std::unordered_map<K, V> super;
-    using super::unordered_map;
+    using super = std::unordered_map<K, V>;
+    using super::super;
 
     V operator[](const K &key) const {
         auto it = super::find(key);

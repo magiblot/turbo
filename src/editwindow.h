@@ -14,7 +14,7 @@
 #include <string>
 #include <filesystem>
 
-class DocumentView;
+struct DocumentView;
 struct SearchBox;
 class TIndicator;
 
@@ -61,7 +61,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     // Minimum window size
 
-    void sizeLimits(TPoint &min, TPoint &max);
+    void sizeLimits(TPoint &min, TPoint &max) override;
     static constexpr TPoint minEditWinSize {24, 6};
 
     void lockSubViews();

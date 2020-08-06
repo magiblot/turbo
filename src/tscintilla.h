@@ -8,9 +8,8 @@
 
 #include <ScintillaHeaders.h>
 
-class DocumentView;
+struct DocumentView;
 class TDrawableView;
-class TCellAttribs;
 
 namespace Scintilla {
 
