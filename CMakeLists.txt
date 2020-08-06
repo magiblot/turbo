@@ -7,7 +7,7 @@ add_library(scintilla STATIC)
 
 target_compile_options(scintilla PRIVATE
     -Wall
-    -O3 -g --std=c++17
+    -O3 --std=c++17
 )
 
 target_compile_definitions(scintilla PRIVATE
@@ -36,7 +36,7 @@ add_executable(turbo)
 
 target_compile_options(turbo PRIVATE
     -Wall -Wno-missing-braces -Wno-unknown-pragmas -Wno-unused-function -Wno-pragmas -Wno-reorder
-    -O2 -g --std=c++17 -fpermissive
+    -O2 --std=c++17 -fpermissive
 )
 
 find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision/include")
@@ -93,7 +93,6 @@ set(LIBS scintilla ${LIBTVISION} ${FMT} ${LIBNCURSESW})
 find_library(GPM gpm)
 if (GPM)
     list(APPEND LIBS ${GPM})
-    string(APPEND CMAKE_CXX_FLAGS " -DHAVE_GPM")
 endif()
 
 # Other optional dependencies
