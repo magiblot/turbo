@@ -75,7 +75,10 @@ TurboApp::TurboApp(int argc, const char *argv[]) :
             r.a.x = r.b.x - 30;
         docTree = new DocumentTreeWindow(r, &docTree);
         docTree->flags &= ~wfZoom;
-        docTree->growMode = 0;
+        // The grow mode assumes it's placed on the right side of the screen.
+        // Greater flexibility would require some trick or a dedicated class
+        // for side views.
+        docTree->growMode = gfGrowLoX | gfGrowHiX | gfGrowHiY | gfGrowRel;
         docTree->setState(sfShadow, False);
         deskTop->insert(docTree);
         // Show by default only on large terminals.
