@@ -180,9 +180,9 @@ void EditorWindow::updateMarginWidth()
 void EditorWindow::updateIndicatorValue()
 {
     auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
-    auto line = editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U);
-    auto col = editor.WndProc(SCI_GETCOLUMN, pos, 0U);
-    indicator->setValue({(int) line, (int) col}, False);
+    int line = std::min<size_t>(editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U), INT_MAX);
+    int col = std::min<size_t>(editor.WndProc(SCI_GETCOLUMN, pos, 0U), INT_MAX);
+    indicator->setValue({col, line}, False);
 }
 
 void EditorWindow::handleEvent(TEvent &ev) {
