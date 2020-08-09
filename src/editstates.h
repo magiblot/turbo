@@ -79,7 +79,7 @@ public:
         else {
             const int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
             const int size = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
-            const bool documentBig = size >= (1 << 19) && width > 512;
+            const bool documentBig = size >= (1 << 19);
             if (documentBig && !confirmedOnce) {
                 if (dialog) {
                     auto &&text = fmt::format("This document is very big and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
