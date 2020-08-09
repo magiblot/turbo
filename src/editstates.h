@@ -139,4 +139,54 @@ struct Indent {
 
 };
 
+struct DocumentProperties {
+
+    static constexpr uint
+        ndEOL = 0x0001;
+
+    uint notDetected;
+    int eolType;
+
+    DocumentProperties()
+    {
+        reset();
+    }
+
+    void reset()
+    {
+        notDetected = ndEOL;
+        eolType = SC_EOL_LF; // Default EOL type is LF.
+    }
+
+    void analyze(std::string_view text)
+    {
+        if (text.size()) {
+            char cur = text[0];
+            char next = text.size() > 0 ? text[1] : '\0';
+            int i = 1;
+            while (notDetected) {
+                if (notDetected & ndEOL) {
+                    if (cur == '\r' && next == '\n')
+                        eolType = SC_EOL_CRLF, notDetected &= ~ndEOL;
+                    else if (cur == '\n')
+                        eolType = SC_EOL_LF, notDetected &= ~ndEOL;
+                    else if (cur == '\r')
+                        eolType = SC_EOL_CR, notDetected &= ~ndEOL;
+                }
+                if (++i < text.size()) {
+                    cur = next;
+                    next = text[i];
+                } else
+                    break;
+            };
+        }
+    }
+
+    void apply(Scintilla::TScintillaEditor &editor) const
+    {
+        editor.WndProc(SCI_SETEOLMODE, eolType, 0U);
+    }
+
+};
+
 #endif

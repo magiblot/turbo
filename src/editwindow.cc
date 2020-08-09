@@ -95,6 +95,8 @@ void EditorWindow::setUpEditor(bool openCanFail)
     setUpStyles(*this);
     // Open the current file, if set.
     tryLoadFile(openCanFail);
+    // Apply the properties detected while loading the file.
+    props.apply(editor);
 
     // Dynamic horizontal scroll
     editor.WndProc(SCI_SETSCROLLWIDTHTRACKING, true, 0U);
@@ -419,6 +421,8 @@ bool EditorWindow::loadFile(bool canFail)
         f.seekg(0);
         // Allocate 1000 extra bytes, as in SciTE.
         editor.WndProc(SCI_ALLOCATE, fSize + 1000, 0U);
+        // Get ready to detect the document's properties.
+        props.reset();
         if (fSize) {
             bool ok = true;
             constexpr size_t blockSize = 1 << 20; // Read in chunks of 1 MiB.
@@ -426,6 +430,7 @@ bool EditorWindow::loadFile(bool canFail)
             std::unique_ptr<char[]> buffer {new char[readSize]};
             sptr_t wParam = reinterpret_cast<sptr_t>(buffer.get());
             while (fSize > 0 && (ok = bool(f.read(buffer.get(), readSize)))) {
+                props.analyze({buffer.get(), readSize});
                 editor.WndProc(SCI_APPENDTEXT, readSize, wParam);
                 fSize -= readSize;
                 if (fSize < readSize)

@@ -187,12 +187,12 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
         {kbPgDn,        SCK_NEXT},
         {kbDel,         SCK_DELETE},
         {kbIns,         SCK_INSERT},
-        {kbTab,         '\t'},
-        {kbEnter,       '\n'},
-        {kbBack,        '\b'},
+        {kbTab,         SCK_TAB},
+        {kbEnter,       SCK_RETURN},
+        {kbBack,        SCK_BACK},
         {kbShiftDel,    SCK_DELETE},
         {kbShiftIns,    SCK_INSERT},
-        {kbShiftTab,    '\t'},
+        {kbShiftTab,    SCK_TAB},
         {kbCtrlDown,    SCK_DOWN},
         {kbCtrlUp,      SCK_UP},
         {kbCtrlLeft,    SCK_LEFT},
@@ -203,8 +203,8 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
         {kbCtrlPgDn,    SCK_NEXT},
         {kbCtrlDel,     SCK_DELETE},
         {kbCtrlIns,     SCK_INSERT},
-        {kbCtrlEnter,   '\n'},
-        {kbCtrlBack,    '\b'}
+        {kbCtrlEnter,   SCK_RETURN},
+        {kbCtrlBack,    SCK_BACK}
     };
 
     int modifiers = convertModifiers(keyDown.controlKeyState);

@@ -39,6 +39,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     WrapMode wrap;
     FileType type;
     Indent indent;
+    DocumentProperties props;
 
     // Scintilla
 
