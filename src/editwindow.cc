@@ -63,6 +63,7 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     commandSet += cmToggleWrap;
     commandSet += cmToggleLineNums;
     commandSet += cmFind;
+//     commandSet += cmReplace;
     commandSet += cmSearchAgain;
     commandSet += cmSearchPrev;
     commandSet += cmToggleIndent;
@@ -110,6 +111,12 @@ void EditorWindow::setUpEditor(bool openCanFail)
     // Enable line wrapping (if appropiate) by default
     wrap.toggle(editor, false);
     editor.WndProc(SCI_SETWRAPVISUALFLAGS, SC_WRAPVISUALFLAG_END, 0U);
+    
+    // Home/End keys should respect line wrapping.
+    editor.WndProc(SCI_ASSIGNCMDKEY, SCK_HOME | (SCI_NORM << 16), SCI_VCHOMEWRAP);
+    editor.WndProc(SCI_ASSIGNCMDKEY, SCK_HOME | (SCI_SHIFT << 16), SCI_VCHOMEWRAPEXTEND);
+    editor.WndProc(SCI_ASSIGNCMDKEY, SCK_END | (SCI_NORM << 16), SCI_LINEENDWRAP);
+    editor.WndProc(SCI_ASSIGNCMDKEY, SCK_END | (SCI_SHIFT << 16), SCI_LINEENDWRAPEXTEND);
 
     // Clear the undo buffer created when loading the file,
     // if that's the case.
