@@ -55,6 +55,8 @@ TScintillaEditor::TScintillaEditor()
     // Extra key shortcuts
     WndProc(SCI_ASSIGNCMDKEY, SCK_UP | ((SCMOD_CTRL | SCMOD_SHIFT) << 16), SCI_MOVESELECTEDLINESUP);
     WndProc(SCI_ASSIGNCMDKEY, SCK_DOWN | ((SCMOD_CTRL | SCMOD_SHIFT) << 16), SCI_MOVESELECTEDLINESDOWN);
+    // Ctrl+Shift+Z, only works on the linux console.
+    WndProc(SCI_ASSIGNCMDKEY, 'Z' | ((SCMOD_CTRL | SCMOD_SHIFT) << 16), SCI_REDO);
 }
 
 void TScintillaEditor::SetVerticalScrollPos()
