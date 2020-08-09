@@ -168,6 +168,48 @@ static constexpr pair<uchar, const char *> keywordsRust[] = {
     {(uchar) -1, nullptr},
 };
 
+static constexpr pair<uchar, Styles> stylesPython[] = {
+    {SCE_P_DEFAULT,                 sNormal},
+    {SCE_P_COMMENTLINE,             sComment},
+    {SCE_P_NUMBER,                  sNumberLiteral},
+    {SCE_P_STRING,                  sStringLiteral},
+    {SCE_P_CHARACTER,               sCharLiteral},
+    {SCE_P_WORD,                    sKeyword1},
+    {SCE_P_TRIPLE,                  sStringLiteral},
+    {SCE_P_TRIPLEDOUBLE,            sStringLiteral},
+    {SCE_P_CLASSNAME,               sNormal},
+    {SCE_P_DEFNAME,                 sNormal},
+    {SCE_P_OPERATOR,                sOperator},
+    {SCE_P_IDENTIFIER,              sNormal},
+    {SCE_P_COMMENTBLOCK,            sComment},
+    {SCE_P_STRINGEOL,               sNormal},
+    {SCE_P_WORD2,                   sGlobals},
+    {SCE_P_DECORATOR,               sPreprocessor},
+    {SCE_P_FSTRING,                 sStringLiteral},
+    {SCE_P_FCHARACTER,              sCharLiteral},
+    {SCE_P_FTRIPLE,                 sStringLiteral},
+    {SCE_P_FTRIPLEDOUBLE,           sStringLiteral},
+    {(uchar) -1, {}},
+};
+
+static constexpr pair<uchar, const char *> keywordsPython[] = {
+    {0,
+"and as assert break class continue def del elif else except exec finally for "
+"from global if import in is lambda not or pass print raise return try while "
+"with yield"
+    },
+    {1,
+"int float complex list tuple range str bytes bytearray memoryview set frozenset "
+"dict "
+    },
+    {(uchar) -1, nullptr},
+};
+
+static constexpr pair<const char *, const char *> propertiesPython[] = {
+    {"lexer.python.keywords2.no.sub.identifiers",       "1"},
+    {nullptr, nullptr},
+};
+
 struct LexerInfo {
     const pair<uchar, Styles> *styles {nullptr};
     const pair<uchar, const char *> *keywords {nullptr};
@@ -180,6 +222,7 @@ static const const_unordered_map<uchar, LexerInfo> lexerStyles = {
     {SCLEX_ASM, {stylesAsm, nullptr, nullptr}},
     {SCLEX_COFFEESCRIPT, {stylesCoffeeScript, nullptr, nullptr}},
     {SCLEX_RUST, {stylesRust, keywordsRust, nullptr}},
+    {SCLEX_PYTHON, {stylesPython, keywordsPython, propertiesPython}},
 };
 
 void loadLexer(int lexerId, EditorWindow &win)
