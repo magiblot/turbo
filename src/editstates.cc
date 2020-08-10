@@ -11,78 +11,78 @@
 #include <magic.h>
 #endif
 
-static const const_unordered_map<std::string_view, int> mime2lex = {
-    {"text/x-c++",                  SCLEX_CPP},
-    {"text/x-c",                    SCLEX_CPP},
-    {"text/x-script.python",        SCLEX_PYTHON},
-    {"application/json",            SCLEX_JSON},
-    {"text/x-shellscript",          SCLEX_BASH},
-    {"text/x-makefile",             SCLEX_MAKEFILE},
-    {"text/x-diff",                 SCLEX_DIFF},
+static const const_unordered_map<std::string_view, Language> mime2lang = {
+    {"text/x-c++",                  langCPP},
+    {"text/x-c",                    langCPP},
+    {"text/x-script.python",        langPython},
+    {"application/json",            langJSON},
+    {"text/x-shellscript",          langBash},
+    {"text/x-makefile",             langMakefile},
+    {"text/x-diff",                 langDiff},
 };
 
-static const const_unordered_map<std::string_view, int> ext2lex = {
-    {".js",         SCLEX_COFFEESCRIPT},
-    {".jsx",        SCLEX_COFFEESCRIPT},
-    {".mjs",        SCLEX_COFFEESCRIPT},
-    {".asm",        SCLEX_ASM},
-    {".s",          SCLEX_ASM},
-    {".S",          SCLEX_ASM},
-    {".c",          SCLEX_CPP},
-    {".cc",         SCLEX_CPP},
-    {".cpp",        SCLEX_CPP},
-    {".cxx",        SCLEX_CPP},
-    {".h",          SCLEX_CPP},
-    {".hh",         SCLEX_CPP},
-    {".hpp",        SCLEX_CPP},
-    {".hxx",        SCLEX_CPP},
-    {".py",         SCLEX_PYTHON},
-    {".htm",        SCLEX_HTML},
-    {".html",       SCLEX_HTML},
-    {".mhtml",      SCLEX_HTML},
-    {".xml",        SCLEX_XML},
-    {".vb",         SCLEX_VB},
-    {".pl",         SCLEX_PERL},
-    {".pm",         SCLEX_PERL},
-    {".bat",        SCLEX_BATCH},
-    {".tex",        SCLEX_LATEX},
-    {".lua",        SCLEX_LUA},
-    {".diff",       SCLEX_DIFF},
-    {".ads",        SCLEX_ADA},
-    {".adb",        SCLEX_ADA},
-    {".lsp",        SCLEX_LISP},
-    {".rb",         SCLEX_RUBY},
-    {".tcl",        SCLEX_TCL},
-    {".vbs",        SCLEX_VBSCRIPT},
-    {".m",          SCLEX_MATLAB},
-    {".css",        SCLEX_CSS},
-    {".yaml",       SCLEX_YAML},
-    {".erl",        SCLEX_ERLANG},
-    {".hrl",        SCLEX_ERLANG},
-    {".st",         SCLEX_SMALLTALK},
-    {".md",         SCLEX_MARKDOWN},
-    {".rs",         SCLEX_RUST},
-    {".java",       SCLEX_CPP},
+static const const_unordered_map<std::string_view, Language> ext2lang = {
+    {".js",         langJavaScript},
+    {".jsx",        langJavaScript},
+    {".mjs",        langJavaScript},
+    {".asm",        langAsm},
+    {".s",          langAsm},
+    {".S",          langAsm},
+    {".c",          langCPP},
+    {".cc",         langCPP},
+    {".cpp",        langCPP},
+    {".cxx",        langCPP},
+    {".h",          langCPP},
+    {".hh",         langCPP},
+    {".hpp",        langCPP},
+    {".hxx",        langCPP},
+    {".py",         langPython},
+    {".htm",        langHTML},
+    {".html",       langHTML},
+    {".mhtml",      langHTML},
+    {".xml",        langXML},
+    {".vb",         langVB},
+    {".pl",         langPerl},
+    {".pm",         langPerl},
+    {".bat",        langBatch},
+    {".tex",        langLaTex},
+    {".lua",        langLua},
+    {".diff",       langDiff},
+    {".ads",        langAda},
+    {".adb",        langAda},
+    {".lsp",        langLisp},
+    {".rb",         langRuby},
+    {".tcl",        langTcl},
+    {".vbs",        langVBScript},
+    {".m",          langMATLAB},
+    {".css",        langCSS},
+    {".yaml",       langYAML},
+    {".erl",        langErlang},
+    {".hrl",        langErlang},
+    {".st",         langSmalltalk},
+    {".md",         langMarkdown},
+    {".rs",         langRust},
+    {".java",       langCPP},
 };
 
 void FileType::detect(EditorWindow &win)
 {
     auto &file = win.file;
-    int lexer = 0;
+    Language lang = langNone;
     [[maybe_unused]] int encoding = 0;
     {
         auto &&ext = file.extension();
-        lexer = ext2lex[ext.native()];
+        lang = ext2lang[ext.native()];
     }
 #ifdef HAVE_MAGIC
-    if (!lexer) {
+    if (!lang) {
         magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
         if (magic_cookie) {
             if (magic_load(magic_cookie, nullptr) == 0)
             {
                 const char *mimeType = magic_file(magic_cookie, file.c_str());
                 if (mimeType)
-                    lexer = mime2lex[mimeType];
+                    lang = mime2lang[mimeType];
             }
             if ( magic_setflags(magic_cookie, MAGIC_MIME_ENCODING) == 0 &&
                  magic_load(magic_cookie, nullptr) == 0 )
@@ -95,10 +95,8 @@ void FileType::detect(EditorWindow &win)
         magic_close(magic_cookie);
     }
 #endif
-    if (!lexer)
-        lexer = SCLEX_NULL;
-    else
+    if (lang != langNone)
         win.lineNumbers.setState(true);
 
-    loadLexer(lexer, win);
+    loadLexer(lang, win);
 }

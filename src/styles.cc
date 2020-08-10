@@ -2,6 +2,7 @@
 #include "util.h"
 #include "editwindow.h"
 #include "tscintilla.h"
+#include "styles.h"
 #include <utility>
 using namespace Scintilla;
 using std::pair;
@@ -116,22 +117,26 @@ static constexpr pair<uchar, Styles> stylesAsm[] = {
     {(uchar) -1, {}},
 };
 
-static constexpr pair<uchar, Styles> stylesCoffeeScript[] = {
-    {SCE_C_DEFAULT,                 sNormal},
-    {SCE_COFFEESCRIPT_COMMENT,      sComment},
-    {SCE_COFFEESCRIPT_COMMENTLINE,  sComment},
-    {SCE_COFFEESCRIPT_COMMENTDOC,   sComment},
-    {SCE_COFFEESCRIPT_NUMBER,       sNumberLiteral},
-    {SCE_COFFEESCRIPT_WORD,         sKeyword1},
-    {SCE_COFFEESCRIPT_STRING,       sStringLiteral},
-    {SCE_COFFEESCRIPT_CHARACTER,    sCharLiteral},
-    {SCE_COFFEESCRIPT_PREPROCESSOR, sPreprocessor},
-    {SCE_COFFEESCRIPT_OPERATOR,     sOperator},
-    {SCE_COFFEESCRIPT_COMMENTLINEDOC,sComment},
-    {SCE_COFFEESCRIPT_WORD2,        sKeyword2},
-    {SCE_COFFEESCRIPT_GLOBALCLASS,  sGlobals},
-    {SCE_COFFEESCRIPT_COMMENTBLOCK, sComment},
-    {(uchar) -1, {}},
+static constexpr pair<uchar, const char *> keywordsJavaScript[] = {
+    {0,
+"await break case catch continue default do else export false finally "
+"for get if import new null return set super switch this throw true try while "
+"with yield"
+    },
+    {1,
+"async class const debugger delete enum eval extends function in instanceof let "
+"static typeof var void"
+    },
+    {3,
+"arguments Array ArrayBuffer AsyncFunction Atomics BigInt BigInt64Array "
+"BigUint64Array Boolean DataView Date Error EvalError Float32Array Float64Array "
+"Function Generator GeneratorFunction globalThis Infinity Int8Array Int16Array "
+"Int32Array InternalError Intl JSON Map Math NaN Number Object Promise Proxy "
+"RangeError ReferenceError Reflect RegExp Set String SyntaxError TypeError URIError "
+"SharedArrayBuffer Symbol Uint8Array Uint8ClampedArray Uint16Array Uint32Array "
+"undefined WeakMap WeakSet WebAssembly"
+    },
+    {(uchar) -1, nullptr},
 };
 
 static constexpr pair<uchar, Styles> stylesRust[] = {
@@ -211,26 +216,26 @@ static constexpr pair<const char *, const char *> propertiesPython[] = {
 };
 
 struct LexerInfo {
+    const int lexer {SCLEX_NULL};
     const pair<uchar, Styles> *styles {nullptr};
     const pair<uchar, const char *> *keywords {nullptr};
     const pair<const char *, const char *> *properties {nullptr};
 };
 
-static const const_unordered_map<uchar, LexerInfo> lexerStyles = {
-    {SCLEX_CPP, {stylesC, keywordsC, propertiesC}},
-    {SCLEX_MAKEFILE, {stylesMake, nullptr, nullptr}},
-    {SCLEX_ASM, {stylesAsm, nullptr, nullptr}},
-    {SCLEX_COFFEESCRIPT, {stylesCoffeeScript, nullptr, nullptr}},
-    {SCLEX_RUST, {stylesRust, keywordsRust, nullptr}},
-    {SCLEX_PYTHON, {stylesPython, keywordsPython, propertiesPython}},
+static const const_unordered_map<Language, LexerInfo> lexerStyles = {
+    {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
+    {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr}},
+    {langAsm, {SCLEX_ASM, stylesAsm, nullptr, nullptr}},
+    {langJavaScript, {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC}},
+    {langRust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr}},
+    {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython}},
 };
 
-void loadLexer(int lexerId, EditorWindow &win)
+void loadLexer(Language lang, EditorWindow &win)
 {
     auto &editor = win.editor;
-    editor.WndProc(SCI_SETLEXER, lexerId, 0U);
-
-    auto [styles, keywords, properties] = lexerStyles[lexerId];
+    auto [lexer, styles, keywords, properties] = lexerStyles[lang];
+    editor.WndProc(SCI_SETLEXER, lexer, 0U);
     if (styles) {
         while (styles->first != (uchar) -1) {
             editor.setStyleColor(styles->first, styleDefaults[styles->second]);
