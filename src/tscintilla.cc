@@ -210,7 +210,7 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
     };
 
     int modifiers = convertModifiers(keyDown.controlKeyState);
-    bool specialKey = modifiers;
+    bool specialKey = modifiers && !keyDown.textLength;
 
     int key;
     if (keyDown.keyCode <= kbCtrlZ)
