@@ -77,10 +77,16 @@ void SearchBox::handleEvent(TEvent &ev)
                     case kbShiftTab:
                         focusNext(True);
                         break;
-                    // Like TDialog:
                     case kbEnter:
-                        ev.what = evBroadcast;
-                        ev.message.command = cmDefault;
+                        if (ev.keyDown.controlKeyState & kbShift) {
+                            // Shift+Enter, only works on the linux console.
+                            ev.what = evCommand;
+                            ev.message.command = cmSearchPrev;
+                        } else {
+                            // Like TDialog:
+                            ev.what = evBroadcast;
+                            ev.message.command = cmDefault;
+                        }
                         ev.message.infoPtr = 0;
                         handled = false;
                         break;
