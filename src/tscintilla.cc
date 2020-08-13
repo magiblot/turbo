@@ -1,3 +1,6 @@
+#define Uses_TSurface
+#include <tvision/tv.h>
+
 #include <chrono>
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -7,7 +10,6 @@ using std::chrono::steady_clock;
 
 using namespace Scintilla;
 
-#include "drawviews.h"
 #include "surface.h"
 
 TScintillaEditor::TScintillaEditor()
@@ -257,7 +259,7 @@ bool TScintillaEditor::MouseEvent(const TEvent &ev) {
     return false;
 }
 
-void TScintillaEditor::draw(TDrawableView &d) {
+void TScintillaEditor::draw(TSurface &d) {
     TScintillaSurface s;
     s.view = &d;
     Editor::Paint(&s, PRectangle(0, 0, d.size.x, d.size.y));

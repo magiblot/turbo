@@ -1,18 +1,20 @@
 #ifndef TURBO_DOCVIEW_H
 #define TURBO_DOCVIEW_H
 
+#define Uses_TSurfaceView
+#include <tvision/tv.h>
+
 #include "tscintilla.h"
-#include "drawviews.h"
 
 struct EditorWindow;
 
-struct DocumentView : public TDrawSubView {
+struct DocumentView : public TSurfaceView {
 
     Scintilla::TScintillaEditor &editor;
     EditorWindow &window;
 
     DocumentView( const TRect &bounds,
-                  const TDrawableView &view,
+                  const TSurface *view,
                   Scintilla::TScintillaEditor &aEditor,
                   EditorWindow &aWindow );
 

@@ -44,13 +44,13 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     indicator->hide();
     insert(indicator);
 
-    leftMargin = new TDrawSubView(TRect( 1, 1, 1, size.y - 1 ), editorView);
+    leftMargin = new TSurfaceView(TRect( 1, 1, 1, size.y - 1 ), &editorView);
     leftMargin->options |= ofFramed;
     leftMargin->growMode = gfGrowHiY | gfFixed;
     insert(leftMargin);
 
     docView = new DocumentView( TRect( 1, 1, size.x - 1, size.y - 1 ),
-                                editorView,
+                                &editorView,
                                 editor,
                                 *this );
     insert(docView);

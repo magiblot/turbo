@@ -55,7 +55,6 @@ target_sources(turbo PRIVATE
     "src/main.cc"
     "src/doctree.cc"
     "src/docview.cc"
-    "src/drawviews.cc"
     "src/editstates.cc"
     "src/editwindow.cc"
     "src/listviews.cc"

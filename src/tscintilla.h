@@ -9,7 +9,7 @@
 #include <ScintillaHeaders.h>
 
 struct DocumentView;
-class TDrawableView;
+class TSurface;
 
 namespace Scintilla {
 
@@ -46,13 +46,13 @@ struct TScintillaEditor : public ScintillaBase {
     int convertModifiers(ulong controlKeyState);
     void KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed);
     bool MouseEvent(const TEvent &ev);
-    void draw(TDrawableView &drawView);
+    void draw(TSurface &drawView);
     void setStyleColor(int style, TCellAttribs attr);
     void setSelectionColor(TCellAttribs attr);
     void setWhitespaceColor(TCellAttribs attr);
     static void drawWrapMarker(Surface *, PRectangle, bool, ColourDesired);
 
-    void setWindow(TDrawableView *wid);
+    void setWindow(TSurface *wid);
     void setParent(TScintillaWindow *parent_);
     void changeSize();
     Sci::Line getFirstVisibleDocumentLine();
@@ -61,7 +61,7 @@ struct TScintillaEditor : public ScintillaBase {
 
 };
 
-inline void TScintillaEditor::setWindow(TDrawableView *wid)
+inline void TScintillaEditor::setWindow(TSurface *wid)
 {
     wMain = wid;
 }

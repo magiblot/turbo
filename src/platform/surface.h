@@ -7,7 +7,7 @@
 
 #include <ScintillaHeaders.h>
 
-class TDrawableView;
+class TSurface;
 struct TScreenCell;
 struct TCellAttribs;
 
@@ -35,7 +35,7 @@ namespace Scintilla {
 
     struct TScintillaSurface : public Surface {
 
-        TDrawableView *view {0};
+        TSurface *view {0};
         TPRect clip {0, 0, 0, 0};
 
         TPRect clipRect(TPRect r);
@@ -92,7 +92,8 @@ namespace Scintilla {
 
 }
 
-#include "drawviews.h"
+#define Uses_TSurface
+#include <tvision/tv.h>
 
 namespace Scintilla {
 

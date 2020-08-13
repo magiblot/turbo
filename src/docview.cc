@@ -7,10 +7,10 @@
 using namespace Scintilla;
 
 DocumentView::DocumentView( const TRect &bounds,
-                            const TDrawableView &view,
+                            const TSurface *view,
                             Scintilla::TScintillaEditor &aEditor,
                             EditorWindow &aWindow ) :
-    TDrawSubView(bounds, view),
+    TSurfaceView(bounds, view),
     editor(aEditor),
     window(aWindow)
 {
@@ -79,5 +79,5 @@ void DocumentView::draw()
 {
     auto [x, y] = editor.getCaretPosition();
     setCursor(x - delta.x, y - delta.y);
-    TDrawSubView::draw();
+    TSurfaceView::draw();
 }

@@ -11,18 +11,18 @@ Surface *Surface::Allocate(int technology)
 
 void TScintillaSurface::Init(WindowID wid)
 {
-    view = (TDrawableView *) wid;
+    view = (TSurface *) wid;
 }
 
 void TScintillaSurface::Init(SurfaceID sid, WindowID wid)
 {
     // We do not distinguish yet between Window and Surface.
-    view = (TDrawableView *) wid;
+    view = (TSurface *) wid;
 }
 
 void TScintillaSurface::InitPixMap(int width, int height, Surface *surface_, WindowID wid)
 {
-    view = (TDrawableView *) wid;
+    view = (TSurface *) wid;
 }
 
 void TScintillaSurface::Release()

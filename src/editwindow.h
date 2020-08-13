@@ -3,10 +3,10 @@
 
 #define Uses_TWindow
 #define Uses_TPalette
+#define Uses_TSurfaceView
 #include <tvision/tv.h>
 
 #include "tscintilla.h"
-#include "drawviews.h"
 #include "util.h"
 #include "editstates.h"
 
@@ -27,7 +27,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // Subviews
 
     DocumentView *docView;
-    TDrawSubView *leftMargin;
+    TSurfaceView *leftMargin;
     SearchBox *search;
     TScrollBar *hScrollBar, *vScrollBar;
     TIndicator *indicator;
@@ -44,7 +44,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // Scintilla
 
     Scintilla::TScintillaEditor editor;
-    TDrawableView editorView;
+    TSurface editorView;
 
     TRect editorBounds() const;
     void setUpEditor(bool openCanFail);
