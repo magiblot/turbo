@@ -263,6 +263,7 @@ void setUpStyles(EditorWindow &win)
 {
     auto &editor = win.editor;
     win.editorView.setFillColor(styleDefaults[sNormal]);
+    win.editorView.clear();
     editor.setStyleColor(STYLE_DEFAULT, styleDefaults[sNormal]);
     editor.WndProc(SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
     editor.setSelectionColor(styleDefaults[sSelection]);

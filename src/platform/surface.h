@@ -7,7 +7,7 @@
 
 #include <ScintillaHeaders.h>
 
-class TSurface;
+class TDrawSurface;
 struct TScreenCell;
 struct TCellAttribs;
 
@@ -17,7 +17,6 @@ namespace Scintilla {
 
         using TRect::TRect;
         TPRect(PRectangle rc);
-        TPRect& operator=(const TRect &r);
 
     };
 
@@ -26,16 +25,9 @@ namespace Scintilla {
     {
     }
 
-    inline TPRect& TPRect::operator=(const TRect &r)
-    {
-        a = r.a;
-        b = r.b;
-        return *this;
-    }
-
     struct TScintillaSurface : public Surface {
 
-        TSurface *view {0};
+        TDrawSurface *view {0};
         TPRect clip {0, 0, 0, 0};
 
         TPRect clipRect(TPRect r);
@@ -91,9 +83,6 @@ namespace Scintilla {
     };
 
 }
-
-#define Uses_TSurface
-#include <tvision/tv.h>
 
 namespace Scintilla {
 

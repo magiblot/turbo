@@ -44,9 +44,9 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // Scintilla
 
     Scintilla::TScintillaEditor editor;
-    TSurface editorView;
+    TDrawSurface editorView;
 
-    TRect editorBounds() const;
+    TPoint editorSize() const;
     void setUpEditor(bool openCanFail);
     void redrawEditor();
     void updateMarginWidth();

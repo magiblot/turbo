@@ -2,6 +2,9 @@
 
 using namespace Scintilla;
 
+#define Uses_TDrawSurface
+#include <tvision/tv.h>
+
 #include "surface.h"
 
 Surface *Surface::Allocate(int technology)
@@ -11,18 +14,18 @@ Surface *Surface::Allocate(int technology)
 
 void TScintillaSurface::Init(WindowID wid)
 {
-    view = (TSurface *) wid;
+    view = (TDrawSurface *) wid;
 }
 
 void TScintillaSurface::Init(SurfaceID sid, WindowID wid)
 {
     // We do not distinguish yet between Window and Surface.
-    view = (TSurface *) wid;
+    view = (TDrawSurface *) wid;
 }
 
 void TScintillaSurface::InitPixMap(int width, int height, Surface *surface_, WindowID wid)
 {
-    view = (TSurface *) wid;
+    view = (TDrawSurface *) wid;
 }
 
 void TScintillaSurface::Release()
@@ -126,7 +129,7 @@ void TScintillaSurface::DrawTextNoClip( PRectangle rc, Font &font_,
                                         ColourDesired fore, ColourDesired back )
 {
     auto clip_ = clip;
-    clip = view->getExtent();
+    clip = {0, 0, view->size.x, view->size.y};
     DrawTextClipped(rc, font_, ybase, text, fore, back);
     clip = clip_;
 }
@@ -233,7 +236,7 @@ XYPOSITION TScintillaSurface::AverageCharWidth(Font &font_)
 void TScintillaSurface::SetClip(PRectangle rc)
 {
     clip = rc;
-    clip.intersect(view->getExtent());
+    clip.intersect({0, 0, view->size.x, view->size.y});
 }
 
 void TScintillaSurface::FlushCachedState()

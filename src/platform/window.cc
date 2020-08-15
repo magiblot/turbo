@@ -1,5 +1,5 @@
 #define Uses_TProgram
-#define Uses_TSurface
+#define Uses_TDrawSurface
 #include <tvision/tv.h>
 
 #include <ScintillaHeaders.h>
@@ -16,19 +16,17 @@ void Window::Destroy()
 
 PRectangle Window::GetPosition() const
 {
-    TSurface *v = (TSurface *) wid;
-    if (v) {
-        TRect r = v->getBounds(); // Relative to parent.
-        return PRectangle::FromInts(r.a.x, r.a.y, r.b.x, r.b.y);
-    }
+    auto *v = (TDrawSurface *) wid;
+    if (v)
+        return PRectangle::FromInts(0, 0, v->size.x, v->size.y);
     return PRectangle();
 }
 
 void Window::SetPosition(PRectangle rc)
 {
-    TSurface *v = (TSurface *) wid;
+    auto *v = (TDrawSurface *) wid;
     if (v)
-        v->changeBounds({{(int) rc.left, (int) rc.top}, {(int) rc.right, (int) rc.bottom}});
+        v->resize({int(rc.right - rc.left), int(rc.bottom - rc.top)});
 }
 
 void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
@@ -38,23 +36,14 @@ void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
 
 PRectangle Window::GetClientPosition() const
 {
-    TSurface *v = (TSurface *) wid;
-    if (v) {
-        TRect r = v->getExtent(); // r.a is {0, 0}.
-        return PRectangle::FromInts(r.a.x, r.a.y, r.b.x, r.b.y);
-    }
+    auto *v = (TDrawSurface *) wid;
+    if (v)
+        return PRectangle::FromInts(0, 0, v->size.x, v->size.y);
     return PRectangle();
 }
 
 void Window::Show(bool show)
 {
-    TSurface *v = (TSurface *) wid;
-    if (v) {
-        if (show)
-            v->show();
-        else
-            v->hide();
-    }
 }
 
 void Window::InvalidateAll()

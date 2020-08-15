@@ -1,4 +1,4 @@
-#define Uses_TSurface
+#define Uses_TDrawSurface
 #include <tvision/tv.h>
 
 #include <chrono>
@@ -259,7 +259,7 @@ bool TScintillaEditor::MouseEvent(const TEvent &ev) {
     return false;
 }
 
-void TScintillaEditor::draw(TSurface &d) {
+void TScintillaEditor::draw(TDrawSurface &d) {
     TScintillaSurface s;
     s.view = &d;
     Editor::Paint(&s, PRectangle(0, 0, d.size.x, d.size.y));

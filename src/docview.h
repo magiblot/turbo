@@ -14,7 +14,7 @@ struct DocumentView : public TSurfaceView {
     EditorWindow &window;
 
     DocumentView( const TRect &bounds,
-                  const TSurface *view,
+                  const TDrawSurface *view,
                   Scintilla::TScintillaEditor &aEditor,
                   EditorWindow &aWindow );
 

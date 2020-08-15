@@ -7,7 +7,7 @@
 using namespace Scintilla;
 
 DocumentView::DocumentView( const TRect &bounds,
-                            const TSurface *view,
+                            const TDrawSurface *view,
                             Scintilla::TScintillaEditor &aEditor,
                             EditorWindow &aWindow ) :
     TSurfaceView(bounds, view),

@@ -22,15 +22,13 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     fatalError(false),
     file(aFile),
     inSavePoint(true),
-    editorView(editorBounds())
+    editorView(editorSize())
 {
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
 
     if (TurboApp::app)
         editor.clipboard = &TurboApp::app->clipboard;
-
-    editorView.hide();
 
     hScrollBar = new TScrollBar(TRect( 18, size.y - 1, size.x - 2, size.y ));
     hScrollBar->hide();
@@ -77,13 +75,13 @@ EditorWindow::~EditorWindow()
         TurboApp::app->removeEditor(this);
 }
 
-TRect EditorWindow::editorBounds() const
+TPoint EditorWindow::editorSize() const
 {
     // Editor size: the window's inside.
     TRect r = getExtent().grow(-1, -1);
     if (lineNumbers.isEnabled())
         r.b.x--;
-    return r;
+    return r.b - r.a;
 }
 
 void EditorWindow::setUpEditor(bool openCanFail)
@@ -170,17 +168,17 @@ void EditorWindow::updateMarginWidth()
         {
             TRect dv = docView->getBounds();
             dv.a.x += delta;
-            TRect ev = editorView.getBounds();
+            TPoint ev = editorView.size;
             if (width == 0) { // Line numbers disabled.
                 dv.a.x -= 1;
-                ev.b.x += 1;
+                ev.x += 1;
             } else if (width == delta) { // Line numbers enabled.
                 dv.a.x += 1;
-                ev.b.x -= 1;
+                ev.x -= 1;
             }
             docView->changeBounds(dv);
-            docView->setDelta({width, 0});
-            editorView.changeBounds(ev);
+            docView->delta = {width, 0};
+            editorView.resize(ev);
         }
         frame->drawView();
     }
@@ -237,7 +235,7 @@ void EditorWindow::changeBounds(const TRect &bounds)
     TWindow::changeBounds(bounds);
     unlockSubViews();
     if (size != lastSize) {
-        editorView.changeBounds(editorBounds());
+        editorView.resize(editorSize());
         redrawEditor();
         lastSize = size;
     }
