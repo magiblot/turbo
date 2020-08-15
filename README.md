@@ -54,7 +54,14 @@ Some of the default keybindings are:
 * `Ctrl+O`: "open file" dialog.
 * `Ctrl+S`: save document.
 * `Ctrl+W`: close focused document.
+* `F6`, `Shift+F6`: next/previous document (sorted by MRU).
 * `Alt+X`: exit the application (I prefer this over `Ctrl+Q` as it is too close to `Ctrl+A` and `Ctrl+W`).
+
+Additionally, the following key shortcuts are supported on the Linux console:
+
+* `Ctrl+Shift+Z`: redo.
+* `Alt+Tab`, `Alt+Shift+Tab`: next/previous document (sorted by MRU).
+* `Shift+Enter`: find previous (in the "find" text box).
 
 Support for these key combinations may vary among terminal applications, but any issue on this should be reported to [Turbo Vision](https://github.com/magiblot/tvision/issues) instead.
 

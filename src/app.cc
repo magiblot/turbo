@@ -152,6 +152,25 @@ void TurboApp::getEvent(TEvent &event)
         parseArgs();
     }
     TApplication::getEvent(event);
+    if (event.what == evKeyDown) {
+        // Handle key shortcuts that do not have a unique keycode.
+        switch (event.keyDown.keyCode) {
+            case kbTab:
+                switch (event.keyDown.controlKeyState & (kbShift | kbAltShift | kbCtrlShift)) {
+                    case kbAltShift:
+                        event.what = evCommand;
+                        event.message.command = cmEditorNext;
+                        event.message.infoPtr = 0;
+                        break;
+                    case kbShift | kbAltShift:
+                        event.what = evCommand;
+                        event.message.command = cmEditorPrev;
+                        event.message.infoPtr = 0;
+                        break;
+                }
+            break;
+        }
+    }
 }
 
 void TurboApp::handleEvent(TEvent &event)
