@@ -163,7 +163,7 @@ struct DocumentProperties {
         if (text.size()) {
             char cur = text[0];
             char next = text.size() > 0 ? text[1] : '\0';
-            int i = 1;
+            size_t i = 1;
             while (notDetected) {
                 if (notDetected & ndEOL) {
                     if (cur == '\r' && next == '\n')
