@@ -2,6 +2,7 @@
 #define Uses_TIndicator
 #define Uses_TButton
 #define Uses_TFrame
+#define Uses_TDrawSurface
 #include <tvision/tv.h>
 
 #include "app.h"
@@ -123,17 +124,26 @@ void SearchBox::draw()
     TGroup::redraw();
 }
 
+static inline void grow(TDrawSurface *s, TPoint delta)
+{
+    s->resize(s->size + delta);
+}
+
+static inline void grow(TView *v, TPoint delta)
+{
+    TRect r = v->getBounds();
+    r.b += delta;
+    v->changeBounds(r);
+}
+
 void SearchBox::open()
 {
     if (!visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
         win.lock();
-        for (auto *v : {(TView *) &win.editorView, (TView *) win.docView, (TView *) win.leftMargin})
-        {
-            TRect r = v->getBounds();
-            r.b.y -= size.y + 1;
-            v->changeBounds(r);
-        }
+        grow(&win.editorView, {0, -(size.y + 1)});
+        for (auto *v : std::initializer_list<TView*> ({win.docView, win.leftMargin}))
+            grow(v, {0, -(size.y + 1)});
         lock();
         show();
         unlock();
@@ -150,12 +160,9 @@ void SearchBox::close()
     if (visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
         win.lock();
-        for (auto *v : {(TView *) &win.editorView, (TView *) win.docView, (TView *) win.leftMargin})
-        {
-            TRect r = v->getBounds();
-            r.b.y += size.y + 1;
-            v->changeBounds(r);
-        }
+        grow(&win.editorView, {0, size.y + 1});
+        for (auto *v : std::initializer_list<TView*> ({win.docView, win.leftMargin}))
+            grow(v, {0, size.y + 1});
         hide();
         win.frame->drawView();
         win.redrawEditor();
