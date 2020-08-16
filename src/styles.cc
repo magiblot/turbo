@@ -15,7 +15,7 @@ enum Styles : uchar {
     sLineNums,
     sKeyword1,
     sKeyword2,
-    sGlobals,
+    sMisc,
     sPreprocessor,
     sOperator,
     sComment,
@@ -23,6 +23,7 @@ enum Styles : uchar {
     sCharLiteral,
     sNumberLiteral,
     sEscapeSequence,
+    sError,
 };
 
 static const TCellAttribs styleDefaults[] = {
@@ -33,7 +34,7 @@ static const TCellAttribs styleDefaults[] = {
     [sLineNums]       = {0x06, afBgDefault                  },
     [sKeyword1]       = {0x0E, afBgDefault                  },
     [sKeyword2]       = {0x0A, afBgDefault                  },
-    [sGlobals]        = {0x09, afBgDefault                  },
+    [sMisc]           = {0x09, afBgDefault                  },
     [sPreprocessor]   = {0x02, afBgDefault                  },
     [sOperator]       = {0x0D, afBgDefault                  },
     [sComment]        = {0x06, afBgDefault                  },
@@ -41,6 +42,7 @@ static const TCellAttribs styleDefaults[] = {
     [sCharLiteral]    = {0x0C, afBgDefault                  },
     [sNumberLiteral]  = {0x03, afBgDefault                  },
     [sEscapeSequence] = {0x0B, afBgDefault                  },
+    [sError]          = {0x30,                              },
 };
 
 static constexpr pair<uchar, Styles> stylesC[] = {
@@ -56,7 +58,7 @@ static constexpr pair<uchar, Styles> stylesC[] = {
     {SCE_C_OPERATOR,                sOperator},
     {SCE_C_COMMENTLINEDOC,          sComment},
     {SCE_C_WORD2,                   sKeyword2},
-    {SCE_C_GLOBALCLASS,             sGlobals},
+    {SCE_C_GLOBALCLASS,             sMisc},
     {SCE_C_PREPROCESSORCOMMENT,     sComment},
     {SCE_C_PREPROCESSORCOMMENTDOC,  sComment},
     {SCE_C_ESCAPESEQUENCE,          sEscapeSequence},
@@ -153,7 +155,7 @@ static constexpr pair<uchar, Styles> stylesRust[] = {
     {SCE_RUST_CHARACTER,            sCharLiteral},
     {SCE_RUST_MACRO,                sPreprocessor},
     {SCE_RUST_OPERATOR,             sOperator},
-    {SCE_RUST_LIFETIME,             sGlobals},
+    {SCE_RUST_LIFETIME,             sMisc},
     {SCE_RUST_BYTESTRING,           sEscapeSequence},
     {SCE_RUST_BYTESTRINGR,          sEscapeSequence},
     {SCE_RUST_BYTECHARACTER,        sEscapeSequence},
@@ -188,7 +190,7 @@ static constexpr pair<uchar, Styles> stylesPython[] = {
     {SCE_P_IDENTIFIER,              sNormal},
     {SCE_P_COMMENTBLOCK,            sComment},
     {SCE_P_STRINGEOL,               sNormal},
-    {SCE_P_WORD2,                   sGlobals},
+    {SCE_P_WORD2,                   sMisc},
     {SCE_P_DECORATOR,               sPreprocessor},
     {SCE_P_FSTRING,                 sStringLiteral},
     {SCE_P_FCHARACTER,              sCharLiteral},
@@ -215,6 +217,38 @@ static constexpr pair<const char *, const char *> propertiesPython[] = {
     {nullptr, nullptr},
 };
 
+static constexpr pair<uchar, Styles> stylesBash[] = {
+    {SCE_SH_DEFAULT,                sNormal},
+    {SCE_SH_ERROR,                  sError},
+    {SCE_SH_COMMENTLINE,            sComment},
+    {SCE_SH_NUMBER,                 sNumberLiteral},
+    {SCE_SH_WORD,                   sKeyword2},
+    {SCE_SH_STRING,                 sStringLiteral},
+    {SCE_SH_CHARACTER,              sCharLiteral},
+    {SCE_SH_OPERATOR,               sOperator},
+    {SCE_SH_IDENTIFIER,             sNormal},
+    {SCE_SH_SCALAR,                 sKeyword1},
+    {SCE_SH_PARAM,                  sKeyword1},
+    {SCE_SH_BACKTICKS,              sKeyword1},
+    {SCE_SH_HERE_DELIM,             sMisc},
+    {SCE_SH_HERE_Q,                 sMisc},
+    {(uchar) -1, {}},
+};
+
+static constexpr pair<uchar, const char *> keywordsBash[] = {
+    {0,
+// Keywords
+"case do done elif else esac fi for function if in select then time until while "
+// Builtins
+"alias bg bind break builtin caller cd command compgen complete compopt continue "
+"declare dirs disown echo enable eval exec exit export fc fg getopts hash help "
+"history jobs kill let local logout mapfile popd printf pushd pwd read readarray "
+"readonly return set shift shopt source suspend test times trap type typeset ulimit "
+"umask unalias unset wait "
+    },
+    {(uchar) -1, nullptr},
+};
+
 struct LexerInfo {
     const int lexer {SCLEX_NULL};
     const pair<uchar, Styles> *styles {nullptr};
@@ -229,6 +263,7 @@ static const const_unordered_map<Language, LexerInfo> lexerStyles = {
     {langJavaScript, {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC}},
     {langRust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr}},
     {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython}},
+    {langBash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr}},
 };
 
 void loadLexer(Language lang, EditorWindow &win)
