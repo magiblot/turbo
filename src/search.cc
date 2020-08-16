@@ -210,7 +210,7 @@ Boolean Searcher::isValid(const char *s)
 {
     // Invoked from TValidator::validate, which in turn is invoked from
     // TInputLine::valid.
-    if (onDemand)
+    if (onDemand && *s)
         searchText(s, true);
     return True;
 }
