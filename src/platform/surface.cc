@@ -168,13 +168,12 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
             ::setChar(c, ' ');
             cells[x++] = c;
         }
-        size_t i = textBegin;
-        while (i < text.size() && (int) x < r.b.x) {
-            auto &c = cells[x];
-            c.Attr.fgSet(fg);
-            c.Attr.attrSet(fg);
-            TText::eat(cells.subspan(x), x, text.substr(i), i);
-        }
+        TText::fill(cells.subspan(x), text.substr(textBegin),
+            [fg] (auto &cell) {
+                cell.Attr.fgSet(fg);
+                cell.Attr.attrSet(fg);
+            }
+        );
     }
 }
 
