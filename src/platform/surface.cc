@@ -3,6 +3,7 @@
 using namespace Scintilla;
 
 #define Uses_TDrawSurface
+#define Uses_TText
 #include <tvision/tv.h>
 
 #include "surface.h"
@@ -143,20 +144,11 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
     size_t textBegin = 0, overlap = 0;
     TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
+        auto cells = TSpan<TScreenCell>(&view->at(y, 0), r.b.x);
         size_t x = r.a.x;
-        while (overlap-- && (int) x < r.b.x) {
-            auto c = view->at(y, x);
-            c.Attr = color;
-            c.Char = ' ';
-            c.extraWidth = 0;
-            view->at(y, x++) = c;
-        }
-        size_t i = textBegin;
-        while (i < text.size() && (int) x < r.b.x) {
-            auto &c = view->at(y, x);
-            c.Attr = color;
-            TText::eat(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
-        }
+        while (overlap-- && (int) x < r.b.x)
+            ::setCell(cells[x++], ' ', color);
+        TText::fill(cells.subspan(x), text.substr(textBegin), color);
     }
 }
 
@@ -167,21 +159,21 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
     size_t textBegin = 0, overlap = 0;
     TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
+        auto cells = TSpan<TScreenCell>(&view->at(y, 0), r.b.x);
         size_t x = r.a.x;
         while (overlap-- && (int) x < r.b.x) {
-            auto c = view->at(y, x);
+            auto c = cells[x];
             c.Attr.fgSet(fg);
             c.Attr.attrSet(fg);
-            c.Char = ' ';
-            c.extraWidth = 0;
-            view->at(y, x++) = c;
+            ::setChar(c, ' ');
+            cells[x++] = c;
         }
         size_t i = textBegin;
         while (i < text.size() && (int) x < r.b.x) {
-            auto &c = view->at(y, x);
+            auto &c = cells[x];
             c.Attr.fgSet(fg);
             c.Attr.attrSet(fg);
-            TText::eat(&c, r.b.x - x, x, text.substr(i, text.size() - i), i);
+            TText::eat(cells.subspan(x), x, text.substr(i), i);
         }
     }
 }
