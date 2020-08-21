@@ -235,7 +235,7 @@ void EditorWindow::changeBounds(const TRect &bounds)
     TWindow::changeBounds(bounds);
     unlockSubViews();
     if (size != lastSize) {
-        editorView.resize(editorSize());
+        editorView.grow(size - lastSize);
         redrawEditor();
         lastSize = size;
     }

@@ -124,11 +124,6 @@ void SearchBox::draw()
     TGroup::redraw();
 }
 
-static inline void grow(TDrawSurface *s, TPoint delta)
-{
-    s->resize(s->size + delta);
-}
-
 static inline void grow(TView *v, TPoint delta)
 {
     TRect r = v->getBounds();
@@ -141,7 +136,7 @@ void SearchBox::open()
     if (!visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
         win.lock();
-        grow(&win.editorView, {0, -(size.y + 1)});
+        win.editorView.grow({0, -(size.y + 1)});
         for (auto *v : std::initializer_list<TView*> ({win.docView, win.leftMargin}))
             grow(v, {0, -(size.y + 1)});
         lock();
@@ -160,7 +155,7 @@ void SearchBox::close()
     if (visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
         win.lock();
-        grow(&win.editorView, {0, size.y + 1});
+        win.editorView.grow({0, size.y + 1});
         for (auto *v : std::initializer_list<TView*> ({win.docView, win.leftMargin}))
             grow(v, {0, size.y + 1});
         hide();
