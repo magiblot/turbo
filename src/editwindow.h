@@ -135,7 +135,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     // Pops out a msgBox with an error message.
 
-    static void showError(const std::string &s);
+    static void showError(std::string_view s);
 
 };
 

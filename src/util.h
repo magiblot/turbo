@@ -9,8 +9,6 @@
 #include <string_view>
 #include <unordered_map>
 
-char *strnzcpy(char *dest, std::string_view src, size_t n);
-
 template<class Func>
 // 'callback' should take an ushort and a TView * and return something
 // evaluable to a bool.

@@ -61,7 +61,6 @@ target_sources(turbo PRIVATE
     "src/search.cc"
     "src/styles.cc"
     "src/tscintilla.cc"
-    "src/util.cc"
     "src/widgets.cc"
     "src/platform/font.cc"
     "src/platform/library.cc"
