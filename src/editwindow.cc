@@ -507,7 +507,7 @@ bool EditorWindow::saveAsDialog()
         bool saved = false;
         TurboApp::app->openFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 0,
             [this, &saved] (TView *dialog) {
-                std::filesystem::path prevFile = std::move(file);
+                util::u8path prevFile = std::move(file);
                 char fileName[MAXPATH];
                 dialog->getData(fileName);
                 std::error_code ec;

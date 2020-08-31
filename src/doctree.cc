@@ -7,8 +7,8 @@ using callback_t = DocumentTreeView::callback_t;
 
 const callback_t *DocumentTreeView::searchCallback {nullptr};
 
-Node::Node(Node *parent, const std::filesystem::path &p) :
-    TNode(p.filename().c_str()),
+Node::Node(Node *parent, const util::u8path &p) :
+    TNode(p.filename().operator std::string_view()),
     ptr(nullptr),
     parent(parent),
     data(p)
@@ -16,7 +16,7 @@ Node::Node(Node *parent, const std::filesystem::path &p) :
 }
 
 Node::Node(Node *parent, EditorWindow *w) :
-    TNode(w->title.c_str()),
+    TNode(w->title),
     ptr(nullptr),
     parent(parent),
     data(w)
@@ -133,7 +133,7 @@ void DocumentTreeView::focusPrev()
     });
 }
 
-Node* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
+Node* DocumentTreeView::getDirNode(const util::u8path &dirPath)
 {
     // The list where the dir will be inserted.
     TNode **list {nullptr};
@@ -147,14 +147,14 @@ Node* DocumentTreeView::getDirNode(const std::filesystem::path &dirPath)
         list = &root;
     // The directory we are searching for.
     auto *dir = (Node *) findInList(list, [&dirPath] (Node *node) {
-        auto *ppath = std::get_if<std::filesystem::path>(&node->data);
+        auto *ppath = std::get_if<util::u8path>(&node->data);
         return ppath && *ppath == dirPath;
     });
     if (!dir) {
         dir = new Node(parent, dirPath);
         // Place already existing subdirectories under this dir.
         findInList(&root, [dir, &dirPath] (Node *node) {
-            auto *ppath = std::get_if<std::filesystem::path>(&node->data);
+            auto *ppath = std::get_if<util::u8path>(&node->data);
             if (ppath && ppath->parent_path() == dirPath)
                 node->setParent(dir);
             return false;
@@ -191,10 +191,10 @@ callback_t DocumentTreeView::hasEditor(const EditorWindow *w, int *pos)
     };
 }
 
-callback_t DocumentTreeView::hasPath(const std::filesystem::path &path, int *pos)
+callback_t DocumentTreeView::hasPath(const util::u8path &path, int *pos)
 {
     return [&path, pos] (auto *node, auto position) {
-        auto *ppath = std::get_if<std::filesystem::path>(&((Node *) node)->data);
+        auto *ppath = std::get_if<util::u8path>(&((Node *) node)->data);
         if (ppath && *ppath == path) {
             if (pos)
                 *pos = position;

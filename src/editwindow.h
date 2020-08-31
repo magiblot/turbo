@@ -12,7 +12,6 @@
 
 #include <string_view>
 #include <string>
-#include <filesystem>
 
 struct DocumentView;
 struct SearchBox;
@@ -83,7 +82,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // The absolute path of the currently open file, or an empty path if
     // no file is open.
 
-    std::filesystem::path file;
+    util::u8path file;
 
     // If there was an error while loading the file, the view is invalid.
     // It shall return False when invoking valid(cmValid).

@@ -17,9 +17,9 @@ struct DocumentTreeView : public TOutline {
 
         TNode **ptr;
         Node *parent;
-        std::variant<std::filesystem::path, EditorWindow *> data;
+        std::variant<util::u8path, EditorWindow *> data;
 
-        Node(Node *parent, const std::filesystem::path &path);
+        Node(Node *parent, const util::u8path &path);
         Node(Node *parent, EditorWindow *w);
         bool hasEditor() const;
         EditorWindow* getEditor();
@@ -46,11 +46,11 @@ struct DocumentTreeView : public TOutline {
     void removeEditor(EditorWindow *w);
     void focusNext();
     void focusPrev();
-    Node *getDirNode(const std::filesystem::path &dirPath);
+    Node *getDirNode(const util::u8path &dirPath);
     TNode *findFirst(const callback_t &cb);
     static Boolean applyCallback(TOutlineViewer *, TNode *, int, int, long, ushort);
     static callback_t hasEditor(const EditorWindow *node, int *pos=nullptr);
-    static callback_t hasPath(const std::filesystem::path &path, int *pos=nullptr);
+    static callback_t hasPath(const util::u8path &path, int *pos=nullptr);
 
 };
 

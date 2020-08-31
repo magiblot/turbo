@@ -295,7 +295,7 @@ TRect TurboApp::adjustEditorBounds(TRect r)
 void TurboApp::setEditorTitle(EditorWindow *w)
 {
     uint number;
-    auto &&file = w->file.filename();
+    auto &&file = (util::u8path) w->file.filename();
     if (!file.empty()) {
         w->title.assign(file);
         number = ++getFileCounter(file.native());
@@ -318,7 +318,7 @@ void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
         docTree->tree->focusEditor(w);
     }
     if (!w->file.empty())
-        mostRecentDir = w->file.parent_path();
+        mostRecentDir.assign(w->file.parent_path());
 }
 
 active_counter& TurboApp::getFileCounter(std::string_view file)
@@ -425,7 +425,7 @@ void TurboApp::setFocusedEditor(EditorWindow *w)
         docTree->tree->focusEditor(w);
     // We keep track of the most recent directory for file dialogs.
     if (!w->file.empty())
-        mostRecentDir = w->file.parent_path();
+        mostRecentDir.assign(w->file.parent_path());
 }
 
 #define cpTurboAppColor \

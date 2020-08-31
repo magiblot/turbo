@@ -8,7 +8,6 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
-#include <filesystem>
 #include "util.h"
 #include "doctree.h"
 
@@ -74,7 +73,7 @@ struct TurboApp : public TApplication {
     // The path of the most recently focused editor, so that file dialogs
     // are opened there.
 
-    std::filesystem::path mostRecentDir;
+    util::u8path mostRecentDir;
     void setFocusedEditor(EditorWindow *w); // Set from here.
 
     template<typename Func>
