@@ -47,10 +47,6 @@
 #include <fstream>
 #include <filesystem>
 
-// POSIX
-#include <dlfcn.h>
-#include <sys/time.h>
-
 // Scintilla headers
 
 // Non-platform-specific headers

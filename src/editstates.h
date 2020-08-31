@@ -139,13 +139,19 @@ struct Indent {
 
 };
 
-struct DocumentProperties {
+#ifdef DocumentProperties
+#undef DocumentProperties
+#endif
+
+class DocumentProperties {
 
     static constexpr uint
         ndEOL = 0x0001;
 
     uint notDetected;
     int eolType;
+
+public:
 
     DocumentProperties()
     {

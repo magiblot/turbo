@@ -209,8 +209,13 @@ void TurboApp::handleEvent(TEvent &event)
 void TurboApp::shell()
 {
     suspend();
+#ifndef __unix__
+    cout << "Type EXIT to return..." << endl;
+    system( getenv( "COMSPEC"));
+#else
     cout << "The application has been stopped. You can return by entering 'fg'." << endl;
     raise(SIGTSTP);
+#endif
     resume();
     redraw();
 }

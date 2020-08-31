@@ -27,22 +27,22 @@ enum Styles : uchar {
 };
 
 static const TCellAttribs styleDefaults[] = {
-    [sNormal]         = {0x07, afFgDefault | afBgDefault    },
-    [sSelection]      = {0x71                               },
-    [sWhitespace]     = {0x05, afBgDefault                  },
-    [sCtrlChar]       = {0x0D, afBgDefault                  },
-    [sLineNums]       = {0x06, afBgDefault                  },
-    [sKeyword1]       = {0x0E, afBgDefault                  },
-    [sKeyword2]       = {0x0A, afBgDefault                  },
-    [sMisc]           = {0x09, afBgDefault                  },
-    [sPreprocessor]   = {0x02, afBgDefault                  },
-    [sOperator]       = {0x0D, afBgDefault                  },
-    [sComment]        = {0x06, afBgDefault                  },
-    [sStringLiteral]  = {0x0C, afBgDefault                  },
-    [sCharLiteral]    = {0x0C, afBgDefault                  },
-    [sNumberLiteral]  = {0x03, afBgDefault                  },
-    [sEscapeSequence] = {0x0B, afBgDefault                  },
-    [sError]          = {0x30,                              },
+    /* sNormal           */ {0x07, afFgDefault | afBgDefault    },
+    /* sSelection        */ {0x71                               },
+    /* sWhitespace       */ {0x05, afBgDefault                  },
+    /* sCtrlChar         */ {0x0D, afBgDefault                  },
+    /* sLineNums         */ {0x06, afBgDefault                  },
+    /* sKeyword1         */ {0x0E, afBgDefault                  },
+    /* sKeyword2         */ {0x0A, afBgDefault                  },
+    /* sMisc             */ {0x09, afBgDefault                  },
+    /* sPreprocessor     */ {0x02, afBgDefault                  },
+    /* sOperator         */ {0x0D, afBgDefault                  },
+    /* sComment          */ {0x06, afBgDefault                  },
+    /* sStringLiteral    */ {0x0C, afBgDefault                  },
+    /* sCharLiteral      */ {0x0C, afBgDefault                  },
+    /* sNumberLiteral    */ {0x03, afBgDefault                  },
+    /* sEscapeSequence   */ {0x0B, afBgDefault                  },
+    /* sError            */ {0x30,                              },
 };
 
 static constexpr pair<uchar, Styles> stylesC[] = {
