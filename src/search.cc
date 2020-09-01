@@ -137,7 +137,7 @@ void SearchBox::open()
         EditorWindow &win = *(EditorWindow *) owner;
         win.lock();
         win.editorView.grow({0, -(size.y + 1)});
-        for (auto *v : std::initializer_list<TView*> ({win.docView, win.leftMargin}))
+        for (auto *v : std::initializer_list<TView*> {win.docView, win.leftMargin})
             grow(v, {0, -(size.y + 1)});
         lock();
         show();
@@ -156,7 +156,7 @@ void SearchBox::close()
         EditorWindow &win = *(EditorWindow *) owner;
         win.lock();
         win.editorView.grow({0, size.y + 1});
-        for (auto *v : std::initializer_list<TView*> ({win.docView, win.leftMargin}))
+        for (auto *v : std::initializer_list<TView*> {win.docView, win.leftMargin})
             grow(v, {0, size.y + 1});
         hide();
         win.frame->drawView();
