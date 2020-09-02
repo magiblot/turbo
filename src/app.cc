@@ -71,18 +71,21 @@ TurboApp::TurboApp(int argc, const char *argv[]) :
     // Create the document tree view
     {
         TRect r = deskTop->getExtent();
-        if (r.b.x > 30)
-            r.a.x = r.b.x - 30;
+        // Try to make it between 22 and 30 columns wide, and try to leave
+        // at least 82 empty columns on screen (so that an editor view is
+        // at least ~80 columns by default).
+        if (r.b.x > 22)
+            r.a.x = r.b.x - std::clamp(r.b.x - 82, 22, 30);
         docTree = new DocumentTreeWindow(r, &docTree);
         docTree->flags &= ~wfZoom;
         // The grow mode assumes it's placed on the right side of the screen.
         // Greater flexibility would require some trick or a dedicated class
         // for side views.
-        docTree->growMode = gfGrowLoX | gfGrowHiX | gfGrowHiY | gfGrowRel;
+        docTree->growMode = gfGrowLoX | gfGrowHiX | gfGrowHiY;
         docTree->setState(sfShadow, False);
         deskTop->insert(docTree);
         // Show by default only on large terminals.
-        if (deskTop->size.x < 100)
+        if (deskTop->size.x - docTree->size.x < 82)
             docTree->hide();
     }
 }
