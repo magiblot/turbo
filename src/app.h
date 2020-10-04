@@ -34,7 +34,6 @@ struct TurboApp : public TApplication {
     std::unordered_map<std::string_view, active_counter> fileCount;
     std::vector<std::string> files; // Storage for the strings referenced by fileCount;
     list_head<EditorWindow> MRUlist;
-    uint editorCount {0};
     TClockView *clock;
     DocumentTreeWindow *docTree;
     TCommandSet editorCmds;

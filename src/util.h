@@ -70,6 +70,20 @@ struct list_head
         next = prev = 0;
     }
 
+    size_t size() const {
+        size_t i = 0;
+        const list_head *head = next;
+        while (head != this) {
+            ++i;
+            head = head->next;
+        }
+        return i;
+    }
+
+    size_t empty() const {
+        return this == next;
+    }
+
     template<class Func>
     void forEach(Func &&callback) {
         list_head *head = next;
@@ -92,15 +106,15 @@ class list_head_iterator
 
 public:
 
-    list_head_iterator(list_head<T> *list_, size_t size_) :
+    list_head_iterator(list_head<T> *list_) :
         list(list_),
-        listSize(size_),
+        listSize(list_->size()),
         it(-1),
         itItem(list)
     {
     }
 
-    size_t size()
+    size_t size() const
     {
         return listSize;
     }

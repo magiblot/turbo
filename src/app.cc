@@ -350,33 +350,31 @@ void TurboApp::addEditor(EditorWindow *w)
         docTree->tree->addEditor(w);
     w->MRUhead.insert_after(&MRUlist);
     deskTop->insert(w);
-    if (!editorCount)
-        enableCommands(editorCmds);
-    ++editorCount;
+    enableCommands(editorCmds);
 }
 
 void TurboApp::removeEditor(EditorWindow *w)
 {
     --getFileCounter(w->file.native());
-    --editorCount;
-    if (!editorCount)
+    w->MRUhead.remove();
+    if (MRUlist.empty())
         disableCommands(editorCmds);
     if (docTree) {
         docTree->tree->removeEditor(w);
         // We need to set the focus again as it had already been set before
         // removing the editor, and so it would stay on the same position
         // but not on the same element.
-        if (editorCount)
+        if (!MRUlist.empty())
             docTree->tree->focusEditor(MRUlist.next->self);
     }
 }
 
 void TurboApp::showEditorList(TEvent *ev)
 {
-    EditorList list(&MRUlist, editorCount);
+    EditorList list {&MRUlist};
     TRect r {0, 0, 0, 0};
     r.b.x = std::clamp<int>(list.measureWidth() + 6, 40, deskTop->size.x - 10);
-    r.b.y = std::clamp<int>(editorCount + 2, 6, deskTop->size.y - 4);
+    r.b.y = std::clamp<int>(list.size() + 2, 6, deskTop->size.y - 4);
     r.move((deskTop->size.x - r.b.x) / 2,
            (deskTop->size.y - r.b.y) / 4);
     ListWindow *lw = new ListWindow(r, "Buffer List", list, &initViewer<EditorListView>);
