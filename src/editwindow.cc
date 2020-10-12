@@ -432,7 +432,7 @@ bool EditorWindow::loadFile(bool canFail)
             bool ok = true;
             constexpr size_t blockSize = 1 << 20; // Read in chunks of 1 MiB.
             size_t readSize = std::min(fSize, blockSize);
-            std::unique_ptr<char[]> buffer {new char[readSize]};
+            auto buffer = std::make_unique<char[]>(readSize);
             sptr_t wParam = reinterpret_cast<sptr_t>(buffer.get());
             while (fSize > 0 && (ok = bool(f.read(buffer.get(), readSize)))) {
                 props.analyze({buffer.get(), readSize});
@@ -477,7 +477,7 @@ bool EditorWindow::saveFile()
             bool ok = true;
             constexpr size_t blockSize = 1 << 20; // Write in chunks of 1 MiB.
             size_t writeSize = std::min(bytesLeft, blockSize);
-            std::unique_ptr<char[]> buffer {new char[writeSize]};
+            auto buffer = std::make_unique<char[]>(writeSize);
             sptr_t bufParam = reinterpret_cast<sptr_t>(buffer.get());
             size_t i = 0;
             do {
