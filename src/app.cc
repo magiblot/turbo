@@ -265,7 +265,7 @@ void TurboApp::fileOpen()
 
 bool TurboApp::openEditor(std::string_view fileName, bool canFail)
 {
-    TRect r = adjustEditorBounds(deskTop->getExtent());
+    TRect r = newEditorBounds();
     EditorWindow *w = new EditorWindow(r, fileName, canFail);
     w = (EditorWindow *) validView(w);
     if (w)
@@ -286,18 +286,23 @@ void TurboApp::closeAll()
     }
 }
 
-TRect TurboApp::adjustEditorBounds(TRect r)
+TRect TurboApp::newEditorBounds() const
 {
-    if (docTree->state & sfVisible) {
-        TRect t = docTree->getBounds();
-        // Align left.
-        if (t.a.x > r.b.x - t.b.x)
-            r.b.x = max(t.a.x, EditorWindow::minEditWinSize.x);
-        // Align right.
-        else
-            r.a.x = min(t.b.x, r.b.x - EditorWindow::minEditWinSize.x);
+    if (!MRUlist.empty())
+        return MRUlist.next->self->getBounds();
+    else {
+        TRect r = deskTop->getExtent();
+        if (docTree->state & sfVisible) {
+            TRect t = docTree->getBounds();
+            // Align left.
+            if (t.a.x > r.b.x - t.b.x)
+                r.b.x = max(t.a.x, EditorWindow::minEditWinSize.x);
+            // Align right.
+            else
+                r.a.x = min(t.b.x, r.b.x - EditorWindow::minEditWinSize.x);
+        }
+        return r;
     }
-    return r;
 }
 
 void TurboApp::setEditorTitle(EditorWindow *w)

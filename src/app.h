@@ -59,7 +59,7 @@ struct TurboApp : public TApplication {
     void fileSave();
     bool openEditor(std::string_view fileName, bool canFail=false);
     void closeAll();
-    TRect adjustEditorBounds(TRect r);
+    TRect newEditorBounds() const;
     void setEditorTitle(EditorWindow *w);
     void updateEditorTitle(EditorWindow *w, std::string_view prevFile);
     active_counter& getFileCounter(std::string_view file);
