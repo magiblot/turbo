@@ -50,6 +50,7 @@ TurboApp::TurboApp(int argc, const char *argv[]) :
     ts += cmSearchAgain;
     ts += cmSearchPrev;
     ts += cmToggleIndent;
+    ts += cmCloseEditor;
     disableCommands(ts);
 
     // Actions that only make sense when there is at least one editor.
@@ -58,6 +59,7 @@ TurboApp::TurboApp(int argc, const char *argv[]) :
     editorCmds += cmTreeNext;
     editorCmds += cmTreePrev;
     editorCmds += cmCloseAll;
+    editorCmds += cmCloseEditor;
     disableCommands(editorCmds);
 
     // Create the clock view.
@@ -102,7 +104,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "~S~ave", cmSave, kbCtrlS, hcNoContext, "Ctrl-S" ) +
             *new TMenuItem( "S~a~ve As...", cmSaveAs, kbNoKey, hcNoContext ) +
             newLine() +
-            *new TMenuItem( "~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl-W" ) +
+            *new TMenuItem( "~C~lose", cmCloseEditor, kbCtrlW, hcNoContext, "Ctrl-W" ) +
             *new TMenuItem( "Close All", cmCloseAll, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
@@ -117,6 +119,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +
             *new TMenuItem( "~N~ext", cmEditorNext, kbF6, hcNoContext, "F6" ) +
             *new TMenuItem( "~P~revious", cmEditorPrev, kbShiftF6, hcNoContext, "Shift-F6" ) +
+            *new TMenuItem( "~C~lose", cmClose, kbAltF3, hcNoContext, "Alt-F3" ) +
             *new TMenuItem( "Previous (in tree)", cmTreePrev, kbAltUp, hcNoContext, "Alt-Up" ) +
             *new TMenuItem( "Next (in tree)", cmTreeNext, kbAltDown, hcNoContext, "Alt-Down" ) +
         *new TSubMenu( "~S~ettings", kbAltS ) +

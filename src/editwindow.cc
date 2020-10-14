@@ -65,6 +65,7 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     commandSet += cmSearchAgain;
     commandSet += cmSearchPrev;
     commandSet += cmToggleIndent;
+    commandSet += cmCloseEditor;
 
     setUpEditor(openCanFail);
 }
@@ -219,6 +220,12 @@ void EditorWindow::handleEvent(TEvent &ev) {
             case cmToggleIndent:
                 indent.toggle();
                 break;
+            case cmCloseEditor: {
+                TEvent event = ev;
+                event.message.command = cmClose;
+                TWindow::handleEvent(event);
+                handled = (event.what == evNothing);
+            }
             default:
                 handled = false;
         }

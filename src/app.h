@@ -23,7 +23,8 @@ const ushort
     cmSearchPrev    = 105,
     cmToggleIndent  = 106,
     cmTreeNext      = 107,
-    cmTreePrev      = 108;
+    cmTreePrev      = 108,
+    cmCloseEditor   = 109;
 
 // Commands that cannot be deactivated.
 const ushort
