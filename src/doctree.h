@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <functional>
 #include <variant>
+#include "util.h"
 
 struct EditorWindow;
 

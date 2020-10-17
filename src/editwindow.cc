@@ -1,4 +1,5 @@
 #define Uses_TScrollBar
+#define Uses_TFrame
 #define Uses_MsgBox
 #define Uses_TIndicator
 #include <tvision/tv.h>
@@ -376,6 +377,7 @@ void EditorWindow::setVerticalScrollPos(int delta, int limit)
 
 void EditorWindow::setSavePointLeft()
 {
+    using namespace std::literals;
     if (inSavePoint) {
         inSavePoint = false;
         title.append("*"sv);

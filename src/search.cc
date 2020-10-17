@@ -8,6 +8,7 @@
 #include "app.h"
 #include "search.h"
 #include "editwindow.h"
+#include "docview.h"
 
 void SearchBox::init(EditorWindow &win)
 {

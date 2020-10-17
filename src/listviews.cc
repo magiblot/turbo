@@ -1,3 +1,6 @@
+#define Uses_TScrollBar
+#include <tvision/tv.h>
+
 #include "listviews.h"
 
 #define cpListWindow "\x32\x32\x34\x37\x36\x32\x33"
