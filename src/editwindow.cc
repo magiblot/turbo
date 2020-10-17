@@ -525,10 +525,10 @@ bool EditorWindow::saveAsDialog()
                     showError(fmt::format("'{}' is not a valid path.", fileName));
                 else if (canOverwrite() && saveFile()) {
                     // Saving has succeeded, now update the title.
-                    TurboApp::app->updateEditorTitle(this, prevFile.native());
+                    TurboApp::app->updateEditorTitle(this, prevFile);
                     setSavePoint();
                     type.detect(*this);
-                    return saved = true;
+                    return ((saved = true));
                 }
                 // Restore the old file path.
                 file = std::move(prevFile);

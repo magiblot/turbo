@@ -64,7 +64,7 @@ struct TurboApp : public TApplication {
     void closeAll();
     TRect newEditorBounds() const;
     void setEditorTitle(EditorWindow *w);
-    void updateEditorTitle(EditorWindow *w, std::string_view prevFile);
+    void updateEditorTitle(EditorWindow *w, const util::u8path &prevFile);
     active_counter& getFileCounter(std::string_view file);
     void addEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);

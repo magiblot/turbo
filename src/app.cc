@@ -311,7 +311,7 @@ TRect TurboApp::newEditorBounds() const
 void TurboApp::setEditorTitle(EditorWindow *w)
 {
     uint number;
-    auto &&file = (util::u8path) w->file.filename();
+    auto &&file = w->file.filename();
     if (!file.empty()) {
         w->title.assign(file);
         number = ++getFileCounter(file.native());
@@ -324,9 +324,9 @@ void TurboApp::setEditorTitle(EditorWindow *w)
     w->name = w->title; // Copy!
 }
 
-void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
+void TurboApp::updateEditorTitle(EditorWindow *w, const util::u8path &prevFile)
 {
-    --getFileCounter(prevFile);
+    --getFileCounter(prevFile.filename().native());
     setEditorTitle(w);
     if (docTree) {
         docTree->tree->removeEditor(w);
