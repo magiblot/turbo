@@ -73,7 +73,10 @@ target_sources(turbo PRIVATE
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     set_target_properties(turbo PROPERTIES UNITY_BUILD ON)
-    target_precompile_headers(turbo PRIVATE "include/ScintillaHeaders.h")
+    target_precompile_headers(turbo PRIVATE
+        "include/ScintillaHeaders.h"
+        "${TVISION_INCLUDE}/tvision/tv.h"
+    )
 endif()
 
 # Dependency 'tvision'
