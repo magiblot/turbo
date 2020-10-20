@@ -90,6 +90,10 @@ find_library(FMT fmt)
 
 set(LIBS scintilla ${LIBTVISION} ${FMT} ${LIBNCURSESW})
 
+if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+    list(APPEND LIBS "stdc++fs")
+endif()
+
 # Optional dependencies, compulsory if found when building 'tvision'
 find_library(GPM gpm)
 if (GPM)
