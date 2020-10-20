@@ -27,8 +27,8 @@ Additionally, you may also want to install these optional dependencies:
 Turbo can be built with the following commands:
 
 ```sh
-$ (cd tvision && cmake . && make) # Build tvision.
-$ cmake . && make # Build Turbo.
+$ (cd tvision && cmake . -B ./build && cmake --build ./build) # Build tvision.
+$ cmake . && cmake --build . # Build Turbo.
 ```
 
 The above will generate the `turbo` binary.

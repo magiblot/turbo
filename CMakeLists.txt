@@ -82,7 +82,7 @@ endif()
 # Dependency 'tvision'
 # Requires building manually if not installed.
 
-find_library(LIBTVISION tvision HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision")
+find_library(LIBTVISION tvision HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision/build/lib")
 
 # Other dependencies
 find_library(LIBNCURSESW ncursesw)
