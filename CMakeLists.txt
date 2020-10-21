@@ -40,6 +40,7 @@ target_compile_options(turbo PRIVATE
 )
 
 find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_SOURCE_DIR}/tvision/include")
+find_path(FMT_INCLUDE "fmt/core.h")
 
 target_include_directories(turbo PRIVATE
     ${SCINTILLA_INC}
@@ -48,6 +49,7 @@ target_include_directories(turbo PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/platform"
     "${TVISION_INCLUDE}"
     "${TVISION_INCLUDE}/override"
+    "${FMT_INCLUDE}"
 )
 
 target_sources(turbo PRIVATE
