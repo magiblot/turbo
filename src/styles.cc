@@ -62,7 +62,6 @@ static constexpr pair<uchar, Styles> stylesC[] = {
     {SCE_C_PREPROCESSORCOMMENT,     sComment},
     {SCE_C_PREPROCESSORCOMMENTDOC,  sComment},
     {SCE_C_ESCAPESEQUENCE,          sEscapeSequence},
-    {(uchar) -1, {}},
 };
 
 static constexpr pair<uchar, const char *> keywordsC[] = {
@@ -85,14 +84,12 @@ static constexpr pair<uchar, const char *> keywordsC[] = {
     {3,
 "std"
     },
-    {(uchar) -1, nullptr},
 };
 
 static constexpr pair<const char *, const char *> propertiesC[] = {
     {"styling.within.preprocessor",         "1"},
     {"lexer.cpp.track.preprocessor",        "0"},
     {"lexer.cpp.escape.sequence",           "1"},
-    {nullptr, nullptr},
 };
 
 
@@ -103,7 +100,6 @@ static constexpr pair<uchar, Styles> stylesMake[] = {
     {SCE_MAKE_IDENTIFIER,           sPreprocessor},
     {SCE_MAKE_PREPROCESSOR,         sPreprocessor},
     {SCE_MAKE_OPERATOR,             sOperator},
-    {(uchar) -1, {}},
 };
 
 static constexpr pair<uchar, Styles> stylesAsm[] = {
@@ -116,7 +112,6 @@ static constexpr pair<uchar, Styles> stylesAsm[] = {
     {SCE_ASM_STRING,                sStringLiteral},
     {SCE_ASM_CHARACTER,             sCharLiteral},
     {SCE_ASM_DIRECTIVE,             sPreprocessor},
-    {(uchar) -1, {}},
 };
 
 static constexpr pair<uchar, const char *> keywordsJavaScript[] = {
@@ -138,7 +133,6 @@ static constexpr pair<uchar, const char *> keywordsJavaScript[] = {
 "SharedArrayBuffer Symbol Uint8Array Uint8ClampedArray Uint16Array Uint32Array "
 "undefined WeakMap WeakSet WebAssembly"
     },
-    {(uchar) -1, nullptr},
 };
 
 static constexpr pair<uchar, Styles> stylesRust[] = {
@@ -159,7 +153,6 @@ static constexpr pair<uchar, Styles> stylesRust[] = {
     {SCE_RUST_BYTESTRING,           sEscapeSequence},
     {SCE_RUST_BYTESTRINGR,          sEscapeSequence},
     {SCE_RUST_BYTECHARACTER,        sEscapeSequence},
-    {(uchar) -1, {}},
 };
 
 static constexpr pair<uchar, const char *> keywordsRust[] = {
@@ -172,7 +165,6 @@ static constexpr pair<uchar, const char *> keywordsRust[] = {
 "bool u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64 usize isize char str Pair "
 "Box String List"
     },
-    {(uchar) -1, nullptr},
 };
 
 static constexpr pair<uchar, Styles> stylesPython[] = {
@@ -196,7 +188,6 @@ static constexpr pair<uchar, Styles> stylesPython[] = {
     {SCE_P_FCHARACTER,              sCharLiteral},
     {SCE_P_FTRIPLE,                 sStringLiteral},
     {SCE_P_FTRIPLEDOUBLE,           sStringLiteral},
-    {(uchar) -1, {}},
 };
 
 static constexpr pair<uchar, const char *> keywordsPython[] = {
@@ -209,12 +200,10 @@ static constexpr pair<uchar, const char *> keywordsPython[] = {
 "int float complex list tuple range str bytes bytearray memoryview set frozenset "
 "dict "
     },
-    {(uchar) -1, nullptr},
 };
 
 static constexpr pair<const char *, const char *> propertiesPython[] = {
     {"lexer.python.keywords2.no.sub.identifiers",       "1"},
-    {nullptr, nullptr},
 };
 
 static constexpr pair<uchar, Styles> stylesBash[] = {
@@ -232,7 +221,6 @@ static constexpr pair<uchar, Styles> stylesBash[] = {
     {SCE_SH_BACKTICKS,              sKeyword1},
     {SCE_SH_HERE_DELIM,             sMisc},
     {SCE_SH_HERE_Q,                 sMisc},
-    {(uchar) -1, {}},
 };
 
 static constexpr pair<uchar, const char *> keywordsBash[] = {
@@ -246,14 +234,13 @@ static constexpr pair<uchar, const char *> keywordsBash[] = {
 "readonly return set shift shopt source suspend test times trap type typeset ulimit "
 "umask unalias unset wait "
     },
-    {(uchar) -1, nullptr},
 };
 
 struct LexerInfo {
     const int lexer {SCLEX_NULL};
-    const pair<uchar, Styles> *styles {nullptr};
-    const pair<uchar, const char *> *keywords {nullptr};
-    const pair<const char *, const char *> *properties {nullptr};
+    const TSpan<const pair<uchar, Styles>> styles;
+    const TSpan<const pair<uchar, const char *>> keywords;
+    const TSpan<const pair<const char *, const char *>> properties;
 };
 
 static const const_unordered_map<Language, LexerInfo> lexerStyles = {
@@ -271,25 +258,12 @@ void loadLexer(Language lang, EditorWindow &win)
     auto &editor = win.editor;
     auto [lexer, styles, keywords, properties] = lexerStyles[lang];
     editor.WndProc(SCI_SETLEXER, lexer, 0U);
-    if (styles) {
-        while (styles->first != (uchar) -1) {
-            editor.setStyleColor(styles->first, styleDefaults[styles->second]);
-            ++styles;
-        }
-    }
-    if (keywords) {
-        while (keywords->first != (uchar) -1) {
-            editor.WndProc(SCI_SETKEYWORDS, keywords->first, (sptr_t) keywords->second);
-            ++keywords;
-        }
-    }
-    if (properties) {
-        while (properties->first) {
-            editor.WndProc(SCI_SETPROPERTY, (sptr_t) properties->first, (sptr_t) properties->second);
-            ++properties;
-        }
-    }
-
+    for (const auto &style : styles)
+        editor.setStyleColor(style.first, styleDefaults[style.second]);
+    for (const auto &keyword : keywords)
+        editor.WndProc(SCI_SETKEYWORDS, keyword.first, (sptr_t) keyword.second);
+    for (const auto &property : properties)
+        editor.WndProc(SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
     editor.WndProc(SCI_COLOURISE, 0, -1);
     win.redrawEditor();
 }
