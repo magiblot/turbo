@@ -236,6 +236,49 @@ static constexpr pair<uchar, const char *> keywordsBash[] = {
     },
 };
 
+static constexpr pair<uchar, Styles> stylesRuby[] = {
+    {SCE_RB_DEFAULT,                sNormal},
+    {SCE_RB_ERROR,                  sError},
+    {SCE_RB_COMMENTLINE,            sComment},
+    {SCE_RB_POD,                    sMisc},
+    {SCE_RB_NUMBER,                 sNumberLiteral},
+    {SCE_RB_WORD,                   sKeyword1},
+    {SCE_RB_STRING,                 sStringLiteral},
+    {SCE_RB_CHARACTER,              sCharLiteral},
+    {SCE_RB_CLASSNAME,              sNormal},
+    {SCE_RB_DEFNAME,                sNormal},
+    {SCE_RB_OPERATOR,               sOperator},
+    {SCE_RB_IDENTIFIER,             sNormal},
+    {SCE_RB_REGEX,                  sNormal},
+    {SCE_RB_GLOBAL,                 sNormal},
+    {SCE_RB_SYMBOL,                 sKeyword2},
+    {SCE_RB_MODULE_NAME,            sNormal},
+    {SCE_RB_INSTANCE_VAR,           sNormal},
+    {SCE_RB_CLASS_VAR,              sNormal},
+    {SCE_RB_BACKTICKS,              sKeyword1},
+    {SCE_RB_HERE_DELIM,             sMisc},
+    {SCE_RB_HERE_Q,                 sMisc},
+    {SCE_RB_STRING_QQ,              sMisc},
+    {SCE_RB_STRING_QX,              sMisc},
+    {SCE_RB_STRING_QR,              sMisc},
+    {SCE_RB_STRING_QW,              sMisc},
+    {SCE_RB_WORD_DEMOTED,           sNormal},
+    {SCE_RB_STDIN,                  sMisc},
+    {SCE_RB_STDOUT,                 sMisc},
+    {SCE_RB_STDERR,                 sMisc},
+    {SCE_RB_UPPER_BOUND,            sMisc},
+};
+
+static constexpr pair<uchar, const char *> keywordsRuby[] = {
+    {0,
+"__ENCODING__ __LINE__ __FILE__ BEGIN END "
+"alias and begin break case class def defined? do else elsif end ensure false "
+"for if in module next nil not or redo rescue retry return self super then true "
+"undef unless until when while yield "
+"public require require_relative "
+    },
+};
+
 struct LexerInfo {
     const int lexer {SCLEX_NULL};
     const TSpan<const pair<uchar, Styles>> styles;
@@ -251,6 +294,7 @@ static const const_unordered_map<Language, LexerInfo> lexerStyles = {
     {langRust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr}},
     {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython}},
     {langBash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr}},
+    {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr}},
 };
 
 void loadLexer(Language lang, EditorWindow &win)
