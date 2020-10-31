@@ -181,22 +181,19 @@ void TScintillaSurface::MeasureWidths(Font &font_, std::string_view text, XYPOSI
 {
     size_t i = 0, j = 1;
     while (i < text.size()) {
-        size_t width = 0, len = 0;
-        TText::next({&text[i], text.size() - i}, len, width);
+        size_t width = 0, k = i;
+        TText::next(text, i, width);
         // I don't know why. It just works.
         j += width - 1;
-        while (len--)
-            positions[i++] = (int) j;
+        while (k < i)
+            positions[k++] = (int) j;
         ++j;
     }
 }
 
 XYPOSITION TScintillaSurface::WidthText(Font &font_, std::string_view text)
 {
-    size_t i = 0, j = 0;
-    while (i < text.size())
-        TText::next({&text[i], text.size() - i}, i, j);
-    return (int) j;
+    return strwidth(text);
 }
 
 XYPOSITION TScintillaSurface::Ascent(Font &font_)
