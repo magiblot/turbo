@@ -33,6 +33,52 @@ $ cmake . && cmake --build . # Build Turbo.
 
 The above will generate the `turbo` binary.
 
+<details>
+<summary><b>Detailed build instructions for Ubuntu 20.04</b></summary>
+
+```sh
+sudo apt update
+sudo apt install cmake build-essential git libfmt-dev libmagic-dev libgpm-dev libncursesw5 libncursesw5-dev
+git clone --recursive https://github.com/magiblot/turbo.git
+cd turbo
+(cd tvision && cmake . -B ./build && cmake --build ./build) # Build tvision.
+cmake . && cmake --build . # Build Turbo.
+sudo cp turbo /usr/local/bin/ # Install.
+```
+</details>
+<details>
+<summary><b>Detailed build instructions for Ubuntu 18.04</b></summary>
+
+```sh
+sudo apt update
+sudo apt-get install libssl-dev gcc-8 g++-8 git libfmt-dev libmagic-dev libgpm-dev libncursesw5 libncursesw5-dev ncurses-dev build-essential
+
+#build CMake 3.18.1
+export CXX=g++-8
+sudo apt remove --purge --auto-remove cmake
+mkdir ~/temp && cd ~/temp
+wget https://cmake.org/files/v3.18/cmake-3.18.1.tar.gz
+tar -xzvf cmake-3.18.1.tar.gz
+cd cmake-3.18.1/
+./bootstrap
+make -j$(nproc)
+sudo make install
+
+#build fmt
+cd .. && git clone https://github.com/fmtlib/fmt.git && cd fmt/
+cmake . && cmake --build .
+sudo make install
+cd ..
+
+git clone --recursive https://github.com/magiblot/turbo.git && cd turbo
+
+(cd tvision && cmake . -B ./build && cmake --build ./build) # Build tvision.
+cmake . && cmake --build . # Build Turbo.
+sudo cp turbo /usr/local/bin/ # Install.
+turbo
+```
+</details>
+
 ## Usage
 
 As said earlier, Turbo has been designed to be intuitive. So you probably already know how to use it!
