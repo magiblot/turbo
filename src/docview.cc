@@ -28,7 +28,12 @@ void DocumentView::handleEvent(TEvent &ev)
         case evKeyDown:
             if (ev.keyDown.keyCode == kbIns)
                 setState(sfCursorIns, Boolean(!getState(sfCursorIns)));
-            editor.KeyDownWithModifiers(ev.keyDown, nullptr);
+            // If we always began reading events in consumeInputText,
+            // we would never autoindent newlines.
+            if (!ev.keyDown.textLength)
+                editor.KeyDownWithModifiers(ev.keyDown, nullptr);
+            else
+                consumeInputText(ev);
             handled = true;
             break;
         case evMouseDown:
@@ -72,6 +77,43 @@ void DocumentView::handleEvent(TEvent &ev)
     if (handled) {
         window.redrawEditor();
         clearEvent(ev);
+    }
+}
+
+void DocumentView::consumeInputText(TEvent &ev)
+{
+    size_t count = 0;
+    std::vector<char> buf;
+    auto push = [&buf] (std::string_view text) {
+        buf.insert(buf.end(), text.data(), text.data()+text.size());
+    };
+
+    do {
+        if (ev.what == evKeyDown) {
+            if (ev.keyDown.keyCode == kbEnter)
+                push("\n");
+            else if (ev.keyDown.keyCode == kbTab)
+                push("\t");
+            else if (ev.keyDown.textLength)
+                push(ev.keyDown.asText());
+            else
+                break;
+        } else
+            break;
+        ++count;
+        getImmediateEvent(ev);
+    } while (true);
+    // Put non-text event back into the queue.
+    if (count && ev.what != evNothing)
+        putEvent(ev);
+
+    if (buf.size()) {
+        if (count > 2) // 1 may be too easy to trigger just by typing fast.
+            editor.WndProc(SCI_BEGINUNDOACTION, 0U, 0U);
+        editor.pasteText({buf.data(), buf.size()});
+        editor.WndProc(SCI_SCROLLCARET, 0U, 0U);
+        if (count > 2)
+            editor.WndProc(SCI_ENDUNDOACTION, 0U, 0U);
     }
 }
 

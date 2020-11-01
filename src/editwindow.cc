@@ -357,6 +357,7 @@ void EditorWindow::notify(SCNotification scn)
         case SCN_CHARADDED:
             if (scn.ch == '\n')
                 indent.autoIndentCurrentLine(editor);
+            break;
     }
 }
 

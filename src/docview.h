@@ -21,6 +21,8 @@ struct DocumentView : public TSurfaceView {
     void handleEvent(TEvent &ev) override;
     void draw() override;
 
+    void consumeInputText(TEvent &ev);
+
 };
 
 #endif

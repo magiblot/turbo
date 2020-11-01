@@ -7,6 +7,7 @@
 #include <tvision/tv.h>
 
 #include <ScintillaHeaders.h>
+#include <string_view>
 
 struct DocumentView;
 class TDrawSurface;
@@ -55,6 +56,7 @@ struct TScintillaEditor : public ScintillaBase {
     void setWindow(TDrawSurface *wid);
     void setParent(TScintillaWindow *parent_);
     void changeSize();
+    void pasteText(std::string_view text);
     Sci::Line getFirstVisibleDocumentLine();
     TPoint getCaretPosition();
     TPoint getDelta();
@@ -74,6 +76,11 @@ inline void TScintillaEditor::setParent(TScintillaWindow *parent_)
 inline void TScintillaEditor::changeSize()
 {
     ScintillaBase::ChangeSize();
+}
+
+inline void TScintillaEditor::pasteText(std::string_view text)
+{
+    InsertPasteShape(text.data(), text.size(), pasteStream);
 }
 
 inline Sci::Line TScintillaEditor::getFirstVisibleDocumentLine()
