@@ -82,39 +82,21 @@ void DocumentView::handleEvent(TEvent &ev)
 
 void DocumentView::consumeInputText(TEvent &ev)
 {
-    size_t count = 0;
-    std::vector<char> buf;
-    auto push = [&buf] (std::string_view text) {
-        buf.insert(buf.end(), text.data(), text.data()+text.size());
+    char buf[4096];
+    bool undogroup = false;
+    size_t count = 0, size;
+
+    while ((size = getTextEvent(ev, buf, &count))) {
+        if (!undogroup && count > 2) {
+            undogroup = true;
+            editor.WndProc(SCI_BEGINUNDOACTION, 0U, 0U);
+        }
+        editor.pasteText({buf, size});
     };
 
-    do {
-        if (ev.what == evKeyDown) {
-            if (ev.keyDown.keyCode == kbEnter)
-                push("\n");
-            else if (ev.keyDown.keyCode == kbTab)
-                push("\t");
-            else if (ev.keyDown.textLength)
-                push(ev.keyDown.asText());
-            else
-                break;
-        } else
-            break;
-        ++count;
-        getImmediateEvent(ev);
-    } while (true);
-    // Put non-text event back into the queue.
-    if (count && ev.what != evNothing)
-        putEvent(ev);
-
-    if (buf.size()) {
-        if (count > 2) // 1 may be too easy to trigger just by typing fast.
-            editor.WndProc(SCI_BEGINUNDOACTION, 0U, 0U);
-        editor.pasteText({buf.data(), buf.size()});
-        editor.WndProc(SCI_SCROLLCARET, 0U, 0U);
-        if (count > 2)
-            editor.WndProc(SCI_ENDUNDOACTION, 0U, 0U);
-    }
+    editor.WndProc(SCI_SCROLLCARET, 0U, 0U);
+    if (undogroup)
+        editor.WndProc(SCI_ENDUNDOACTION, 0U, 0U);
 }
 
 void DocumentView::draw()
