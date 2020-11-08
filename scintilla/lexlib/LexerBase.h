@@ -18,6 +18,7 @@ protected:
 	PropSetSimple props;
 	enum {numWordLists=KEYWORDSET_MAX+1};
 	WordList *keyWordLists[numWordLists+1];
+	static const char styleSubable_[];
 public:
 	LexerBase(const LexicalClass *lexClasses_=nullptr, size_t nClasses_=0);
 	virtual ~LexerBase();

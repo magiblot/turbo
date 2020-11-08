@@ -22,7 +22,7 @@
 
 using namespace Scintilla;
 
-static const char styleSubable[] = { 0 };
+const char DefaultLexer::styleSubable_[] = { 0 };
 
 DefaultLexer::DefaultLexer(const char *languageName_, int language_,
 	const LexicalClass *lexClasses_, size_t nClasses_) :
@@ -109,7 +109,7 @@ int SCI_METHOD DefaultLexer::DistanceToSecondaryStyles() {
 }
 
 const char * SCI_METHOD DefaultLexer::GetSubStyleBases() {
-	return styleSubable;
+	return styleSubable_;
 }
 
 int SCI_METHOD DefaultLexer::NamedStyles() {

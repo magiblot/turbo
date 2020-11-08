@@ -35,7 +35,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     bool resizeLock;
     TPoint lastSize;
     LineNumbersWidth lineNumbers;
-    WrapMode wrap;
+    ::WrapMode wrap;
     FileType type;
     Indent indent;
     DocumentProperties props;

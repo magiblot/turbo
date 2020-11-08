@@ -18,6 +18,7 @@ class DefaultLexer : public ILexer5 {
 	int language;
 	const LexicalClass *lexClasses;
 	size_t nClasses;
+	static const char styleSubable_[];
 public:
 	DefaultLexer(const char *languageName_, int language_,
 		const LexicalClass *lexClasses_ = nullptr, size_t nClasses_ = 0);

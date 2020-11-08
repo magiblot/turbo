@@ -22,7 +22,7 @@
 
 using namespace Scintilla;
 
-static const char styleSubable[] = { 0 };
+const char LexerBase::styleSubable_[] = { 0 };
 
 LexerBase::LexerBase(const LexicalClass *lexClasses_, size_t nClasses_) :
 	lexClasses(lexClasses_), nClasses(nClasses_) {
@@ -125,7 +125,7 @@ int SCI_METHOD LexerBase::DistanceToSecondaryStyles() {
 }
 
 const char * SCI_METHOD LexerBase::GetSubStyleBases() {
-	return styleSubable;
+	return styleSubable_;
 }
 
 int SCI_METHOD LexerBase::NamedStyles() {
