@@ -163,7 +163,7 @@ static constexpr pair<uchar, const char *> keywordsRust[] = {
     },
     {1,
 "bool u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64 usize isize char str Pair "
-"Box String List"
+"Box box String List"
     },
 };
 
