@@ -86,9 +86,7 @@ void DocumentView::consumeInputText(TEvent &ev)
     bool undogroup = false;
     size_t count = 0, size;
 
-    // Is this the right place to clear selections?
-    // TScintillaEditor::Paste() does it.
-    editor.WndProc(SCI_REPLACESEL, 0U, (sptr_t) "");
+    editor.clearBeforeTentativeStart();
     while (textEvent(ev, buf, size, count)) {
         if (!undogroup && count > 2) {
             undogroup = true;

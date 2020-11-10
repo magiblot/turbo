@@ -56,6 +56,7 @@ struct TScintillaEditor : public ScintillaBase {
     void setWindow(TDrawSurface *wid);
     void setParent(TScintillaWindow *parent_);
     void changeSize();
+    void clearBeforeTentativeStart();
     void pasteText(std::string_view text);
     Sci::Line getFirstVisibleDocumentLine();
     TPoint getCaretPosition();
@@ -76,6 +77,11 @@ inline void TScintillaEditor::setParent(TScintillaWindow *parent_)
 inline void TScintillaEditor::changeSize()
 {
     ScintillaBase::ChangeSize();
+}
+
+inline void TScintillaEditor::clearBeforeTentativeStart()
+{
+    ScintillaBase::ClearBeforeTentativeStart();
 }
 
 inline void TScintillaEditor::pasteText(std::string_view text)
