@@ -14,8 +14,15 @@ project (turbo)
 # These two could be built in one single target, but we want to enable Unity Build
 # for 'scintilla' and precompiled headers for 'scilexers'.
 
-add_library(scintilla STATIC)
-add_library(scilexers STATIC)
+file(GLOB_RECURSE SCINTILLA_SRC
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/src/*.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexlib/*.cxx"
+)
+
+file(GLOB_RECURSE SCILEXERS_SRC "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/*.cxx")
+
+add_library(scintilla STATIC ${SCINTILLA_SRC})
+add_library(scilexers STATIC ${SCILEXERS_SRC})
 
 foreach(t scintilla scilexers)
     target_compile_features(${t} PUBLIC cxx_std_17)
@@ -40,15 +47,6 @@ foreach(t scintilla scilexers)
     )
 endforeach()
 
-file(GLOB_RECURSE SCINTILLA_SRC
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/src/*.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexlib/*.cxx"
-)
-target_sources(scintilla PRIVATE ${SCINTILLA_SRC})
-
-file(GLOB_RECURSE SCILEXERS_SRC "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/*.cxx")
-target_sources(scilexers PRIVATE ${SCILEXERS_SRC})
-
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     set_target_properties(scintilla PROPERTIES UNITY_BUILD ON)
     target_precompile_headers(scilexers PRIVATE
@@ -56,9 +54,16 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     )
 endif()
 
+# Address cyclic dependencies of static libraries
+
+target_link_libraries(scintilla scilexers)
+target_link_libraries(scilexers scintilla)
+
 # Target 'turbo'
 
-add_executable(${PROJECT_NAME})
+file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.cc")
+
+add_executable(${PROJECT_NAME} ${TURBO_SRC})
 
 add_subdirectory(deps/fmt)
 
@@ -71,9 +76,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/src/platform"
 )
 
-file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.cc")
-target_sources(${PROJECT_NAME} PRIVATE ${TURBO_SRC})
-
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
     target_precompile_headers(${PROJECT_NAME} PRIVATE
@@ -84,7 +86,6 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     scintilla
-    scilexers
     tvision
     fmt
 )
