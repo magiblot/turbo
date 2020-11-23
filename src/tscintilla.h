@@ -9,6 +9,8 @@
 #include <ScintillaHeaders.h>
 #include <string_view>
 
+#include "clipboard.h"
+
 struct DocumentView;
 class TDrawSurface;
 
@@ -21,7 +23,7 @@ struct TScintillaEditor : public ScintillaBase {
     friend struct DocumentView;
 
     TScintillaWindow *parent {0};
-    SelectionText *clipboard;
+    Clipboard *clipboard;
 
     TScintillaEditor();
 

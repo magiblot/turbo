@@ -86,19 +86,35 @@ bool TScintillaEditor::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 
 void TScintillaEditor::Copy()
 {
-    if (clipboard && !sel.Empty())
-        CopySelectionRange(clipboard);
+    if (clipboard && !sel.Empty()) {
+        clipboard->copy(
+            [this] (auto &selText) {
+                CopySelectionRange(&selText);
+            }
+        );
+    }
 }
 
 void TScintillaEditor::Paste()
 {
-    if (clipboard && !clipboard->Empty()) {
-        ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
-        InsertPasteShape( clipboard->Data(),
-                          (int) clipboard->Length(),
-                          clipboard->rectangular ? pasteRectangular
-                                                 : pasteStream );
-        EnsureCaretVisible();
+    if (clipboard) {
+        clipboard->paste(
+            [this] (auto &selText, auto text) {
+                if (text.size()) {
+                    ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
+                    selText.Copy( text,
+                                  pdoc->dbcsCodePage,
+                                  vs.styles[STYLE_DEFAULT].characterSet,
+                                  false,
+                                  true );
+                    InsertPasteShape( selText.Data(),
+                                      selText.Length(),
+                                      selText.rectangular ? pasteRectangular
+                                                          : pasteStream );
+                    EnsureCaretVisible();
+                }
+            }
+        );
     }
 }
 

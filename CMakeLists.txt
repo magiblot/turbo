@@ -66,13 +66,14 @@ file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.cc")
 add_executable(${PROJECT_NAME} ${TURBO_SRC})
 
 add_subdirectory(deps/fmt)
-
+add_subdirectory(deps/libclipboard)
 add_subdirectory(deps/tvision)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/include"
     "${CMAKE_CURRENT_LIST_DIR}/src"
     "${CMAKE_CURRENT_LIST_DIR}/src/platform"
+    "${CMAKE_CURRENT_LIST_DIR}/deps/libclipboard/include"
 )
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
@@ -86,6 +87,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     scintilla
     tvision
     fmt
+    clipboard
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
@@ -98,6 +100,3 @@ if (MAGIC)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${MAGIC})
     target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_MAGIC)
 endif()
-
-target_link_libraries(turbo ${LIBS})
-

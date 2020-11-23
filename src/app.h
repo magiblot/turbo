@@ -12,6 +12,7 @@
 #include <vector>
 #include "util.h"
 #include "doctree.h"
+#include "clipboard.h"
 
 struct EditorWindow;
 class TClockView;
@@ -43,7 +44,7 @@ struct TurboApp : public TApplication {
     bool argsParsed {false};
     int argc;
     const char **argv;
-    Scintilla::SelectionText clipboard;
+    Clipboard clipboard;
 
     static TurboApp *app;
 

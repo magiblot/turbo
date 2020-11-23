@@ -4,3 +4,6 @@
 [submodule "deps/fmt"]
 	path = deps/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "libclipboard"]
+	path = deps/libclipboard
+	url = https://github.com/jtanx/libclipboard.git

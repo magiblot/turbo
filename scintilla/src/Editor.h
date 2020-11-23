@@ -77,7 +77,7 @@ public:
 		codePage = 0;
 		characterSet = 0;
 	}
-	void Copy(const std::string &s_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
+	void Copy(std::string_view s_, int codePage_, int characterSet_, bool rectangular_, bool lineCopy_) {
 		s = s_;
 		codePage = codePage_;
 		characterSet = characterSet_;
