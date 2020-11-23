@@ -68,7 +68,6 @@ add_executable(${PROJECT_NAME} ${TURBO_SRC})
 add_subdirectory(deps/fmt)
 
 add_subdirectory(deps/tvision)
-find_path(TVISION_INCLUDE "tvision/tv.h" HINTS "${CMAKE_CURRENT_LIST_DIR}/deps/tvision/include")
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/include"
@@ -79,8 +78,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
     target_precompile_headers(${PROJECT_NAME} PRIVATE
-        "include/ScintillaHeaders.h"
-        "${TVISION_INCLUDE}/tvision/tv.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
     )
 endif()
 
