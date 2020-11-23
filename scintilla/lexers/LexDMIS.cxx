@@ -250,7 +250,7 @@ void SCI_METHOD LexerDMIS::Lex(Sci_PositionU startPos, Sci_Position lengthDoc, i
 					char tmpStr[MAX_STR_LEN];
 					memset(tmpStr, 0, MAX_STR_LEN*sizeof(char));
 					scCTX.GetCurrent(tmpStr, (MAX_STR_LEN-1));
-					strncpy(tmpStr, this->UpperCase(tmpStr), (MAX_STR_LEN-1));
+					this->UpperCase(tmpStr);
 
 					if (this->m_minorWords.InList(tmpStr)) {
 						scCTX.ChangeState(SCE_DMIS_MINORWORD);
@@ -320,7 +320,7 @@ void SCI_METHOD LexerDMIS::Fold(Sci_PositionU startPos, Sci_Position lengthDoc, 
 			if (setDMISFoldWord.Contains(ch)) {
 				tmpStr[strPos++] = ch;
 			} else {
-				tmpStr = this->UpperCase(tmpStr);
+				this->UpperCase(tmpStr);
 				if (this->m_codeFoldingStart.InList(tmpStr) && (!noFoldPos)) {
 					levelCurrent++;
 				};

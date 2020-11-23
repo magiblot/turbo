@@ -290,7 +290,7 @@ static const char *ControlCharacterString(unsigned char ch) noexcept {
 		return "BAD";
 	}
 }
-
+#if 0
 static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const ViewStyle &vsDraw) {
 	const IntegerRectangle ircTab(rcTab);
 	if ((rcTab.left + 2) < (rcTab.right - 1))
@@ -312,7 +312,7 @@ static void DrawTabArrow(Surface *surface, PRectangle rcTab, int ymid, const Vie
 		surface->LineTo(xhead, ymid + ydiff);
 	}
 }
-
+#endif
 void EditView::RefreshPixMaps(Surface *surfaceWindow, WindowID wid, const ViewStyle &vsDraw) {
 	if (!pixmapIndentGuide->Initialised()) {
 		// 1 extra pixel in height so can handle odd/even positions and so produce a continuous line
@@ -1767,12 +1767,15 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 	int subLine, ColourOptional background) {
 
 	const bool selBackDrawn = vsDraw.SelectionBackgroundDrawn();
+#if 0
 	const bool drawWhitespaceBackground = vsDraw.WhitespaceBackgroundDrawn() && !background.isSet;
+#endif
 	bool inIndentation = subLine == 0;	// Do not handle indentation except on first subline.
 
 	const XYACCUMULATOR subLineStart = ll->positions[lineRange.start];
+#if 0
 	const XYPOSITION indentWidth = model.pdoc->IndentSize() * vsDraw.spaceWidth;
-
+#endif
 	// Does not take margin into account but not significant
 	const int xStartVisible = static_cast<int>(subLineStart)-xStart;
 
