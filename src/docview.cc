@@ -1,4 +1,5 @@
 #define Uses_TScrollBar
+#define Uses_TText
 #include <tvision/tv.h>
 
 #include "docview.h"
@@ -88,11 +89,20 @@ void DocumentView::consumeInputText(TEvent &ev)
 
     editor.clearBeforeTentativeStart();
     while (textEvent(ev, buf, size, count)) {
+        std::string_view text {buf, size};
         if (!undogroup && count > 2) {
             undogroup = true;
             editor.WndProc(SCI_BEGINUNDOACTION, 0U, 0U);
         }
-        editor.pasteText({buf, size});
+        if (!undogroup) { // Individual typing.
+            size_t i = 0, j = 0;
+            while (TText::next(text, j)) {
+                // Allow overwrite on Ins.
+                editor.insertCharacter(text.substr(i, j));
+                i = j;
+            }
+        } else
+            editor.pasteText(text);
     };
 
     editor.WndProc(SCI_SCROLLCARET, 0U, 0U);
