@@ -1,0 +1,107 @@
+name: Build
+
+on: [push]
+
+env:
+  BUILD_TYPE: MinSizeRel
+
+jobs:
+  build-linux-gcc:
+    name: Linux (GCC)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Install Dependencies
+      run: sudo apt -y install libncursesw5-dev
+
+    - name: Configure CMake
+      shell: bash
+      env:
+        CC: gcc-8
+        CXX: g++-8
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(nproc)
+
+  build-windows-msvc32:
+    name: Windows (MSVC) (Win32)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -A Win32 -DTURBO_USE_STATIC_RTL=ON
+
+    - name: Build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE -j$(nproc)
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: turbo-x86
+        path: |
+          ${{env.BUILD_TYPE}}/turbo.exe
+
+  build-windows-msvc64:
+    name: Windows (MSVC) (x64)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -A x64 -DTURBO_USE_STATIC_RTL=ON
+
+    - name: Build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE -j$(nproc)
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: turbo-x64
+        path: |
+          ${{env.BUILD_TYPE}}/turbo.exe
+
+  build-windows-mingw:
+    name: Windows (MinGW)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(nproc)
+
+  build-macos-clang:
+    name: MacOS (Clang)
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(sysctl -n hw.logicalcpu)
