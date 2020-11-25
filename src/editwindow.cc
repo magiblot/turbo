@@ -145,6 +145,7 @@ void EditorWindow::redrawEditor()
         updateMarginWidth();
         if (!resizeLock)
             editor.changeSize();
+        lang.updateBraces(editor);
         editor.draw(editorView);
         leftMargin->drawView();
         docView->drawView();

@@ -9,6 +9,7 @@
 #include "tscintilla.h"
 #include "util.h"
 #include "editstates.h"
+#include "styles.h"
 
 #include <string_view>
 #include <string>
@@ -39,6 +40,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     FileType type;
     Indent indent;
     DocumentProperties props;
+    LanguageState lang;
 
     // Scintilla
 

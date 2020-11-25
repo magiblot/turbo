@@ -24,9 +24,10 @@ enum Styles : uchar {
     sNumberLiteral,
     sEscapeSequence,
     sError,
+    StyleCount
 };
 
-static const TCellAttribs styleDefaults[] = {
+static const TCellAttribs styleDefaults[StyleCount] = {
     /* sNormal           */ {0x07, afFgDefault | afBgDefault    },
     /* sSelection        */ {0x71                               },
     /* sWhitespace       */ {0x05, afBgDefault                  },
@@ -92,6 +93,7 @@ static constexpr pair<const char *, const char *> propertiesC[] = {
     {"lexer.cpp.escape.sequence",           "1"},
 };
 
+static constexpr TSpan<const char> bracesC = "[](){}";
 
 static constexpr pair<uchar, Styles> stylesMake[] = {
     {SCE_MAKE_DEFAULT,              sNormal},
@@ -284,32 +286,38 @@ struct LexerInfo {
     const TSpan<const pair<uchar, Styles>> styles;
     const TSpan<const pair<uchar, const char *>> keywords;
     const TSpan<const pair<const char *, const char *>> properties;
+    const TSpan<const char> braces;
 };
 
-static const const_unordered_map<Language, LexerInfo> lexerStyles = {
-    {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
-    {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr}},
-    {langAsm, {SCLEX_ASM, stylesAsm, nullptr, nullptr}},
-    {langJavaScript, {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC}},
-    {langRust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr}},
-    {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython}},
-    {langBash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr}},
-    {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr}},
+static const std::unordered_map<Language, LexerInfo> lexerStyles = {
+    {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC, bracesC}},
+    {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr, bracesC}},
+    {langAsm, {SCLEX_ASM, stylesAsm, nullptr, nullptr, bracesC}},
+    {langJavaScript, {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC, bracesC}},
+    {langRust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr, bracesC}},
+    {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython, bracesC}},
+    {langBash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr, bracesC}},
+    {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
 };
 
 void loadLexer(Language lang, EditorWindow &win)
 {
     auto &editor = win.editor;
-    auto [lexer, styles, keywords, properties] = lexerStyles[lang];
-    editor.WndProc(SCI_SETLEXER, lexer, 0U);
-    for (const auto &style : styles)
-        editor.setStyleColor(style.first, styleDefaults[style.second]);
-    for (const auto &keyword : keywords)
-        editor.WndProc(SCI_SETKEYWORDS, keyword.first, (sptr_t) keyword.second);
-    for (const auto &property : properties)
-        editor.WndProc(SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
-    editor.WndProc(SCI_COLOURISE, 0, -1);
-    win.redrawEditor();
+    auto it = lexerStyles.find(lang);
+    if (it != lexerStyles.end())
+    {
+        auto &lexInfo = it->second;
+        win.lang = {&lexInfo};
+        editor.WndProc(SCI_SETLEXER, lexInfo.lexer, 0U);
+        for (const auto &style : lexInfo.styles)
+            editor.setStyleColor(style.first, styleDefaults[style.second]);
+        for (const auto &keyword : lexInfo.keywords)
+            editor.WndProc(SCI_SETKEYWORDS, keyword.first, (sptr_t) keyword.second);
+        for (const auto &property : lexInfo.properties)
+            editor.WndProc(SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
+        editor.WndProc(SCI_COLOURISE, 0, -1);
+        win.redrawEditor();
+    }
 }
 
 void setUpStyles(EditorWindow &win)
@@ -323,4 +331,47 @@ void setUpStyles(EditorWindow &win)
     editor.setWhitespaceColor(styleDefaults[sWhitespace]);
     editor.setStyleColor(STYLE_CONTROLCHAR, styleDefaults[sCtrlChar]);
     editor.setStyleColor(STYLE_LINENUMBER, styleDefaults[sLineNums]);
+}
+
+static bool isBrace(TSpan<const char> braces, char ch)
+{
+    return memchr(braces.data(), ch, braces.size()) != nullptr;
+}
+
+static TCellAttribs getBraceAttr(TSpan<const pair<uchar, Styles>> styles, uchar sciStyle)
+{
+    for (const auto &pStyle : styles)
+        if (pStyle.first == sciStyle)
+        {
+            auto attr = styleDefaults[pStyle.second];
+            attr.fgSet(0xE);
+            attr.bold = 1;
+            return attr;
+        }
+    return styleDefaults[sError];
+}
+
+void BraceMatching::update(const LexerInfo &lexInfo, Scintilla::TScintillaEditor &editor)
+{
+    auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
+    if (pos != lastPos)
+    {
+        do {
+            if (isBrace(lexInfo.braces, editor.WndProc(SCI_GETCHARAT, pos, 0U)))
+            {
+                // Scintilla already makes sure that both braces have the same style.
+                auto matchPos = editor.WndProc(SCI_BRACEMATCH, pos, 0U);
+                if (matchPos != -1)
+                {
+                    uchar sciStyle = editor.WndProc(SCI_GETSTYLEAT, pos, 0U);
+                    auto braceAttr = getBraceAttr(lexInfo.styles, sciStyle);
+                    editor.setStyleColor(STYLE_BRACELIGHT, braceAttr);
+                    editor.WndProc(SCI_BRACEHIGHLIGHT, pos, matchPos);
+                    break;
+                }
+            }
+            editor.WndProc(SCI_BRACEHIGHLIGHT, -1, -1);
+        } while (0);
+        lastPos = pos;
+    }
 }
