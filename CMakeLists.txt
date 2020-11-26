@@ -73,7 +73,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/include"
     "${CMAKE_CURRENT_LIST_DIR}/src"
     "${CMAKE_CURRENT_LIST_DIR}/src/platform"
-    "${CMAKE_CURRENT_LIST_DIR}/deps/libclipboard/include"
+    "${CMAKE_CURRENT_LIST_DIR}/deps/libclipboard/include" # libclipboard.h
+    "${CMAKE_BINARY_DIR}/deps/libclipboard/include" # libclipboard-config.h
 )
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
