@@ -65,7 +65,7 @@ struct TurboApp : public TApplication {
     void closeAll();
     TRect newEditorBounds() const;
     void setEditorTitle(EditorWindow *w);
-    void updateEditorTitle(EditorWindow *w, const util::u8path &prevFile);
+    void updateEditorTitle(EditorWindow *w, std::string_view prevFile);
     active_counter& getFileCounter(std::string_view file);
     void addEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
@@ -76,7 +76,7 @@ struct TurboApp : public TApplication {
     // The path of the most recently focused editor, so that file dialogs
     // are opened there.
 
-    util::u8path mostRecentDir;
+    std::string mostRecentDir;
     void setFocusedEditor(EditorWindow *w); // Set from here.
 
     template<typename Func>

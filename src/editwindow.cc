@@ -416,13 +416,9 @@ void EditorWindow::setSavePoint()
 void EditorWindow::tryLoadFile(bool canFail)
 {
     if (!file.empty()) {
-        std::error_code ec;
-        file.assign(std::filesystem::absolute(file, ec));
-        if (ec) {
-            fatalError = true;
-            showError(fmt::format("'{}' is not a valid path.", file.native()));
-        } else
-            fatalError = !loadFile(canFail);
+        char tmp[MAXPATH];
+        file = TPath::resolve(tmp, file);
+        fatalError = !loadFile(canFail);
         if (!fatalError)
             type.detect(*this);
     }
@@ -453,12 +449,12 @@ bool EditorWindow::loadFile(bool canFail)
                     readSize = fSize;
             };
             if (!ok) {
-                showError(fmt::format("An error occurred while reading from file '{}'.", file.native()));
+                showError(fmt::format("An error occurred while reading from file '{}'.", file));
                 return false;
             }
         }
     } else if (!canFail) {
-        showError(fmt::format("Unable to open file '{}'.", file.native()));
+        showError(fmt::format("Unable to open file '{}'.", file));
         return false;
     }
     return true;
@@ -501,12 +497,12 @@ bool EditorWindow::saveFile()
                     writeSize = bytesLeft;
             } while (bytesLeft > 0 && ok);
             if (!ok) {
-                showError(fmt::format("An error occurred while writing to file '{}'.", file.native()));
+                showError(fmt::format("An error occurred while writing to file '{}'.", file));
                 return false;
             }
         }
     } else {
-        showError(fmt::format("Unable to write to file '{}'.", file.native()));
+        showError(fmt::format("Unable to write to file '{}'.", file));
         return false;
     }
     return true;
@@ -518,14 +514,12 @@ bool EditorWindow::saveAsDialog()
         bool saved = false;
         TurboApp::app->openFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 0,
             [this, &saved] (TView *dialog) {
-                util::u8path prevFile = std::move(file);
+                std::string prevFile = std::move(file);
                 char fileName[MAXPATH];
                 dialog->getData(fileName);
-                std::error_code ec;
-                file = std::filesystem::absolute(fileName, ec);
-                if (ec)
-                    showError(fmt::format("'{}' is not a valid path.", fileName));
-                else if (canOverwrite() && saveFile()) {
+                fexpand(fileName);
+                file = fileName;
+                if (canOverwrite() && saveFile()) {
                     // Saving has succeeded, now update the title.
                     TurboApp::app->updateEditorTitle(this, prevFile);
                     setSavePoint();
@@ -544,9 +538,8 @@ bool EditorWindow::saveAsDialog()
 
 bool EditorWindow::canOverwrite() const
 {
-    std::error_code ec;
-    if (std::filesystem::exists(file, ec)) {
-        auto &&text = fmt::format("'{}' already exists. Overwrite?", file.native());
+    if (TPath::exists(file.c_str())) {
+        auto &&text = fmt::format("'{}' already exists. Overwrite?", file);
         return cmYes == messageBox(text, mfConfirmation | mfYesButton | mfNoButton);
     }
     return true;
@@ -556,7 +549,7 @@ bool EditorWindow::tryClose()
 {
     if (!inSavePoint) {
         auto &&msg = file.empty() ? fmt::format("Save '{}'?", name)
-                                  : fmt::format("'{}' has been modified. Save?", file.native());
+                                  : fmt::format("'{}' has been modified. Save?", file);
         switch (messageBox(msg, mfConfirmation | mfYesNoCancel)) {
             case cmYes:
                 return trySaveFile(); // Close only if the file gets saved.

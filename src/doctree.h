@@ -5,9 +5,9 @@
 #define Uses_TOutline
 #include <tvision/tv.h>
 
-#include <filesystem>
 #include <functional>
 #include <variant>
+#include <string_view>
 #include "util.h"
 
 struct EditorWindow;
@@ -18,9 +18,9 @@ struct DocumentTreeView : public TOutline {
 
         TNode **ptr;
         Node *parent;
-        std::variant<util::u8path, EditorWindow *> data;
+        std::variant<std::string, EditorWindow *> data;
 
-        Node(Node *parent, const util::u8path &path);
+        Node(Node *parent, std::string_view path);
         Node(Node *parent, EditorWindow *w);
         bool hasEditor() const;
         EditorWindow* getEditor();
@@ -47,11 +47,11 @@ struct DocumentTreeView : public TOutline {
     void removeEditor(EditorWindow *w);
     void focusNext();
     void focusPrev();
-    Node *getDirNode(const util::u8path &dirPath);
+    Node *getDirNode(std::string_view dirPath);
     TNode *findFirst(const callback_t &cb);
     static Boolean applyCallback(TOutlineViewer *, TNode *, int, int, long, ushort);
     static callback_t hasEditor(const EditorWindow *node, int *pos=nullptr);
-    static callback_t hasPath(const util::u8path &path, int *pos=nullptr);
+    static callback_t hasPath(std::string_view path, int *pos=nullptr);
 
 };
 

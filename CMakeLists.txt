@@ -93,10 +93,6 @@ target_link_libraries(${PROJECT_NAME}-core PUBLIC
     clipboard
 )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
-    target_link_libraries(${PROJECT_NAME} PRIVATE stdc++fs)
-endif()
-
 # Other optional dependencies
 find_library(MAGIC magic)
 if (MAGIC)

@@ -311,10 +311,10 @@ TRect TurboApp::newEditorBounds() const
 void TurboApp::setEditorTitle(EditorWindow *w)
 {
     uint number;
-    auto &&file = w->file.filename();
+    auto file = TPath::basename(w->file);
     if (!file.empty()) {
         w->title.assign(file);
-        number = ++getFileCounter(file.native());
+        number = ++getFileCounter(file);
     } else {
         w->title.assign("Untitled"s);
         number = ++fileCount[{}];
@@ -324,17 +324,19 @@ void TurboApp::setEditorTitle(EditorWindow *w)
     w->name = w->title; // Copy!
 }
 
-void TurboApp::updateEditorTitle(EditorWindow *w, const util::u8path &prevFile)
+void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
 {
-    --getFileCounter(prevFile.filename().native());
-    setEditorTitle(w);
-    if (docTree) {
-        docTree->tree->removeEditor(w);
-        docTree->tree->addEditor(w);
-        docTree->tree->focusEditor(w);
+    if (w->file != prevFile) {
+        --getFileCounter(TPath::basename(prevFile));
+        setEditorTitle(w);
+        if (docTree) {
+            docTree->tree->removeEditor(w);
+            docTree->tree->addEditor(w);
+            docTree->tree->focusEditor(w);
+        }
     }
     if (!w->file.empty())
-        mostRecentDir.assign(w->file.parent_path());
+        mostRecentDir.assign(TPath::dirname(w->file));
 }
 
 active_counter& TurboApp::getFileCounter(std::string_view file)
@@ -363,7 +365,7 @@ void TurboApp::addEditor(EditorWindow *w)
 
 void TurboApp::removeEditor(EditorWindow *w)
 {
-    --getFileCounter(w->file.native());
+    --getFileCounter(w->file);
     w->MRUhead.remove();
     if (MRUlist.empty())
         disableCommands(editorCmds);
@@ -439,7 +441,7 @@ void TurboApp::setFocusedEditor(EditorWindow *w)
         docTree->tree->focusEditor(w);
     // We keep track of the most recent directory for file dialogs.
     if (!w->file.empty())
-        mostRecentDir.assign(w->file.parent_path());
+        mostRecentDir.assign(TPath::dirname(w->file));
 }
 
 #define cpTurboAppColor \

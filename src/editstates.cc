@@ -71,8 +71,8 @@ void FileType::detect(EditorWindow &win)
     Language lang = langNone;
     [[maybe_unused]] int encoding = 0;
     {
-        auto &&ext = file.extension();
-        lang = ext2lang[ext.native()];
+        auto ext = TPath::extname(file);
+        lang = ext2lang[ext];
     }
 #ifdef HAVE_MAGIC
     if (!lang) {

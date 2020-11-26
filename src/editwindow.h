@@ -84,7 +84,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // The absolute path of the currently open file, or an empty path if
     // no file is open.
 
-    util::u8path file;
+    std::string file;
 
     // If there was an error while loading the file, the view is invalid.
     // It shall return False when invoking valid(cmValid).

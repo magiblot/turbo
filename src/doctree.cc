@@ -7,11 +7,11 @@ using callback_t = DocumentTreeView::callback_t;
 
 const callback_t *DocumentTreeView::searchCallback {nullptr};
 
-Node::Node(Node *parent, const util::u8path &p) :
-    TNode(p.filename().operator std::string_view()),
+Node::Node(Node *parent, std::string_view p) :
+    TNode(TPath::basename(p)),
     ptr(nullptr),
     parent(parent),
-    data(p)
+    data(std::string {p})
 {
 }
 
@@ -79,7 +79,7 @@ void DocumentTreeView::addEditor(EditorWindow *w)
         parent = nullptr;
         list = &root;
     } else {
-        parent = getDirNode(w->file.parent_path());
+        parent = getDirNode(TPath::dirname(w->file));
         list = &parent->childList;
     }
     putLast(list, new Node(parent, w));
@@ -133,29 +133,29 @@ void DocumentTreeView::focusPrev()
     });
 }
 
-Node* DocumentTreeView::getDirNode(const util::u8path &dirPath)
+Node* DocumentTreeView::getDirNode(std::string_view dirPath)
 {
     // The list where the dir will be inserted.
     TNode **list {nullptr};
     Node *parent {nullptr};
     {
-        auto &&parentPath = dirPath.parent_path();
+        auto parentPath = TPath::dirname(dirPath);
         if ((parent = (Node *) findFirst(hasPath(parentPath))))
             list = &parent->childList;
     }
     if (!list)
         list = &root;
     // The directory we are searching for.
-    auto *dir = (Node *) findInList(list, [&dirPath] (Node *node) {
-        auto *ppath = std::get_if<util::u8path>(&node->data);
+    auto *dir = (Node *) findInList(list, [dirPath] (Node *node) {
+        auto *ppath = std::get_if<std::string>(&node->data);
         return ppath && *ppath == dirPath;
     });
     if (!dir) {
         dir = new Node(parent, dirPath);
         // Place already existing subdirectories under this dir.
-        findInList(&root, [dir, &dirPath] (Node *node) {
-            auto *ppath = std::get_if<util::u8path>(&node->data);
-            if (ppath && ppath->parent_path() == dirPath)
+        findInList(&root, [dir, dirPath] (Node *node) {
+            auto *ppath = std::get_if<std::string>(&node->data);
+            if (ppath && TPath::dirname(*ppath) == TStringView(dirPath))
                 node->setParent(dir);
             return false;
         });
@@ -191,10 +191,10 @@ callback_t DocumentTreeView::hasEditor(const EditorWindow *w, int *pos)
     };
 }
 
-callback_t DocumentTreeView::hasPath(const util::u8path &path, int *pos)
+callback_t DocumentTreeView::hasPath(std::string_view path, int *pos)
 {
-    return [&path, pos] (auto *node, auto position) {
-        auto *ppath = std::get_if<util::u8path>(&((Node *) node)->data);
+    return [path, pos] (auto *node, auto position) {
+        auto *ppath = std::get_if<std::string>(&((Node *) node)->data);
         if (ppath && *ppath == path) {
             if (pos)
                 *pos = position;
