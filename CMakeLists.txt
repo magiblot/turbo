@@ -59,9 +59,9 @@ endif()
 target_link_libraries(scintilla scilexers)
 target_link_libraries(scilexers scintilla)
 
-# Target 'turbo'
+# Target 'turbo-core'
 
-file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.cc")
+file(GLOB TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.cc")
 set(TURBO_MAIN "${CMAKE_CURRENT_LIST_DIR}/src/main.cc")
 list(REMOVE_ITEM TURBO_SRC ${TURBO_MAIN})
 
@@ -99,6 +99,27 @@ if (MAGIC)
     target_link_libraries(${PROJECT_NAME}-core PRIVATE ${MAGIC})
     target_compile_definitions(${PROJECT_NAME}-core PRIVATE HAVE_MAGIC)
 endif()
+
+# Target 'sciplatform'
+
+file(GLOB SCIPLATFORM_SRC "${CMAKE_CURRENT_LIST_DIR}/src/platform/*.cc")
+
+add_library(sciplatform ${SCIPLATFORM_SRC})
+
+target_include_directories(sciplatform PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/include"
+    "${CMAKE_CURRENT_LIST_DIR}/src/platform"
+)
+
+# Address more cyclic dependencies
+
+target_link_libraries(scintilla sciplatform)
+target_link_libraries(sciplatform PRIVATE
+    scintilla
+    tvision
+)
+
+# Target 'turbo'
 
 add_executable(${PROJECT_NAME} ${TURBO_MAIN})
 target_link_libraries(${PROJECT_NAME} PRIVATE
