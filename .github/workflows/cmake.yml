@@ -74,35 +74,35 @@ jobs:
         path: |
           ${{env.BUILD_TYPE}}/turbo.exe
 
-#  build-windows-mingw:
-#    name: Windows (MinGW)
-#    runs-on: windows-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#      with:
-#        submodules: 'recursive'
-#
-#    - name: Configure CMake
-#      shell: bash
-#      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-#
-#    - name: Build
-#      shell: bash
-#      run: cmake --build . -j$(nproc)
-#
-#  build-macos-clang:
-#    name: MacOS (Clang)
-#    runs-on: macos-latest
-#    steps:
-#    - uses: actions/checkout@v2
-#      with:
-#        submodules: 'recursive'
-#
-#    - name: Configure CMake
-#      shell: bash
-#      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-#
-#    - name: Build
-#      shell: bash
-#      run: cmake --build . -j$(sysctl -n hw.logicalcpu)
-#
+  build-windows-mingw:
+    name: Windows (MinGW)
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(nproc)
+
+  build-macos-clang:
+    name: MacOS (Clang)
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Configure CMake
+      shell: bash
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      shell: bash
+      run: cmake --build . -j$(sysctl -n hw.logicalcpu)
+
