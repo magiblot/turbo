@@ -50,7 +50,7 @@ endforeach()
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     set_target_properties(scintilla PROPERTIES UNITY_BUILD ON)
     target_precompile_headers(scilexers PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/include/Scilexers.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/ScilexersPCH.h"
     )
 endif()
 
@@ -62,14 +62,16 @@ target_link_libraries(scilexers scintilla)
 # Target 'turbo'
 
 file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.cc")
+set(TURBO_MAIN "${CMAKE_CURRENT_LIST_DIR}/src/main.cc")
+list(REMOVE_ITEM TURBO_SRC ${TURBO_MAIN})
 
-add_executable(${PROJECT_NAME} ${TURBO_SRC})
+add_library(${PROJECT_NAME}-core ${TURBO_SRC})
 
 add_subdirectory(deps/fmt)
 add_subdirectory(deps/libclipboard)
 add_subdirectory(deps/tvision)
 
-target_include_directories(${PROJECT_NAME} PRIVATE
+target_include_directories(${PROJECT_NAME}-core PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
     "${CMAKE_CURRENT_LIST_DIR}/src"
     "${CMAKE_CURRENT_LIST_DIR}/src/platform"
@@ -78,13 +80,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
-    set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON)
-    target_precompile_headers(${PROJECT_NAME} PRIVATE
+    set_target_properties(${PROJECT_NAME}-core PROPERTIES UNITY_BUILD ON)
+    target_precompile_headers(${PROJECT_NAME}-core PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
     )
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME}-core PUBLIC
     scintilla
     tvision
     fmt
@@ -98,6 +100,11 @@ endif()
 # Other optional dependencies
 find_library(MAGIC magic)
 if (MAGIC)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${MAGIC})
-    target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_MAGIC)
+    target_link_libraries(${PROJECT_NAME}-core PRIVATE ${MAGIC})
+    target_compile_definitions(${PROJECT_NAME}-core PRIVATE HAVE_MAGIC)
 endif()
+
+add_executable(${PROJECT_NAME} ${TURBO_MAIN})
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    ${PROJECT_NAME}-core
+)
