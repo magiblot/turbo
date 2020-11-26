@@ -45,7 +45,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <filesystem>
 
 // Scintilla headers
 
