@@ -59,19 +59,19 @@ endif()
 target_link_libraries(scintilla scilexers)
 target_link_libraries(scilexers scintilla)
 
-# Target 'turbo-core'
+# Target 'turbo-ui'
 
 file(GLOB TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.cc")
 set(TURBO_MAIN "${CMAKE_CURRENT_LIST_DIR}/src/main.cc")
 list(REMOVE_ITEM TURBO_SRC ${TURBO_MAIN})
 
-add_library(${PROJECT_NAME}-core ${TURBO_SRC})
+add_library(${PROJECT_NAME}-ui ${TURBO_SRC})
 
 add_subdirectory(deps/fmt)
 add_subdirectory(deps/libclipboard)
 add_subdirectory(deps/tvision)
 
-target_include_directories(${PROJECT_NAME}-core PUBLIC
+target_include_directories(${PROJECT_NAME}-ui PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
     "${CMAKE_CURRENT_LIST_DIR}/src"
     "${CMAKE_CURRENT_LIST_DIR}/src/platform"
@@ -80,13 +80,13 @@ target_include_directories(${PROJECT_NAME}-core PUBLIC
 )
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
-    set_target_properties(${PROJECT_NAME}-core PROPERTIES UNITY_BUILD ON)
-    target_precompile_headers(${PROJECT_NAME}-core PRIVATE
+    set_target_properties(${PROJECT_NAME}-ui PROPERTIES UNITY_BUILD ON)
+    target_precompile_headers(${PROJECT_NAME}-ui PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
     )
 endif()
 
-target_link_libraries(${PROJECT_NAME}-core PUBLIC
+target_link_libraries(${PROJECT_NAME}-ui PUBLIC
     scintilla
     tvision
     fmt
@@ -96,8 +96,8 @@ target_link_libraries(${PROJECT_NAME}-core PUBLIC
 # Other optional dependencies
 find_library(MAGIC magic)
 if (MAGIC)
-    target_link_libraries(${PROJECT_NAME}-core PRIVATE ${MAGIC})
-    target_compile_definitions(${PROJECT_NAME}-core PRIVATE HAVE_MAGIC)
+    target_link_libraries(${PROJECT_NAME}-ui PRIVATE ${MAGIC})
+    target_compile_definitions(${PROJECT_NAME}-ui PRIVATE HAVE_MAGIC)
 endif()
 
 # Target 'sciplatform'
@@ -123,5 +123,5 @@ target_link_libraries(sciplatform PRIVATE
 
 add_executable(${PROJECT_NAME} ${TURBO_MAIN})
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${PROJECT_NAME}-core
+    ${PROJECT_NAME}-ui
 )
