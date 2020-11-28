@@ -55,7 +55,6 @@ struct TurboApp : public TApplication {
     void idle() override;
     void getEvent(TEvent &event) override;
     void handleEvent(TEvent& event) override;
-    void shell();
     void parseArgs();
 
     void fileNew();
