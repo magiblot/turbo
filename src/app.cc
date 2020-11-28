@@ -31,6 +31,15 @@ using namespace std::literals;
 
 TurboApp* TurboApp::app = 0;
 
+void turbo_main(int argc, const char *argv[])
+{
+    TurboApp app(argc, argv);
+    TurboApp::app = &app;
+    app.run();
+    app.shutDown();
+    TurboApp::app = 0;
+}
+
 TurboApp::TurboApp(int argc, const char *argv[]) :
     TProgInit( &TurboApp::initStatusLine,
                &TurboApp::initMenuBar,

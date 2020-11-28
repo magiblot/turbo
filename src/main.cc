@@ -1,10 +1,6 @@
-#include "app.h"
+void turbo_main(int, const char *[]); // app.cc
 
 int main(int argc, const char *argv[])
 {
-    TurboApp app(argc, argv);
-    TurboApp::app = &app;
-    app.run();
-    app.shutDown();
-    TurboApp::app = 0;
+    turbo_main(argc, argv);
 }
