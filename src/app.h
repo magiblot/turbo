@@ -66,6 +66,8 @@ struct TurboApp : public TApplication {
     TRect newEditorBounds() const;
     void setEditorTitle(EditorWindow *w);
     void updateEditorTitle(EditorWindow *w, std::string_view prevFile);
+    uint incFileCounter(std::string_view path);
+    void decFileCounter(std::string_view path);
     active_counter& getFileCounter(std::string_view file);
     void addEditor(EditorWindow *w);
     void removeEditor(EditorWindow *w);
@@ -87,6 +89,16 @@ struct TurboApp : public TApplication {
     TPalette& getPalette() const override;
 
 };
+
+inline uint TurboApp::incFileCounter(std::string_view path)
+{
+    return ++getFileCounter(TPath::basename(path));
+}
+
+inline void TurboApp::decFileCounter(std::string_view path)
+{
+    --getFileCounter(TPath::basename(path));
+}
 
 template<typename Func>
 inline void TurboApp::openFileDialog( const char *aWildCard, const char *aTitle,

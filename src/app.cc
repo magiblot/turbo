@@ -311,10 +311,10 @@ TRect TurboApp::newEditorBounds() const
 void TurboApp::setEditorTitle(EditorWindow *w)
 {
     uint number;
-    auto file = TPath::basename(w->file);
-    if (!file.empty()) {
-        w->title.assign(file);
-        number = ++getFileCounter(file);
+    auto fileName = TPath::basename(w->file);
+    if (!fileName.empty()) {
+        w->title.assign(fileName);
+        number = incFileCounter(w->file);
     } else {
         w->title.assign("Untitled"s);
         number = ++fileCount[{}];
@@ -327,7 +327,7 @@ void TurboApp::setEditorTitle(EditorWindow *w)
 void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
 {
     if (w->file != prevFile) {
-        --getFileCounter(TPath::basename(prevFile));
+        decFileCounter(prevFile);
         setEditorTitle(w);
         if (docTree) {
             docTree->tree->removeEditor(w);
@@ -365,7 +365,7 @@ void TurboApp::addEditor(EditorWindow *w)
 
 void TurboApp::removeEditor(EditorWindow *w)
 {
-    --getFileCounter(w->file);
+    decFileCounter(w->file);
     w->MRUhead.remove();
     if (MRUlist.empty())
         disableCommands(editorCmds);
