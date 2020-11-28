@@ -122,6 +122,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // title if necessary.
 
     bool trySaveFile();
+    void processBeforeSave();
     bool saveFile();
     bool canOverwrite() const;
 

@@ -195,4 +195,6 @@ public:
 
 };
 
+void stripTrailingSpaces(Scintilla::TScintillaEditor &editor);
+
 #endif

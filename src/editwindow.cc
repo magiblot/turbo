@@ -475,8 +475,15 @@ bool EditorWindow::trySaveFile()
     return true;
 }
 
+void EditorWindow::processBeforeSave()
+{
+    ::stripTrailingSpaces(editor);
+    redrawEditor();
+}
+
 bool EditorWindow::saveFile()
 {
+    processBeforeSave();
     std::ofstream f(file, ios::out | ios::binary);
     if (f) {
         size_t bytesLeft = editor.WndProc(SCI_GETTEXT, 0, 0) - 1;

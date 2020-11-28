@@ -125,14 +125,14 @@ Below is my TO-DO list of features I would like to implement in Turbo:
 - [ ] Replace.
 - [ ] Go to line.
 - [ ] List of recently opened files.
-- [ ] Remove trailing whitespaces on save.
+- [x] Remove trailing whitespaces on save.
 - [ ] Detect open files modified on disk.
 - [ ] Persistent configuration.
 - [ ] Keybinding customization.
 - [ ] Color scheme customization.
 - [x] Syntax highlighting for some languages (C/C++, Rust, Python, JavaScript, Make, Bash, Ruby).
 - [ ] Syntax highlighting for the rest of [languages supported by Scintilla](https://github.com/RaiKoHoff/scintilla/blob/master/include/SciLexer.h).
-- [ ] Brace match highlighting.
+- [x] Brace match highlighting.
 - [ ] VIM input mode.
 - [ ] Localization.
 - [x] Unicode in dialog text boxes (this depends on Turbo Vision).
