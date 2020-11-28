@@ -61,6 +61,7 @@ struct TScintillaEditor : public ScintillaBase {
     void clearBeforeTentativeStart();
     void pasteText(std::string_view text);
     void insertCharacter(std::string_view ch);
+    void idleWork();
     Sci::Line getFirstVisibleDocumentLine();
     TPoint getCaretPosition();
     TPoint getDelta();
@@ -95,6 +96,11 @@ inline void TScintillaEditor::pasteText(std::string_view text)
 inline void TScintillaEditor::insertCharacter(std::string_view text)
 {
     InsertCharacter(text, CharacterSource::directInput);
+}
+
+inline void TScintillaEditor::idleWork()
+{
+    IdleWork();
 }
 
 inline Sci::Line TScintillaEditor::getFirstVisibleDocumentLine()

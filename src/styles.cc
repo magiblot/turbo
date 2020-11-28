@@ -354,24 +354,23 @@ static TCellAttribs getBraceAttr(TSpan<const pair<uchar, Styles>> styles, uchar 
 void BraceMatching::update(const LexerInfo &lexInfo, Scintilla::TScintillaEditor &editor)
 {
     auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
-    if (pos != lastPos)
-    {
-        do {
-            if (isBrace(lexInfo.braces, editor.WndProc(SCI_GETCHARAT, pos, 0U)))
+    auto ch = editor.WndProc(SCI_GETCHARAT, pos, 0U);
+    do {
+        if (isBrace(lexInfo.braces, ch))
+        {
+            // We must lex any newly inserted so that it has the right style.
+            editor.idleWork();
+            // Scintilla already makes sure that both braces have the same style.
+            auto matchPos = editor.WndProc(SCI_BRACEMATCH, pos, 0U);
+            if (matchPos != -1)
             {
-                // Scintilla already makes sure that both braces have the same style.
-                auto matchPos = editor.WndProc(SCI_BRACEMATCH, pos, 0U);
-                if (matchPos != -1)
-                {
-                    uchar sciStyle = editor.WndProc(SCI_GETSTYLEAT, pos, 0U);
-                    auto braceAttr = getBraceAttr(lexInfo.styles, sciStyle);
-                    editor.setStyleColor(STYLE_BRACELIGHT, braceAttr);
-                    editor.WndProc(SCI_BRACEHIGHLIGHT, pos, matchPos);
-                    break;
-                }
+                uchar sciStyle = editor.WndProc(SCI_GETSTYLEAT, pos, 0U);
+                auto braceAttr = getBraceAttr(lexInfo.styles, sciStyle);
+                editor.setStyleColor(STYLE_BRACELIGHT, braceAttr);
+                editor.WndProc(SCI_BRACEHIGHLIGHT, pos, matchPos);
+                break;
             }
-            editor.WndProc(SCI_BRACEHIGHLIGHT, -1, -1);
-        } while (0);
-        lastPos = pos;
-    }
+        }
+        editor.WndProc(SCI_BRACEHIGHLIGHT, -1, -1);
+    } while (0);
 }

@@ -39,8 +39,6 @@ void setUpStyles(EditorWindow &win);
 
 class BraceMatching {
 
-    Sci::Position lastPos {-1};
-
 public:
 
     void update(const struct LexerInfo&, Scintilla::TScintillaEditor &editor);
