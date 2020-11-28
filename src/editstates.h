@@ -193,8 +193,14 @@ public:
         editor.WndProc(SCI_SETEOLMODE, eolType, 0U);
     }
 
+    int getEOLType() const
+    {
+        return eolType;
+    }
+
 };
 
 void stripTrailingSpaces(Scintilla::TScintillaEditor &editor);
+void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor, int EOLType);
 
 #endif

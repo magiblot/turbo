@@ -126,6 +126,7 @@ Below is my TO-DO list of features I would like to implement in Turbo:
 - [ ] Go to line.
 - [ ] List of recently opened files.
 - [x] Remove trailing whitespaces on save.
+- [x] Ensure newline at end of file.
 - [ ] Detect open files modified on disk.
 - [ ] Persistent configuration.
 - [ ] Keybinding customization.

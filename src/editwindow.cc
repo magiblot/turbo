@@ -478,6 +478,7 @@ bool EditorWindow::trySaveFile()
 void EditorWindow::processBeforeSave()
 {
     ::stripTrailingSpaces(editor);
+    ::ensureNewlineAtEnd(editor, props.getEOLType());
     redrawEditor();
 }
 
