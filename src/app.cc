@@ -339,8 +339,9 @@ active_counter& TurboApp::getFileCounter(std::string_view file)
     // This is because I don't want fileCount to be a map of std::string.
     auto it = fileCount.find(file);
     if (it == fileCount.end()) {
-        // Allocate string for the filename.
-        const auto &s = files.emplace_back(file);
+        // Allocate string for the filename. We use a forward_list to avoid
+        // reference invalidation.
+        const auto &s = files.emplace_front(file);
         file = s; // Make file point to the allocated string.
         it = fileCount.emplace(file, active_counter()).first;
     }

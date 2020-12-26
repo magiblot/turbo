@@ -9,7 +9,7 @@
 
 #include <string_view>
 #include <unordered_map>
-#include <vector>
+#include <forward_list>
 #include "util.h"
 #include "doctree.h"
 #include "clipboard.h"
@@ -36,7 +36,7 @@ const ushort
 struct TurboApp : public TApplication {
 
     std::unordered_map<std::string_view, active_counter> fileCount;
-    std::vector<std::string> files; // Storage for the strings referenced by fileCount;
+    std::forward_list<std::string> files; // Storage for the strings referenced by fileCount;
     list_head<EditorWindow> MRUlist;
     TClockView *clock;
     DocumentTreeWindow *docTree;
