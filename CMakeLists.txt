@@ -79,13 +79,6 @@ target_include_directories(${PROJECT_NAME}-ui PUBLIC
     "${CMAKE_BINARY_DIR}/deps/libclipboard/include" # libclipboard-config.h
 )
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
-    set_target_properties(${PROJECT_NAME}-ui PROPERTIES UNITY_BUILD ON)
-    target_precompile_headers(${PROJECT_NAME}-ui PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
-    )
-endif()
-
 target_link_libraries(${PROJECT_NAME}-ui PUBLIC
     scintilla
     tvision
@@ -118,6 +111,16 @@ target_link_libraries(sciplatform PRIVATE
     scintilla
     tvision
 )
+
+# Build optimization
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+    set_target_properties(${PROJECT_NAME}-ui PROPERTIES UNITY_BUILD ON)
+    target_precompile_headers(${PROJECT_NAME}-ui PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
+    )
+    set_target_properties(sciplatform PROPERTIES UNITY_BUILD ON)
+endif()
 
 # Target 'turbo'
 
