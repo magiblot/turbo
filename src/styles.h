@@ -2,6 +2,7 @@
 #define TURBO_STYLES_H
 
 struct EditorWindow;
+struct LexerInfo;
 
 enum Language : unsigned char {
     langNone,
@@ -34,30 +35,38 @@ enum Language : unsigned char {
     langMarkdown,
 };
 
-void loadLexer(Language lang, EditorWindow &win);
+// To initialize styling in an EditorWindow:
+// 1. '::setUpStyles(win)' initializes the language-independent styles.
+// 2. 'LanguageState::detect(win)' detects the file type and initializes lexing
+//    and language-aware styles.
+
 void setUpStyles(EditorWindow &win);
 
 class BraceMatching {
 
 public:
 
-    void update(const struct LexerInfo&, Scintilla::TScintillaEditor &editor);
+    void update(const LexerInfo&, Scintilla::TScintillaEditor &editor);
 
 };
 
 class LanguageState {
 
-    const struct LexerInfo *lexInfo {nullptr};
+    const LexerInfo *lexInfo {nullptr};
     BraceMatching matching;
+
+    void loadLexer(Language lang, EditorWindow &win);
 
 public:
 
     LanguageState() = default;
 
-    LanguageState(const struct LexerInfo *lexInfo) :
+    LanguageState(const LexerInfo *lexInfo) :
         lexInfo(lexInfo)
     {
     }
+
+    void detect(EditorWindow &win);
 
     void updateBraces(Scintilla::TScintillaEditor &editor)
     {

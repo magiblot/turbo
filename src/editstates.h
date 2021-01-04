@@ -105,14 +105,6 @@ public:
 
 };
 
-struct EditorWindow;
-
-struct FileType {
-
-    void detect(EditorWindow &win);
-
-};
-
 struct Indent {
 
     bool autoIndent {true};

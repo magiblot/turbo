@@ -434,7 +434,7 @@ void EditorWindow::setFile(std::string newFile)
     file = std::move(newFile);
     if (TurboApp::app)
         TurboApp::app->updateEditorTitle(this, oldFile);
-    type.detect(*this);
+    lang.detect(*this);
 }
 
 // Note: the 'fatalError' variable set here is later checked in valid() for
