@@ -27,7 +27,8 @@ const ushort
     cmToggleIndent  = 106,
     cmTreeNext      = 107,
     cmTreePrev      = 108,
-    cmCloseEditor   = 109;
+    cmCloseEditor   = 109,
+    cmRename        = 110;
 
 // Commands that cannot be deactivated.
 const ushort
@@ -81,8 +82,8 @@ struct TurboApp : public TApplication {
     void setFocusedEditor(EditorWindow *w); // Set from here.
 
     template<typename Func>
-    void openFileDialog( const char *aWildCard, const char *aTitle,
-                         const char *inputName, ushort aOptions,
+    void openFileDialog( std::string_view aWildCard, std::string_view aTitle,
+                         std::string_view inputName, ushort aOptions,
                          uchar histId, Func &&callback );
 
     TPalette& getPalette() const override;
@@ -100,9 +101,9 @@ inline void TurboApp::decFileCounter(std::string_view path)
 }
 
 template<typename Func>
-inline void TurboApp::openFileDialog( const char *aWildCard, const char *aTitle,
-                                       const char *inputName, ushort aOptions,
-                                       uchar histId, Func &&callback )
+inline void TurboApp::openFileDialog( std::string_view aWildCard, std::string_view aTitle,
+                                      std::string_view inputName, ushort aOptions,
+                                      uchar histId, Func &&callback )
 {
     // Unfortunately, TFileDialog relies on the current directory.
     [[maybe_unused]] int rr = chdir(mostRecentDir.c_str());

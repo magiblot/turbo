@@ -56,17 +56,20 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
 
     SearchBox::init(*this);
 
-    // Set the commands that always get enabled when focusing the editor.
-    commandSet += cmSave;
-    commandSet += cmSaveAs;
-    commandSet += cmToggleWrap;
-    commandSet += cmToggleLineNums;
-    commandSet += cmFind;
-//     commandSet += cmReplace;
-    commandSet += cmSearchAgain;
-    commandSet += cmSearchPrev;
-    commandSet += cmToggleIndent;
-    commandSet += cmCloseEditor;
+    // Commands that always get enabled when focusing the editor.
+    enabledCmds += cmSave;
+    enabledCmds += cmSaveAs;
+    enabledCmds += cmToggleWrap;
+    enabledCmds += cmToggleLineNums;
+    enabledCmds += cmFind;
+    enabledCmds += cmSearchAgain;
+    enabledCmds += cmSearchPrev;
+    enabledCmds += cmToggleIndent;
+    enabledCmds += cmCloseEditor;
+
+    // Commands that always get disabled when unfocusing the editor.
+    disabledCmds += enabledCmds;
+    disabledCmds += cmRename;
 
     setUpEditor(openCanFail);
 }
@@ -111,7 +114,7 @@ void EditorWindow::setUpEditor(bool openCanFail)
     // Enable line wrapping (if appropiate) by default
     wrap.toggle(editor, false);
     editor.WndProc(SCI_SETWRAPVISUALFLAGS, SC_WRAPVISUALFLAG_END, 0U);
-    
+
     // Home/End keys should respect line wrapping.
     editor.WndProc(SCI_ASSIGNCMDKEY, SCK_HOME | (SCI_NORM << 16), SCI_VCHOMEWRAP);
     editor.WndProc(SCI_ASSIGNCMDKEY, SCK_HOME | (SCI_SHIFT << 16), SCI_VCHOMEWRAPEXTEND);
@@ -211,6 +214,9 @@ void EditorWindow::handleEvent(TEvent &ev) {
             case cmSaveAs:
                 saveAsDialog();
                 break;
+            case cmRename:
+                renameDialog();
+                break;
             case cmToggleWrap:
                 if (wrap.toggle(editor))
                     redrawEditor();
@@ -278,8 +284,7 @@ void EditorWindow::setState(ushort aState, Boolean enable)
     switch (aState) {
         // These actions do not depend on subview lifetime.
         case sfActive:
-            (enable ? enableCommands
-                    : disableCommands)(commandSet);
+            updateCommands();
             break;
     }
 
@@ -312,6 +317,14 @@ void EditorWindow::sizeLimits( TPoint& min, TPoint& max )
 {
     TView::sizeLimits(min, max);
     min = minEditWinSize;
+}
+
+void EditorWindow::updateCommands()
+{
+    if (state & sfActive)
+        enableCommands(enabledCmds);
+    else
+        disableCommands(disabledCmds);
 }
 
 void EditorWindow::lockSubViews()
@@ -398,7 +411,7 @@ void EditorWindow::setSavePointReached()
 
 void EditorWindow::setSavePoint()
 {
-    inSavePoint = true;
+    setSavePointReached();
     editor.WndProc(SCI_SETSAVEPOINT, 0U, 0U);
     frame->drawView();
 }
@@ -408,6 +421,21 @@ void EditorWindow::setSavePoint()
 
 #include <memory>
 #include <fstream>
+#include <cstdio>
+#include <cerrno>
+
+void EditorWindow::setFile(std::string newFile)
+{
+    if (!newFile.empty()) {
+        enabledCmds += cmRename;
+        updateCommands();
+    }
+    std::string oldFile = std::move(file);
+    file = std::move(newFile);
+    if (TurboApp::app)
+        TurboApp::app->updateEditorTitle(this, oldFile);
+    type.detect(*this);
+}
 
 // Note: the 'fatalError' variable set here is later checked in valid() for
 // command cmValid. If there was an error, valid() will return False,
@@ -416,15 +444,15 @@ void EditorWindow::setSavePoint()
 void EditorWindow::tryLoadFile(bool canFail)
 {
     if (!file.empty()) {
-        char tmp[MAXPATH];
-        file = TPath::resolve(tmp, file);
-        fatalError = !loadFile(canFail);
+        char fileName[MAXPATH];
+        TPath::resolve(fileName, file);
+        fatalError = !loadFile(fileName, canFail);
         if (!fatalError)
-            type.detect(*this);
+            setFile(fileName);
     }
 }
 
-bool EditorWindow::loadFile(bool canFail)
+bool EditorWindow::loadFile(const char *file, bool canFail)
 {
     std::ifstream f(file, ios::in | ios::binary);
     if (f) {
@@ -449,12 +477,12 @@ bool EditorWindow::loadFile(bool canFail)
                     readSize = fSize;
             };
             if (!ok) {
-                showError(fmt::format("An error occurred while reading from file '{}'.", file));
+                showError(fmt::format("An error occurred while reading from file '{}': {}.", file, strerror(errno)));
                 return false;
             }
         }
     } else if (!canFail) {
-        showError(fmt::format("Unable to open file '{}'.", file));
+        showError(fmt::format("Unable to open file '{}': {}.", file, strerror(errno)));
         return false;
     }
     return true;
@@ -463,26 +491,29 @@ bool EditorWindow::loadFile(bool canFail)
 bool EditorWindow::trySaveFile()
 {
     if (!inSavePoint || file.empty()) {
-        if (file.empty()) {
-            return saveAsDialog(); // Already takes care of updating the title.
-        } else if (saveFile()) {
-            setSavePointReached(); // Update title if necessary.
-            setSavePoint(); // Notify Scintilla.
-            return true;
-        }
-        return false;
+        if (file.empty())
+            return saveAsDialog();
+        return saveFile(file.c_str());
     }
     return true;
 }
 
 void EditorWindow::processBeforeSave()
 {
-    ::stripTrailingSpaces(editor);
-    ::ensureNewlineAtEnd(editor, props.getEOLType());
-    redrawEditor();
+    // Don't modify the file if it is still clean.
+    if (!inSavePoint) {
+        ::stripTrailingSpaces(editor);
+        ::ensureNewlineAtEnd(editor, props.getEOLType());
+        redrawEditor();
+    }
 }
 
-bool EditorWindow::saveFile()
+void EditorWindow::processAfterSave()
+{
+    setSavePoint();
+}
+
+bool EditorWindow::saveFile(const char *file, bool silent)
 {
     processBeforeSave();
     std::ofstream f(file, ios::out | ios::binary);
@@ -505,14 +536,15 @@ bool EditorWindow::saveFile()
                     writeSize = bytesLeft;
             } while (bytesLeft > 0 && ok);
             if (!ok) {
-                showError(fmt::format("An error occurred while writing to file '{}'.", file));
+                if (!silent) showError(fmt::format("An error occurred while writing to file '{}': {}.", file, strerror(errno)));
                 return false;
             }
         }
     } else {
-        showError(fmt::format("Unable to write to file '{}'.", file));
+        if (!silent) showError(fmt::format("Unable to write into file '{}': {}.", file, strerror(errno)));
         return false;
     }
+    processAfterSave();
     return true;
 }
 
@@ -522,20 +554,13 @@ bool EditorWindow::saveAsDialog()
         bool saved = false;
         TurboApp::app->openFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 0,
             [this, &saved] (TView *dialog) {
-                std::string prevFile = std::move(file);
                 char fileName[MAXPATH];
                 dialog->getData(fileName);
                 fexpand(fileName);
-                file = fileName;
-                if (canOverwrite() && saveFile()) {
-                    // Saving has succeeded, now update the title.
-                    TurboApp::app->updateEditorTitle(this, prevFile);
-                    setSavePoint();
-                    type.detect(*this);
+                if (canOverwrite(fileName) && saveFile(fileName)) {
+                    setFile(fileName);
                     return ((saved = true));
                 }
-                // Restore the old file path.
-                file = std::move(prevFile);
                 return false;
             }
         );
@@ -544,9 +569,47 @@ bool EditorWindow::saveAsDialog()
     return false;
 }
 
-bool EditorWindow::canOverwrite() const
+void EditorWindow::renameDialog()
 {
-    if (TPath::exists(file.c_str())) {
+    if (TurboApp::app) {
+        TurboApp::app->openFileDialog("*.*", "Rename file", "~N~ame", fdOKButton, 0,
+            [this] (TView *dialog) {
+                char newFile[MAXPATH];
+                dialog->getData(newFile);
+                fexpand(newFile);
+                // Don't do anything if renaming to the same file. If the user needed to
+                // save the file, they would use the 'save' feature.
+                if (std::string_view {newFile} == file)
+                    return true;
+                if (canOverwrite(newFile) && renameFile(file.c_str(), newFile)) {
+                    setFile(newFile);
+                    return true;
+                }
+                return false;
+            }
+        );
+    }
+}
+
+bool EditorWindow::renameFile(const char *src, const char *dst)
+{
+    // Try saving first, then renaming.
+    if (saveFile(src, true) && ::rename(src, dst) == 0)
+        return true;
+    // If the above doesn't work, try saving at the new location, and then remove
+    // the old file.
+    else if (saveFile(dst, true)) {
+        if (TPath::exists(src) && ::remove(src) != 0)
+            showWarning(fmt::format("'{}' was created successfully, but '{}' could not be removed: {}.", dst, src, strerror(errno)));
+        return true;
+    }
+    showError(fmt::format("Unable to rename '{}' into '{}': {}.", src, dst, strerror(errno)));
+    return false;
+}
+
+bool EditorWindow::canOverwrite(const char *file)
+{
+    if (TPath::exists(file)) {
         auto &&text = fmt::format("'{}' already exists. Overwrite?", file);
         return cmYes == messageBox(text, mfConfirmation | mfYesButton | mfNoButton);
     }
@@ -579,6 +642,11 @@ void EditorWindow::close()
 void EditorWindow::showError(std::string_view s)
 {
     messageBox(s, mfError | mfOKButton);
+}
+
+void EditorWindow::showWarning(std::string_view s)
+{
+    messageBox(s, mfWarning | mfOKButton);
 }
 
 #define cpEditorWindow \

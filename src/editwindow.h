@@ -31,7 +31,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     SearchBox *search;
     TScrollBar *hScrollBar, *vScrollBar;
     TIndicator *indicator;
-    TCommandSet commandSet;
+    TCommandSet enabledCmds, disabledCmds;
     bool drawing;
     bool resizeLock;
     TPoint lastSize;
@@ -66,6 +66,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void sizeLimits(TPoint &min, TPoint &max) override;
     static constexpr TPoint minEditWinSize {24, 6};
 
+    void updateCommands();
     void lockSubViews();
     void unlockSubViews();
     void scrollBarEvent(TEvent ev);
@@ -85,6 +86,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // no file is open.
 
     std::string file;
+    void setFile(std::string); // Use this setter to update the string.
 
     // If there was an error while loading the file, the view is invalid.
     // It shall return False when invoking valid(cmValid).
@@ -115,7 +117,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // a file should be opened, according to 'file'.
 
     void tryLoadFile(bool canFail);
-    bool loadFile(bool canFail);
+    bool loadFile(const char *src, bool canFail);
 
     // trySaveFile gets invoked on cmSave. It decides whether to save the
     // file or to show a dialog. It also takes care of updating the window
@@ -123,14 +125,17 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     bool trySaveFile();
     void processBeforeSave();
-    bool saveFile();
-    bool canOverwrite() const;
+    void processAfterSave();
+    bool saveFile(const char *dst, bool silent=false);
+    bool renameFile(const char *src, const char *dst);
+    static bool canOverwrite(const char *);
 
     // saveAsDialog keeps popping out a dialog until the user decides
     // not to save or we succeed in writing to file. It also updates
     // the window title.
 
     bool saveAsDialog();
+    void renameDialog();
 
     bool tryClose();
     void close() override;
@@ -138,6 +143,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // Pops out a msgBox with an error message.
 
     static void showError(std::string_view s);
+    static void showWarning(std::string_view s);
 
 };
 

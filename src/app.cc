@@ -51,6 +51,7 @@ TurboApp::TurboApp(int argc, const char *argv[]) :
     TCommandSet ts;
     ts += cmSave;
     ts += cmSaveAs;
+    ts += cmRename;
     ts += cmOpenRecent;
     ts += cmToggleWrap;
     ts += cmToggleLineNums;
@@ -108,10 +109,11 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
             *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
-            *new TMenuItem( "Open ~R~ecent...", cmOpenRecent, kbNoKey, hcNoContext ) +
+            *new TMenuItem( "Open R~e~cent...", cmOpenRecent, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "~S~ave", cmSave, kbCtrlS, hcNoContext, "Ctrl-S" ) +
             *new TMenuItem( "S~a~ve As...", cmSaveAs, kbNoKey, hcNoContext ) +
+            *new TMenuItem( "~R~ename...", cmRename, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "~C~lose", cmCloseEditor, kbCtrlW, hcNoContext, "Ctrl-W" ) +
             *new TMenuItem( "Close All", cmCloseAll, kbNoKey, hcNoContext ) +
@@ -316,6 +318,7 @@ void TurboApp::setEditorTitle(EditorWindow *w)
     if (number > 1)
         w->title.append(fmt::format(" ({})", number));
     w->name = w->title; // Copy!
+    w->frame->drawView();
 }
 
 void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
