@@ -21,7 +21,6 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     lineNumbers(5),
     MRUhead(this),
     fatalError(false),
-    file(aFile),
     inSavePoint(true),
     editorView(editorSize())
 {
@@ -71,7 +70,7 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     disabledCmds += enabledCmds;
     disabledCmds += cmRename;
 
-    setUpEditor(openCanFail);
+    setUpEditor(aFile, openCanFail);
 }
 
 EditorWindow::~EditorWindow()
@@ -89,7 +88,7 @@ TPoint EditorWindow::editorSize() const
     return r.b - r.a;
 }
 
-void EditorWindow::setUpEditor(bool openCanFail)
+void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
 {
     // Editor should take into account the size of docView.
     editor.setWindow(&editorView);
@@ -98,7 +97,7 @@ void EditorWindow::setUpEditor(bool openCanFail)
     // Set color defaults.
     setUpStyles(*this);
     // Open the current file, if set.
-    tryLoadFile(openCanFail);
+    tryLoadFile(aFile, openCanFail);
     // Apply the properties detected while loading the file.
     props.apply(editor);
 
@@ -441,11 +440,11 @@ void EditorWindow::setFile(std::string newFile)
 // command cmValid. If there was an error, valid() will return False,
 // thus resulting in the EditorWindow being destroyed in checkValid().
 
-void EditorWindow::tryLoadFile(bool canFail)
+void EditorWindow::tryLoadFile(std::string_view aFile, bool canFail)
 {
-    if (!file.empty()) {
+    if (!aFile.empty()) {
         char fileName[MAXPATH];
-        TPath::resolve(fileName, file);
+        TPath::resolve(fileName, aFile);
         fatalError = !loadFile(fileName, canFail);
         if (!fatalError)
             setFile(fileName);

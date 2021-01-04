@@ -81,8 +81,12 @@ struct list_head
         return i;
     }
 
-    size_t empty() const {
+    bool empty() const {
         return this == next;
+    }
+
+    bool detached() const {
+        return !next && !prev;
     }
 
     template<class Func>

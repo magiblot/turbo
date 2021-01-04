@@ -323,6 +323,8 @@ void TurboApp::setEditorTitle(EditorWindow *w)
 
 void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
 {
+    if (w->MRUhead.detached()) // 'addEditor' not called yet.
+        return;
     if (w->file != prevFile) {
         decFileCounter(prevFile);
         setEditorTitle(w);

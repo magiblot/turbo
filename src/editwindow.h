@@ -47,7 +47,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TDrawSurface editorView;
 
     TPoint editorSize() const;
-    void setUpEditor(bool openCanFail);
+    void setUpEditor(std::string_view aFile, bool openCanFail);
     void redrawEditor();
     void updateMarginWidth();
     void updateIndicatorValue();
@@ -115,7 +115,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // tryLoadFile is invoked when creating the Window. It decides whether
     // a file should be opened, according to 'file'.
 
-    void tryLoadFile(bool canFail);
+    void tryLoadFile(std::string_view aFile, bool canFail);
     bool loadFile(const char *src, bool canFail);
 
     // trySaveFile gets invoked on cmSave. It decides whether to save the
