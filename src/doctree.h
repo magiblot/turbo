@@ -38,6 +38,8 @@ struct DocumentTreeView : public TOutline {
 
     static const callback_t *searchCallback;
 
+    bool focusing {false};
+
     using TOutline::TOutline;
 
     void focused(int i) override;

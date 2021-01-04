@@ -64,10 +64,16 @@ void Node::dispose()
 
 void DocumentTreeView::focused(int i)
 {
-    TOutline::focused(i);
-    if (auto *node = (Node *) getNode(i)) {
-        if (auto *w = node->getEditor())
-            w->focus();
+    // Avoid reentrancy on focus:
+    // focused() => w->focus() => app->setFocusedEditor() => focusEditor() => focused()
+    if (!focusing) {
+        focusing = true;
+        TOutline::focused(i);
+        if (auto *node = (Node *) getNode(i)) {
+            if (auto *w = node->getEditor())
+                w->focus();
+        }
+        focusing = false;
     }
 }
 
@@ -89,6 +95,9 @@ void DocumentTreeView::addEditor(EditorWindow *w)
 
 void DocumentTreeView::focusEditor(EditorWindow *w)
 {
+    // Avoid the reentrant case (see focused()).
+    if (focusing)
+        return;
     int i;
     if (findFirst(hasEditor(w, &i)))
         focused(i);
@@ -167,9 +176,10 @@ Node* DocumentTreeView::getDirNode(std::string_view dirPath)
 
 TNode *DocumentTreeView::findFirst(const callback_t &cb)
 {
+    auto *tmp = searchCallback;
     searchCallback = &cb;
     auto *ret = firstThat(applyCallback);
-    searchCallback = nullptr;
+    searchCallback = tmp;
     return ret;
 }
 
