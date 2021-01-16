@@ -358,8 +358,12 @@ bool EditorWindow::scrollBarChanged(TScrollBar *bar)
 
 void EditorWindow::scrollTo(TPoint delta)
 {
-    editor.WndProc(SCI_SETXOFFSET, std::clamp(delta.x, 0, hScrollBar->maxVal), 0U);
-    editor.WndProc(SCI_SETFIRSTVISIBLELINE, delta.y, 0U);
+    {
+        auto &&lk = lockDrawing();
+        hScrollBar->setValue(delta.x);
+        vScrollBar->setValue(delta.y);
+    }
+    redrawEditor();
 }
 
 void EditorWindow::notify(SCNotification scn)

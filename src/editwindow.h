@@ -17,6 +17,7 @@
 struct DocumentView;
 struct SearchBox;
 class TIndicator;
+class ScopedGuard;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
@@ -74,6 +75,8 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void notify(SCNotification scn) override;
     void setHorizontalScrollPos(int delta, int limit) override;
     void setVerticalScrollPos(int delta, int limit) override;
+
+    ScopedGuard lockDrawing();
 
     // TurboApp integration
 
@@ -145,5 +148,30 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     static void showWarning(std::string_view s);
 
 };
+
+class ScopedGuard
+{
+    bool &dest;
+    const bool value;
+
+public:
+
+    ScopedGuard(bool &dest, bool guardValue) :
+        dest(dest),
+        value(dest)
+    {
+        dest = guardValue;
+    }
+
+    ~ScopedGuard()
+    {
+        dest = value;
+    }
+};
+
+inline ScopedGuard EditorWindow::lockDrawing()
+{
+    return ScopedGuard(drawing, true);
+}
 
 #endif

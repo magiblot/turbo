@@ -45,7 +45,6 @@ void DocumentView::handleEvent(TEvent &ev)
                     TPoint mouse = makeLocal(ev.mouse.where);
                     TPoint d = editor.getDelta() + (lastMouse - mouse);
                     window.scrollTo(d);
-                    window.redrawEditor();
                     lastMouse = mouse;
                 }
                 handled = true;
