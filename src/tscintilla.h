@@ -45,6 +45,7 @@ struct TScintillaEditor : public ScintillaBase {
     void CreateCallTipWindow(PRectangle rc) override;
     void AddToPopUp(const char *label, int cmd=0, bool enabled=true) override;
 
+    CaseFolder *CaseFolderForEncoding() override;
     int KeyDefault(int key, int modifiers) override;
     int convertModifiers(ulong controlKeyState);
     void KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed);

@@ -171,6 +171,13 @@ void TScintillaEditor::AddToPopUp(const char *label, int cmd, bool enabled)
 {
 }
 
+CaseFolder *TScintillaEditor::CaseFolderForEncoding()
+{
+    if (IsUnicodeMode())
+        return new CaseFolderUnicode();
+    return ScintillaBase::CaseFolderForEncoding();
+}
+
 int TScintillaEditor::KeyDefault(int key, int modifiers) {
     if (!modifiers) {
         Editor::AddChar(key);
