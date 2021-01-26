@@ -23,7 +23,6 @@ struct DocumentTreeView : public TOutline {
         Node(Node *parent, EditorWindow *w);
         bool hasEditor() const;
         EditorWindow* getEditor();
-        void setParent(Node *parent);
         void remove();
         void dispose();
 
@@ -74,26 +73,6 @@ struct DocumentTreeWindow : public TWindow {
     void close() override;
 
 };
-
-inline void putLast(TNode **indirect, DocumentTreeView::Node *node)
-{
-    // Warning: if you want to change the parent of a node, use
-    // setParent() instead. Otherwise, node->parent will be a dangling pointer.
-    node->next = nullptr;
-    while (*indirect)
-        indirect = &(*indirect)->next;
-    *indirect = node;
-    node->ptr = indirect;
-}
-
-inline void putFirst(TNode **indirect, DocumentTreeView::Node *node)
-{
-    node->next = *indirect;
-    if (*indirect)
-        ((DocumentTreeView::Node *) *indirect)->ptr = &node->next;
-    *indirect = node;
-    node->ptr = indirect;
-}
 
 template <class Func>
 inline TNode* findInList(TNode **list, Func &&test)

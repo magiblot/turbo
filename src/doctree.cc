@@ -1,6 +1,7 @@
 #include "doctree.h"
 #include "editwindow.h"
 #include "app.h"
+#include <utility>
 #include <cassert>
 using Node = DocumentTreeView::Node;
 
@@ -30,26 +31,17 @@ EditorWindow* Node::getEditor() {
     return nullptr;
 }
 
-void Node::setParent(Node *parent_) {
-    if (parent != parent_) {
-        remove();
-        parent = parent_;
-        if (parent)
-            putLast(&parent->childList, this);
-    }
-}
-
-
 void Node::remove()
 {
     if (next)
         ((Node *) next)->ptr = ptr;
-    if (ptr) {
+    if (ptr)
         *ptr = next;
-        ptr = nullptr;
-    }
+    next = nullptr;
+    ptr = nullptr;
     if (parent && !parent->childList)
         parent->dispose();
+    parent = nullptr;
 }
 
 void Node::dispose()
@@ -57,6 +49,48 @@ void Node::dispose()
     assert(!childList);
     remove();
     delete this;
+}
+
+// Directories shall appear before files.
+enum NodeType { ntDir, ntEditor };
+using NodeKey = std::pair<NodeType, std::string_view>;
+
+static NodeKey getKey(Node *node)
+{
+    if (node->hasEditor())
+        return {ntEditor, node->text};
+    return {ntDir, node->text};
+}
+
+static void putNode(TNode **indirect, Node *node)
+// Pre: node->parent is properly set.
+{
+    auto key = getKey(node);
+    TNode *other;
+    while ((other = *indirect))
+    {
+        if (key < getKey((Node *) other))
+        {
+            node->next = other;
+            ((Node *) other)->ptr = &node->next;
+            break;
+        }
+        indirect = &other->next;
+    }
+    *indirect = node;
+    node->ptr = indirect;
+}
+
+static void setParent(Node *node, Node *parent)
+{
+    if (!parent)
+        node->dispose();
+    else if (parent != node->parent)
+    {
+        node->remove(); // May free the parent, hence the 'parent != node->parent' check.
+        node->parent = parent;
+        putNode(&parent->childList, node);
+    }
 }
 
 void DocumentTreeView::focused(int i)
@@ -85,7 +119,7 @@ void DocumentTreeView::addEditor(EditorWindow *w)
         parent = getDirNode(TPath::dirname(w->file));
         list = &parent->childList;
     }
-    putLast(list, new Node(parent, w));
+    putNode(list, new Node(parent, w));
     update();
     drawView();
 }
@@ -163,11 +197,10 @@ Node* DocumentTreeView::getDirNode(std::string_view dirPath)
         findInList(&root, [dir, dirPath] (Node *node) {
             auto *ppath = std::get_if<std::string>(&node->data);
             if (ppath && TPath::dirname(*ppath) == TStringView(dirPath))
-                node->setParent(dir);
+                setParent(node, dir);
             return false;
         });
-        // Directories are put at the beginning of their list.
-        putFirst(list, dir);
+        putNode(list, dir);
     }
     return dir;
 }

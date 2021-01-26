@@ -119,7 +119,7 @@ Below is my TO-DO list of features I would like to implement in Turbo:
 - [x] Opening binary files without freaking out.
 - [x] List of open documents in MRU order.
 - [x] Tree view of open documents.
-- [ ] Tree view sorted alphabetically.
+- [x] Tree view sorted alphabetically.
 - [x] Case-insensitive search.
 - [x] Find as you type.
 - [ ] Replace.
