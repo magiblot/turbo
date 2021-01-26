@@ -10,6 +10,8 @@
 #include "search.h"
 #include "styles.h"
 #include <fmt/core.h>
+#include <iostream>
+using std::ios;
 
 EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
                             bool openCanFail ) :

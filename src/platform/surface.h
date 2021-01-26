@@ -3,13 +3,12 @@
 
 #define Uses_TPoint
 #define Uses_TRect
+#define Uses_TScreenCell
 #include <tvision/tv.h>
 
 #include <ScintillaHeaders.h>
 
 class TDrawSurface;
-struct TScreenCell;
-struct TCellAttribs;
 
 namespace Scintilla {
 

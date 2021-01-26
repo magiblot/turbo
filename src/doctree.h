@@ -5,7 +5,6 @@
 #define Uses_TOutline
 #include <tvision/tv.h>
 
-#include <functional>
 #include <variant>
 #include <string_view>
 #include "util.h"
@@ -32,12 +31,6 @@ struct DocumentTreeView : public TOutline {
 
     typedef std::function<bool(TNode *, int)> callback_t;
 
-    // The limited TOutline interface does not allow providing custom
-    // parameters to search functions, so we must store them externally.
-    // This is not thread-safe.
-
-    static const callback_t *searchCallback;
-
     bool focusing {false};
 
     using TOutline::TOutline;
@@ -50,12 +43,25 @@ struct DocumentTreeView : public TOutline {
     void focusNext();
     void focusPrev();
     Node *getDirNode(std::string_view dirPath);
-    TNode *findFirst(const callback_t &cb);
-    static Boolean applyCallback(TOutlineViewer *, TNode *, int, int, long, ushort);
-    static callback_t hasEditor(const EditorWindow *node, int *pos=nullptr);
-    static callback_t hasPath(std::string_view path, int *pos=nullptr);
+    Node *findByEditor(const EditorWindow *w, int *pos=nullptr);
+    Node *findByPath(std::string_view path);
+    template <class Func>
+    Node *firstThat(Func &&func);
 
 };
+
+template <class Func>
+inline DocumentTreeView::Node *DocumentTreeView::firstThat(Func &&func)
+{
+    auto applyCallback =
+    [] ( TOutlineViewer *, TNode *node, int, int position,
+         long, ushort, void *arg )
+    {
+        return (*(Func *) arg)((Node *) node, position);
+    };
+
+    return (Node *) TOutlineViewer::firstThat(applyCallback, &func);
+}
 
 struct DocumentTreeWindow : public TWindow {
 

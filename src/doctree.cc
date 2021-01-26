@@ -3,9 +3,6 @@
 #include "app.h"
 #include <cassert>
 using Node = DocumentTreeView::Node;
-using callback_t = DocumentTreeView::callback_t;
-
-const callback_t *DocumentTreeView::searchCallback {nullptr};
 
 Node::Node(Node *parent, std::string_view p) :
     TNode(TPath::basename(p)),
@@ -99,23 +96,24 @@ void DocumentTreeView::focusEditor(EditorWindow *w)
     if (focusing)
         return;
     int i;
-    if (findFirst(hasEditor(w, &i)))
+    if (findByEditor(w, &i))
         focused(i);
     drawView();
 }
 
 void DocumentTreeView::removeEditor(EditorWindow *w)
 {
-    if (auto *f = (Node *) findFirst(hasEditor(w))) {
+    Node *f = findByEditor(w);
+    if (f) {
         f->dispose();
         update();
         drawView();
-    };
+    }
 }
 
 void DocumentTreeView::focusNext()
 {
-    findFirst([this] (auto *node, auto pos) {
+    firstThat([this] (auto *node, auto pos) {
         if (((Node *) node)->hasEditor() && pos > foc) {
             focused(pos);
             drawView();
@@ -128,7 +126,7 @@ void DocumentTreeView::focusNext()
 void DocumentTreeView::focusPrev()
 {
     int prevPos = -1;
-    findFirst([this, &prevPos] (auto *node, auto pos) {
+    firstThat([this, &prevPos] (auto *node, auto pos) {
         if (((Node *) node)->hasEditor()) {
             if (pos < foc)
                 prevPos = pos;
@@ -149,7 +147,7 @@ Node* DocumentTreeView::getDirNode(std::string_view dirPath)
     Node *parent {nullptr};
     {
         auto parentPath = TPath::dirname(dirPath);
-        if ((parent = (Node *) findFirst(hasPath(parentPath))))
+        if ((parent = findByPath(parentPath)))
             list = &parent->childList;
     }
     if (!list)
@@ -174,44 +172,30 @@ Node* DocumentTreeView::getDirNode(std::string_view dirPath)
     return dir;
 }
 
-TNode *DocumentTreeView::findFirst(const callback_t &cb)
+Node* DocumentTreeView::findByEditor(const EditorWindow *w, int *pos)
 {
-    auto *tmp = searchCallback;
-    searchCallback = &cb;
-    auto *ret = firstThat(applyCallback);
-    searchCallback = tmp;
-    return ret;
-}
-
-Boolean DocumentTreeView::applyCallback(TOutlineViewer *, TNode *node, int, int position, long, ushort)
-{
-    return Boolean((*searchCallback)(node, position));
-}
-
-callback_t DocumentTreeView::hasEditor(const EditorWindow *w, int *pos)
-{
-    return [w, pos] (auto *node, auto position) {
-        auto *w_ = ((Node *) node)->getEditor();
+    return firstThat(
+    [w, pos] (Node *node, int position)
+    {
+        auto *w_ = node->getEditor();
         if (w_ && w_ == w) {
             if (pos)
                 *pos = position;
             return true;
         }
         return false;
-    };
+    });
 }
 
-callback_t DocumentTreeView::hasPath(std::string_view path, int *pos)
+
+Node* DocumentTreeView::findByPath(std::string_view path)
 {
-    return [path, pos] (auto *node, auto position) {
-        auto *ppath = std::get_if<std::string>(&((Node *) node)->data);
-        if (ppath && *ppath == path) {
-            if (pos)
-                *pos = position;
-            return true;
-        }
-        return false;
-    };
+    return firstThat(
+    [path] (Node *node, int)
+    {
+        auto *ppath = std::get_if<std::string>(&node->data);
+        return ppath && *ppath == path;
+    });
 }
 
 DocumentTreeWindow::DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow **ptr) :
