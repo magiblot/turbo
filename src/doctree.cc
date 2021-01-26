@@ -97,13 +97,14 @@ void DocumentTreeView::focused(int i)
 {
     // Avoid reentrancy on focus:
     // focused() => w->focus() => app->setFocusedEditor() => focusEditor() => focused()
-    if (!focusing) {
+    if (!focusing)
+    {
         focusing = true;
         TOutline::focused(i);
-        if (auto *node = (Node *) getNode(i)) {
+        if (auto *node = (Node *) getNode(i))
             if (auto *w = node->getEditor())
                 w->focus();
-        }
+        update();
         focusing = false;
     }
 }
