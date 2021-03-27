@@ -7,7 +7,7 @@ env:
 
 jobs:
   build-linux-gcc:
-    name: Linux (GCC)
+    name: Linux (GCC 8)
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -15,7 +15,7 @@ jobs:
         submodules: 'recursive'
 
     - name: Install Dependencies
-      run: sudo apt -y install libncursesw5-dev
+      run: sudo apt -y install libncurses-dev
 
     - name: Configure CMake
       shell: bash
@@ -42,7 +42,7 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE -j$(nproc)
+      run: cmake --build . --config $BUILD_TYPE -- -p:CL_MPcount=$(nproc)
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
@@ -65,7 +65,7 @@ jobs:
 
     - name: Build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE -j$(nproc)
+      run: cmake --build . --config $BUILD_TYPE -- -p:CL_MPcount=$(nproc)
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
