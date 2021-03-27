@@ -80,27 +80,47 @@ void DocumentView::handleEvent(TEvent &ev)
     }
 }
 
+static bool isPastedText(std::string_view text)
+{
+    size_t i = 0, n = 0;
+    while (TText::next(text, i))
+    {
+        if (++n > 2)
+            return true;
+    }
+    return false;
+}
+
+static void insertOneByOne( Scintilla::TScintillaEditor &editor,
+                            std::string_view text )
+{
+    size_t i = 0, j = 0;
+    while (TText::next(text, j))
+    {
+        // Allow overwrite on Ins.
+        editor.insertCharacter(text.substr(i, j));
+        i = j;
+    }
+}
+
 void DocumentView::consumeInputText(TEvent &ev)
 {
     char buf[4096];
     bool undogroup = false;
-    size_t count = 0, size;
+    size_t length;
 
     editor.clearBeforeTentativeStart();
-    while (textEvent(ev, buf, size, count)) {
-        std::string_view text {buf, size};
-        if (!undogroup && count > 2) {
+    while (textEvent(ev, buf, length))
+    {
+        std::string_view text {buf, length};
+        if (!undogroup && isPastedText(text))
+        {
             undogroup = true;
             editor.WndProc(SCI_BEGINUNDOACTION, 0U, 0U);
         }
-        if (!undogroup) { // Individual typing.
-            size_t i = 0, j = 0;
-            while (TText::next(text, j)) {
-                // Allow overwrite on Ins.
-                editor.insertCharacter(text.substr(i, j));
-                i = j;
-            }
-        } else
+        if (!undogroup) // Individual typing.
+            insertOneByOne(editor, text);
+        else
             editor.pasteText(text);
     };
 
