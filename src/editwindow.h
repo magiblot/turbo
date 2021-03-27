@@ -16,10 +16,11 @@
 
 struct DocumentView;
 struct SearchBox;
-class TIndicator;
 class ScopedGuard;
 
 struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
+
+    static TFrame* initFrame(TRect bounds);
 
     EditorWindow( const TRect &bounds, std::string_view aFile,
                   bool openCanFail );
@@ -31,7 +32,6 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TSurfaceView *leftMargin;
     SearchBox *search;
     TScrollBar *hScrollBar, *vScrollBar;
-    TIndicator *indicator;
     TCommandSet enabledCmds, disabledCmds;
     bool drawing;
     bool resizeLock;
@@ -48,6 +48,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TDrawSurface editorView;
 
     TPoint editorSize() const;
+    TPoint cursorPos();
     void setUpEditor(std::string_view aFile, bool openCanFail);
     void redrawEditor();
     void updateMarginWidth();

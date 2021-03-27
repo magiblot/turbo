@@ -1,10 +1,10 @@
 #define Uses_TScrollBar
 #define Uses_TFrame
 #define Uses_MsgBox
-#define Uses_TIndicator
 #include <tvision/tv.h>
 
 #include "editwindow.h"
+#include "editframe.h"
 #include "docview.h"
 #include "app.h"
 #include "search.h"
@@ -12,6 +12,11 @@
 #include <fmt/core.h>
 #include <iostream>
 using std::ios;
+
+TFrame *EditorWindow::initFrame(TRect bounds)
+{
+    return new EditorFrame(bounds);
+}
 
 EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
                             bool openCanFail ) :
@@ -26,6 +31,8 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     inSavePoint(true),
     editorView(editorSize())
 {
+    ((EditorFrame *) frame)->editwin = this;
+
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
 
@@ -39,10 +46,6 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     vScrollBar = new TScrollBar(TRect( size.x - 1, 1, size.x, size.y - 1 ));
     vScrollBar->hide();
     insert(vScrollBar);
-
-    indicator = new TIndicator(TRect( 2, size.y - 1, 18, size.y ));
-    indicator->hide();
-    insert(indicator);
 
     leftMargin = new TSurfaceView(TRect( 1, 1, 1, size.y - 1 ), &editorView);
     leftMargin->options |= ofFramed;
@@ -88,6 +91,15 @@ TPoint EditorWindow::editorSize() const
     if (lineNumbers.isEnabled())
         r.b.x--;
     return r.b - r.a;
+}
+
+
+TPoint EditorWindow::cursorPos()
+{
+    auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
+    int line = std::min<size_t>(editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U), INT_MAX);
+    int col = std::min<size_t>(editor.WndProc(SCI_GETCOLUMN, pos, 0U), INT_MAX);
+    return {col, line};
 }
 
 void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
@@ -155,8 +167,7 @@ void EditorWindow::redrawEditor()
         docView->drawView();
         hScrollBar->drawView();
         vScrollBar->drawView();
-        updateIndicatorValue();
-        indicator->drawView();
+        frame->drawView();
         unlock();
         drawing = false;
     }
@@ -189,14 +200,6 @@ void EditorWindow::updateMarginWidth()
         }
         frame->drawView();
     }
-}
-
-void EditorWindow::updateIndicatorValue()
-{
-    auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
-    int line = std::min<size_t>(editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U), INT_MAX);
-    int col = std::min<size_t>(editor.WndProc(SCI_GETCOLUMN, pos, 0U), INT_MAX);
-    indicator->setValue({col, line}, False);
 }
 
 void EditorWindow::handleEvent(TEvent &ev) {
@@ -276,7 +279,6 @@ void EditorWindow::setState(ushort aState, Boolean enable)
             case sfActive:
                 hScrollBar->setState(sfVisible, enable);
                 vScrollBar->setState(sfVisible, enable);
-                indicator->setState(sfVisible, enable);
                 if (enable && TurboApp::app)
                     TurboApp::app->setFocusedEditor(this);
                 break;
