@@ -86,7 +86,7 @@ Some of the default keybindings are:
 * `Ctrl+A`: select all.
 * `Shift+Arrow`: extend selection.
 * `Ctrl+F`: find.
-* `Ctrl+Back`, `Ctrl+Del`: erase one word left/right.
+* `Ctrl+Back`/`Alt+Back`, `Ctrl+Del`: erase one word left/right.
 * `Ctrl+Left`, `Ctrl+Right`: move one word left/right.
 * `Ctrl+Shift+Up`, `Ctrl+Shift+Down`: move selected lines up/down.
 * `Ctrl+N`: create new document.
