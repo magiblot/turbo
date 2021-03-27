@@ -63,6 +63,8 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {".md",         langMarkdown},
     {".rs",         langRust},
     {".java",       langCPP},
+    {"Makefile",    langMakefile},
+    {"PKGBUILD",    langBash},
 };
 
 void LanguageState::detect(EditorWindow &win)
@@ -71,7 +73,13 @@ void LanguageState::detect(EditorWindow &win)
     Language lang = langNone;
     {
         auto ext = TPath::extname(file);
-        lang = ext2lang[ext];
+        if (!ext.empty())
+            lang = ext2lang[ext];
+        else
+        {
+            auto name = TPath::basename(file);
+            lang = ext2lang[name];
+        }
     }
 #ifdef HAVE_MAGIC
     if (lang == langNone) {
