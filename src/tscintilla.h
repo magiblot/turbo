@@ -12,7 +12,7 @@
 #include "clipboard.h"
 
 struct DocumentView;
-class TDrawSurface;
+struct EditorSurface;
 
 namespace Scintilla {
 
@@ -50,13 +50,13 @@ struct TScintillaEditor : public ScintillaBase {
     int convertModifiers(ulong controlKeyState);
     void KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed);
     bool MouseEvent(const TEvent &ev);
-    void draw(TDrawSurface &drawView);
-    void setStyleColor(int style, TCellAttribs attr);
-    void setSelectionColor(TCellAttribs attr);
-    void setWhitespaceColor(TCellAttribs attr);
+    void draw(EditorSurface &surface);
+    void setStyleColor(int style, TColorAttr attr);
+    void setSelectionColor(TColorAttr attr);
+    void setWhitespaceColor(TColorAttr attr);
     static void drawWrapMarker(Surface *, PRectangle, bool, ColourDesired);
 
-    void setWindow(TDrawSurface *wid);
+    void setWindow(EditorSurface *wid);
     void setParent(TScintillaWindow *parent_);
     void changeSize();
     void clearBeforeTentativeStart();
@@ -69,7 +69,7 @@ struct TScintillaEditor : public ScintillaBase {
 
 };
 
-inline void TScintillaEditor::setWindow(TDrawSurface *wid)
+inline void TScintillaEditor::setWindow(EditorSurface *wid)
 {
     wMain = wid;
 }

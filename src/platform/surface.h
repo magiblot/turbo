@@ -8,7 +8,7 @@
 
 #include <ScintillaHeaders.h>
 
-class TDrawSurface;
+struct EditorSurface;
 
 namespace Scintilla {
 
@@ -26,15 +26,10 @@ namespace Scintilla {
 
     struct TScintillaSurface : public Surface {
 
-        TDrawSurface *view {0};
+        EditorSurface *view {0};
         TPRect clip {0, 0, 0, 0};
 
         TPRect clipRect(TPRect r);
-
-        static TScreenCell makeCell(uchar ch, ColourDesired fore, ColourDesired back);
-        static TCellAttribs convertColor(ColourDesired c);
-        static TCellAttribs convertColorPair(ColourDesired fore, ColourDesired back);
-        static ColourDesired convertColor(TCellAttribs c);
 
         void Init(WindowID wid) override;
         void Init(SurfaceID sid, WindowID wid) override;
@@ -81,10 +76,6 @@ namespace Scintilla {
 
     };
 
-}
-
-namespace Scintilla {
-
     inline TPRect TScintillaSurface::clipRect(TPRect r) {
         // The 'clip' member is already intersected with the view's extent.
         // See SetClip().
@@ -92,33 +83,26 @@ namespace Scintilla {
         return r;
     }
 
-    inline TScreenCell TScintillaSurface::makeCell(uchar ch, ColourDesired fore, ColourDesired back)
+    inline TColorDesired convertColor(ColourDesired color)
     {
-        TScreenCell c {0};
-        c.Char = ch;
-        c.Attr = convertColorPair(fore, back);
+        TColorDesired c;
+        c.bitCast(color.AsInteger());
         return c;
     }
 
-    inline TCellAttribs TScintillaSurface::convertColor(ColourDesired c)
+    inline TColorAttr convertColorPair(ColourDesired fore, ColourDesired back)
     {
-        TCellAttribs attr {0};
-        attr = attr | (c.GetGreen() << 8) | c.GetRed();
-        return attr;
+        return {convertColor(fore), convertColor(back)};
     }
 
-    inline TCellAttribs TScintillaSurface::convertColorPair(ColourDesired fore, ColourDesired back)
+    inline ColourDesired convertColor(TColorDesired c)
     {
-        TCellAttribs attr {0};
-        attr.fgSet(fore.GetRed());
-        attr.bgSet(back.GetRed());
-        attr = attr | (fore.GetGreen() << 8);
-        return attr;
+        return ColourDesired(c.bitCast());
     }
 
-    inline ColourDesired TScintillaSurface::convertColor(TCellAttribs c)
+    inline size_t getStyle(const Font &font)
     {
-        return ColourDesired(c & 0xFF, (c & 0xFF00) >> 8, 0);
+        return (size_t) font.GetID();
     }
 
 }

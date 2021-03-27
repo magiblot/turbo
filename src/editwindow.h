@@ -9,6 +9,7 @@
 #include "tscintilla.h"
 #include "util.h"
 #include "editstates.h"
+#include "editsurface.h"
 #include "styles.h"
 
 #include <string_view>
@@ -40,12 +41,12 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     ::WrapMode wrap;
     Indent indent;
     DocumentProperties props;
-    LanguageState lang;
+    ThemingState theming;
 
     // Scintilla
 
     Scintilla::TScintillaEditor editor;
-    TDrawSurface editorView;
+    EditorSurface editorView;
 
     TPoint editorSize() const;
     TPoint cursorPos();

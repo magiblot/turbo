@@ -29,7 +29,7 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     MRUhead(this),
     fatalError(false),
     inSavePoint(true),
-    editorView(editorSize())
+    editorView(editorSize(), theming)
 {
     ((EditorFrame *) frame)->editwin = this;
 
@@ -109,7 +109,7 @@ void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
     // But should send notifications to this window.
     editor.setParent(this);
     // Set color defaults.
-    setUpStyles(*this);
+    theming.resetStyles(*this);
     // Open the current file, if set.
     tryLoadFile(aFile, openCanFail);
     // Apply the properties detected while loading the file.
@@ -160,8 +160,10 @@ void EditorWindow::redrawEditor()
         lock();
         updateMarginWidth();
         if (!resizeLock)
+        {
             editor.changeSize();
-        lang.updateBraces(editor);
+            theming.updateBraces(editor);
+        }
         editor.draw(editorView);
         leftMargin->drawView();
         docView->drawView();
@@ -363,7 +365,7 @@ bool EditorWindow::scrollBarChanged(TScrollBar *bar)
 void EditorWindow::scrollTo(TPoint delta)
 {
     {
-        auto &&lk = lockDrawing();
+        auto lk {lockDrawing()};
         hScrollBar->setValue(delta.x);
         vScrollBar->setValue(delta.y);
     }
@@ -441,7 +443,7 @@ void EditorWindow::setFile(std::string newFile)
     file = std::move(newFile);
     if (TurboApp::app)
         TurboApp::app->updateEditorTitle(this, oldFile);
-    lang.detect(*this);
+    theming.detectLanguage(*this);
 }
 
 // Note: the 'fatalError' variable set here is later checked in valid() for

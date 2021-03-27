@@ -1884,7 +1884,10 @@ void EditView::DrawForeground(Surface *surface, const EditModel &model, const Vi
 								textBack = vsDraw.whitespaceColours.back;
 						} else {
 							textFore = vsDraw.styles[STYLE_CONTROLCHAR].fore;
-							textBack = vsDraw.styles[STYLE_CONTROLCHAR].back;
+							// Scintilla originally draws control characters as blobs, but we use
+							// regular text. So we need to preserve the selection background.
+							if (!inSelection || !vsDraw.selColours.back.isSet)
+								textBack = vsDraw.styles[STYLE_CONTROLCHAR].back;
 						}
 					}
 					if (vsDraw.controlCharSymbol >= 32) {

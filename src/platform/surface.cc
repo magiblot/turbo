@@ -2,11 +2,11 @@
 
 using namespace Scintilla;
 
-#define Uses_TDrawSurface
 #define Uses_TText
 #include <tvision/tv.h>
 
 #include "surface.h"
+#include "../editsurface.h"
 
 Surface *Surface::Allocate(int technology)
 {
@@ -15,18 +15,18 @@ Surface *Surface::Allocate(int technology)
 
 void TScintillaSurface::Init(WindowID wid)
 {
-    view = (TDrawSurface *) wid;
+    view = (EditorSurface *) wid;
 }
 
 void TScintillaSurface::Init(SurfaceID sid, WindowID wid)
 {
     // We do not distinguish yet between Window and Surface.
-    view = (TDrawSurface *) wid;
+    view = (EditorSurface *) wid;
 }
 
 void TScintillaSurface::InitPixMap(int width, int height, Surface *surface_, WindowID wid)
 {
-    view = (TDrawSurface *) wid;
+    view = (EditorSurface *) wid;
 }
 
 void TScintillaSurface::Release()
@@ -71,18 +71,17 @@ void TScintillaSurface::RectangleDraw(PRectangle rc, ColourDesired fore, ColourD
 
 void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
 {
-    // Used to draw text selections. Do not overwrite the foreground color.
+    // Used to draw text selections and areas without text. The foreground color
+    // also needs to be set or else the cursor will have the wrong color when
+    // placed on this area.
     auto r = clipRect(rc);
-    auto color = view->getFillColor();
-    color.bgSet(convertColor(back));
+    auto attr = view->normalColor();
+    ::setBack(attr, convertColor(back));
+    TScreenCell cell;
+    ::setCell(cell, ' ', attr);
     for (int y = r.a.y; y < r.b.y; ++y)
-        for (int x = r.a.x; x < r.b.x; ++x) {
-            auto c = view->at(y, x);
-            c.Attr = color;
-            c.Char = '\0';
-            c.extraWidth = 0;
-            view->at(y, x) = c;
-        }
+        for (int x = r.a.x; x < r.b.x; ++x)
+            view->at(y, x) = cell;
 }
 
 void TScintillaSurface::FillRectangle(PRectangle rc, Surface &surfacePattern)
@@ -98,10 +97,14 @@ void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesi
         ColourDesired outline, int alphaOutline, int flags)
 {
     auto r = clipRect(rc);
-    auto attr = convertColorPair(outline, fill);
+    auto fg = convertColor(outline),
+         bg = convertColor(fill);
     for (int y = r.a.y; y < r.b.y; ++y)
-        for (int x = r.a.x; x < r.b.x; ++x)
-            view->at(y, x).Attr = attr;
+        for (int x = r.a.x; x < r.b.x; ++x) {
+            auto &attr = view->at(y, x).attr;
+            ::setFore(attr, fg);
+            ::setBack(attr, bg);
+        }
 }
 
 void TScintillaSurface::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options)
@@ -140,15 +143,16 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
                                          ColourDesired fore, ColourDesired back )
 {
     auto r = clipRect(rc);
-    auto color = convertColorPair(fore, back);
+    auto attr = convertColorPair(fore, back);
+    ::setStyle(attr, getStyle(font_));
     size_t textBegin = 0, overlap = 0;
     TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
         auto cells = TSpan<TScreenCell>(&view->at(y, 0), r.b.x);
         size_t x = r.a.x;
         while (overlap-- && (int) x < r.b.x)
-            ::setCell(cells[x++], ' ', color);
-        TText::fill(cells.subspan(x), text.substr(textBegin), color);
+            ::setCell(cells[x++], ' ', attr);
+        TText::fill(cells.subspan(x), text.substr(textBegin), attr);
     }
 }
 
@@ -156,22 +160,22 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
 {
     auto r = clipRect(rc);
     auto fg = convertColor(fore);
+    auto style = getStyle(font_);
     size_t textBegin = 0, overlap = 0;
     TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
     for (int y = r.a.y; y < r.b.y; ++y) {
         auto cells = TSpan<TScreenCell>(&view->at(y, 0), r.b.x);
         size_t x = r.a.x;
-        while (overlap-- && (int) x < r.b.x) {
-            auto c = cells[x];
-            c.Attr.fgSet(fg);
-            c.Attr.attrSet(fg);
-            ::setChar(c, ' ');
-            cells[x++] = c;
+        for (; overlap-- && (int) x < r.b.x; ++x) {
+            auto &c = cells[x];
+            ::setFore(c.attr, fg);
+            ::setStyle(c.attr, style);
+            c.ch = ' ';
         }
         TText::fill(cells.subspan(x), text.substr(textBegin),
-            [fg] (auto &cell) {
-                cell.Attr.fgSet(fg);
-                cell.Attr.attrSet(fg);
+            [fg, style] (auto &attr) {
+                ::setFore(attr, fg);
+                ::setStyle(attr, style);
             }
         );
     }

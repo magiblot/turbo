@@ -1,8 +1,16 @@
 #ifndef TURBO_STYLES_H
 #define TURBO_STYLES_H
 
+#include <tvision/tv.h>
+#include <utility>
+
 struct EditorWindow;
 struct LexerInfo;
+struct TColorAttr;
+namespace Scintilla
+{
+    struct TScintillaEditor;
+}
 
 enum Language : unsigned char {
     langNone,
@@ -35,44 +43,61 @@ enum Language : unsigned char {
     langMarkdown,
 };
 
-// To initialize styling in an EditorWindow:
-// 1. '::setUpStyles(win)' initializes the language-independent styles.
-// 2. 'LanguageState::detect(win)' detects the file type and initializes lexing
-//    and language-aware styles.
-
-void setUpStyles(EditorWindow &win);
-
-class BraceMatching {
-
-public:
-
-    void update(const LexerInfo&, Scintilla::TScintillaEditor &editor);
-
+enum Styles : unsigned char {
+    sNormal,
+    sSelection,
+    sWhitespace,
+    sCtrlChar,
+    sLineNums,
+    sKeyword1,
+    sKeyword2,
+    sMisc,
+    sPreprocessor,
+    sOperator,
+    sComment,
+    sStringLiteral,
+    sCharLiteral,
+    sNumberLiteral,
+    sEscapeSequence,
+    sError,
+    sBraceMatch,
+    sFramePassive,
+    sFrameActive,
+    sFrameIcon,
+    sStaticText,
+    sLabelNormal,
+    sLabelSelected,
+    sLabelShortcut,
+    sButtonNormal,
+    sButtonDefault,
+    sButtonSelected,
+    sButtonDisabled,
+    sButtonShortcut,
+    sButtonShadow,
+    StyleCount,
 };
 
-class LanguageState {
+typedef TSpan<const std::pair<uchar, Styles>> LexerStyles;
+typedef TSpan<const std::pair<uchar, const char *>> LexerKeywords;
+typedef TSpan<const std::pair<const char *, const char *>> LexerProperties;
 
-    const LexerInfo *lexInfo {nullptr};
-    BraceMatching matching;
+struct ThemingState
+{
+
+    const LexerInfo *lexInfo;
+    const TColorAttr *schema;
+
+    ThemingState();
+
+    void resetStyles(EditorWindow &win) const;
+    void detectLanguage(EditorWindow &win);
+    void updateBraces(Scintilla::TScintillaEditor &editor) const;
+    TColorAttr normalize(Styles) const;
+
+private:
 
     void loadLexer(Language lang, EditorWindow &win);
-
-public:
-
-    LanguageState() = default;
-
-    LanguageState(const LexerInfo *lexInfo) :
-        lexInfo(lexInfo)
-    {
-    }
-
-    void detect(EditorWindow &win);
-
-    void updateBraces(Scintilla::TScintillaEditor &editor)
-    {
-        if (lexInfo)
-            matching.update(*lexInfo, editor);
-    }
+    TColorAttr braceAttr(LexerStyles, uchar) const;
 
 };
 

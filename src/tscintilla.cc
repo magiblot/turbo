@@ -284,28 +284,34 @@ bool TScintillaEditor::MouseEvent(const TEvent &ev) {
     return false;
 }
 
-void TScintillaEditor::draw(TDrawSurface &d) {
+void TScintillaEditor::draw(EditorSurface &d)
+{
     TScintillaSurface s;
     s.view = &d;
     Editor::Paint(&s, PRectangle(0, 0, d.size.x, d.size.y));
 }
 
-void TScintillaEditor::setStyleColor(int style, TCellAttribs attr)
+void TScintillaEditor::setStyleColor(int style, TColorAttr attr)
 {
-    WndProc(SCI_STYLESETFORE, style, TScintillaSurface::convertColor(attr).AsInteger());
-    WndProc(SCI_STYLESETBACK, style, TScintillaSurface::convertColor(attr.bgGet()).AsInteger());
+    WndProc(SCI_STYLESETFORE, style, convertColor(::getFore(attr)).AsInteger());
+    WndProc(SCI_STYLESETBACK, style, convertColor(::getBack(attr)).AsInteger());
+    WndProc(SCI_STYLESETWEIGHT, style, ::getStyle(attr));
 }
 
-void TScintillaEditor::setSelectionColor(TCellAttribs attr)
+void TScintillaEditor::setSelectionColor(TColorAttr attr)
 {
-    WndProc(SCI_SETSELFORE, true, TScintillaSurface::convertColor(attr).AsInteger());
-    WndProc(SCI_SETSELBACK, true, TScintillaSurface::convertColor(attr.bgGet()).AsInteger());
+    auto fg = ::getFore(attr),
+         bg = ::getBack(attr);
+    WndProc(SCI_SETSELFORE, !fg.isDefault(), convertColor(fg).AsInteger());
+    WndProc(SCI_SETSELBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
-void TScintillaEditor::setWhitespaceColor(TCellAttribs attr)
+void TScintillaEditor::setWhitespaceColor(TColorAttr attr)
 {
-    WndProc(SCI_SETWHITESPACEFORE, true, TScintillaSurface::convertColor(attr).AsInteger());
-    WndProc(SCI_SETWHITESPACEBACK, true, TScintillaSurface::convertColor(attr.bgGet()).AsInteger());
+    auto fg = ::getFore(attr),
+         bg = ::getBack(attr);
+    WndProc(SCI_SETWHITESPACEFORE, !fg.isDefault(), convertColor(fg).AsInteger());
+    WndProc(SCI_SETWHITESPACEBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
 void TScintillaEditor::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour)

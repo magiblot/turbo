@@ -67,7 +67,7 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {"PKGBUILD",    langBash},
 };
 
-void LanguageState::detect(EditorWindow &win)
+void ThemingState::detectLanguage(EditorWindow &win)
 {
     auto &file = win.file;
     Language lang = langNone;
@@ -108,44 +108,62 @@ void LanguageState::detect(EditorWindow &win)
     loadLexer(lang, win);
 }
 
-enum Styles : uchar {
-    sNormal,
-    sSelection,
-    sWhitespace,
-    sCtrlChar,
-    sLineNums,
-    sKeyword1,
-    sKeyword2,
-    sMisc,
-    sPreprocessor,
-    sOperator,
-    sComment,
-    sStringLiteral,
-    sCharLiteral,
-    sNumberLiteral,
-    sEscapeSequence,
-    sError,
-    StyleCount
+static constexpr TColorAttr schemaDefault[StyleCount] = {
+    /* sNormal           */ {{}      , {}                       },
+    /* sSelection        */ {'\x1'   , '\x7'                    },
+    /* sWhitespace       */ {'\x5'   , {}                       },
+    /* sCtrlChar         */ {'\xD'   , {}                       },
+    /* sLineNums         */ {'\x6'   , {}                       },
+    /* sKeyword1         */ {'\xE'   , {}                       },
+    /* sKeyword2         */ {'\xA'   , {}                       },
+    /* sMisc             */ {'\x9'   , {}                       },
+    /* sPreprocessor     */ {'\x2'   , {}                       },
+    /* sOperator         */ {'\xD'   , {}                       },
+    /* sComment          */ {'\x6'   , {}                       },
+    /* sStringLiteral    */ {'\xC'   , {}                       },
+    /* sCharLiteral      */ {'\xC'   , {}                       },
+    /* sNumberLiteral    */ {'\x3'   , {}                       },
+    /* sEscapeSequence   */ {'\xB'   , {}                       },
+    /* sError            */ {'\x0'   , '\x3'                    },
+    /* sBraceMatch       */ {'\xE'   , {}      , slBold         },
+    /* sFramePassive     */ '\x07',
+    /* sFrameActive      */ '\x0F',
+    /* sFrameIcon        */ '\x0A',
+    /* sStaticText       */ '\x0F',
+    /* sLabelNormal      */ '\x08',
+    /* sLabelSelected    */ '\x0F',
+    /* sLabelShortcut    */ '\x06',
+    /* sButtonNormal     */ '\x20',
+    /* sButtonDefault    */ '\x2B',
+    /* sButtonSelected   */ '\x2F',
+    /* sButtonDisabled   */ '\x78',
+    /* sButtonShortcut   */ '\x2E',
+    /* sButtonShadow     */ '\x08',
 };
 
-static const TCellAttribs styleDefaults[StyleCount] = {
-    /* sNormal           */ {0x07, afFgDefault | afBgDefault    },
-    /* sSelection        */ {0x71                               },
-    /* sWhitespace       */ {0x05, afBgDefault                  },
-    /* sCtrlChar         */ {0x0D, afBgDefault                  },
-    /* sLineNums         */ {0x06, afBgDefault                  },
-    /* sKeyword1         */ {0x0E, afBgDefault                  },
-    /* sKeyword2         */ {0x0A, afBgDefault                  },
-    /* sMisc             */ {0x09, afBgDefault                  },
-    /* sPreprocessor     */ {0x02, afBgDefault                  },
-    /* sOperator         */ {0x0D, afBgDefault                  },
-    /* sComment          */ {0x06, afBgDefault                  },
-    /* sStringLiteral    */ {0x0C, afBgDefault                  },
-    /* sCharLiteral      */ {0x0C, afBgDefault                  },
-    /* sNumberLiteral    */ {0x03, afBgDefault                  },
-    /* sEscapeSequence   */ {0x0B, afBgDefault                  },
-    /* sError            */ {0x30,                              },
-};
+
+ThemingState::ThemingState() :
+    lexInfo(nullptr),
+    schema(schemaDefault)
+{
+    if (TurboApp::app)
+    {
+        TPalette &pal = TurboApp::app->getPalette();
+        pal[edFramePassive  ] = normalize(sFramePassive  );
+        pal[edFrameActive   ] = normalize(sFrameActive   );
+        pal[edFrameIcon     ] = normalize(sFrameIcon     );
+        pal[edStaticText    ] = normalize(sStaticText    );
+        pal[edLabelNormal   ] = normalize(sLabelNormal   );
+        pal[edLabelSelected ] = normalize(sLabelSelected );
+        pal[edLabelShortcut ] = normalize(sLabelShortcut );
+        pal[edButtonNormal  ] = normalize(sButtonNormal  );
+        pal[edButtonDefault ] = normalize(sButtonDefault );
+        pal[edButtonSelected] = normalize(sButtonSelected);
+        pal[edButtonDisabled] = normalize(sButtonDisabled);
+        pal[edButtonShortcut] = normalize(sButtonShortcut);
+        pal[edButtonShadow  ] = normalize(sButtonShadow  );
+    }
+}
 
 static constexpr pair<uchar, Styles> stylesC[] = {
     {SCE_C_DEFAULT,                 sNormal},
@@ -384,9 +402,9 @@ static constexpr pair<uchar, const char *> keywordsRuby[] = {
 
 struct LexerInfo {
     const int lexer {SCLEX_NULL};
-    const TSpan<const pair<uchar, Styles>> styles;
-    const TSpan<const pair<uchar, const char *>> keywords;
-    const TSpan<const pair<const char *, const char *>> properties;
+    const LexerStyles styles;
+    const LexerKeywords keywords;
+    const LexerProperties properties;
     const TSpan<const char> braces;
 };
 
@@ -401,37 +419,63 @@ static const std::unordered_map<Language, LexerInfo> lexerStyles = {
     {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
 };
 
-void LanguageState::loadLexer(Language lang, EditorWindow &win)
+void ThemingState::loadLexer(Language lang, EditorWindow &win)
 {
     auto &editor = win.editor;
     auto it = lexerStyles.find(lang);
     if (it != lexerStyles.end())
     {
-        auto &lexInfo = it->second;
-        *this = {&lexInfo};
-        editor.WndProc(SCI_SETLEXER, lexInfo.lexer, 0U);
-        for (const auto &style : lexInfo.styles)
-            editor.setStyleColor(style.first, styleDefaults[style.second]);
-        for (const auto &keyword : lexInfo.keywords)
+        lexInfo = &it->second;
+        editor.WndProc(SCI_SETLEXER, lexInfo->lexer, 0U);
+        for (const auto &style : lexInfo->styles)
+            editor.setStyleColor(style.first, normalize(style.second));
+        for (const auto &keyword : lexInfo->keywords)
             editor.WndProc(SCI_SETKEYWORDS, keyword.first, (sptr_t) keyword.second);
-        for (const auto &property : lexInfo.properties)
+        for (const auto &property : lexInfo->properties)
             editor.WndProc(SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
         editor.WndProc(SCI_COLOURISE, 0, -1);
         win.redrawEditor();
     }
 }
 
-void setUpStyles(EditorWindow &win)
+static TColorAttr merge(const TColorAttr &from, const TColorAttr &into)
+{
+    auto f_fg = ::getFore(from),
+         f_bg = ::getBack(from),
+         i_fg = ::getFore(into),
+         i_bg = ::getBack(into);
+    return {
+        f_fg.isDefault() ? i_fg : f_fg,
+        f_bg.isDefault() ? i_bg : f_bg,
+        ::getStyle(from),
+    };
+}
+
+TColorAttr ThemingState::normalize(Styles index) const
+{
+    auto normal = schema[sNormal];
+    if (index != sNormal)
+        return merge(schema[index], normal);
+    return normal;
+}
+
+void ThemingState::resetStyles(EditorWindow &win) const
 {
     auto &editor = win.editor;
-    win.editorView.setFillColor(styleDefaults[sNormal]);
-    win.editorView.clear();
-    editor.setStyleColor(STYLE_DEFAULT, styleDefaults[sNormal]);
+    editor.setStyleColor(STYLE_DEFAULT, schema[sNormal]);
     editor.WndProc(SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
-    editor.setSelectionColor(styleDefaults[sSelection]);
-    editor.setWhitespaceColor(styleDefaults[sWhitespace]);
-    editor.setStyleColor(STYLE_CONTROLCHAR, styleDefaults[sCtrlChar]);
-    editor.setStyleColor(STYLE_LINENUMBER, styleDefaults[sLineNums]);
+    editor.setSelectionColor(schema[sSelection]);
+    editor.setWhitespaceColor(schema[sWhitespace]);
+    editor.setStyleColor(STYLE_CONTROLCHAR, normalize(sCtrlChar));
+    editor.setStyleColor(STYLE_LINENUMBER, normalize(sLineNums));
+}
+
+TColorAttr ThemingState::braceAttr(LexerStyles styles, uchar sciStyle) const
+{
+    for (const auto &lexStyle : styles)
+        if (lexStyle.first == sciStyle)
+            return merge(schema[sBraceMatch], normalize(lexStyle.second));
+    return schema[sError];
 }
 
 static bool isBrace(TSpan<const char> braces, char ch)
@@ -439,39 +483,29 @@ static bool isBrace(TSpan<const char> braces, char ch)
     return memchr(braces.data(), ch, braces.size()) != nullptr;
 }
 
-static TCellAttribs getBraceAttr(TSpan<const pair<uchar, Styles>> styles, uchar sciStyle)
+void ThemingState::updateBraces(Scintilla::TScintillaEditor &editor) const
 {
-    for (const auto &pStyle : styles)
-        if (pStyle.first == sciStyle)
+    if (lexInfo)
+    {
+        auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
+        auto ch = editor.WndProc(SCI_GETCHARAT, pos, 0U);
+        bool braceFound = false;
+        if (isBrace(lexInfo->braces, ch))
         {
-            auto attr = styleDefaults[pStyle.second];
-            attr.fgSet(0xE);
-            attr.bold = 1;
-            return attr;
-        }
-    return styleDefaults[sError];
-}
-
-void BraceMatching::update(const LexerInfo &lexInfo, Scintilla::TScintillaEditor &editor)
-{
-    auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
-    auto ch = editor.WndProc(SCI_GETCHARAT, pos, 0U);
-    do {
-        if (isBrace(lexInfo.braces, ch))
-        {
-            // We must lex any newly inserted so that it has the right style.
+            // We must lex any newly inserted text so that it has the right style.
             editor.idleWork();
             // Scintilla already makes sure that both braces have the same style.
             auto matchPos = editor.WndProc(SCI_BRACEMATCH, pos, 0U);
             if (matchPos != -1)
             {
                 uchar sciStyle = editor.WndProc(SCI_GETSTYLEAT, pos, 0U);
-                auto braceAttr = getBraceAttr(lexInfo.styles, sciStyle);
-                editor.setStyleColor(STYLE_BRACELIGHT, braceAttr);
+                auto attr = braceAttr(lexInfo->styles, sciStyle);
+                editor.setStyleColor(STYLE_BRACELIGHT, attr);
                 editor.WndProc(SCI_BRACEHIGHLIGHT, pos, matchPos);
-                break;
+                braceFound = true;
             }
         }
-        editor.WndProc(SCI_BRACEHIGHLIGHT, -1, -1);
-    } while (0);
+        if (!braceFound)
+            editor.WndProc(SCI_BRACEHIGHLIGHT, -1, -1);
+    }
 }

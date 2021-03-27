@@ -113,4 +113,40 @@ inline void TurboApp::openFileDialog( std::string_view aWildCard, std::string_vi
     execDialog(dialog, nullptr, callback);
 }
 
+enum : uchar
+{
+    edFramePassive = 136,
+    edFrameActive,
+    edFrameIcon,
+    edScrollBarPageArea,
+    edScrollBarControls,
+    edStaticText,
+    edLabelNormal,
+    edLabelSelected,
+    edLabelShortcut,
+    edButtonNormal,
+    edButtonDefault,
+    edButtonSelected,
+    edButtonDisabled,
+    edButtonShortcut,
+    edButtonShadow,
+    edClusterNormal,
+    edClusterSelected,
+    edClusterShortcut,
+    edInputLineNormal,
+    edInputLineSelected,
+    edInputLineArrows,
+    edHistoryArrow,
+    edHistorySides,
+    edHistWinScrollBarPageArea,
+    edHistWinScrollBarControls,
+    edListViewerNormal,
+    edListViewerFocused,
+    edListViewerSelected,
+    edListViewerDivider,
+    edInfoPane,
+    edClusterDisabled,
+    edReserved,
+};
+
 #endif
