@@ -309,10 +309,10 @@ void TurboApp::setEditorTitle(EditorWindow *w)
     uint number;
     auto fileName = TPath::basename(w->file);
     if (!fileName.empty()) {
-        w->title.assign(fileName);
+        w->title = fileName;
         number = incFileCounter(w->file);
     } else {
-        w->title.assign("Untitled"s);
+        w->title = "Untitled"sv;
         number = ++fileCount[{}];
     }
     if (number > 1)
@@ -335,7 +335,7 @@ void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
         }
     }
     if (!w->file.empty())
-        mostRecentDir.assign(TPath::dirname(w->file));
+        mostRecentDir = TPath::dirname(w->file);
 }
 
 active_counter& TurboApp::getFileCounter(std::string_view file)
@@ -441,7 +441,7 @@ void TurboApp::setFocusedEditor(EditorWindow *w)
         docTree->tree->focusEditor(w);
     // We keep track of the most recent directory for file dialogs.
     if (!w->file.empty())
-        mostRecentDir.assign(TPath::dirname(w->file));
+        mostRecentDir = TPath::dirname(w->file);
 }
 
 static constexpr TColorAttr cpTurboAppColor[167] =
