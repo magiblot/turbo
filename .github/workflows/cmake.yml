@@ -8,14 +8,14 @@ env:
 jobs:
   build-linux-gcc:
     name: Linux (GCC 8)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
 
     - name: Install Dependencies
-      run: sudo apt -y install libncurses-dev
+      run: sudo apt -y install libncursesw5-dev g++-8
 
     - name: Configure CMake
       shell: bash
