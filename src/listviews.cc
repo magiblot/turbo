@@ -12,8 +12,8 @@ ListWindow::ListWindow(const TRect &bounds, const char *aTitle, List &aList) :
 
 ListWindow::ListWindow( const TRect &bounds, const char *aTitle, List &aList,
                         std::function<ListView *(TRect, TWindow *, List &)> &&cListViewer ) :
+    TWindowInit(&initFrame),
     TWindow(bounds, aTitle, wnNoNumber),
-    TWindowInit( &ListWindow::initFrame),
     list(aList)
 {
     flags = wfClose | wfMove;

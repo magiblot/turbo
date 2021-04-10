@@ -20,16 +20,16 @@ TFrame *EditorWindow::initFrame(TRect bounds)
 
 EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
                             bool openCanFail ) :
-    TWindow(bounds, nullptr, wnNoNumber),
     TWindowInit(&initFrame),
+    TWindow(bounds, nullptr, wnNoNumber),
     drawing(false),
     resizeLock(false),
     lastSize(size),
     lineNumbers(5),
+    editorView(editorSize(), theming),
     MRUhead(this),
     fatalError(false),
-    inSavePoint(true),
-    editorView(editorSize(), theming)
+    inSavePoint(true)
 {
     ((EditorFrame *) frame)->editwin = this;
 
