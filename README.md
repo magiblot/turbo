@@ -17,6 +17,7 @@ Then, make sure the following dependencies are installed:
 * CMake.
 * A compiler supporting C++17.
 * `libncursesw` (note the 'w') (Unix only).
+* `pkg-config`, `libxcb` (Unix only).
 
 Additionally, you may also want to install these optional dependencies:
 
@@ -37,7 +38,7 @@ The above will generate the `turbo` binary.
 
 ```sh
 sudo apt update
-sudo apt install cmake build-essential git libfmt-dev libmagic-dev libgpm-dev libncursesw5 libncursesw5-dev
+sudo apt install cmake build-essential git libfmt-dev libmagic-dev libgpm-dev libncurses-dev pkg-config libxcb1-dev
 git clone --recursive https://github.com/magiblot/turbo.git
 cd turbo
 cmake . -DCMAKE_BUILD_TYPE=Release
@@ -50,7 +51,7 @@ sudo cp turbo /usr/local/bin/ # Install.
 
 ```sh
 sudo apt update
-sudo apt-get install libssl-dev gcc-8 g++-8 git libfmt-dev libmagic-dev libgpm-dev libncursesw5 libncursesw5-dev ncurses-dev build-essential
+sudo apt-get install libssl-dev gcc-8 g++-8 git libfmt-dev libmagic-dev libgpm-dev libncursesw5-dev pkg-config libxcb1-dev build-essential
 
 #build CMake 3.18.1
 export CXX=g++-8
@@ -94,7 +95,7 @@ Some of the default keybindings are:
 * `Ctrl+S`: save document.
 * `Ctrl+W`: close focused document.
 * `F6`, `Shift+F6`: next/previous document (sorted by MRU).
-* `Alt+X`: exit the application (I prefer this over `Ctrl+Q` as it is too close to `Ctrl+A` and `Ctrl+W`).
+* `Alt+X`: exit the application (I prefer this over `Ctrl+Q`, which is too close to `Ctrl+A` and `Ctrl+W`).
 
 Additionally, the following key shortcuts are supported on the Linux console:
 
