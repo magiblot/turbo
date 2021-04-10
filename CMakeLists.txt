@@ -9,6 +9,8 @@ endif()
 
 project (turbo)
 
+option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
+
 # Target 'scintilla'
 
 # These two could be built in one single target, but we want to enable Unity Build
@@ -67,9 +69,7 @@ list(REMOVE_ITEM TURBO_SRC ${TURBO_MAIN})
 
 add_library(${PROJECT_NAME}-ui ${TURBO_SRC})
 
-add_subdirectory(deps/fmt)
-add_subdirectory(deps/libclipboard)
-add_subdirectory(deps/tvision)
+include(deps/CMakeLists.txt)
 
 target_include_directories(${PROJECT_NAME}-ui PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
