@@ -9,6 +9,7 @@ endif()
 
 project (turbo)
 
+option(TURBO_USE_SYSTEM_DEPS "Use system-wide dependencies instead of submodules (except Turbo Vision)" OFF)
 option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
 
 # Target 'scintilla'
