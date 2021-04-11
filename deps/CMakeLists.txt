@@ -42,6 +42,7 @@ endif()
 
 if (TURBO_USE_SYSTEM_TVISION)
     find_package(tvision CONFIG REQUIRED)
+    add_library(tvision ALIAS tvision::tvision)
     get_target_property(_TVISION tvision LOCATION)
     message(STATUS "Found 'tvision': ${_TVISION}")
 else()
