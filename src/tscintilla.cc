@@ -7,6 +7,7 @@ using std::chrono::milliseconds;
 using std::chrono::steady_clock;
 
 #include "tscintilla.h"
+#include "editsurface.h"
 
 using namespace Scintilla;
 

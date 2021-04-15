@@ -3,6 +3,7 @@
 #include "editwindow.h"
 #include "tscintilla.h"
 #include "styles.h"
+#include "app.h"
 #include <utility>
 using namespace Scintilla;
 using std::pair;

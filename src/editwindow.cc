@@ -1,6 +1,7 @@
 #define Uses_TScrollBar
 #define Uses_TFrame
 #define Uses_MsgBox
+#define __INC_EDITORS_H
 #include <tvision/tv.h>
 
 #include "editwindow.h"

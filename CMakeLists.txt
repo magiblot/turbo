@@ -11,6 +11,7 @@ project (turbo)
 
 option(TURBO_USE_SYSTEM_DEPS "Use system-wide dependencies instead of submodules (except Turbo Vision)" OFF)
 option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
+option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the UI component" ON)
 
 # Target 'scintilla'
 
@@ -115,7 +116,7 @@ target_link_libraries(sciplatform PRIVATE
 
 # Build optimization
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0" AND TURBO_OPTIMIZE_BUILD)
     set_target_properties(${PROJECT_NAME}-ui PROPERTIES UNITY_BUILD ON)
     target_precompile_headers(${PROJECT_NAME}-ui PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"

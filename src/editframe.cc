@@ -1,4 +1,8 @@
+#define Uses_TRect
+#include <tvision/tv.h>
+
 #include "editframe.h"
+#include "editwindow.h"
 
 EditorFrame::EditorFrame(const TRect &bounds) :
     TFrame(bounds),

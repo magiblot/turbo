@@ -22,7 +22,7 @@ jobs:
       env:
         CC: gcc-8
         CXX: g++-8
-      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTURBO_OPTIMIZE_BUILD=OFF
 
     - name: Build
       shell: bash

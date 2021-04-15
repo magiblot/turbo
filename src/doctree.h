@@ -28,8 +28,6 @@ struct DocumentTreeView : public TOutline {
 
     };
 
-    typedef std::function<bool(TNode *, int)> callback_t;
-
     bool focusing {false};
 
     using TOutline::TOutline;
