@@ -274,14 +274,12 @@ bool TurboApp::openEditor(std::string_view fileName, bool canFail)
 
 void TurboApp::closeAll()
 {
-    auto *head = MRUlist.next;
-    while (head != &MRUlist) {
-        auto *next = head->next;
+    while (!MRUlist.empty()) {
+        auto *head = MRUlist.next;
         message((EditorWindow *) head->self, evCommand, cmClose, 0);
         TScreen::flushScreen();
-        if (next->prev == head) // Not removed
+        if (MRUlist.next == head) // Not removed
             break;
-        head = next;
     }
 }
 
