@@ -10,7 +10,7 @@ As a text editor, Turbo aims at being intuitive and easy to use. Usability and p
 
 ## Building
 
-First of all, you should clone this repository along its submodules with `git clone --recursive`.
+First of all, you should clone this repository along its submodules with the `--recursive` option of `git clone`.
 
 Then, make sure the following dependencies are installed:
 
@@ -37,39 +37,26 @@ The above will generate the `turbo` binary.
 <summary><b>Detailed build instructions for Ubuntu 20.04</b></summary>
 
 ```sh
-sudo apt update
-sudo apt install cmake build-essential git libfmt-dev libmagic-dev libgpm-dev libncurses-dev pkg-config libxcb1-dev
+sudo apt update && sudo apt upgrade
+sudo apt install build-essential cmake gettext-base git libgpm-dev libmagic-dev libncursesw5-dev libxcb1-dev pkg-config
 git clone --recursive https://github.com/magiblot/turbo.git
 cd turbo
 cmake . -DCMAKE_BUILD_TYPE=Release
-cmake --build . # Build Turbo.
-sudo cp turbo /usr/local/bin/ # Install.
+cmake --build . -- -j$(nproc) # Build Turbo.
+sudo cp turbo /usr/local/bin/ # Install (optional).
 ```
 </details>
 <details>
 <summary><b>Detailed build instructions for Ubuntu 18.04</b></summary>
 
 ```sh
-sudo apt update
-sudo apt-get install libssl-dev gcc-8 g++-8 git libfmt-dev libmagic-dev libgpm-dev libncursesw5-dev pkg-config libxcb1-dev build-essential
-
-#build CMake 3.18.1
-export CXX=g++-8
-sudo apt remove --purge --auto-remove cmake
-mkdir ~/temp && cd ~/temp
-wget https://cmake.org/files/v3.18/cmake-3.18.1.tar.gz
-tar -xzvf cmake-3.18.1.tar.gz
-pushd cmake-3.18.1/
-./bootstrap
-make -j$(nproc)
-sudo make install
-popd
+sudo apt update && sudo apt upgrade
+sudo apt install build-essential cmake g++-8 gettext-base git libgpm-dev libmagic-dev libncursesw5-dev libxcb1-dev pkg-config
 git clone --recursive https://github.com/magiblot/turbo.git
 cd turbo
-cmake . -DCMAKE_BUILD_TYPE=Release
-cmake --build . # Build Turbo.
-sudo cp turbo /usr/local/bin/ # Install.
-turbo
+CXX=g++-8 cmake . -DCMAKE_BUILD_TYPE=Release
+cmake --build . -- -j$(nproc) # Build Turbo.
+sudo cp turbo /usr/local/bin/ # Install (optional).
 ```
 </details>
 
@@ -97,7 +84,7 @@ Some of the default keybindings are:
 * `F6`, `Shift+F6`: next/previous document (sorted by MRU).
 * `Alt+X`: exit the application (I prefer this over `Ctrl+Q`, which is too close to `Ctrl+A` and `Ctrl+W`).
 
-Additionally, the following key shortcuts are supported on the Linux console:
+Additionally, the following key shortcuts may be supported on the Linux console or Windows:
 
 * `Ctrl+Shift+Z`: redo.
 * `Alt+Tab`, `Alt+Shift+Tab`: next/previous document (sorted by MRU).
