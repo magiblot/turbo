@@ -13,10 +13,15 @@ class Clipboard {
     void syncSetText(std::string_view);
     const char* syncGetText();
 
+protected:
+
+    virtual void fallbackSetText(std::string_view);
+    virtual char* fallbackGetText();
+
 public:
 
     Clipboard();
-    ~Clipboard();
+    virtual ~Clipboard();
 
     template <class Func>
     void copy(Func &&fillSel)
