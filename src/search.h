@@ -8,11 +8,11 @@
 #include <tvision/tv.h>
 #include <string_view>
 
-struct EditorWindow;
+struct BaseEditorWindow;
 
 struct SearchBox : public TGroup {
 
-    SearchBox(const TRect &bounds, EditorWindow &win);
+    SearchBox(const TRect &bounds, BaseEditorWindow &win);
 
     TInputLine *findBox;
     bool visible;
@@ -22,18 +22,18 @@ struct SearchBox : public TGroup {
     void open();
     void close();
 
-    static void init(EditorWindow &win);
+    static void init(BaseEditorWindow &win);
 
 };
 
 struct Searcher : public TValidator {
 
-    EditorWindow &win;
+    BaseEditorWindow &win;
     bool onDemand {false}, typing {false};
     sptr_t result, resultEnd;
     enum {forward=0, backwards=1} direction;
 
-    Searcher(EditorWindow &win) :
+    Searcher(BaseEditorWindow &win) :
         win(win)
     {
     }

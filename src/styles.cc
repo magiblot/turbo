@@ -420,7 +420,7 @@ static const std::unordered_map<Language, LexerInfo> lexerStyles = {
     {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
 };
 
-void ThemingState::loadLexer(Language lang, EditorWindow &win)
+void ThemingState::loadLexer(Language lang, BaseEditorWindow &win)
 {
     auto &editor = win.editor;
     auto it = lexerStyles.find(lang);
@@ -460,7 +460,7 @@ TColorAttr ThemingState::normalize(Styles index) const
     return normal;
 }
 
-void ThemingState::resetStyles(EditorWindow &win) const
+void ThemingState::resetStyles(BaseEditorWindow &win) const
 {
     auto &editor = win.editor;
     editor.setStyleColor(STYLE_DEFAULT, schema[sNormal]);

@@ -4,6 +4,7 @@
 #include <tvision/tv.h>
 #include <utility>
 
+struct BaseEditorWindow;
 struct EditorWindow;
 struct LexerInfo;
 struct TColorAttr;
@@ -89,14 +90,14 @@ struct ThemingState
 
     ThemingState();
 
-    void resetStyles(EditorWindow &win) const;
+    void resetStyles(BaseEditorWindow &win) const;
     void detectLanguage(EditorWindow &win);
     void updateBraces(Scintilla::TScintillaEditor &editor) const;
     TColorAttr normalize(Styles) const;
 
 private:
 
-    void loadLexer(Language lang, EditorWindow &win);
+    void loadLexer(Language lang, BaseEditorWindow &win);
     TColorAttr braceAttr(LexerStyles, uchar) const;
 
 };

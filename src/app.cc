@@ -265,7 +265,8 @@ void TurboApp::fileOpen()
 bool TurboApp::openEditor(std::string_view fileName, bool canFail)
 {
     TRect r = newEditorBounds();
-    EditorWindow *w = new EditorWindow(r, fileName, canFail);
+    EditorWindow *w = new EditorWindow(r);
+    w->setUpEditor(fileName, canFail);
     w = (EditorWindow *) validView(w);
     if (w)
         addEditor(w);

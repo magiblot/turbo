@@ -19,13 +19,12 @@ struct DocumentView;
 struct SearchBox;
 class ScopedGuard;
 
-struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
+struct BaseEditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     static TFrame* initFrame(TRect bounds);
 
-    EditorWindow( const TRect &bounds, std::string_view aFile,
-                  bool openCanFail );
-    ~EditorWindow();
+    BaseEditorWindow( const TRect &bounds );
+    virtual ~BaseEditorWindow();
 
     // Subviews
 
@@ -50,7 +49,9 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     TPoint editorSize() const;
     TPoint cursorPos();
-    void setUpEditor(std::string_view aFile, bool openCanFail);
+    void setUpEditorPreLoad();
+    void loadText(std::string_view text);
+    void setUpEditorPostLoad();
     void redrawEditor();
     void updateMarginWidth();
     void updateIndicatorValue();
@@ -59,9 +60,6 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void changeBounds(const TRect &bounds) override;
     void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     void setState(ushort aState, Boolean enable) override;
-    Boolean valid(ushort command) override;
-    const char* getTitle(short) override;
-    TPalette& getPalette() const override;
 
     // Minimum window size
 
@@ -79,6 +77,18 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void setVerticalScrollPos(int delta, int limit) override;
 
     ScopedGuard lockDrawing();
+};
+
+struct EditorWindow : public BaseEditorWindow {
+    EditorWindow( const TRect &bounds );
+    virtual ~EditorWindow();
+    void setState(ushort aState, Boolean enable) override;
+    void setUpEditor(std::string_view aFile, bool openCanFail);
+    void handleEvent(TEvent &ev) override;
+    Boolean valid(ushort command) override;
+    const char* getTitle(short) override;
+    void notify(SCNotification scn) override;
+    TPalette& getPalette() const override;
 
     // TurboApp integration
 
@@ -90,7 +100,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // no file is open.
 
     std::string file;
-    void setFile(std::string); // Use this setter to update the string.
+    virtual void setFile(std::string); // Use this setter to update the string.
 
     // If there was an error while loading the file, the view is invalid.
     // It shall return False when invoking valid(cmValid).
@@ -148,7 +158,6 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
 
     static void showError(std::string_view s);
     static void showWarning(std::string_view s);
-
 };
 
 class ScopedGuard
@@ -171,7 +180,7 @@ public:
     }
 };
 
-inline ScopedGuard EditorWindow::lockDrawing()
+inline ScopedGuard BaseEditorWindow::lockDrawing()
 {
     return ScopedGuard(drawing, true);
 }

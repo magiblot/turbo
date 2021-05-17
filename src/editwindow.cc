@@ -14,31 +14,24 @@
 #include <iostream>
 using std::ios;
 
-TFrame *EditorWindow::initFrame(TRect bounds)
+TFrame *BaseEditorWindow::initFrame(TRect bounds)
 {
     return new EditorFrame(bounds);
 }
 
-EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
-                            bool openCanFail ) :
+BaseEditorWindow::BaseEditorWindow( const TRect &bounds ) :
     TWindowInit(&initFrame),
     TWindow(bounds, nullptr, wnNoNumber),
     drawing(false),
     resizeLock(false),
     lastSize(size),
     lineNumbers(5),
-    editorView(editorSize(), theming),
-    MRUhead(this),
-    fatalError(false),
-    inSavePoint(true)
+    editorView(editorSize(), theming)
 {
     ((EditorFrame *) frame)->editwin = this;
 
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
-
-    if (TurboApp::app)
-        editor.clipboard = &TurboApp::app->clipboard;
 
     hScrollBar = new TScrollBar(TRect( 18, size.y - 1, size.x - 2, size.y ));
     hScrollBar->hide();
@@ -75,8 +68,21 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     // Commands that always get disabled when unfocusing the editor.
     disabledCmds += enabledCmds;
     disabledCmds += cmRename;
+}
 
-    setUpEditor(aFile, openCanFail);
+EditorWindow::EditorWindow( const TRect &bounds )
+    : TWindowInit(&initFrame),
+      BaseEditorWindow(bounds),
+      MRUhead(this),
+      fatalError(false),
+      inSavePoint(true)
+{
+    if (TurboApp::app)
+        editor.clipboard = &TurboApp::app->clipboard;
+}
+
+BaseEditorWindow::~BaseEditorWindow()
+{
 }
 
 EditorWindow::~EditorWindow()
@@ -85,7 +91,7 @@ EditorWindow::~EditorWindow()
         TurboApp::app->removeEditor(this);
 }
 
-TPoint EditorWindow::editorSize() const
+TPoint BaseEditorWindow::editorSize() const
 {
     // Editor size: the window's inside.
     TRect r = getExtent().grow(-1, -1);
@@ -95,7 +101,7 @@ TPoint EditorWindow::editorSize() const
 }
 
 
-TPoint EditorWindow::cursorPos()
+TPoint BaseEditorWindow::cursorPos()
 {
     auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
     int line = std::min<size_t>(editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U), INT_MAX);
@@ -103,7 +109,7 @@ TPoint EditorWindow::cursorPos()
     return {col, line};
 }
 
-void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
+void BaseEditorWindow::setUpEditorPreLoad()
 {
     // Editor should take into account the size of docView.
     editor.setWindow(&editorView);
@@ -111,8 +117,10 @@ void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
     editor.setParent(this);
     // Set color defaults.
     theming.resetStyles(*this);
-    // Open the current file, if set.
-    tryLoadFile(aFile, openCanFail);
+}
+
+void BaseEditorWindow::setUpEditorPostLoad()
+{
     // Apply the properties detected while loading the file.
     props.apply(editor);
 
@@ -138,7 +146,6 @@ void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
     // Clear the undo buffer created when loading the file,
     // if that's the case.
     editor.WndProc(SCI_EMPTYUNDOBUFFER, 0U, 0U);
-    inSavePoint = true;
 
     // Indentation
     editor.WndProc(SCI_SETUSETABS, false, 0U);
@@ -154,7 +161,19 @@ void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
     redrawEditor();
 }
 
-void EditorWindow::redrawEditor()
+void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
+{
+    setUpEditorPreLoad();
+
+    // Open the current file, if set.
+    tryLoadFile(aFile, openCanFail);
+
+    setUpEditorPostLoad();
+
+    inSavePoint = true;
+}
+
+void BaseEditorWindow::redrawEditor()
 {
     if (!drawing) {
         drawing = true;
@@ -176,7 +195,7 @@ void EditorWindow::redrawEditor()
     }
 }
 
-void EditorWindow::updateMarginWidth()
+void BaseEditorWindow::updateMarginWidth()
 {
     const auto [width, delta] = lineNumbers.update(editor);
     if (delta) {
@@ -205,7 +224,7 @@ void EditorWindow::updateMarginWidth()
     }
 }
 
-void EditorWindow::handleEvent(TEvent &ev) {
+void BaseEditorWindow::handleEvent(TEvent &ev) {
     if (ev.what == evBroadcast && ev.message.command == cmScrollBarChanged) {
         if (scrollBarChanged((TScrollBar *) ev.message.infoPtr)) {
             redrawEditor();
@@ -215,15 +234,6 @@ void EditorWindow::handleEvent(TEvent &ev) {
     if (ev.what == evCommand) {
         bool handled = true;
         switch (ev.message.command) {
-            case cmSave:
-                trySaveFile();
-                break;
-            case cmSaveAs:
-                saveAsDialog();
-                break;
-            case cmRename:
-                renameDialog();
-                break;
             case cmToggleWrap:
                 if (wrap.toggle(editor))
                     redrawEditor();
@@ -250,7 +260,26 @@ void EditorWindow::handleEvent(TEvent &ev) {
     TWindow::handleEvent(ev);
 }
 
-void EditorWindow::changeBounds(const TRect &bounds)
+void EditorWindow::handleEvent(TEvent &ev)
+{
+    BaseEditorWindow::handleEvent(ev);
+    if (ev.what == evCommand) {
+        switch (ev.message.command) {
+            case cmSave:
+                trySaveFile();
+                break;
+            case cmSaveAs:
+                saveAsDialog();
+                break;
+            case cmRename:
+                renameDialog();
+                break;
+        }
+    }
+}
+
+
+void BaseEditorWindow::changeBounds(const TRect &bounds)
 {
     lock();
     lockSubViews();
@@ -264,7 +293,7 @@ void EditorWindow::changeBounds(const TRect &bounds)
     unlock();
 }
 
-void EditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
+void BaseEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
 {
     resizeLock = true;
     TWindow::dragView(event, mode, limits, minSize, maxSize);
@@ -272,7 +301,7 @@ void EditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint min
     redrawEditor();
 }
 
-void EditorWindow::setState(ushort aState, Boolean enable)
+void BaseEditorWindow::setState(ushort aState, Boolean enable)
 {
     TWindow::setState(aState, enable);
     if (state & sfExposed) {
@@ -282,8 +311,6 @@ void EditorWindow::setState(ushort aState, Boolean enable)
             case sfActive:
                 hScrollBar->setState(sfVisible, enable);
                 vScrollBar->setState(sfVisible, enable);
-                if (enable && TurboApp::app)
-                    TurboApp::app->setFocusedEditor(this);
                 break;
         }
     }
@@ -294,6 +321,19 @@ void EditorWindow::setState(ushort aState, Boolean enable)
             break;
     }
 
+}
+
+void EditorWindow::setState(ushort aState, Boolean enable)
+{
+    BaseEditorWindow::setState(aState, enable);
+    if (state & sfExposed) {
+        switch (aState) {
+            case sfActive:
+                if (enable && TurboApp::app)
+                    TurboApp::app->setFocusedEditor(this);
+                break;
+        }
+    }
 }
 
 Boolean EditorWindow::valid(ushort command)
@@ -319,13 +359,13 @@ const char* EditorWindow::getTitle(short)
     return nullptr;
 }
 
-void EditorWindow::sizeLimits( TPoint& min, TPoint& max )
+void BaseEditorWindow::sizeLimits( TPoint& min, TPoint& max )
 {
     TView::sizeLimits(min, max);
     min = minEditWinSize;
 }
 
-void EditorWindow::updateCommands()
+void BaseEditorWindow::updateCommands()
 {
     if (state & sfActive)
         enableCommands(enabledCmds);
@@ -333,25 +373,25 @@ void EditorWindow::updateCommands()
         disableCommands(disabledCmds);
 }
 
-void EditorWindow::lockSubViews()
+void BaseEditorWindow::lockSubViews()
 {
     for (auto *v : std::initializer_list<TView *> {docView, leftMargin, vScrollBar})
         v->setState(sfExposed, False);
 }
 
-void EditorWindow::unlockSubViews()
+void BaseEditorWindow::unlockSubViews()
 {
     for (auto *v : std::initializer_list<TView *> {docView, leftMargin, vScrollBar})
         v->setState(sfExposed, True);
 }
 
-void EditorWindow::scrollBarEvent(TEvent ev)
+void BaseEditorWindow::scrollBarEvent(TEvent ev)
 {
     hScrollBar->handleEvent(ev);
     vScrollBar->handleEvent(ev);
 }
 
-bool EditorWindow::scrollBarChanged(TScrollBar *bar)
+bool BaseEditorWindow::scrollBarChanged(TScrollBar *bar)
 {
     if (bar == vScrollBar) {
         editor.WndProc(SCI_SETFIRSTVISIBLELINE, bar->value, 0U);
@@ -363,7 +403,7 @@ bool EditorWindow::scrollBarChanged(TScrollBar *bar)
     return false;
 }
 
-void EditorWindow::scrollTo(TPoint delta)
+void BaseEditorWindow::scrollTo(TPoint delta)
 {
     {
         auto lk {lockDrawing()};
@@ -373,11 +413,9 @@ void EditorWindow::scrollTo(TPoint delta)
     redrawEditor();
 }
 
-void EditorWindow::notify(SCNotification scn)
+void BaseEditorWindow::notify(SCNotification scn)
 {
     switch (scn.nmhdr.code) {
-        case SCN_SAVEPOINTLEFT: setSavePointLeft(); break;
-        case SCN_SAVEPOINTREACHED: setSavePointReached(); break;
         case SCN_CHARADDED:
             if (scn.ch == '\n')
                 indent.autoIndentCurrentLine(editor);
@@ -385,13 +423,22 @@ void EditorWindow::notify(SCNotification scn)
     }
 }
 
-void EditorWindow::setHorizontalScrollPos(int delta, int limit)
+void EditorWindow::notify(SCNotification scn)
+{
+    BaseEditorWindow::notify(scn);
+    switch (scn.nmhdr.code) {
+        case SCN_SAVEPOINTLEFT: setSavePointLeft(); break;
+        case SCN_SAVEPOINTREACHED: setSavePointReached(); break;
+    }
+}
+
+void BaseEditorWindow::setHorizontalScrollPos(int delta, int limit)
 {
     int size = docView->size.x;
     hScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
 }
 
-void EditorWindow::setVerticalScrollPos(int delta, int limit)
+void BaseEditorWindow::setVerticalScrollPos(int delta, int limit)
 {
     int size = docView->size.y;
     vScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
@@ -449,7 +496,7 @@ void EditorWindow::setFile(std::string newFile)
 
 // Note: the 'fatalError' variable set here is later checked in valid() for
 // command cmValid. If there was an error, valid() will return False,
-// thus resulting in the EditorWindow being destroyed in checkValid().
+// thus resulting in the BaseEditorWindow being destroyed in checkValid().
 
 void EditorWindow::tryLoadFile(std::string_view aFile, bool canFail)
 {
@@ -460,6 +507,13 @@ void EditorWindow::tryLoadFile(std::string_view aFile, bool canFail)
         if (!fatalError)
             setFile(fileName);
     }
+}
+
+void BaseEditorWindow::loadText(std::string_view text)
+{
+    // Allocate 1000 extra bytes, as in SciTE.
+    editor.WndProc(SCI_ALLOCATE, text.size() + 1000, 0U);
+    editor.WndProc(SCI_APPENDTEXT, text.size(), reinterpret_cast<sptr_t>(text.data()));
 }
 
 bool EditorWindow::loadFile(const char *file, bool canFail)
