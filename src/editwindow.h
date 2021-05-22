@@ -100,7 +100,7 @@ struct EditorWindow : public BaseEditorWindow {
     // no file is open.
 
     std::string file;
-    virtual void setFile(std::string); // Use this setter to update the string.
+    void setFile(std::string); // Use this setter to update the string.
 
     // If there was an error while loading the file, the view is invalid.
     // It shall return False when invoking valid(cmValid).
