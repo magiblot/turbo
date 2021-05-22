@@ -232,6 +232,11 @@ void BaseEditorWindow::handleEvent(TEvent &ev) {
             clearEvent(ev);
         }
     }
+    TWindow::handleEvent(ev);
+}
+
+void EditorWindow::handleEvent(TEvent &ev)
+{
     if (ev.what == evCommand) {
         bool handled = true;
         switch (ev.message.command) {
@@ -258,11 +263,6 @@ void BaseEditorWindow::handleEvent(TEvent &ev) {
         if (handled)
             clearEvent(ev);
     }
-    TWindow::handleEvent(ev);
-}
-
-void EditorWindow::handleEvent(TEvent &ev)
-{
     BaseEditorWindow::handleEvent(ev);
     if (ev.what == evCommand) {
         switch (ev.message.command) {
