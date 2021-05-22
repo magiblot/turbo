@@ -52,6 +52,19 @@ BaseEditorWindow::BaseEditorWindow( const TRect &bounds ) :
     insert(docView);
 
     SearchBox::init(*this);
+}
+
+EditorWindow::EditorWindow( const TRect &bounds )
+    : TWindowInit(&initFrame),
+      BaseEditorWindow(bounds),
+      MRUhead(this),
+      fatalError(false),
+      inSavePoint(true)
+{
+    setState(sfShadow, False);
+
+    if (TurboApp::app)
+        editor.clipboard = &TurboApp::app->clipboard;
 
     // Commands that always get enabled when focusing the editor.
     enabledCmds += cmSave;
@@ -67,19 +80,6 @@ BaseEditorWindow::BaseEditorWindow( const TRect &bounds ) :
     // Commands that always get disabled when unfocusing the editor.
     disabledCmds += enabledCmds;
     disabledCmds += cmRename;
-}
-
-EditorWindow::EditorWindow( const TRect &bounds )
-    : TWindowInit(&initFrame),
-      BaseEditorWindow(bounds),
-      MRUhead(this),
-      fatalError(false),
-      inSavePoint(true)
-{
-    setState(sfShadow, False);
-
-    if (TurboApp::app)
-        editor.clipboard = &TurboApp::app->clipboard;
 }
 
 BaseEditorWindow::~BaseEditorWindow()
@@ -315,13 +315,6 @@ void BaseEditorWindow::setState(ushort aState, Boolean enable)
                 break;
         }
     }
-    switch (aState) {
-        // These actions do not depend on subview lifetime.
-        case sfActive:
-            updateCommands();
-            break;
-    }
-
 }
 
 void EditorWindow::setState(ushort aState, Boolean enable)
@@ -334,6 +327,13 @@ void EditorWindow::setState(ushort aState, Boolean enable)
                     TurboApp::app->setFocusedEditor(this);
                 break;
         }
+    }
+
+    switch (aState) {
+        // These actions do not depend on subview lifetime.
+        case sfActive:
+            updateCommands();
+            break;
     }
 }
 
@@ -366,7 +366,7 @@ void BaseEditorWindow::sizeLimits( TPoint& min, TPoint& max )
     min = minEditWinSize;
 }
 
-void BaseEditorWindow::updateCommands()
+void EditorWindow::updateCommands()
 {
     if (state & sfActive)
         enableCommands(enabledCmds);

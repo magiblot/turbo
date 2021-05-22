@@ -32,7 +32,6 @@ struct BaseEditorWindow : public TWindow, Scintilla::TScintillaWindow {
     TSurfaceView *leftMargin;
     SearchBox *search;
     TScrollBar *hScrollBar, *vScrollBar;
-    TCommandSet enabledCmds, disabledCmds;
     bool drawing;
     bool resizeLock;
     TPoint lastSize;
@@ -66,7 +65,6 @@ struct BaseEditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void sizeLimits(TPoint &min, TPoint &max) override;
     static constexpr TPoint minEditWinSize {24, 6};
 
-    void updateCommands();
     void lockSubViews();
     void unlockSubViews();
     void scrollBarEvent(TEvent ev);
@@ -89,6 +87,9 @@ struct EditorWindow : public BaseEditorWindow {
     const char* getTitle(short) override;
     void notify(SCNotification scn) override;
     TPalette& getPalette() const override;
+    void updateCommands();
+
+    TCommandSet enabledCmds, disabledCmds;
 
     // TurboApp integration
 
