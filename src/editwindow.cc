@@ -31,7 +31,6 @@ BaseEditorWindow::BaseEditorWindow( const TRect &bounds ) :
     ((EditorFrame *) frame)->editwin = this;
 
     options |= ofTileable | ofFirstClick;
-    setState(sfShadow, False);
 
     hScrollBar = new TScrollBar(TRect( 18, size.y - 1, size.x - 2, size.y ));
     hScrollBar->hide();
@@ -77,6 +76,8 @@ EditorWindow::EditorWindow( const TRect &bounds )
       fatalError(false),
       inSavePoint(true)
 {
+    setState(sfShadow, False);
+
     if (TurboApp::app)
         editor.clipboard = &TurboApp::app->clipboard;
 }
