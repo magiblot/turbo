@@ -8,6 +8,13 @@ As a text editor, Turbo aims at being intuitive and easy to use. Usability and p
 
 ![Turbo](https://user-images.githubusercontent.com/20713561/89552632-b7053380-d80c-11ea-92e0-a8c30f80cd49.png)
 
+## Downloads
+
+* Unix systems: you'll have to build Turbo yourself. You may follow the build instructions in the next section.
+* Windows: you can find up-to-date binaries in the [Actions](https://github.com/magiblot/turbo/actions?query=branch:master+event:push) page. Click on the first successful workflow (with a green tick) in the list. At the bottom of the workflow page, as long as you have logged in to GitHub, you'll find an *Artifacts* section with the following files:
+    * `turbo-x86.zip`: 32-bit executable built with MSVC. Windows Vista or later required.
+    * `turbo-x64.zip`: 64-bit executable built with MSVC. x64 Windows Vista or later required.
+
 ## Building
 
 First of all, you should clone this repository along its submodules with the `--recursive` option of `git clone`.
@@ -81,13 +88,13 @@ Some of the default keybindings are:
 * `Ctrl+O`: "open file" dialog.
 * `Ctrl+S`: save document.
 * `Ctrl+W`: close focused document.
-* `F6`, `Shift+F6`: next/previous document (sorted by MRU).
+* `F6`, `Shift+F6`: next/previous document (in MRU order).
 * `Alt+X`: exit the application (I prefer this over `Ctrl+Q`, which is too close to `Ctrl+A` and `Ctrl+W`).
 
 Additionally, the following key shortcuts may be supported on the Linux console or Windows:
 
 * `Ctrl+Shift+Z`: redo.
-* `Alt+Tab`, `Alt+Shift+Tab`: next/previous document (sorted by MRU).
+* `Alt+Tab`, `Alt+Shift+Tab`: next/previous document (in MRU order).
 * `Shift+Enter`: find previous (in the "find" text box).
 
 Support for these key combinations may vary among terminal applications, but any issue on this should be reported to [Turbo Vision](https://github.com/magiblot/tvision/issues) instead.
