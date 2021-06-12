@@ -91,10 +91,10 @@ Some of the default keybindings are:
 * `F6`, `Shift+F6`: next/previous document (in MRU order).
 * `Alt+X`: exit the application (I prefer this over `Ctrl+Q`, which is too close to `Ctrl+A` and `Ctrl+W`).
 
-Additionally, the following key shortcuts may be supported on the Linux console or Windows:
+In environments with extended keyboard support (e.g. the Linux console, Windows or Kitty ≥ 0.20.0), the following key shortcuts may also work:
 
 * `Ctrl+Shift+Z`: redo.
-* `Alt+Tab`, `Alt+Shift+Tab`: next/previous document (in MRU order).
+* `Ctrl+Tab`/`Alt+Tab`, `Ctrl+Shift+Tab`/`Alt+Shift+Tab`: next/previous document (in MRU order).
 * `Shift+Enter`: find previous (in the "find" text box).
 
 Support for these key combinations may vary among terminal applications, but any issue on this should be reported to [Turbo Vision](https://github.com/magiblot/tvision/issues) instead.
