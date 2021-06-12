@@ -4,12 +4,12 @@
 #define Uses_TFrame
 #include <tvision/tv.h>
 
-struct EditorWindow;
+struct BaseEditorWindow;
 
 struct EditorFrame : public TFrame
 {
 
-    EditorWindow *editwin;
+    BaseEditorWindow *editwin;
 
     EditorFrame(const TRect &bounds);
 

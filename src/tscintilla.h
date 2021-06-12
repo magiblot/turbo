@@ -35,6 +35,7 @@ struct TScintillaEditor : public ScintillaBase {
     void ClaimSelection() override;
     void NotifyChange() override;
     void NotifyParent(SCNotification scn) override;
+    void NotifyStyleToNeeded(Sci::Position endStyleNeeded) override;
     void CopyToClipboard(const SelectionText &selectedText) override;
     bool FineTickerRunning(TickReason reason) override;
     void FineTickerStart(TickReason reason, int millis, int tolerance) override;
@@ -127,6 +128,7 @@ public:
     virtual void notify(SCNotification scn) {};
     virtual void setVerticalScrollPos(int delta, int limit) = 0;
     virtual void setHorizontalScrollPos(int delta, int limit) = 0;
+    virtual void notifyStyleToNeeded(Sci::Position endStyleNeeded) {};
 
 };
 

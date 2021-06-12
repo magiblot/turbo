@@ -6,17 +6,17 @@
 
 #include "tscintilla.h"
 
-struct EditorWindow;
+struct BaseEditorWindow;
 
 struct DocumentView : public TSurfaceView {
 
     Scintilla::TScintillaEditor &editor;
-    EditorWindow &window;
+    BaseEditorWindow &window;
 
     DocumentView( const TRect &bounds,
                   const TDrawSurface *view,
                   Scintilla::TScintillaEditor &aEditor,
-                  EditorWindow &aWindow );
+                  BaseEditorWindow &aWindow );
 
     void handleEvent(TEvent &ev) override;
     void draw() override;

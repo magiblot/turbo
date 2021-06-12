@@ -135,6 +135,12 @@ void TScintillaEditor::NotifyParent(SCNotification scn)
         parent->notify(scn);
 }
 
+void TScintillaEditor::NotifyStyleToNeeded(Sci::Position endStyleNeeded)
+{
+    if (parent)
+        parent->notifyStyleToNeeded(endStyleNeeded);
+}
+
 void TScintillaEditor::CopyToClipboard(const SelectionText &selectedText)
 {
 }

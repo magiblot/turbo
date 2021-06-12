@@ -10,7 +10,7 @@
 #include "editwindow.h"
 #include "docview.h"
 
-void SearchBox::init(EditorWindow &win)
+void SearchBox::init(BaseEditorWindow &win)
 {
     TRect r = win.getExtent().grow(-1, -1);
     r.a.y = r.b.y - 2;
@@ -21,7 +21,7 @@ void SearchBox::init(EditorWindow &win)
     win.insert(box);
 }
 
-SearchBox::SearchBox(const TRect &bounds, EditorWindow &win) :
+SearchBox::SearchBox(const TRect &bounds, BaseEditorWindow &win) :
     TGroup(bounds),
     visible(false)
 {
@@ -135,7 +135,7 @@ static inline void grow(TView *v, TPoint delta)
 void SearchBox::open()
 {
     if (!visible && owner) {
-        EditorWindow &win = *(EditorWindow *) owner;
+        BaseEditorWindow &win = *(BaseEditorWindow *) owner;
         win.lock();
         win.editorView.grow({0, -(size.y + 1)});
         for (auto *v : std::initializer_list<TView*> {win.docView, win.leftMargin})
@@ -154,7 +154,7 @@ void SearchBox::open()
 void SearchBox::close()
 {
     if (visible && owner) {
-        EditorWindow &win = *(EditorWindow *) owner;
+        BaseEditorWindow &win = *(BaseEditorWindow *) owner;
         win.lock();
         win.editorView.grow({0, size.y + 1});
         for (auto *v : std::initializer_list<TView*> {win.docView, win.leftMargin})
