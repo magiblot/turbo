@@ -13,7 +13,7 @@
 template<class Func>
 // 'callback' should take an ushort and a TView * and return something
 // evaluable to a bool.
-ushort execDialog(TDialog *d, void *data, Func &&callback)
+inline ushort execDialog(TDialog *d, void *data, Func &&callback)
 {
     TView *p = TProgram::application->validView(d);
     if (p) {
@@ -21,7 +21,7 @@ ushort execDialog(TDialog *d, void *data, Func &&callback)
             p->setData(data);
         ushort result;
         do {
-            result = TProgram::deskTop->execView(p);
+            result = TProgram::application->execView(p);
         } while (result != cmCancel && !callback(p));
         TObject::destroy(p);
         return result;
