@@ -89,7 +89,7 @@ TPoint EditorWindow::editorSize() const
 {
     // Editor size: the window's inside.
     TRect r = getExtent().grow(-1, -1);
-    if (lineNumbers.isEnabled())
+    if (lineNumbers.enabled)
         r.b.x--;
     return r.b - r.a;
 }
@@ -178,31 +178,15 @@ void EditorWindow::redrawEditor()
 
 void EditorWindow::updateMarginWidth()
 {
-    const auto [width, delta] = lineNumbers.update(editor);
-    if (delta) {
-        editor.WndProc(SCI_SETMARGINWIDTHN, 0, width);
-        {
-            TRect r = leftMargin->getBounds();
-            r.b.x += delta;
-            leftMargin->changeBounds(r);
-        }
-        {
-            TRect dv = docView->getBounds();
-            dv.a.x += delta;
-            TPoint ev = editorView.size;
-            if (width == 0) { // Line numbers disabled.
-                dv.a.x -= 1;
-                ev.x += 1;
-            } else if (width == delta) { // Line numbers enabled.
-                dv.a.x += 1;
-                ev.x -= 1;
-            }
-            docView->changeBounds(dv);
-            docView->delta = {width, 0};
-            editorView.resize(ev);
-        }
-        frame->drawView();
-    }
+    int width = lineNumbers.update(editor);
+    TRect mr = leftMargin->getBounds();
+    mr.b.x = mr.a.x + width;
+    leftMargin->setBounds(mr);
+    TRect vr = docView->getBounds();
+    vr.a.x = mr.b.x + (width != 0);
+    docView->setBounds(vr);
+    docView->delta = {width, 0};
+    editorView.resize(editorSize());
 }
 
 void EditorWindow::handleEvent(TEvent &ev) {

@@ -10,13 +10,13 @@
 
 #include "tscintilla.h"
 
-class LineNumbersWidth {
-
-    const int minWidth;
-    int lastWidth {0};
-    bool enabled {false};
+class LineNumbersWidth
+{
 
 public:
+
+    int minWidth;
+    bool enabled {false};
 
     LineNumbersWidth(int min) :
         minWidth(min)
@@ -25,38 +25,14 @@ public:
 
     void toggle()
     {
-        setState(!enabled);
+        enabled ^= true;
     }
 
-    void setState(bool enable)
-    {
-        enabled = enable;
-    }
+    int update(Scintilla::TScintillaEditor &editor);
 
-    bool isEnabled() const
-    {
-        return enabled;
-    }
+private:
 
-    std::tuple<int, int> update(Scintilla::TScintillaEditor &editor)
-    {
-        int newWidth;
-        if (enabled) {
-            newWidth = 1;
-            size_t newLines = editor.WndProc(SCI_GETLINECOUNT, 0U, 0U);
-            while (newLines /= 10)
-                ++newWidth;
-            if (newWidth < minWidth)
-                newWidth = minWidth;
-        } else
-            newWidth = 0;
-        if (newWidth != lastWidth) {
-            int delta = newWidth - lastWidth;
-            lastWidth = newWidth;
-            return {newWidth, delta};
-        }
-        return {newWidth, 0};
-    }
+    int calcWidth(Scintilla::TScintillaEditor &editor);
 
 };
 

@@ -104,7 +104,7 @@ void ThemingState::detectLanguage(EditorWindow &win)
     }
 #endif
     if (lang != langNone)
-        win.lineNumbers.setState(true);
+        win.lineNumbers.enabled = true;
 
     loadLexer(lang, win);
 }

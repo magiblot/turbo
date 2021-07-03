@@ -1,5 +1,26 @@
 #include "editstates.h"
-#include "editwindow.h"
+
+/////////////////////////////////////////////////////////////////////////
+// LineNumbersWidth
+
+int LineNumbersWidth::update(Scintilla::TScintillaEditor &editor)
+{
+    int newWidth = enabled ? calcWidth(editor) : 0;
+    editor.WndProc(SCI_SETMARGINWIDTHN, 0, newWidth); // Does nothing if width hasn't changed.
+    return newWidth;
+}
+
+int LineNumbersWidth::calcWidth(Scintilla::TScintillaEditor &editor)
+{
+    int width = 1;
+    size_t lines = editor.WndProc(SCI_GETLINECOUNT, 0U, 0U);
+    while (lines /= 10)
+        ++width;
+    if (width < minWidth)
+        width = minWidth;
+    return width;
+}
+/////////////////////////////////////////////////////////////////////////
 
 void stripTrailingSpaces(Scintilla::TScintillaEditor &editor)
 {
