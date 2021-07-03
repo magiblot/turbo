@@ -8,7 +8,7 @@
 
 #include <ScintillaHeaders.h>
 
-struct EditorSurface;
+class TDrawSurface;
 
 namespace Scintilla {
 
@@ -26,7 +26,8 @@ namespace Scintilla {
 
     struct TScintillaSurface : public Surface {
 
-        EditorSurface *view {0};
+        TDrawSurface *surface {nullptr};
+        TColorAttr defaultTextAttr {};
         TPRect clip {0, 0, 0, 0};
 
         TPRect clipRect(TPRect r);

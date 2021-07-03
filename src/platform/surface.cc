@@ -3,10 +3,10 @@
 using namespace Scintilla;
 
 #define Uses_TText
+#define Uses_TDrawSurface
 #include <tvision/tv.h>
 
 #include "surface.h"
-#include "../editsurface.h"
 
 Surface *Surface::Allocate(int technology)
 {
@@ -15,28 +15,29 @@ Surface *Surface::Allocate(int technology)
 
 void TScintillaSurface::Init(WindowID wid)
 {
-    view = (EditorSurface *) wid;
 }
 
 void TScintillaSurface::Init(SurfaceID sid, WindowID wid)
 {
-    // We do not distinguish yet between Window and Surface.
-    view = (EditorSurface *) wid;
 }
 
 void TScintillaSurface::InitPixMap(int width, int height, Surface *surface_, WindowID wid)
 {
-    view = (EditorSurface *) wid;
+    // We get the actual TDrawSurface object we need to draw on from the 'surface_' parameter,
+    // which points to the TScintillaSurface object created in ScintillaEditor::paint().
+    surface = ((TScintillaSurface *) surface_)->surface;
+    defaultTextAttr = ((TScintillaSurface *) surface_)->defaultTextAttr;
 }
 
 void TScintillaSurface::Release()
 {
-    // TScintillaSurface is non-owning.
+    surface = nullptr;
+    defaultTextAttr = {};
 }
 
 bool TScintillaSurface::Initialised()
 {
-    return view;
+    return surface;
 }
 
 void TScintillaSurface::PenColour(ColourDesired fore)
@@ -71,17 +72,20 @@ void TScintillaSurface::RectangleDraw(PRectangle rc, ColourDesired fore, ColourD
 
 void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
 {
-    // Used to draw text selections and areas without text. The foreground color
-    // also needs to be set or else the cursor will have the wrong color when
-    // placed on this area.
-    auto r = clipRect(rc);
-    auto attr = view->normalColor();
-    ::setBack(attr, convertColor(back));
-    TScreenCell cell;
-    ::setCell(cell, ' ', attr);
-    for (int y = r.a.y; y < r.b.y; ++y)
-        for (int x = r.a.x; x < r.b.x; ++x)
-            view->at(y, x) = cell;
+    if (surface)
+    {
+        // Used to draw text selections and areas without text. The foreground color
+        // also needs to be set or else the cursor will have the wrong color when
+        // placed on this area.
+        auto r = clipRect(rc);
+        auto attr = defaultTextAttr;
+        ::setBack(attr, convertColor(back));
+        TScreenCell cell;
+        ::setCell(cell, ' ', attr);
+        for (int y = r.a.y; y < r.b.y; ++y)
+            for (int x = r.a.x; x < r.b.x; ++x)
+                surface->at(y, x) = cell;
+    }
 }
 
 void TScintillaSurface::FillRectangle(PRectangle rc, Surface &surfacePattern)
@@ -96,15 +100,19 @@ void TScintillaSurface::RoundedRectangle(PRectangle rc, ColourDesired fore, Colo
 void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
         ColourDesired outline, int alphaOutline, int flags)
 {
-    auto r = clipRect(rc);
-    auto fg = convertColor(outline),
-         bg = convertColor(fill);
-    for (int y = r.a.y; y < r.b.y; ++y)
-        for (int x = r.a.x; x < r.b.x; ++x) {
-            auto &attr = view->at(y, x).attr;
-            ::setFore(attr, fg);
-            ::setBack(attr, bg);
-        }
+    if (surface)
+    {
+        auto r = clipRect(rc);
+        auto fg = convertColor(outline),
+             bg = convertColor(fill);
+        for (int y = r.a.y; y < r.b.y; ++y)
+            for (int x = r.a.x; x < r.b.x; ++x)
+            {
+                auto &attr = surface->at(y, x).attr;
+                ::setFore(attr, fg);
+                ::setBack(attr, bg);
+            }
+    }
 }
 
 void TScintillaSurface::GradientRectangle(PRectangle rc, const std::vector<ColourStop> &stops, GradientOptions options)
@@ -132,52 +140,64 @@ void TScintillaSurface::DrawTextNoClip( PRectangle rc, Font &font_,
                                         XYPOSITION ybase, std::string_view text,
                                         ColourDesired fore, ColourDesired back )
 {
-    auto clip_ = clip;
-    clip = {0, 0, view->size.x, view->size.y};
-    DrawTextClipped(rc, font_, ybase, text, fore, back);
-    clip = clip_;
+    if (surface)
+    {
+        auto lastClip = clip;
+        clip = {0, 0, surface->size.x, surface->size.y};
+        DrawTextClipped(rc, font_, ybase, text, fore, back);
+        clip = lastClip;
+    }
 }
 
 void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
                                          XYPOSITION ybase, std::string_view text,
                                          ColourDesired fore, ColourDesired back )
 {
-    auto r = clipRect(rc);
-    auto attr = convertColorPair(fore, back);
-    ::setStyle(attr, getStyle(font_));
-    size_t textBegin = 0, overlap = 0;
-    TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
-    for (int y = r.a.y; y < r.b.y; ++y) {
-        auto cells = TSpan<TScreenCell>(&view->at(y, 0), r.b.x);
-        size_t x = r.a.x;
-        while (overlap-- && (int) x < r.b.x)
-            ::setCell(cells[x++], ' ', attr);
-        TText::fill(cells.subspan(x), text.substr(textBegin), attr);
+    if (surface)
+    {
+        auto r = clipRect(rc);
+        auto attr = convertColorPair(fore, back);
+        ::setStyle(attr, getStyle(font_));
+        size_t textBegin = 0, overlap = 0;
+        TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
+        for (int y = r.a.y; y < r.b.y; ++y)
+        {
+            auto cells = TSpan<TScreenCell>(&surface->at(y, 0), r.b.x);
+            size_t x = r.a.x;
+            while (overlap-- && (int) x < r.b.x)
+                ::setCell(cells[x++], ' ', attr);
+            TText::fill(cells.subspan(x), text.substr(textBegin), attr);
+        }
     }
 }
 
 void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore)
 {
-    auto r = clipRect(rc);
-    auto fg = convertColor(fore);
-    auto style = getStyle(font_);
-    size_t textBegin = 0, overlap = 0;
-    TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
-    for (int y = r.a.y; y < r.b.y; ++y) {
-        auto cells = TSpan<TScreenCell>(&view->at(y, 0), r.b.x);
-        size_t x = r.a.x;
-        for (; overlap-- && (int) x < r.b.x; ++x) {
-            auto &c = cells[x];
-            ::setFore(c.attr, fg);
-            ::setStyle(c.attr, style);
-            c.ch = ' ';
-        }
-        TText::fill(cells.subspan(x), text.substr(textBegin),
-            [fg, style] (auto &attr) {
-                ::setFore(attr, fg);
-                ::setStyle(attr, style);
+    if (surface)
+    {
+        auto r = clipRect(rc);
+        auto fg = convertColor(fore);
+        auto style = getStyle(font_);
+        size_t textBegin = 0, overlap = 0;
+        TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
+        for (int y = r.a.y; y < r.b.y; ++y)
+        {
+            auto cells = TSpan<TScreenCell>(&surface->at(y, 0), r.b.x);
+            size_t x = r.a.x;
+            for (; overlap-- && (int) x < r.b.x; ++x)
+            {
+                auto &c = cells[x];
+                ::setFore(c.attr, fg);
+                ::setStyle(c.attr, style);
+                c.ch = ' ';
             }
-        );
+            TText::fill(cells.subspan(x), text.substr(textBegin),
+                [fg, style] (auto &attr) {
+                    ::setFore(attr, fg);
+                    ::setStyle(attr, style);
+                }
+            );
+        }
     }
 }
 
@@ -228,7 +248,8 @@ XYPOSITION TScintillaSurface::AverageCharWidth(Font &font_)
 void TScintillaSurface::SetClip(PRectangle rc)
 {
     clip = rc;
-    clip.intersect({0, 0, view->size.x, view->size.y});
+    if (surface)
+        clip.intersect({0, 0, surface->size.x, surface->size.y});
 }
 
 void TScintillaSurface::FlushCachedState()

@@ -27,7 +27,7 @@ EditorWindow::EditorWindow( const TRect &bounds, std::string_view aFile,
     resizeLock(false),
     lastSize(size),
     lineNumbers(5),
-    editorView(editorSize(), theming),
+    editorView(),
     MRUhead(this),
     fatalError(false),
     inSavePoint(true)
@@ -85,7 +85,7 @@ EditorWindow::~EditorWindow()
         TurboApp::app->removeEditor(this);
 }
 
-TPoint EditorWindow::editorSize() const
+TPoint EditorWindow::getEditorSize()
 {
     // Editor size: the window's inside.
     TRect r = getExtent().grow(-1, -1);
@@ -105,9 +105,6 @@ TPoint EditorWindow::cursorPos()
 
 void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
 {
-    // Editor should take into account the size of docView.
-    editor.setWindow(&editorView);
-    // But should send notifications to this window.
     editor.setParent(this);
     // Set color defaults.
     theming.resetStyles(*this);
@@ -123,7 +120,7 @@ void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
     // Trick so that the scroll width gets computed.
     editor.WndProc(SCI_SETFIRSTVISIBLELINE, 1, 0U);
     editor.WndProc(SCI_SETFIRSTVISIBLELINE, 0, 0U);
-    editor.draw(editorView);
+    editor.paint(editorView);
 
     // Enable line wrapping (if appropiate) by default
     wrap.toggle(editor, false);
@@ -165,7 +162,7 @@ void EditorWindow::redrawEditor()
             editor.changeSize();
             theming.updateBraces(editor);
         }
-        editor.draw(editorView);
+        editor.paint(editorView);
         leftMargin->drawView();
         docView->drawView();
         hScrollBar->drawView();
@@ -186,7 +183,7 @@ void EditorWindow::updateMarginWidth()
     vr.a.x = mr.b.x + (width != 0);
     docView->setBounds(vr);
     docView->delta = {width, 0};
-    editorView.resize(editorSize());
+    editorView.resize(getEditorSize());
 }
 
 void EditorWindow::handleEvent(TEvent &ev) {
@@ -357,7 +354,7 @@ void EditorWindow::scrollTo(TPoint delta)
     redrawEditor();
 }
 
-void EditorWindow::notify(SCNotification scn)
+void EditorWindow::handleNotification(const SCNotification &scn)
 {
     switch (scn.nmhdr.code) {
         case SCN_SAVEPOINTLEFT: setSavePointLeft(); break;

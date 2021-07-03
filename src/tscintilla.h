@@ -11,19 +11,15 @@
 
 #include "clipboard.h"
 
-struct DocumentView;
-struct EditorSurface;
+class TDrawSurface;
 
 namespace Scintilla {
 
-class TScintillaWindow;
+struct TScintillaParent;
 
 struct TScintillaEditor : public ScintillaBase {
 
-    friend struct DocumentView;
-
-    TScintillaWindow *parent {0};
-    Clipboard *clipboard;
+    Clipboard *clipboard {0};
 
     TScintillaEditor();
 
@@ -50,14 +46,15 @@ struct TScintillaEditor : public ScintillaBase {
     int convertModifiers(ulong controlKeyState);
     void KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed);
     bool MouseEvent(const TEvent &ev);
-    void draw(EditorSurface &surface);
+    void paint(TDrawSurface &surface);
     void setStyleColor(int style, TColorAttr attr);
+    TColorAttr getStyleColor(int style);
     void setSelectionColor(TColorAttr attr);
     void setWhitespaceColor(TColorAttr attr);
     static void drawWrapMarker(Surface *, PRectangle, bool, ColourDesired);
 
-    void setWindow(EditorSurface *wid);
-    void setParent(TScintillaWindow *parent_);
+    void setParent(TScintillaParent *aParent);
+    TScintillaParent *getParent() const;
     void changeSize();
     void clearBeforeTentativeStart();
     void pasteText(std::string_view text);
@@ -69,14 +66,14 @@ struct TScintillaEditor : public ScintillaBase {
 
 };
 
-inline void TScintillaEditor::setWindow(EditorSurface *wid)
+inline void TScintillaEditor::setParent(TScintillaParent *aParent)
 {
-    wMain = wid;
+    wMain = aParent;
 }
 
-inline void TScintillaEditor::setParent(TScintillaWindow *parent_)
+inline TScintillaParent *TScintillaEditor::getParent() const
 {
-    parent = parent_;
+    return (TScintillaParent *) wMain.GetID();
 }
 
 inline void TScintillaEditor::changeSize()
@@ -120,13 +117,12 @@ inline TPoint TScintillaEditor::getDelta()
     return {xOffset, (int) topLine};
 }
 
-class TScintillaWindow {
+struct TScintillaParent {
 
-public:
-
-    virtual void notify(SCNotification scn) {};
-    virtual void setVerticalScrollPos(int delta, int limit) = 0;
-    virtual void setHorizontalScrollPos(int delta, int limit) = 0;
+    virtual TPoint getEditorSize();
+    virtual void handleNotification(const SCNotification &scn);
+    virtual void setVerticalScrollPos(int delta, int limit);
+    virtual void setHorizontalScrollPos(int delta, int limit);
 
 };
 

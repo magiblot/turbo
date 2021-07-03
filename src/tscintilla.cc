@@ -7,7 +7,6 @@ using std::chrono::milliseconds;
 using std::chrono::steady_clock;
 
 #include "tscintilla.h"
-#include "editsurface.h"
 
 using namespace Scintilla;
 
@@ -66,6 +65,7 @@ TScintillaEditor::TScintillaEditor()
 
 void TScintillaEditor::SetVerticalScrollPos()
 {
+    auto *parent = getParent();
     if (parent) {
         auto limit = LinesOnScreen() + MaxScrollPos();
         parent->setVerticalScrollPos(topLine, limit);
@@ -74,6 +74,7 @@ void TScintillaEditor::SetVerticalScrollPos()
 
 void TScintillaEditor::SetHorizontalScrollPos()
 {
+    auto *parent = getParent();
     if (parent)
         parent->setHorizontalScrollPos(xOffset, vs.wrapState == SC_WRAP_NONE ? scrollWidth : 1);
 }
@@ -131,8 +132,9 @@ void TScintillaEditor::NotifyChange()
 
 void TScintillaEditor::NotifyParent(SCNotification scn)
 {
+    auto *parent = getParent();
     if (parent)
-        parent->notify(scn);
+        parent->handleNotification(scn);
 }
 
 void TScintillaEditor::CopyToClipboard(const SelectionText &selectedText)
@@ -296,11 +298,13 @@ bool TScintillaEditor::MouseEvent(const TEvent &ev) {
     return false;
 }
 
-void TScintillaEditor::draw(EditorSurface &d)
+void TScintillaEditor::paint(TDrawSurface &d)
+// 'd.size' should equal 'parent->editorSize()'.
 {
     TScintillaSurface s;
-    s.view = &d;
-    Editor::Paint(&s, PRectangle(0, 0, d.size.x, d.size.y));
+    s.surface = &d;
+    s.defaultTextAttr = getStyleColor(STYLE_DEFAULT);
+    Editor::Paint(&s, PRectangle::FromInts(0, 0, d.size.x, d.size.y));
 }
 
 void TScintillaEditor::setStyleColor(int style, TColorAttr attr)
@@ -308,6 +312,18 @@ void TScintillaEditor::setStyleColor(int style, TColorAttr attr)
     WndProc(SCI_STYLESETFORE, style, convertColor(::getFore(attr)).AsInteger());
     WndProc(SCI_STYLESETBACK, style, convertColor(::getBack(attr)).AsInteger());
     WndProc(SCI_STYLESETWEIGHT, style, ::getStyle(attr));
+}
+
+TColorAttr TScintillaEditor::getStyleColor(int style)
+{
+    ColourDesired fore {(int) WndProc(SCI_STYLEGETFORE, style, 0U)};
+    ColourDesired back {(int) WndProc(SCI_STYLEGETBACK, style, 0U)};
+    auto styleWeight = WndProc(SCI_STYLEGETWEIGHT, style, 0U);
+    return {
+        convertColor(fore),
+        convertColor(back),
+        (ushort) styleWeight,
+    };
 }
 
 void TScintillaEditor::setSelectionColor(TColorAttr attr)
@@ -334,4 +350,21 @@ void TScintillaEditor::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool
         // Imitate the Tilde text editor.
         s->DrawTextTransparent(rcPlace, f, rcPlace.bottom, "↵", wrapColour);
     }
+}
+
+TPoint TScintillaParent::getEditorSize()
+{
+    return {0, 0};
+}
+
+void TScintillaParent::handleNotification(const SCNotification &scn)
+{
+}
+
+void TScintillaParent::setVerticalScrollPos(int, int)
+{
+}
+
+void TScintillaParent::setHorizontalScrollPos(int, int)
+{
 }

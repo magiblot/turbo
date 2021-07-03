@@ -3,13 +3,13 @@
 
 #define Uses_TWindow
 #define Uses_TPalette
+#define Uses_TDrawSurface
 #define Uses_TSurfaceView
 #include <tvision/tv.h>
 
 #include "tscintilla.h"
 #include "util.h"
 #include "editstates.h"
-#include "editsurface.h"
 #include "styles.h"
 
 #include <string_view>
@@ -19,7 +19,7 @@ struct DocumentView;
 struct SearchBox;
 class ScopedGuard;
 
-struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
+struct EditorWindow : public TWindow, Scintilla::TScintillaParent {
 
     static TFrame* initFrame(TRect bounds);
 
@@ -46,9 +46,9 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     // Scintilla
 
     Scintilla::TScintillaEditor editor;
-    EditorSurface editorView;
+    TDrawSurface editorView;
 
-    TPoint editorSize() const;
+    TPoint getEditorSize() override;
     TPoint cursorPos();
     void setUpEditor(std::string_view aFile, bool openCanFail);
     void redrawEditor();
@@ -74,7 +74,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaWindow {
     void scrollBarEvent(TEvent ev);
     bool scrollBarChanged(TScrollBar *bar);
     void scrollTo(TPoint delta);
-    void notify(SCNotification scn) override;
+    void handleNotification(const SCNotification &scn) override;
     void setHorizontalScrollPos(int delta, int limit) override;
     void setVerticalScrollPos(int delta, int limit) override;
 

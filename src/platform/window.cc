@@ -3,6 +3,8 @@
 #include <tvision/tv.h>
 
 #include <ScintillaHeaders.h>
+#include "../tscintilla.h"
+#include "surface.h"
 
 using namespace Scintilla;
 
@@ -16,29 +18,25 @@ void Window::Destroy()
 
 PRectangle Window::GetPosition() const
 {
-    auto *v = (TDrawSurface *) wid;
-    if (v)
-        return PRectangle::FromInts(0, 0, v->size.x, v->size.y);
     return PRectangle();
 }
 
 void Window::SetPosition(PRectangle rc)
 {
-    auto *v = (TDrawSurface *) wid;
-    if (v)
-        v->resize({int(rc.right - rc.left), int(rc.bottom - rc.top)});
 }
 
 void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
 {
-    SetPosition(rc);
 }
 
 PRectangle Window::GetClientPosition() const
 {
-    auto *v = (TDrawSurface *) wid;
-    if (v)
-        return PRectangle::FromInts(0, 0, v->size.x, v->size.y);
+    auto *p = (TScintillaParent *) wid;
+    if (p)
+    {
+        auto size = p->getEditorSize();
+        return PRectangle::FromInts(0, 0, size.x, size.y);
+    }
     return PRectangle();
 }
 
@@ -66,9 +64,10 @@ void Window::SetCursor(Cursor curs)
 
 PRectangle Window::GetMonitorRect(Point pt)
 {
-    if (TProgram::application) {
-        TPoint r = TProgram::application->size;
-        return PRectangle::FromInts(0, 0, r.x, r.y);
+    if (TProgram::application)
+    {
+        auto size = TProgram::application->size;
+        return PRectangle::FromInts(0, 0, size.x, size.y);
     }
     return PRectangle();
 }
