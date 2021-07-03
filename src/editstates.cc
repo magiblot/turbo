@@ -1,4 +1,9 @@
+#define Uses_MsgBox
+#include <tvision/tv.h>
+
+#include <fmt/core.h>
 #include "editstates.h"
+#include "tscintilla.h"
 
 /////////////////////////////////////////////////////////////////////////
 // LineNumbersWidth
@@ -20,6 +25,103 @@ int LineNumbersWidth::calcWidth(Scintilla::TScintillaEditor &editor)
         width = minWidth;
     return width;
 }
+
+/////////////////////////////////////////////////////////////////////////
+// WrapState
+
+bool WrapState::toggle(Scintilla::TScintillaEditor &editor, bool dialog)
+{
+    bool proceed = true;
+    if (enabled)
+    {
+        auto line = editor.getFirstVisibleDocumentLine();
+        editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
+        editor.WndProc(SCI_SETFIRSTVISIBLELINE, line, 0U);
+        enabled = false;
+    }
+    else
+    {
+        const int size = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
+        const bool documentBig = size >= (1 << 19);
+        if (documentBig && !confirmedOnce)
+        {
+            if (dialog)
+            {
+                const int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
+                auto &&text = fmt::format("This document is very big and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
+                ushort res = messageBox(text, mfInformation | mfYesButton | mfNoButton);
+                proceed = confirmedOnce = (res == cmYes);
+            }
+            else
+                proceed = false;
+        }
+        if (proceed)
+        {
+            editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, 0U);
+            enabled = true;
+        }
+    }
+    return proceed;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Indent
+
+void Indent::autoIndentCurrentLine(Scintilla::TScintillaEditor &editor)
+{
+    if (autoIndent)
+    {
+        auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
+        auto line = editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U);
+        if (line > 0)
+        {
+            auto indentation = editor.WndProc(SCI_GETLINEINDENTATION, line - 1, 0U);
+            if (indentation > 0)
+            {
+                editor.WndProc(SCI_SETLINEINDENTATION, line, indentation);
+                editor.WndProc(SCI_VCHOME, 0U, 0U);
+            }
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////
+// DocumentProperties
+
+void DocumentProperties::analyze(std::string_view text)
+{
+    if (text.size())
+    {
+        char cur = text[0];
+        char next = text.size() > 0 ? text[1] : '\0';
+        size_t i = 1;
+        while (notDetected)
+        {
+            if (notDetected & ndEOL)
+            {
+                if (cur == '\r' && next == '\n')
+                    eolType = SC_EOL_CRLF, notDetected &= ~ndEOL;
+                else if (cur == '\n')
+                    eolType = SC_EOL_LF, notDetected &= ~ndEOL;
+                else if (cur == '\r')
+                    eolType = SC_EOL_CR, notDetected &= ~ndEOL;
+            }
+            if (++i < text.size())
+            {
+                cur = next;
+                next = text[i];
+            }
+            else
+                break;
+        }
+    }
+}
+
+void DocumentProperties::apply(Scintilla::TScintillaEditor &editor) const
+{
+    editor.WndProc(SCI_SETEOLMODE, eolType, 0U);
+}
+
 /////////////////////////////////////////////////////////////////////////
 
 void stripTrailingSpaces(Scintilla::TScintillaEditor &editor)
