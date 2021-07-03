@@ -107,7 +107,7 @@ void EditorWindow::setUpEditor(std::string_view aFile, bool openCanFail)
 {
     editor.setParent(this);
     // Set color defaults.
-    theming.resetStyles(*this);
+    theming.resetStyles(editor);
     // Open the current file, if set.
     tryLoadFile(aFile, openCanFail);
     // Apply the properties detected while loading the file.
@@ -425,7 +425,8 @@ void EditorWindow::setFile(std::string newFile)
     file = std::move(newFile);
     if (TurboApp::app)
         TurboApp::app->updateEditorTitle(this, oldFile);
-    theming.detectLanguage(*this);
+    if (theming.detectLanguage(file, editor))
+        lineNumbers.enabled = true;
 }
 
 // Note: the 'fatalError' variable set here is later checked in valid() for

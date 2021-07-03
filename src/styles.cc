@@ -68,9 +68,8 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {"PKGBUILD",    langBash},
 };
 
-void ThemingState::detectLanguage(EditorWindow &win)
+bool ThemingState::detectLanguage(const std::string &file, Scintilla::TScintillaEditor &editor)
 {
-    auto &file = win.file;
     Language lang = langNone;
     {
         auto ext = TPath::extname(file);
@@ -103,10 +102,9 @@ void ThemingState::detectLanguage(EditorWindow &win)
         magic_close(magic_cookie);
     }
 #endif
-    if (lang != langNone)
-        win.lineNumbers.enabled = true;
 
-    loadLexer(lang, win);
+    loadLexer(lang, editor);
+    return lang != langNone;
 }
 
 static constexpr TColorAttr schemaDefault[StyleCount] = {
@@ -420,9 +418,8 @@ static const std::unordered_map<Language, LexerInfo> lexerStyles = {
     {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
 };
 
-void ThemingState::loadLexer(Language lang, EditorWindow &win)
+void ThemingState::loadLexer(Language lang, Scintilla::TScintillaEditor &editor)
 {
-    auto &editor = win.editor;
     auto it = lexerStyles.find(lang);
     if (it != lexerStyles.end())
     {
@@ -435,7 +432,6 @@ void ThemingState::loadLexer(Language lang, EditorWindow &win)
         for (const auto &property : lexInfo->properties)
             editor.WndProc(SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
         editor.WndProc(SCI_COLOURISE, 0, -1);
-        win.redrawEditor();
     }
 }
 
@@ -460,9 +456,8 @@ TColorAttr ThemingState::normalize(Styles index) const
     return normal;
 }
 
-void ThemingState::resetStyles(EditorWindow &win) const
+void ThemingState::resetStyles(Scintilla::TScintillaEditor &editor) const
 {
-    auto &editor = win.editor;
     editor.setStyleColor(STYLE_DEFAULT, schema[sNormal]);
     editor.WndProc(SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
     editor.setSelectionColor(schema[sSelection]);

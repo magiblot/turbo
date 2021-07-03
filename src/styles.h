@@ -3,6 +3,7 @@
 
 #include <tvision/tv.h>
 #include <utility>
+#include <string>
 
 struct EditorWindow;
 struct LexerInfo;
@@ -89,14 +90,14 @@ struct ThemingState
 
     ThemingState();
 
-    void resetStyles(EditorWindow &win) const;
-    void detectLanguage(EditorWindow &win);
+    void resetStyles(Scintilla::TScintillaEditor &editor) const;
+    bool detectLanguage(const std::string &file, Scintilla::TScintillaEditor &editor);
     void updateBraces(Scintilla::TScintillaEditor &editor) const;
     TColorAttr normalize(Styles) const;
 
 private:
 
-    void loadLexer(Language lang, EditorWindow &win);
+    void loadLexer(Language lang, Scintilla::TScintillaEditor &editor);
     TColorAttr braceAttr(LexerStyles, uchar) const;
 
 };
