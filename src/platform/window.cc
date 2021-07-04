@@ -46,12 +46,16 @@ void Window::Show(bool show)
 
 void Window::InvalidateAll()
 {
+    auto *p = (TScintillaParent *) wid;
+    if (p)
+        p->invalidate({{0, 0}, p->getEditorSize()});
 }
 
 void Window::InvalidateRectangle(PRectangle rc)
 {
-    // Partial redraw is not supported.
-    InvalidateAll();
+    auto *p = (TScintillaParent *) wid;
+    if (p)
+        p->invalidate(TPRect(rc));
 }
 
 void Window::SetFont(Font &font)

@@ -47,6 +47,7 @@ struct TScintillaEditor : public ScintillaBase {
     void KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed);
     bool MouseEvent(const TEvent &ev);
     void paint(TDrawSurface &surface);
+    void paint(TDrawSurface &surface, TRect area);
     void setStyleColor(int style, TColorAttr attr);
     TColorAttr getStyleColor(int style);
     void setSelectionColor(TColorAttr attr);
@@ -120,6 +121,7 @@ inline TPoint TScintillaEditor::getDelta()
 struct TScintillaParent {
 
     virtual TPoint getEditorSize();
+    virtual void invalidate(TRect area);
     virtual void handleNotification(const SCNotification &scn);
     virtual void setVerticalScrollPos(int delta, int limit);
     virtual void setHorizontalScrollPos(int delta, int limit);

@@ -312,6 +312,17 @@ void TScintillaEditor::paint(TDrawSurface &d)
     Editor::Paint(&s, PRectangle::FromInts(0, 0, d.size.x, d.size.y));
 }
 
+void TScintillaEditor::paint(TDrawSurface &d, TRect area)
+{
+    TScintillaSurface s;
+    s.surface = &d;
+    s.defaultTextAttr = getStyleColor(STYLE_DEFAULT);
+    Editor::Paint(
+        &s,
+        PRectangle::FromInts(area.a.x, area.a.y, area.b.x, area.b.y)
+    );
+}
+
 void TScintillaEditor::setStyleColor(int style, TColorAttr attr)
 {
     WndProc(SCI_STYLESETFORE, style, convertColor(::getFore(attr)).AsInteger());
@@ -360,6 +371,10 @@ void TScintillaEditor::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool
 TPoint TScintillaParent::getEditorSize()
 {
     return {0, 0};
+}
+
+void TScintillaParent::invalidate(TRect)
+{
 }
 
 void TScintillaParent::handleNotification(const SCNotification &scn)
