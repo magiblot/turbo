@@ -130,3 +130,7 @@ add_executable(${PROJECT_NAME} ${TURBO_MAIN})
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ${PROJECT_NAME}-ui
 )
+
+# Examples
+
+add_subdirectory(examples)

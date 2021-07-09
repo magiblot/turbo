@@ -3,6 +3,8 @@
 # Manually include root-level directories
 !deps/
 !deps/**/
+!examples/
+!examples/**/
 !include/
 !include/**/
 !scintilla/
