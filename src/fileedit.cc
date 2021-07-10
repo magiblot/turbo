@@ -6,7 +6,10 @@
 #include <fmt/core.h>
 #include <memory>
 #include <fstream>
+#include <tvision/compat/io.h>
+#include <stdlib.h>
 #include <errno.h>
+#include "util.h"
 
 namespace turbo {
 
@@ -23,7 +26,14 @@ static std::string loadFile(Editor &editor, const char *path)
         size_t bytesLeft = f.tellg();
         f.seekg(0);
         // Allocate 1000 extra bytes, like SciTE does.
-        editor.WndProc(SCI_ALLOCATE, bytesLeft + 1000, 0U);
+        try
+        {
+            editor.WndProc(SCI_ALLOCATE, bytesLeft + 1000, 0U);
+        }
+        catch (const std::bad_alloc &)
+        {
+            return fmt::format("Unable to open file '{}': file too big ({} bytes).", path, bytesLeft);
+        }
         DocumentProperties props;
         if (bytesLeft > 0)
         {
@@ -46,18 +56,58 @@ static std::string loadFile(Editor &editor, const char *path)
     return {};
 }
 
-Editor *loadFile(const char *path, ushort options)
+Editor *openFile(const char *path, ushort options)
 {
     using namespace constants;
     auto editor = std::make_unique<Editor>();
     auto &&errorMsg = loadFile(*editor, path);
     if (!errorMsg.empty())
     {
-        if (options & lfShowError)
+        if (options & ofShowError)
             messageBox(errorMsg, mfError | mfOKButton);
         return nullptr;
     }
     return editor.release();
+}
+
+struct CwdGuard
+{
+    char *lastCwd;
+    CwdGuard(const char *newCwd)
+    {
+        if (newCwd)
+        {
+            lastCwd = getcwd(nullptr, 0);
+            int r = chdir(newCwd); (void) r;
+        }
+        else
+            lastCwd = nullptr;
+    }
+    ~CwdGuard()
+    {
+        if (lastCwd)
+        {
+            int r = chdir(lastCwd); (void) r;
+            ::free(lastCwd);
+        }
+    }
+};
+
+OpenFileWithDialogResult openFileWithDialog(const char *dir)
+{
+    using namespace constants;
+    // TFileDialog relies on the current working directory.
+    CwdGuard cwd(dir);
+    // MAXPATH as assumed by TFileDialog.
+    char path[MAXPATH];
+    Editor *editor = nullptr;
+    openFileDialog("*.*", "Open file", "~N~ame", fdOpenButton, 0,
+        [&] (TView *dialog) {
+            dialog->getData(path);
+            return (editor = openFile(path, ofShowError));
+        }
+    );
+    return {editor, path};
 }
 
 } // namespace turbo

@@ -4,6 +4,7 @@
 #define Uses_TDialog
 #define Uses_TProgram
 #define Uses_TDeskTop
+#define Uses_TFileDialog
 #include <tvision/tv.h>
 #include "tpath.h"
 
@@ -28,6 +29,28 @@ inline ushort execDialog(TDialog *d, void *data, Func &&callback)
     }
     return cmCancel;
 }
+
+template<typename Func>
+inline void openFileDialog( TStringView aWildCard, TStringView aTitle,
+                            TStringView inputName, ushort aOptions,
+                            uchar histId, Func &&callback )
+{
+    auto *dialog = new TFileDialog( aWildCard, aTitle,
+                                    inputName, aOptions,
+                                    histId );
+    execDialog(dialog, nullptr, std::move(callback));
+}
+
+// inline ushort execDialog(TView *d)
+// {
+//     TView *p = TProgram::application->validView(d);
+//     if (p) {
+//         ushort result = TProgram::application->execView(p);
+//         TObject::destroy(p);
+//         return result;
+//     }
+//     return cmCancel;
+// }
 
 template<typename T>
 struct list_head
@@ -210,17 +233,17 @@ namespace detail {
 template <class T, size_t N, class Func>
 struct forEach_
 {
-    static void invoke(T* const * args, const Func &func)
+    static void invoke(T* const * args, Func &&func)
     {
         if (args[0]) func(*args[0]);
-        forEach_<T, N - 1, Func>::invoke(&args[1], func);
+        forEach_<T, N - 1, Func>::invoke(&args[1], std::move(func));
     }
 };
 
 template<class T, class Func>
 struct forEach_<T, 0, Func>
 {
-    static void invoke(T* const *, const Func &)
+    static void invoke(T* const *, Func &&)
     {
     }
 };
@@ -228,9 +251,9 @@ struct forEach_<T, 0, Func>
 } // namespace detail
 
 template <class T, size_t N, class Func>
-inline void forEach(T* const (&args)[N], const Func &func)
+inline void forEach(T* const (&args)[N], Func &&func)
 {
-    detail::forEach_<T, N, Func>::invoke(&args[0], func);
+    detail::forEach_<T, N, Func>::invoke(&args[0], std::move(func));
 }
 
 #endif

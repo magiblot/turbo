@@ -7,9 +7,9 @@
 
 namespace turbo {
 
-EditorState::EditorState() :
-    EditorState(*new Editor)
+Editor &createEditor()
 {
+    return *new Editor;
 }
 
 EditorState::EditorState(Editor &aEditor) :

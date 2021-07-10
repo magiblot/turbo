@@ -26,6 +26,8 @@ using Editor = Scintilla::TScintillaEditor;
 class EditorView;
 class LeftMarginView;
 
+Editor &createEditor();
+
 struct EditorState : Scintilla::TScintillaParent
 {
 
@@ -53,7 +55,6 @@ struct EditorState : Scintilla::TScintillaParent
     LineNumbersWidth lineNumbers {minLineNumbersWidth};
     WrapState wrapping;
 
-    EditorState();
     EditorState(Editor &aEditor);
     virtual ~EditorState();
 
@@ -118,12 +119,20 @@ public:
 
 namespace constants {
 enum : ushort {
-    // Load File options
-    lfShowError = 0x0001, // Show a dialog on error.
+    // Open File options
+    ofShowError = 0x0001, // Show a dialog on error.
 };
 } // namespace turbo::constants
 
-Editor *loadFile(const char *path, ushort options);
+Editor *openFile(const char *filePath, ushort options);
+
+struct OpenFileWithDialogResult
+{
+    Editor *editor;
+    std::string filePath;
+};
+
+OpenFileWithDialogResult openFileWithDialog(const char *dir = nullptr);
 
 struct FileEditorState : EditorState
 {

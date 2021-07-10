@@ -5,21 +5,21 @@
 #define Uses_TFrame
 #define Uses_TScrollBar
 #define Uses_TListViewer
-#define Uses_TFileDialog
 #include <tvision/tv.h>
 #include <turbo/turbo.h>
+#include <tpath.h>
 
 #include <memory>
 #include <utility>
 #include <forward_list>
 #include <vector>
-#include <util.h>
 
 enum : ushort
 {
     cmToggleLineNumbers = 1000,
     cmToggleLineWrapping,
     cmEditorSelected,
+    cmNewFile,
     cmOpenFile,
 };
 
@@ -52,6 +52,8 @@ struct DemoEditorWindow : public TDialog
     void handleEvent(TEvent &ev) override;
     void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     const char *getTitle(short) override;
+
+    void addEditor(turbo::Editor &, TStringView filePath);
 
 };
 
@@ -133,6 +135,13 @@ DemoEditorWindow::DemoEditorWindow(const TRect &bounds) :
         insert(but);
     }
     {
+        TStringView text = "New File";
+        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
+        auto *but = new TButton(butBounds, text, cmNewFile, bfNormal);
+        but->growMode = gfGrowLoY | gfGrowHiY;
+        insert(but);
+    }
+    {
         TStringView text = "Open File";
         butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
         auto *but = new TButton(butBounds, text, cmOpenFile, bfNormal);
@@ -183,17 +192,6 @@ void DemoEditorWindow::shutDown()
     TDialog::shutDown();
 }
 
-template<typename Func>
-inline void openFileDialog( TStringView aWildCard, TStringView aTitle,
-                            TStringView inputName, ushort aOptions,
-                            uchar histId, Func &&callback )
-{
-    auto *dialog = new TFileDialog( aWildCard, aTitle,
-                                    inputName, aOptions,
-                                    histId );
-    execDialog(dialog, nullptr, std::move(callback));
-}
-
 void DemoEditorWindow::handleEvent(TEvent &ev)
 {
     using namespace turbo::constants;
@@ -225,25 +223,16 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 clearEvent(ev);
                 break;
             }
-            case cmOpenFile:
-                openFileDialog( "*.*", "Open file", "~N~ame", fdOpenButton, 0,
-                    [this] (TView *dialog) {
-                        // MAXPATH as assumed by TFileDialog.
-                        char path[MAXPATH];
-                        dialog->getData(path);
-                        auto *editor = turbo::loadFile(path, lfShowError);
-                        if (editor)
-                        {
-                            states.emplace_front(*editor, path);
-                            listView->setRange(listView->range + 1);
-                            listView->focusItemNum(0); // Triggers EditorState::associate.
-                            listView->drawView();
-                            return true;
-                        }
-                        return false;
-                    }
-                );
+            case cmNewFile:
+                addEditor(turbo::createEditor(), "");
                 break;
+            case cmOpenFile:
+            {
+                auto &&r = turbo::openFileWithDialog();
+                if (r.editor)
+                    addEditor(*r.editor, r.filePath);
+                break;
+            }
         }
     }
     TDialog::handleEvent(ev);
@@ -271,6 +260,7 @@ const char *DemoEditorWindow::getTitle(short)
     {
         auto &state = *(turbo::FileEditorState *) edView->state;
         auto name = TPath::basename(state.filePath);
+        if (name.empty()) name = "Untitled";
         bool dirty = !state.inSavePoint();
         size_t length = name.size() + dirty;
         title.resize(0);
@@ -281,6 +271,14 @@ const char *DemoEditorWindow::getTitle(short)
         return title.data();
     }
     return nullptr;
+}
+
+void DemoEditorWindow::addEditor(turbo::Editor &editor, TStringView filePath)
+{
+    states.emplace_front(editor, filePath);
+    listView->setRange(listView->range + 1);
+    listView->focusItemNum(0); // Triggers EditorState::associate.
+    listView->drawView();
 }
 
 void DemoEditorState::drawViews()
@@ -309,7 +307,10 @@ void DemoEditorListView::getText(char *dest, short item, short maxLen)
     for (auto &state : list)
         if (i++ == item)
         {
-            strnzcpy(dest, state.filePath, maxLen);
+            if (!state.filePath.empty())
+                strnzcpy(dest, state.filePath, maxLen);
+            else
+                strnzcpy(dest, "Untitled", maxLen);
             return;
         }
     snprintf(dest, maxLen, "<ERROR: out-of-bounds index %hd>", item);
