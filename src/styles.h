@@ -91,7 +91,7 @@ struct ThemingState
     ThemingState();
 
     void resetStyles(Scintilla::TScintillaEditor &editor) const;
-    bool detectLanguage(const std::string &file, Scintilla::TScintillaEditor &editor);
+    bool detectLanguage(const char *filePath, Scintilla::TScintillaEditor &editor);
     void updateBraces(Scintilla::TScintillaEditor &editor) const;
     TColorAttr normalize(Styles) const;
 

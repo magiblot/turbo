@@ -68,16 +68,16 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {"PKGBUILD",    langBash},
 };
 
-bool ThemingState::detectLanguage(const std::string &file, Scintilla::TScintillaEditor &editor)
+bool ThemingState::detectLanguage(const char *filePath, Scintilla::TScintillaEditor &editor)
 {
     Language lang = langNone;
     {
-        auto ext = TPath::extname(file);
+        auto ext = TPath::extname(filePath);
         if (!ext.empty())
             lang = ext2lang[ext];
         else
         {
-            auto name = TPath::basename(file);
+            auto name = TPath::basename(filePath);
             lang = ext2lang[name];
         }
     }
@@ -87,14 +87,14 @@ bool ThemingState::detectLanguage(const std::string &file, Scintilla::TScintilla
         if (magic_cookie) {
             if (magic_load(magic_cookie, nullptr) == 0)
             {
-                const char *mimeType = magic_file(magic_cookie, file.c_str());
+                const char *mimeType = magic_file(magic_cookie, filePath);
                 if (mimeType)
                     lang = mime2lang[mimeType];
             }
             if ( magic_setflags(magic_cookie, MAGIC_MIME_ENCODING) == 0 &&
                  magic_load(magic_cookie, nullptr) == 0 )
             {
-                const char *mimeEncoding = magic_file(magic_cookie, file.c_str());
+                const char *mimeEncoding = magic_file(magic_cookie, filePath);
                 if (mimeEncoding)
                     ;
             }

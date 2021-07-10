@@ -65,7 +65,7 @@ struct EditorState : Scintilla::TScintillaParent
     void scrollTo(TPoint delta);
     void redraw();
     void partialRedraw();
-    bool redraw(TRect area);
+    bool redraw(const TRect &area);
     void updateMarginWidth();
     bool handleScrollBarChanged(TScrollBar *);
 
@@ -135,6 +135,8 @@ inline FileEditorState::FileEditorState(Editor &aEditor, std::string aFilePath) 
     EditorState(aEditor),
     filePath(std::move(aFilePath))
 {
+    if (theming.detectLanguage(filePath.c_str(), editor))
+        lineNumbers.enabled = true;
 }
 
 } // namespace turbo

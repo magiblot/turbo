@@ -152,7 +152,7 @@ void EditorState::invalidate(TRect area)
         invalidatedArea.Union(area);
 }
 
-bool EditorState::redraw(TRect area)
+bool EditorState::redraw(const TRect &area)
 {
     if ( !drawLock && 0 <= area.a.x && area.a.x < area.b.x
                    && 0 <= area.a.y && area.a.y < area.b.y )
@@ -165,16 +165,19 @@ bool EditorState::redraw(TRect area)
         if (!resizeLock)
         {
             editor.changeSize();
-            theming.updateBraces(editor);
+            theming.updateBraces(editor); // May mutate 'invalidatedArea', which may be 'area'.
         }
         auto size = getEditorSize();
+        TRect paintArea;
         if (surface.size != size)
         {
             surface.resize(size);
             // We need to redraw the whole editor because it has been resized.
-            area = {{0, 0}, size};
+            paintArea = {{0, 0}, size};
         }
-        editor.paint(surface, area);
+        else
+            paintArea = area;
+        editor.paint(surface, paintArea);
         forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
             p.surface = &surface;
         });

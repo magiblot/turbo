@@ -419,7 +419,7 @@ void EditorWindow::setFile(std::string newFile)
     file = std::move(newFile);
     if (TurboApp::app)
         TurboApp::app->updateEditorTitle(this, oldFile);
-    if (theming.detectLanguage(file, editor))
+    if (theming.detectLanguage(file.c_str(), editor))
         lineNumbers.enabled = true;
 }
 
