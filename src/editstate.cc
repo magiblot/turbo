@@ -176,14 +176,14 @@ bool EditorState::redraw(TRect area)
         }
         editor.paint(surface, area);
         forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
-            p.sface = &surface;
+            p.surface = &surface;
         });
         forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
             p.drawView();
             if (p.owner) p.owner->unlock();
         });
         forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
-            p.sface = nullptr;
+            p.surface = nullptr;
         });
         drawLock = false;
         return true;

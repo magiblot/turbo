@@ -140,16 +140,16 @@ void EditorView::consumeInputText(TEvent &ev)
 void EditorView::draw()
 {
     if (!state)
-        return;
-    // 'sface' is only set when the draw is triggered by EditorState.
-    if (sface)
+        TSurfaceView::draw();
+    // 'surface' is only set when the draw is triggered by EditorState.
+    else if (!surface)
+        state->redraw();
+    else
     {
         TPoint p = state->editor.getCaretPosition();
         setCursor(p.x - delta.x, p.y - delta.y);
         TSurfaceView::draw();
     }
-    else
-        state->redraw();
 }
 
 } // namespace turbo
