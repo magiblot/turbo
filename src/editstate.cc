@@ -41,6 +41,10 @@ EditorState::EditorState(Editor &aEditor) :
     editor.WndProc(SCI_SETMARGINS, 1, 0U);
     editor.WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
     updateMarginWidth();
+
+    // Savepoint and undo buffer.
+    editor.WndProc(SCI_EMPTYUNDOBUFFER, 0U, 0U);
+    editor.WndProc(SCI_SETSAVEPOINT, 0U, 0U);
 }
 
 EditorState::~EditorState()
@@ -158,9 +162,6 @@ bool EditorState::redraw(const TRect &area)
                    && 0 <= area.a.y && area.a.y < area.b.y )
     {
         drawLock = true;
-        forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
-            if (p.owner) p.owner->lock();
-        });
         updateMarginWidth();
         if (!resizeLock)
         {
@@ -181,10 +182,7 @@ bool EditorState::redraw(const TRect &area)
         forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
             p.surface = &surface;
         });
-        forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
-            p.drawView();
-            if (p.owner) p.owner->unlock();
-        });
+        drawViews();
         forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
             p.surface = nullptr;
         });
@@ -192,6 +190,17 @@ bool EditorState::redraw(const TRect &area)
         return true;
     }
     return false;
+}
+
+void EditorState::drawViews()
+{
+    forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
+        if (p.owner) p.owner->lock();
+    });
+    forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
+        p.drawView();
+        if (p.owner) p.owner->unlock();
+    });
 }
 
 void EditorState::updateMarginWidth()
@@ -243,6 +252,11 @@ void EditorState::setVerticalScrollPos(int delta, int limit)
         auto size = view->size.y;
         vScrollBar->setParams(delta, 0, limit - size, size - 1, 1);
     }
+}
+
+bool EditorState::inSavePoint()
+{
+    return editor.WndProc(SCI_GETMODIFY, 0U, 0U) == 0;
 }
 
 } // namespace turbo

@@ -66,6 +66,7 @@ struct EditorState : Scintilla::TScintillaParent
     void redraw();
     void partialRedraw();
     bool redraw(const TRect &area);
+    virtual void drawViews();
     void updateMarginWidth();
     bool handleScrollBarChanged(TScrollBar *);
 
@@ -84,6 +85,8 @@ struct EditorState : Scintilla::TScintillaParent
     {
         lineNumbers.enabled ^= true;
     }
+
+    bool inSavePoint();
 
 };
 

@@ -40,7 +40,6 @@ static std::string loadFile(Editor &editor, const char *path)
                 return fmt::format("Cannot read from file '{}': {}.", path, strerror(errno));
         }
         props.apply(editor);
-        editor.WndProc(SCI_EMPTYUNDOBUFFER, 0U, 0U);
     }
     else
         return fmt::format("Unable to open file '{}': {}.", path, strerror(errno));

@@ -12,6 +12,7 @@
 #include <memory>
 #include <utility>
 #include <forward_list>
+#include <vector>
 #include <util.h>
 
 enum : ushort
@@ -22,8 +23,9 @@ enum : ushort
     cmOpenFile,
 };
 
-using EditorStateList = std::forward_list<turbo::FileEditorState>;
 struct DemoEditorListView;
+struct DemoEditorState;
+using EditorStateList = std::forward_list<DemoEditorState>;
 
 struct DemoApplication : public TApplication
 {
@@ -42,12 +44,24 @@ struct DemoEditorWindow : public TDialog
     turbo::LeftMarginView *leftMargin;
     TScrollBar *hScrollBar, *vScrollBar;
     DemoEditorListView *listView;
+    std::vector<char> title;
 
     DemoEditorWindow(const TRect &bounds);
 
     void shutDown() override;
     void handleEvent(TEvent &ev) override;
     void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
+    const char *getTitle(short) override;
+
+};
+
+struct DemoEditorState : public turbo::FileEditorState
+{
+
+    using super = turbo::FileEditorState;
+    using super::FileEditorState;
+
+    void drawViews() override;
 
 };
 
@@ -81,7 +95,7 @@ DemoApplication::DemoApplication() :
 
 DemoEditorWindow::DemoEditorWindow(const TRect &bounds) :
     TWindowInit(&initFrame),
-    TDialog(bounds, "A plain dialog")
+    TDialog(bounds, nullptr)
 {
     using namespace turbo;
     flags |= wfGrow;
@@ -192,7 +206,6 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 {
                     edView->state->toggleLineNumbers();
                     edView->state->redraw();
-                    frame->drawView();
                     clearEvent(ev);
                 }
                 break;
@@ -246,10 +259,41 @@ void DemoEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint
         TDialog::dragView(event, mode, limits, minSize, maxSize);
         edView->state->resizeLock = lastResizeLock;
         if (lastSize != edView->size)
-            edView->state->redraw();
+            edView->state->redraw(); // Redraw without 'resizeLock = true'.
     }
     else
         TDialog::dragView(event, mode, limits, minSize, maxSize);
+}
+
+const char *DemoEditorWindow::getTitle(short)
+{
+    if (edView && edView->state)
+    {
+        auto &state = *(turbo::FileEditorState *) edView->state;
+        auto name = TPath::basename(state.filePath);
+        bool dirty = !state.inSavePoint();
+        size_t length = name.size() + dirty;
+        title.resize(0);
+        title.resize(length + 1);
+        memcpy(title.data(), name.data(), name.size());
+        if (dirty) title[name.size()] = '*';
+        title[length] = '\0';
+        return title.data();
+    }
+    return nullptr;
+}
+
+void DemoEditorState::drawViews()
+{
+    if (view && view->owner)
+    {
+        auto &window = *(DemoEditorWindow *) view->owner;
+        window.lock();
+        super::drawViews();
+        if (!resizeLock) // No need to draw the frame twice while resizing.
+            window.frame->drawView();
+        window.unlock();
+    }
 }
 
 DemoEditorListView::DemoEditorListView( const TRect& bounds, TScrollBar *aHScrollBar,
