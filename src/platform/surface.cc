@@ -72,12 +72,13 @@ void TScintillaSurface::RectangleDraw(PRectangle rc, ColourDesired fore, ColourD
 
 void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
 {
-    if (surface)
+    auto r = clipRect(rc);
+    if ( surface && 0 <= r.a.x && r.a.x < r.b.x
+                 && 0 <= r.a.y && r.a.y < r.b.y )
     {
         // Used to draw text selections and areas without text. The foreground color
         // also needs to be set or else the cursor will have the wrong color when
         // placed on this area.
-        auto r = clipRect(rc);
         auto attr = defaultTextAttr;
         ::setBack(attr, convertColor(back));
         TScreenCell cell;
@@ -103,9 +104,10 @@ void TScintillaSurface::RoundedRectangle(PRectangle rc, ColourDesired fore, Colo
 void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
         ColourDesired outline, int alphaOutline, int flags)
 {
-    if (surface)
+    auto r = clipRect(rc);
+    if ( surface && 0 <= r.a.x && r.a.x < r.b.x
+                 && 0 <= r.a.y && r.a.y < r.b.y )
     {
-        auto r = clipRect(rc);
         auto fg = convertColor(outline),
              bg = convertColor(fill);
         for (int y = r.a.y; y < r.b.y; ++y)
@@ -158,9 +160,10 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
                                          XYPOSITION ybase, std::string_view text,
                                          ColourDesired fore, ColourDesired back )
 {
-    if (surface)
+    auto r = clipRect(rc);
+    if ( surface && 0 <= r.a.x && r.a.x < r.b.x
+                 && 0 <= r.a.y && r.a.y < r.b.y )
     {
-        auto r = clipRect(rc);
         auto attr = convertColorPair(fore, back);
         ::setStyle(attr, getStyle(font_));
         size_t textBegin = 0, overlap = 0;
@@ -178,9 +181,10 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
 
 void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITION ybase, std::string_view text, ColourDesired fore)
 {
-    if (surface)
+    auto r = clipRect(rc);
+    if ( surface && 0 <= r.a.x && r.a.x < r.b.x
+                 && 0 <= r.a.y && r.a.y < r.b.y )
     {
-        auto r = clipRect(rc);
         auto fg = convertColor(fore);
         auto style = getStyle(font_);
         size_t textBegin = 0, overlap = 0;
