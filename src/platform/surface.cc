@@ -83,8 +83,11 @@ void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
         TScreenCell cell;
         ::setCell(cell, ' ', attr);
         for (int y = r.a.y; y < r.b.y; ++y)
+        {
+            auto *row = &surface->at(y, 0);
             for (int x = r.a.x; x < r.b.x; ++x)
-                surface->at(y, x) = cell;
+                row[x] = cell;
+        }
     }
 }
 
@@ -106,12 +109,14 @@ void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesi
         auto fg = convertColor(outline),
              bg = convertColor(fill);
         for (int y = r.a.y; y < r.b.y; ++y)
+        {
+            auto *row = &surface->at(y, 0);
             for (int x = r.a.x; x < r.b.x; ++x)
             {
-                auto &attr = surface->at(y, x).attr;
-                ::setFore(attr, fg);
-                ::setBack(attr, bg);
+                ::setFore(row[x].attr, fg);
+                ::setBack(row[x].attr, bg);
             }
+        }
     }
 }
 
