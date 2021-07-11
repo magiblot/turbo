@@ -171,6 +171,15 @@ bool FileEditorState::save()
     return success;
 }
 
+bool FileEditorState::saveAs()
+{
+    beforeSave();
+    bool success = !(filePath = saveFileWithDialog(editor)).empty();
+    if (success)
+        afterSave();
+    return success;
+}
+
 void FileEditorState::beforeSave()
 {
     if (!inSavePoint() && !editor.WndProc(SCI_CANREDO, 0U, 0U))

@@ -22,6 +22,7 @@ enum : ushort
     cmNewFile,
     cmOpenFile,
     cmSaveFile,
+    cmSaveFileAs,
 };
 
 struct DemoEditorListView;
@@ -151,9 +152,16 @@ DemoEditorWindow::DemoEditorWindow(const TRect &bounds) :
         insert(but);
     }
     {
-        TStringView text = "Save File";
+        TStringView text = "Save";
         butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
         auto *but = new TButton(butBounds, text, cmSaveFile, bfNormal);
+        but->growMode = gfGrowLoY | gfGrowHiY;
+        insert(but);
+    }
+    {
+        TStringView text = "Save As";
+        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
+        auto *but = new TButton(butBounds, text, cmSaveFileAs, bfNormal);
         but->growMode = gfGrowLoY | gfGrowHiY;
         insert(but);
     }
@@ -247,6 +255,13 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 {
                     auto &state = *(DemoEditorState *) edView->state;
                     state.save();
+                }
+                break;
+            case cmSaveFileAs:
+                if (edView->state)
+                {
+                    auto &state = *(DemoEditorState *) edView->state;
+                    state.saveAs();
                 }
                 break;
         }

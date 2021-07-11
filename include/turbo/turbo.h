@@ -143,6 +143,7 @@ struct FileEditorState : EditorState
 
     void detectLanguage();
     bool save();
+    bool saveAs();
 
     virtual void beforeSave();
     virtual void afterSave();
