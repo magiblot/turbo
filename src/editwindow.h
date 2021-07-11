@@ -39,7 +39,7 @@ struct EditorWindow : public TWindow, Scintilla::TScintillaParent {
     TPoint lastSize;
     LineNumbersWidth lineNumbers;
     WrapState wrap;
-    Indent indent;
+    AutoIndent indent;
     DocumentProperties props;
     ThemingState theming;
 

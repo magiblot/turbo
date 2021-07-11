@@ -65,11 +65,11 @@ bool WrapState::toggle(Scintilla::TScintillaEditor &editor, bool dialog)
 }
 
 /////////////////////////////////////////////////////////////////////////
-// Indent
+// AutoIndent
 
-void Indent::autoIndentCurrentLine(Scintilla::TScintillaEditor &editor)
+void AutoIndent::applyToCurrentLine(Scintilla::TScintillaEditor &editor)
 {
-    if (autoIndent)
+    if (enabled)
     {
         auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
         auto line = editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U);

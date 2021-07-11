@@ -355,7 +355,7 @@ void EditorWindow::handleNotification(const SCNotification &scn)
         case SCN_SAVEPOINTREACHED: setSavePointReached(); break;
         case SCN_CHARADDED:
             if (scn.ch == '\n')
-                indent.autoIndentCurrentLine(editor);
+                indent.applyToCurrentLine(editor);
             break;
     }
 }

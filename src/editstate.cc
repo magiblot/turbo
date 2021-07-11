@@ -236,6 +236,17 @@ bool EditorState::handleScrollBarChanged(TScrollBar *s)
     return false;
 }
 
+void EditorState::handleNotification(const SCNotification &scn)
+{
+    switch (scn.nmhdr.code)
+    {
+        case SCN_CHARADDED:
+            if (scn.ch == '\n')
+                autoIndent.applyToCurrentLine(editor);
+            break;
+    }
+}
+
 void EditorState::setHorizontalScrollPos(int delta, int limit)
 {
     if (view && hScrollBar)

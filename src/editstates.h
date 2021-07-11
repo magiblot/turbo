@@ -47,18 +47,16 @@ public:
     bool toggle(Scintilla::TScintillaEditor &editor, bool dialog=true);
 };
 
-class Indent
+struct AutoIndent
 {
-    bool autoIndent {true};
-
-public:
+    bool enabled {true};
 
     void toggle()
     {
-        autoIndent ^= true;
+        enabled ^= true;
     }
 
-    void autoIndentCurrentLine(Scintilla::TScintillaEditor &editor);
+    void applyToCurrentLine(Scintilla::TScintillaEditor &editor);
 };
 
 #ifdef DocumentProperties

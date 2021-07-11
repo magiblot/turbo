@@ -54,6 +54,7 @@ struct EditorState : Scintilla::TScintillaParent
     bool resizeLock {false};
     LineNumbersWidth lineNumbers {minLineNumbersWidth};
     WrapState wrapping;
+    AutoIndent autoIndent;
 
     EditorState(Editor &aEditor);
     virtual ~EditorState();
@@ -73,6 +74,7 @@ struct EditorState : Scintilla::TScintillaParent
 
     TPoint getEditorSize() override;
     void invalidate(TRect area) override;
+    void handleNotification(const SCNotification &scn) override;
     void setHorizontalScrollPos(int delta, int limit) override;
     void setVerticalScrollPos(int delta, int limit) override;
 
