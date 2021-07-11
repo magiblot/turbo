@@ -23,7 +23,15 @@ file(GLOB_RECURSE SCINTILLA_SRC
     "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexlib/*.cxx"
 )
 
-file(GLOB_RECURSE SCILEXERS_SRC "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/*.cxx")
+list(APPEND SCILEXERS_SRC
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexAsm.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexBash.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexCPP.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexMake.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexPython.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexRuby.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexRust.cxx"
+)
 
 add_library(scintilla STATIC ${SCINTILLA_SRC})
 add_library(scilexers STATIC ${SCILEXERS_SRC})
