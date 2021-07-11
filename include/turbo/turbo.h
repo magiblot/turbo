@@ -121,18 +121,18 @@ namespace constants {
 enum : ushort {
     // Open File options
     ofShowError = 0x0001, // Show a dialog on error.
+    // Save File options
+    sfShowError = 0x0001, // Show a dialog on error.
 };
 } // namespace turbo::constants
 
 Editor *openFile(const char *filePath, ushort options);
 
-struct OpenFileWithDialogResult
-{
-    Editor *editor;
-    std::string filePath;
-};
-
+struct OpenFileWithDialogResult { Editor *editor; std::string filePath; };
 OpenFileWithDialogResult openFileWithDialog(const char *dir = nullptr);
+
+std::string saveFileWithDialog(Editor &editor);
+bool saveFile(const char *filePath, Editor &editor, ushort options);
 
 struct FileEditorState : EditorState
 {
@@ -141,14 +141,20 @@ struct FileEditorState : EditorState
 
     FileEditorState(Editor &aEditor, std::string aFilePath);
 
+    void detectLanguage();
+    bool saveFile();
+
+protected:
+    virtual void beforeSave();
+    virtual void afterSave();
+
 };
 
 inline FileEditorState::FileEditorState(Editor &aEditor, std::string aFilePath) :
     EditorState(aEditor),
     filePath(std::move(aFilePath))
 {
-    if (theming.detectLanguage(filePath.c_str(), editor))
-        lineNumbers.enabled = true;
+    detectLanguage();
 }
 
 } // namespace turbo

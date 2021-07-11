@@ -98,6 +98,6 @@ public:
 };
 
 void stripTrailingSpaces(Scintilla::TScintillaEditor &editor);
-void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor, int EOLType);
+void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor);
 
 #endif

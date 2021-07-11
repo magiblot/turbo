@@ -489,7 +489,7 @@ void EditorWindow::processBeforeSave()
     // Don't modify the file if it is still clean.
     if (!inSavePoint) {
         ::stripTrailingSpaces(editor);
-        ::ensureNewlineAtEnd(editor, props.getEOLType());
+        ::ensureNewlineAtEnd(editor);
         redrawEditor();
     }
 }

@@ -103,8 +103,12 @@ bool ThemingState::detectLanguage(const char *filePath, Scintilla::TScintillaEdi
     }
 #endif
 
-    loadLexer(lang, editor);
-    return lang != langNone;
+    if (loadLexer(lang, editor))
+    {
+        language = lang;
+        return true;
+    }
+    return false;
 }
 
 static constexpr TColorAttr schemaDefault[StyleCount] = {
@@ -142,6 +146,7 @@ static constexpr TColorAttr schemaDefault[StyleCount] = {
 
 
 ThemingState::ThemingState() :
+    language(langNone),
     lexInfo(nullptr),
     schema(schemaDefault)
 {
@@ -418,7 +423,7 @@ static const std::unordered_map<Language, LexerInfo> lexerStyles = {
     {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
 };
 
-void ThemingState::loadLexer(Language lang, Scintilla::TScintillaEditor &editor)
+bool ThemingState::loadLexer(Language lang, Scintilla::TScintillaEditor &editor)
 {
     auto it = lexerStyles.find(lang);
     if (it != lexerStyles.end())
@@ -433,6 +438,9 @@ void ThemingState::loadLexer(Language lang, Scintilla::TScintillaEditor &editor)
             editor.WndProc(SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
         editor.WndProc(SCI_COLOURISE, 0, -1);
     }
+    else
+        lexInfo = nullptr;
+    return lexInfo;
 }
 
 static TColorAttr merge(const TColorAttr &from, const TColorAttr &into)

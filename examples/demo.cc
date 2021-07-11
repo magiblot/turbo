@@ -21,6 +21,7 @@ enum : ushort
     cmEditorSelected,
     cmNewFile,
     cmOpenFile,
+    cmSaveFile,
 };
 
 struct DemoEditorListView;
@@ -64,6 +65,7 @@ struct DemoEditorState : public turbo::FileEditorState
     using super::FileEditorState;
 
     void drawViews() override;
+    void afterSave() override;
 
 };
 
@@ -148,6 +150,13 @@ DemoEditorWindow::DemoEditorWindow(const TRect &bounds) :
         but->growMode = gfGrowLoY | gfGrowHiY;
         insert(but);
     }
+    {
+        TStringView text = "Save File";
+        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
+        auto *but = new TButton(butBounds, text, cmSaveFile, bfNormal);
+        but->growMode = gfGrowLoY | gfGrowHiY;
+        insert(but);
+    }
     listView = [&] {
         TRect r = viewBounds;
         r.a.x = r.b.x + 1;
@@ -217,9 +226,9 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 break;
             case cmEditorSelected:
             {
-                auto *editor = (turbo::EditorState *) ev.message.infoPtr;
-                editor->associate(edView, leftMargin, hScrollBar, vScrollBar);
-                editor->redraw();
+                auto &state = *(DemoEditorState *) ev.message.infoPtr;
+                state.associate(edView, leftMargin, hScrollBar, vScrollBar);
+                state.redraw();
                 clearEvent(ev);
                 break;
             }
@@ -233,6 +242,13 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                     addEditor(*r.editor, r.filePath);
                 break;
             }
+            case cmSaveFile:
+                if (edView->state)
+                {
+                    auto &state = *(DemoEditorState *) edView->state;
+                    state.saveFile();
+                }
+                break;
         }
     }
     TDialog::handleEvent(ev);
@@ -291,6 +307,18 @@ void DemoEditorState::drawViews()
         if (!resizeLock) // No need to draw the frame twice while resizing.
             window.frame->drawView();
         window.unlock();
+    }
+}
+
+void DemoEditorState::afterSave()
+{
+    super::afterSave();
+    if (view)
+    {
+        if (view->state)
+            view->state->redraw();
+        if (view->owner)
+            ((DemoEditorWindow *) view->owner)->listView->drawView();
     }
 }
 

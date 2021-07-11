@@ -143,8 +143,9 @@ void stripTrailingSpaces(Scintilla::TScintillaEditor &editor)
     }
 }
 
-void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor, int EOLType)
+void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor)
 {
+    int EOLType = editor.WndProc(SCI_GETEOLMODE, 0U, 0U);
     Sci::Line lineCount = editor.WndProc(SCI_GETLINECOUNT, 0U, 0U);
     Sci::Position docEnd = editor.WndProc(SCI_POSITIONFROMLINE, lineCount, 0U);
     if ( lineCount == 1 || (lineCount > 1 &&

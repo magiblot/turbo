@@ -85,6 +85,7 @@ typedef TSpan<const std::pair<const char *, const char *>> LexerProperties;
 struct ThemingState
 {
 
+    Language language;
     const LexerInfo *lexInfo;
     const TColorAttr *schema;
 
@@ -97,7 +98,7 @@ struct ThemingState
 
 private:
 
-    void loadLexer(Language lang, Scintilla::TScintillaEditor &editor);
+    bool loadLexer(Language lang, Scintilla::TScintillaEditor &editor);
     TColorAttr braceAttr(LexerStyles, uchar) const;
 
 };
