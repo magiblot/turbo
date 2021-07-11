@@ -10,6 +10,7 @@
 
 #include <string_view>
 #include <unordered_map>
+#include <tvision/compat/io.h>
 
 template<class Func>
 // 'callback' should take an ushort and a TView * and return something
@@ -255,5 +256,28 @@ inline void forEach(T* const (&args)[N], Func &&func)
 {
     detail::forEach_<T, N, Func>::invoke(&args[0], std::move(func));
 }
+
+struct CwdGuard
+{
+    char *lastCwd;
+    CwdGuard(const char *newCwd)
+    {
+        if (newCwd)
+        {
+            lastCwd = ::getcwd(nullptr, 0);
+            int r = ::chdir(newCwd); (void) r;
+        }
+        else
+            lastCwd = nullptr;
+    }
+    ~CwdGuard()
+    {
+        if (lastCwd)
+        {
+            int r = chdir(lastCwd); (void) r;
+            ::free(lastCwd);
+        }
+    }
+};
 
 #endif

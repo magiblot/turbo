@@ -246,7 +246,7 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 if (edView->state)
                 {
                     auto &state = *(DemoEditorState *) edView->state;
-                    state.saveFile();
+                    state.save();
                 }
                 break;
         }

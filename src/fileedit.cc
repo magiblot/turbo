@@ -6,7 +6,6 @@
 #include <fmt/core.h>
 #include <memory>
 #include <fstream>
-#include <tvision/compat/io.h>
 #include <stdlib.h>
 #include <errno.h>
 #include "util.h"
@@ -75,34 +74,9 @@ Editor *openFile(const char *path, ushort options)
     return editor.release();
 }
 
-struct CwdGuard
-{
-    char *lastCwd;
-    CwdGuard(const char *newCwd)
-    {
-        if (newCwd)
-        {
-            lastCwd = getcwd(nullptr, 0);
-            int r = chdir(newCwd); (void) r;
-        }
-        else
-            lastCwd = nullptr;
-    }
-    ~CwdGuard()
-    {
-        if (lastCwd)
-        {
-            int r = chdir(lastCwd); (void) r;
-            ::free(lastCwd);
-        }
-    }
-};
-
-OpenFileWithDialogResult openFileWithDialog(const char *dir)
+OpenFileWithDialogResult openFileWithDialog()
 {
     using namespace constants;
-    // TFileDialog relies on the current working directory.
-    CwdGuard cwd(dir);
     // MAXPATH as assumed by TFileDialog.
     char path[MAXPATH];
     Editor *editor = nullptr;
@@ -183,7 +157,7 @@ std::string saveFileWithDialog(Editor &editor)
     return {};
 }
 
-bool FileEditorState::saveFile()
+bool FileEditorState::save()
 {
     using namespace constants;
     bool success = false;
@@ -191,7 +165,7 @@ bool FileEditorState::saveFile()
     if (filePath.empty())
         success = !(filePath = saveFileWithDialog(editor)).empty();
     else
-        success = ::turbo::saveFile(filePath.c_str(), editor, sfShowError);
+        success = saveFile(filePath.c_str(), editor, sfShowError);
     if (success)
         afterSave();
     return success;
@@ -199,8 +173,7 @@ bool FileEditorState::saveFile()
 
 void FileEditorState::beforeSave()
 {
-    // Don't modify the file if it is still clean.
-    if (!inSavePoint())
+    if (!inSavePoint() && !editor.WndProc(SCI_CANREDO, 0U, 0U))
     {
         stripTrailingSpaces(editor);
         ensureNewlineAtEnd(editor);
@@ -210,8 +183,7 @@ void FileEditorState::beforeSave()
 void FileEditorState::afterSave()
 {
     editor.WndProc(SCI_SETSAVEPOINT, 0U, 0U);
-    if (theming.language == langNone)
-        detectLanguage();
+    detectLanguage();
 }
 
 } // namespace turbo

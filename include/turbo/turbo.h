@@ -129,7 +129,7 @@ enum : ushort {
 Editor *openFile(const char *filePath, ushort options);
 
 struct OpenFileWithDialogResult { Editor *editor; std::string filePath; };
-OpenFileWithDialogResult openFileWithDialog(const char *dir = nullptr);
+OpenFileWithDialogResult openFileWithDialog();
 
 std::string saveFileWithDialog(Editor &editor);
 bool saveFile(const char *filePath, Editor &editor, ushort options);
@@ -142,9 +142,8 @@ struct FileEditorState : EditorState
     FileEditorState(Editor &aEditor, std::string aFilePath);
 
     void detectLanguage();
-    bool saveFile();
+    bool save();
 
-protected:
     virtual void beforeSave();
     virtual void afterSave();
 
