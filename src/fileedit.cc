@@ -187,7 +187,9 @@ std::string renameFileWithDialog(const char *src, Editor &editor)
     using namespace constants;
     char path[MAXPATH];
     bool ok = false;
-    openFileDialog("*.*", "Rename file", "~N~ame", fdOKButton, 0,
+    openFileDialog(
+        "*.*", fmt::format("Rename file '{}'", TPath::basename(src)),
+        "~N~ame", fdOKButton, 0,
         [&] (TView *dialog) {
             dialog->getData(path);
             fexpand(path);
