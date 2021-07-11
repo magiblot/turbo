@@ -251,8 +251,10 @@ void FileEditorState::beforeSave()
 {
     if (!inSavePoint() && !editor.WndProc(SCI_CANREDO, 0U, 0U))
     {
+        editor.WndProc(SCI_BEGINUNDOACTION, 0U, 0U);
         stripTrailingSpaces(editor);
         ensureNewlineAtEnd(editor);
+        editor.WndProc(SCI_ENDUNDOACTION, 0U, 0U);
     }
 }
 

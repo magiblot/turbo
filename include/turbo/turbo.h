@@ -147,7 +147,7 @@ struct FileEditorState : EditorState
     bool saveAs();
     bool rename();
 
-    virtual void beforeSave();
+    void beforeSave();
     virtual void afterSave();
 
 };
