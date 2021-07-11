@@ -8,6 +8,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <errno.h>
+#include <stdio.h>
 #include "util.h"
 
 namespace turbo {
@@ -147,7 +148,54 @@ std::string saveFileWithDialog(Editor &editor)
         [&] (TView *dialog) {
             dialog->getData(path);
             fexpand(path);
-            if (canOverwrite(path) && saveFile(path, editor, sfShowError))
+            if (canOverwrite(path) && saveFile(path, editor, ofShowError))
+                return (ok = true);
+            return false;
+        }
+    );
+    if (ok)
+        return path;
+    return {};
+}
+
+bool renameFile(const char *dst, const char *src, Editor &editor, ushort options)
+{
+    using namespace constants;
+    // Try saving first, then renaming.
+    if (saveFile(src, editor, 0) && ::rename(src, dst) == 0)
+        return true;
+    // If the above doesn't work, try saving at the new location, and then remove
+    // the old file.
+    else if (saveFile(dst, editor, 0))
+    {
+        if (TPath::exists(src) && ::remove(src) != 0 && (options & ofShowError))
+            messageBox(
+                fmt::format("'{}' was created successfully, but '{}' could not be removed: {}.", dst, src, strerror(errno)),
+                mfWarning | mfOKButton
+            );
+        return true;
+    }
+    messageBox(
+        fmt::format("Unable to rename '{}' into '{}': {}.", src, dst, strerror(errno)),
+        mfError | mfOKButton
+    );
+    return false;
+}
+
+std::string renameFileWithDialog(const char *src, Editor &editor)
+{
+    using namespace constants;
+    char path[MAXPATH];
+    bool ok = false;
+    openFileDialog("*.*", "Rename file", "~N~ame", fdOKButton, 0,
+        [&] (TView *dialog) {
+            dialog->getData(path);
+            fexpand(path);
+            // Don't do anything if renaming to the same file. If the user needed to
+            // save the file, they would use the 'save' feature.
+            if (strcmp(path, src) == 0)
+                return true;
+            if (canOverwrite(path) && renameFile(path, src, editor, ofShowError))
                 return (ok = true);
             return false;
         }
@@ -165,7 +213,7 @@ bool FileEditorState::save()
     if (filePath.empty())
         success = !(filePath = saveFileWithDialog(editor)).empty();
     else
-        success = saveFile(filePath.c_str(), editor, sfShowError);
+        success = saveFile(filePath.c_str(), editor, ofShowError);
     if (success)
         afterSave();
     return success;
@@ -174,10 +222,29 @@ bool FileEditorState::save()
 bool FileEditorState::saveAs()
 {
     beforeSave();
-    bool success = !(filePath = saveFileWithDialog(editor)).empty();
-    if (success)
+    auto &&newFilePath = saveFileWithDialog(editor);
+    if (!newFilePath.empty())
+    {
+        filePath = std::move(newFilePath);
         afterSave();
-    return success;
+        return true;
+    }
+    return false;
+}
+
+bool FileEditorState::rename()
+{
+    if (filePath.empty())
+        return saveAs();
+    beforeSave();
+    auto &&newFilePath = renameFileWithDialog(filePath.c_str(), editor);
+    if (!newFilePath.empty())
+    {
+        filePath = std::move(newFilePath);
+        afterSave();
+        return true;
+    }
+    return false;
 }
 
 void FileEditorState::beforeSave()

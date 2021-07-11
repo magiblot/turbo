@@ -23,6 +23,7 @@ enum : ushort
     cmOpenFile,
     cmSaveFile,
     cmSaveFileAs,
+    cmRenameFile,
 };
 
 struct DemoEditorListView;
@@ -122,49 +123,21 @@ DemoEditorWindow::DemoEditorWindow(const TRect &bounds) :
         r.b.x += 1;
         return new TScrollBar(r);
     }();
-    TRect butBounds;
-    {
-        TStringView text = "Line Numbers";
-        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(viewBounds.a.x, viewBounds.b.y + 2);
-        auto *but = new TButton(butBounds, text, cmToggleLineNumbers, bfNormal);
+    TPoint butOrigin = {viewBounds.a.x, viewBounds.b.y + 2};
+    auto addButton = [&] (ushort command, TStringView text) {
+        TRect r = TRect(butOrigin, butOrigin + TPoint {cstrlen(text) + 4, 2});
+        auto *but = new TButton(r, text, command, bfNormal);
         but->growMode = gfGrowLoY | gfGrowHiY;
         insert(but);
-    }
-    {
-        TStringView text = "Line Wrapping";
-        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
-        auto *but = new TButton(butBounds, text, cmToggleLineWrapping, bfNormal);
-        but->growMode = gfGrowLoY | gfGrowHiY;
-        insert(but);
-    }
-    {
-        TStringView text = "New File";
-        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
-        auto *but = new TButton(butBounds, text, cmNewFile, bfNormal);
-        but->growMode = gfGrowLoY | gfGrowHiY;
-        insert(but);
-    }
-    {
-        TStringView text = "Open File";
-        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
-        auto *but = new TButton(butBounds, text, cmOpenFile, bfNormal);
-        but->growMode = gfGrowLoY | gfGrowHiY;
-        insert(but);
-    }
-    {
-        TStringView text = "Save";
-        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
-        auto *but = new TButton(butBounds, text, cmSaveFile, bfNormal);
-        but->growMode = gfGrowLoY | gfGrowHiY;
-        insert(but);
-    }
-    {
-        TStringView text = "Save As";
-        butBounds = TRect(0, 0, cstrlen(text) + 4, 2).move(butBounds.b.x + 1, butBounds.a.y);
-        auto *but = new TButton(butBounds, text, cmSaveFileAs, bfNormal);
-        but->growMode = gfGrowLoY | gfGrowHiY;
-        insert(but);
-    }
+        butOrigin = {r.b.x + 1, r.a.y};
+    };
+    addButton(cmToggleLineNumbers, "Line Numbers");
+    addButton(cmToggleLineWrapping, "Line Wrapping");
+    addButton(cmNewFile, "New File");
+    addButton(cmOpenFile, "Open File");
+    addButton(cmSaveFile, "Save");
+    addButton(cmSaveFileAs, "Save As");
+    addButton(cmRenameFile, "Rename");
     listView = [&] {
         TRect r = viewBounds;
         r.a.x = r.b.x + 1;
@@ -252,17 +225,15 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
             }
             case cmSaveFile:
                 if (edView->state)
-                {
-                    auto &state = *(DemoEditorState *) edView->state;
-                    state.save();
-                }
+                    ((DemoEditorState *) edView->state)->save();
                 break;
             case cmSaveFileAs:
                 if (edView->state)
-                {
-                    auto &state = *(DemoEditorState *) edView->state;
-                    state.saveAs();
-                }
+                    ((DemoEditorState *) edView->state)->saveAs();
+                break;
+            case cmRenameFile:
+                if (edView->state)
+                    ((DemoEditorState *) edView->state)->rename();
                 break;
         }
     }

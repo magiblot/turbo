@@ -119,10 +119,8 @@ public:
 
 namespace constants {
 enum : ushort {
-    // Open File options
+    // openFile/saveFile/renameFile options
     ofShowError = 0x0001, // Show a dialog on error.
-    // Save File options
-    sfShowError = 0x0001, // Show a dialog on error.
 };
 } // namespace turbo::constants
 
@@ -131,8 +129,11 @@ Editor *openFile(const char *filePath, ushort options);
 struct OpenFileWithDialogResult { Editor *editor; std::string filePath; };
 OpenFileWithDialogResult openFileWithDialog();
 
-std::string saveFileWithDialog(Editor &editor);
 bool saveFile(const char *filePath, Editor &editor, ushort options);
+std::string saveFileWithDialog(Editor &editor);
+
+bool renameFile(const char *dst, const char *src, Editor &editor, ushort options);
+std::string renameFileWithDialog(const char *src, Editor &editor);
 
 struct FileEditorState : EditorState
 {
@@ -144,6 +145,7 @@ struct FileEditorState : EditorState
     void detectLanguage();
     bool save();
     bool saveAs();
+    bool rename();
 
     virtual void beforeSave();
     virtual void afterSave();

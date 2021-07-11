@@ -10,7 +10,7 @@
 
 #include <string_view>
 #include <unordered_map>
-#include <tvision/compat/io.h>
+#include <tvision/compat/dir.h>
 
 template<class Func>
 // 'callback' should take an ushort and a TView * and return something
