@@ -60,10 +60,10 @@ void EditorState::associate( EditorParent *aParent,
     parent = aParent;
     if (aView)
     {
-        if (aView->state)
-            aView->state->disassociate();
-        aView->state = this;
-        ((TView *) aView)->state |= sfCursorVis;
+        if (aView->editorState)
+            aView->editorState->disassociate();
+        aView->editorState = this;
+        aView->state |= sfCursorVis;
     }
     view = aView;
     if (aView && aLeftMargin)
@@ -80,7 +80,7 @@ void EditorState::associate( EditorParent *aParent,
 }
 
 void EditorState::disassociate()
-// Pre: if view != nullptr, view->state == this.
+// Pre: if view != nullptr, view->editorState == this.
 // Post: if view != nullptr && leftMargin != nullptr, they are sized as if
 //       the line numbers were hidden.
 {
@@ -94,8 +94,8 @@ void EditorState::disassociate()
             view->setBounds(r);
             leftMargin->size.x = 0;
         }
-        view->state = nullptr;
-        ((TView *) view)->state &= ~sfCursorVis;
+        view->editorState = nullptr;
+        view->state &= ~sfCursorVis;
     }
     view = nullptr;
     leftMargin = nullptr;

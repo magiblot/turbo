@@ -168,8 +168,8 @@ DemoEditorWindow::DemoEditorWindow(const TRect &bounds) :
 
 void DemoEditorWindow::shutDown()
 {
-    if (edView && edView->state)
-        edView->state->disassociate();
+    if (edView && edView->editorState)
+        edView->editorState->disassociate();
     edView = nullptr;
     leftMargin = nullptr;
     hScrollBar = nullptr;
@@ -186,18 +186,18 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
         switch (ev.message.command)
         {
             case cmToggleLineNumbers:
-                if (edView->state)
+                if (edView->editorState)
                 {
-                    edView->state->toggleLineNumbers();
-                    edView->state->redraw();
+                    edView->editorState->toggleLineNumbers();
+                    edView->editorState->redraw();
                     clearEvent(ev);
                 }
                 break;
             case cmToggleLineWrapping:
-                if (edView->state)
+                if (edView->editorState)
                 {
-                    edView->state->toggleLineWrapping(lwConfirm);
-                    edView->state->redraw();
+                    edView->editorState->toggleLineWrapping(lwConfirm);
+                    edView->editorState->redraw();
                     clearEvent(ev);
                 }
                 break;
@@ -230,23 +230,23 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 break;
             }
             case cmSaveFile:
-                if (edView->state)
-                    ((FileEditorState *) edView->state)->save();
+                if (edView->editorState)
+                    ((FileEditorState *) edView->editorState)->save();
                 clearEvent(ev);
                 break;
             case cmSaveFileAs:
-                if (edView->state)
-                    ((FileEditorState *) edView->state)->saveAs();
+                if (edView->editorState)
+                    ((FileEditorState *) edView->editorState)->saveAs();
                 clearEvent(ev);
                 break;
             case cmRenameFile:
-                if (edView->state)
-                    ((FileEditorState *) edView->state)->rename();
+                if (edView->editorState)
+                    ((FileEditorState *) edView->editorState)->rename();
                 clearEvent(ev);
                 break;
             case cmCloseFile:
-                if (edView->state && ((FileEditorState *) edView->state)->close())
-                    removeState(*(FileEditorState *) edView->state);
+                if (edView->editorState && ((FileEditorState *) edView->editorState)->close())
+                    removeState(*(FileEditorState *) edView->editorState);
                 clearEvent(ev);
                 break;
         }
@@ -270,15 +270,15 @@ Boolean DemoEditorWindow::valid(ushort command)
 
 void DemoEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
 {
-    if (edView && edView->state)
+    if (edView && edView->editorState)
     {
-        auto lastResizeLock = edView->state->resizeLock;
+        auto lastResizeLock = edView->editorState->resizeLock;
         auto lastSize = edView->size;
-        edView->state->resizeLock = true;
+        edView->editorState->resizeLock = true;
         TDialog::dragView(event, mode, limits, minSize, maxSize);
-        edView->state->resizeLock = lastResizeLock;
+        edView->editorState->resizeLock = lastResizeLock;
         if (lastSize != edView->size)
-            edView->state->redraw(); // Redraw without 'resizeLock = true'.
+            edView->editorState->redraw(); // Redraw without 'resizeLock = true'.
     }
     else
         TDialog::dragView(event, mode, limits, minSize, maxSize);
@@ -286,9 +286,9 @@ void DemoEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint
 
 const char *DemoEditorWindow::getTitle(short)
 {
-    if (edView && edView->state)
+    if (edView && edView->editorState)
     {
-        auto &state = *(turbo::FileEditorState *) edView->state;
+        auto &state = *(turbo::FileEditorState *) edView->editorState;
         auto name = TPath::basename(state.filePath);
         if (name.empty()) name = "Untitled";
         bool dirty = !state.inSavePoint();
@@ -344,9 +344,9 @@ void DemoEditorWindow::removeState(FileEditorState &aState)
 bool DemoEditorWindow::closeAllEditors()
 {
     if (edView)
-        while (edView->state)
+        while (edView->editorState)
         {
-            auto &state = *(FileEditorState *) edView->state;
+            auto &state = *(FileEditorState *) edView->editorState;
             if (state.close())
                 removeState(state);
             else

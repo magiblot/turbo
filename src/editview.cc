@@ -15,10 +15,10 @@ EditorView::EditorView(const TRect &bounds) :
 
 void EditorView::handleEvent(TEvent &ev)
 {
-    if (!state)
+    if (!editorState)
         return;
     TView::handleEvent(ev);
-    auto &editor = state->editor;
+    auto &editor = editorState->editor;
     switch (ev.what)
     {
         case evKeyDown:
@@ -30,7 +30,7 @@ void EditorView::handleEvent(TEvent &ev)
                 editor.KeyDownWithModifiers(ev.keyDown, nullptr);
             else
                 consumeInputText(ev);
-            state->partialRedraw();
+            editorState->partialRedraw();
             clearEvent(ev);
             break;
         case evMouseDown:
@@ -42,8 +42,8 @@ void EditorView::handleEvent(TEvent &ev)
                 {
                     TPoint mouse = makeLocal(ev.mouse.where);
                     TPoint d = editor.getDelta() + (lastMouse - mouse);
-                    state->scrollTo(d);
-                    state->partialRedraw();
+                    editorState->scrollTo(d);
+                    editorState->partialRedraw();
                     lastMouse = mouse;
                 }
             }
@@ -55,7 +55,7 @@ void EditorView::handleEvent(TEvent &ev)
                     if (ev.what == evMouseWheel)
                     {
                         // Mouse wheel while holding button down.
-                        state->scrollBarEvent(ev);
+                        editorState->scrollBarEvent(ev);
                         ev.mouse.where = where;
                         ev.what = evMouseMove;
                         // For some reason, the caret is not always updated
@@ -68,20 +68,20 @@ void EditorView::handleEvent(TEvent &ev)
                         ev.mouse.where = where;
                         if (!editor.MouseEvent(ev))
                         {
-                            state->partialRedraw();
+                            editorState->partialRedraw();
                             break;
                         }
                     }
-                    state->partialRedraw();
+                    editorState->partialRedraw();
                 } while (mouseEvent(ev, evMouseDown | evMouseMove | evMouseAuto | evMouseWheel));
             }
             clearEvent(ev);
             break;
         case evBroadcast:
             if ( ev.message.command == cmScrollBarChanged &&
-                 state->handleScrollBarChanged((TScrollBar *) ev.message.infoPtr) )
+                 editorState->handleScrollBarChanged((TScrollBar *) ev.message.infoPtr) )
             {
-                state->partialRedraw();
+                editorState->partialRedraw();
                 clearEvent(ev);
             }
             break;
@@ -109,9 +109,9 @@ static void insertOneByOne(Editor &editor, std::string_view text)
 }
 
 void EditorView::consumeInputText(TEvent &ev)
-// Pre: 'state' is non-null.
+// Pre: 'editorState' is non-null.
 {
-    auto &editor = state->editor;
+    auto &editor = editorState->editor;
     editor.clearBeforeTentativeStart();
 
     char buf[4096];
@@ -138,14 +138,14 @@ void EditorView::consumeInputText(TEvent &ev)
 
 void EditorView::draw()
 {
-    if (!state)
+    if (!editorState)
         TSurfaceView::draw();
     // 'surface' is only set when the draw is triggered by EditorState.
     else if (!surface)
-        state->redraw();
+        editorState->redraw();
     else
     {
-        TPoint p = state->editor.getCaretPosition();
+        TPoint p = editorState->editor.getCaretPosition();
         cursor = p - delta;
         TSurfaceView::draw();
     }

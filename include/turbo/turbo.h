@@ -109,7 +109,7 @@ class EditorView : public TSurfaceView
 {
 public:
 
-    EditorState *state {nullptr};
+    EditorState *editorState {nullptr};
 
     EditorView(const TRect &bounds);
 
