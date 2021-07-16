@@ -249,6 +249,19 @@ bool FileEditorState::rename()
     return false;
 }
 
+bool FileEditorState::close()
+{
+    if (!inSavePoint())
+    {
+        auto &&msg = filePath.empty() ?
+            fmt::format("Save 'Untitled'?") :
+            fmt::format("'{}' has been modified. Save?", filePath);
+        auto reply = messageBox(msg, mfConfirmation | mfYesNoCancel);
+        return (reply == cmYes && save()) || reply == cmNo;
+    }
+    return true;
+}
+
 void FileEditorState::beforeSave()
 {
     if (!inSavePoint() && !editor.WndProc(SCI_CANREDO, 0U, 0U))

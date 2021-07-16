@@ -163,6 +163,7 @@ struct FileEditorState : EditorState
     bool save();
     bool saveAs();
     bool rename();
+    bool close();
 
     void beforeSave();
     void afterSave();

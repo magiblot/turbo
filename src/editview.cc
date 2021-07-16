@@ -11,7 +11,6 @@ EditorView::EditorView(const TRect &bounds) :
     growMode = gfGrowHiX | gfGrowHiY;
     options |= ofSelectable | ofFirstClick;
     eventMask |= evMouseUp | evMouseMove | evMouseAuto | evBroadcast;
-    showCursor();
 }
 
 void EditorView::handleEvent(TEvent &ev)
@@ -147,7 +146,7 @@ void EditorView::draw()
     else
     {
         TPoint p = state->editor.getCaretPosition();
-        setCursor(p.x - delta.x, p.y - delta.y);
+        cursor = p - delta;
         TSurfaceView::draw();
     }
 }

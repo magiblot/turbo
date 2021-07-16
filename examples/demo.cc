@@ -18,12 +18,13 @@ enum : ushort
 {
     cmToggleLineNumbers = 1000,
     cmToggleLineWrapping,
-    cmEditorSelected,
+    cmEditorFocused,
     cmNewFile,
     cmOpenFile,
     cmSaveFile,
     cmSaveFileAs,
     cmRenameFile,
+    cmCloseFile,
 };
 
 struct DemoEditorListView;
@@ -53,12 +54,15 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
 
     void shutDown() override;
     void handleEvent(TEvent &ev) override;
+    Boolean valid(ushort command) override;
     void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     const char *getTitle(short) override;
 
     void handleNotification(ushort, turbo::EditorState &) override;
 
     void addEditor(turbo::Editor &, TStringView filePath);
+    void removeState(FileEditorState &aState);
+    bool closeAllEditors();
 
 };
 
@@ -71,7 +75,7 @@ struct DemoEditorListView : public TListViewer
     EditorStateList &list;
 
     void getText(char *dest, short item, short maxLen) override;
-    void focusItem(short item) override;
+    void focusItemNum(short item) override;
     void setRange(short aRange);
 
     int maxWidth();
@@ -129,6 +133,7 @@ DemoEditorWindow::DemoEditorWindow(const TRect &bounds) :
     addButton(cmSaveFile, "Save");
     addButton(cmSaveFileAs, "Save As");
     addButton(cmRenameFile, "Rename");
+    addButton(cmCloseFile, "Close");
     listView = [&] {
         TRect r = viewBounds;
         r.a.x = r.b.x + 1;
@@ -196,11 +201,19 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                     clearEvent(ev);
                 }
                 break;
-            case cmEditorSelected:
+            case cmEditorFocused:
             {
-                auto &state = *(DemoEditorState *) ev.message.infoPtr;
-                state.redraw();
-                state.associate(this, edView, leftMargin, hScrollBar, vScrollBar);
+                auto *state = (FileEditorState *) ev.message.infoPtr;
+                if (state)
+                {
+                    state->associate(this, edView, leftMargin, hScrollBar, vScrollBar);
+                    state->redraw();
+                }
+                else
+                {
+                    edView->drawView();
+                    frame->drawView();
+                }
                 clearEvent(ev);
                 break;
             }
@@ -231,9 +244,28 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                     ((FileEditorState *) edView->state)->rename();
                 clearEvent(ev);
                 break;
+            case cmCloseFile:
+                if (edView->state && ((FileEditorState *) edView->state)->close())
+                    removeState(*(FileEditorState *) edView->state);
+                clearEvent(ev);
+                break;
         }
     }
     TDialog::handleEvent(ev);
+}
+
+Boolean DemoEditorWindow::valid(ushort command)
+{
+    if (TDialog::valid(command))
+        switch (command)
+        {
+            case cmQuit:
+            case cmClose:
+                return closeAllEditors();
+            default:
+                return true;
+        }
+    return false;
 }
 
 void DemoEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
@@ -295,6 +327,33 @@ void DemoEditorWindow::addEditor(turbo::Editor &editor, TStringView filePath)
     listView->drawView();
 }
 
+void DemoEditorWindow::removeState(FileEditorState &aState)
+// Pre: 'aState' belongs to 'states'.
+{
+    states.remove_if([&] (const auto &state) {
+        if (&state == &aState)
+            return aState.disassociate(), true;
+        return false;
+    });
+    // 'aState' is dangling by this point.
+    listView->setRange(listView->range - 1);
+    listView->focusItemNum(listView->focused);
+    listView->drawView();
+}
+
+bool DemoEditorWindow::closeAllEditors()
+{
+    if (edView)
+        while (edView->state)
+        {
+            auto &state = *(FileEditorState *) edView->state;
+            if (state.close())
+                removeState(state);
+            else
+                return false;
+        }
+    return true;
+}
 
 DemoEditorListView::DemoEditorListView( const TRect& bounds, TScrollBar *aHScrollBar,
                                 TScrollBar *aVScrollBar, EditorStateList &aList ) :
@@ -303,31 +362,32 @@ DemoEditorListView::DemoEditorListView( const TRect& bounds, TScrollBar *aHScrol
 {
 }
 
-void DemoEditorListView::getText(char *dest, short item, short maxLen)
+void DemoEditorListView::getText(char *dest, short item, short maxChars)
 {
     short i = 0;
     for (auto &state : list)
         if (i++ == item)
         {
             if (!state.filePath.empty())
-                strnzcpy(dest, state.filePath, maxLen);
+                strnzcpy(dest, state.filePath, maxChars + 1);
             else
-                strnzcpy(dest, "Untitled", maxLen);
+                strnzcpy(dest, "Untitled", maxChars + 1);
             return;
         }
-    snprintf(dest, maxLen, "<ERROR: out-of-bounds index %hd>", item);
+    snprintf(dest, maxChars, "<ERROR: out-of-bounds index %hd>", item);
 }
 
-void DemoEditorListView::focusItem(short item)
+void DemoEditorListView::focusItemNum(short item)
 {
-    TListViewer::focusItem(item);
+    TListViewer::focusItemNum(item);
     short i = 0;
     for (auto &state : list)
-        if (i++ == item)
+        if (i++ == focused)
         {
-            message(owner, evCommand, cmEditorSelected, &state);
-            break;
+            message(owner, evCommand, cmEditorFocused, &state);
+            return;
         }
+    message(owner, evCommand, cmEditorFocused, nullptr);
 }
 
 void DemoEditorListView::setRange(short aRange)
