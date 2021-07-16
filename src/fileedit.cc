@@ -63,7 +63,6 @@ static std::string loadFile(Editor &editor, const char *path)
 
 Editor *openFile(const char *path, ushort options)
 {
-    using namespace constants;
     auto editor = std::make_unique<Editor>();
     auto &&errorMsg = loadFile(*editor, path);
     if (!errorMsg.empty())
@@ -77,7 +76,6 @@ Editor *openFile(const char *path, ushort options)
 
 OpenFileWithDialogResult openFileWithDialog()
 {
-    using namespace constants;
     // MAXPATH as assumed by TFileDialog.
     char path[MAXPATH];
     Editor *editor = nullptr;
@@ -118,7 +116,6 @@ static std::string saveFile(const char *path, Editor &editor)
 
 bool saveFile(const char *path, Editor &editor, ushort options)
 {
-    using namespace constants;
     auto &&errorMsg = saveFile(path, editor);
     if (!errorMsg.empty())
     {
@@ -141,7 +138,6 @@ static bool canOverwrite(const char *path)
 
 std::string saveFileWithDialog(Editor &editor)
 {
-    using namespace constants;
     char path[MAXPATH];
     bool ok = false;
     openFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 0,
@@ -160,7 +156,6 @@ std::string saveFileWithDialog(Editor &editor)
 
 bool renameFile(const char *dst, const char *src, Editor &editor, ushort options)
 {
-    using namespace constants;
     // Try saving first, then renaming.
     if (saveFile(src, editor, 0) && ::rename(src, dst) == 0)
         return true;
@@ -184,7 +179,6 @@ bool renameFile(const char *dst, const char *src, Editor &editor, ushort options
 
 std::string renameFileWithDialog(const char *src, Editor &editor)
 {
-    using namespace constants;
     char path[MAXPATH];
     bool ok = false;
     openFileDialog(
@@ -209,7 +203,6 @@ std::string renameFileWithDialog(const char *src, Editor &editor)
 
 bool FileEditorState::save()
 {
-    using namespace constants;
     bool success = false;
     beforeSave();
     if (filePath.empty())

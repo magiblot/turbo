@@ -180,7 +180,6 @@ void DemoEditorWindow::shutDown()
 
 void DemoEditorWindow::handleEvent(TEvent &ev)
 {
-    using namespace turbo::constants;
     if (ev.what == evCommand && edView)
     {
         switch (ev.message.command)
@@ -196,7 +195,7 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
             case cmToggleLineWrapping:
                 if (edView->editorState)
                 {
-                    edView->editorState->toggleLineWrapping(lwConfirm);
+                    edView->editorState->toggleLineWrapping(turbo::lwConfirm);
                     edView->editorState->redraw();
                     clearEvent(ev);
                 }

@@ -15,12 +15,11 @@
 class TScrollBar;
 
 namespace turbo {
-namespace constants {
+
 enum : ushort {
     // Line Wrapping options
     lwConfirm = 0x0001, // Ask for confirmation when document too big.
 };
-} // namespace constants
 
 using Editor = Scintilla::TScintillaEditor;
 
@@ -93,7 +92,7 @@ struct EditorState : Scintilla::TScintillaParent
     bool toggleLineWrapping(ushort options)
     // Post: returns true if line wrapping is enabled.
     {
-        return wrapping.toggle(editor, options & constants::lwConfirm);
+        return wrapping.toggle(editor, options & lwConfirm);
     }
 
     void toggleLineNumbers()
@@ -131,12 +130,10 @@ public:
     LeftMarginView(int aDistance);
 };
 
-namespace constants {
 enum : ushort {
     // openFile/saveFile/renameFile options
     ofShowError = 0x0001, // Show a dialog on error.
 };
-} // namespace turbo::constants
 
 Editor *openFile(const char *filePath, ushort options);
 
