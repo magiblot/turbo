@@ -23,13 +23,23 @@ enum : ushort {
 } // namespace constants
 
 using Editor = Scintilla::TScintillaEditor;
-class EditorView;
-class LeftMarginView;
 
 Editor &createEditor();
 
+class EditorView;
+class LeftMarginView;
+struct EditorState;
+
+struct EditorParent
+{
+    virtual void handleNotification(ushort code, EditorState &) = 0;
+};
+
 struct EditorState : Scintilla::TScintillaParent
 {
+    enum : ushort { // Notification Codes
+        ncPainted = 1,
+    };
 
     struct InvalidationRectangle : TRect
     {
@@ -44,6 +54,7 @@ struct EditorState : Scintilla::TScintillaParent
 
     Editor &editor;
     ThemingState theming;
+    EditorParent *parent {nullptr};
     EditorView *view {nullptr};
     LeftMarginView *leftMargin {nullptr};
     TScrollBar *hScrollBar {nullptr};
@@ -59,7 +70,8 @@ struct EditorState : Scintilla::TScintillaParent
     EditorState(Editor &aEditor);
     virtual ~EditorState();
 
-    void associate( EditorView *aView, LeftMarginView *aLeftMargin,
+    void associate( EditorParent *aParent,
+                    EditorView *aView, LeftMarginView *aLeftMargin,
                     TScrollBar *aHScrollBar, TScrollBar *aVScrollBar );
     void disassociate();
 
@@ -68,7 +80,7 @@ struct EditorState : Scintilla::TScintillaParent
     void redraw();
     void partialRedraw();
     bool redraw(const TRect &area);
-    virtual void drawViews();
+    void drawViews();
     void updateMarginWidth();
     bool handleScrollBarChanged(TScrollBar *);
 
@@ -139,6 +151,9 @@ std::string renameFileWithDialog(const char *src, Editor &editor);
 
 struct FileEditorState : EditorState
 {
+    enum : ushort { // Notification Codes
+        ncSaved = 100,
+    };
 
     std::string filePath;
 
@@ -150,7 +165,7 @@ struct FileEditorState : EditorState
     bool rename();
 
     void beforeSave();
-    virtual void afterSave();
+    void afterSave();
 
 };
 

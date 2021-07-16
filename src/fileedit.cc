@@ -264,6 +264,8 @@ void FileEditorState::afterSave()
 {
     editor.WndProc(SCI_SETSAVEPOINT, 0U, 0U);
     detectLanguage();
+    if (parent)
+        parent->handleNotification(ncSaved, *this);
 }
 
 } // namespace turbo

@@ -52,10 +52,12 @@ EditorState::~EditorState()
     delete &editor;
 }
 
-void EditorState::associate( EditorView *aView, LeftMarginView *aLeftMargin,
+void EditorState::associate( EditorParent *aParent,
+                             EditorView *aView, LeftMarginView *aLeftMargin,
                              TScrollBar *aHScrollBar, TScrollBar *aVScrollBar )
 {
     disassociate();
+    parent = aParent;
     if (aView)
     {
         if (aView->state)
@@ -80,6 +82,7 @@ void EditorState::disassociate()
 // Pre: if view != nullptr, view->state == this.
 // Post: if view != nullptr, it is sized as if the line numbers were hidden.
 {
+    parent = nullptr;
     if (view)
     {
         if (leftMargin)
@@ -195,12 +198,10 @@ bool EditorState::redraw(const TRect &area)
 void EditorState::drawViews()
 {
     forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
-        if (p.owner) p.owner->lock();
-    });
-    forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
         p.drawView();
-        if (p.owner) p.owner->unlock();
     });
+    if (parent)
+        parent->handleNotification(ncPainted, *this);
 }
 
 void EditorState::updateMarginWidth()

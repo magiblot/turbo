@@ -27,8 +27,8 @@ enum : ushort
 };
 
 struct DemoEditorListView;
-struct DemoEditorState;
-using EditorStateList = std::forward_list<DemoEditorState>;
+using turbo::FileEditorState;
+using EditorStateList = std::forward_list<FileEditorState>;
 
 struct DemoApplication : public TApplication
 {
@@ -37,7 +37,7 @@ struct DemoApplication : public TApplication
 
 };
 
-struct DemoEditorWindow : public TDialog
+struct DemoEditorWindow : public TDialog, public turbo::EditorParent
 {
 
     enum { listWidth = 20 };
@@ -56,18 +56,9 @@ struct DemoEditorWindow : public TDialog
     void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     const char *getTitle(short) override;
 
+    void handleNotification(ushort, turbo::EditorState &) override;
+
     void addEditor(turbo::Editor &, TStringView filePath);
-
-};
-
-struct DemoEditorState : public turbo::FileEditorState
-{
-
-    using super = turbo::FileEditorState;
-    using super::FileEditorState;
-
-    void drawViews() override;
-    void afterSave() override;
 
 };
 
@@ -208,32 +199,37 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
             case cmEditorSelected:
             {
                 auto &state = *(DemoEditorState *) ev.message.infoPtr;
-                state.associate(edView, leftMargin, hScrollBar, vScrollBar);
                 state.redraw();
+                state.associate(this, edView, leftMargin, hScrollBar, vScrollBar);
                 clearEvent(ev);
                 break;
             }
             case cmNewFile:
                 addEditor(turbo::createEditor(), "");
+                clearEvent(ev);
                 break;
             case cmOpenFile:
             {
                 auto &&r = turbo::openFileWithDialog();
                 if (r.editor)
                     addEditor(*r.editor, r.filePath);
+                clearEvent(ev);
                 break;
             }
             case cmSaveFile:
                 if (edView->state)
-                    ((DemoEditorState *) edView->state)->save();
+                    ((FileEditorState *) edView->state)->save();
+                clearEvent(ev);
                 break;
             case cmSaveFileAs:
                 if (edView->state)
-                    ((DemoEditorState *) edView->state)->saveAs();
+                    ((FileEditorState *) edView->state)->saveAs();
+                clearEvent(ev);
                 break;
             case cmRenameFile:
                 if (edView->state)
-                    ((DemoEditorState *) edView->state)->rename();
+                    ((FileEditorState *) edView->state)->rename();
+                clearEvent(ev);
                 break;
         }
     }
@@ -275,6 +271,22 @@ const char *DemoEditorWindow::getTitle(short)
     return nullptr;
 }
 
+void DemoEditorWindow::handleNotification(ushort code, turbo::EditorState &state)
+{
+    using namespace turbo;
+    switch (code)
+    {
+        case EditorState::ncPainted:
+            if (!state.resizeLock) // These already get drawn when resizing.
+                frame->drawView(); // The frame is sensible to the save point state.
+            break;
+        case FileEditorState::ncSaved:
+            state.redraw();
+            listView->drawView();
+            break;
+    }
+}
+
 void DemoEditorWindow::addEditor(turbo::Editor &editor, TStringView filePath)
 {
     states.emplace_front(editor, filePath);
@@ -283,30 +295,6 @@ void DemoEditorWindow::addEditor(turbo::Editor &editor, TStringView filePath)
     listView->drawView();
 }
 
-void DemoEditorState::drawViews()
-{
-    if (view && view->owner)
-    {
-        auto &window = *(DemoEditorWindow *) view->owner;
-        window.lock();
-        super::drawViews();
-        if (!resizeLock) // No need to draw the frame twice while resizing.
-            window.frame->drawView();
-        window.unlock();
-    }
-}
-
-void DemoEditorState::afterSave()
-{
-    super::afterSave();
-    if (view)
-    {
-        if (view->state)
-            view->state->redraw();
-        if (view->owner)
-            ((DemoEditorWindow *) view->owner)->listView->drawView();
-    }
-}
 
 DemoEditorListView::DemoEditorListView( const TRect& bounds, TScrollBar *aHScrollBar,
                                 TScrollBar *aVScrollBar, EditorStateList &aList ) :
