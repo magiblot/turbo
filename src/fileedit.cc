@@ -61,11 +61,11 @@ bool readFile(Editor &editor, const char *path, FileDialogs &dlgs) noexcept
     return true;
 }
 
-void openFile( FuncView<void(Editor &, const char *)> accept,
-               FileDialogs &dlgs ) noexcept
+void openFile( FuncView<Editor&()> createEditor,
+               FuncView<void(Editor &, const char *)> accept, FileDialogs &dlgs ) noexcept
 {
     dlgs.getOpenPath([&] (const char *path) {
-        auto editor = std::make_unique<Editor>();
+        std::unique_ptr<Editor> editor {&createEditor()};
         if (readFile(*editor, path, dlgs))
         {
             accept(*editor.release(), path);

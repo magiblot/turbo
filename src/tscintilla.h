@@ -9,9 +9,8 @@
 #include <ScintillaHeaders.h>
 #include <string_view>
 
-#include "clipboard.h"
-
 class TDrawSurface;
+class Clipboard;
 
 namespace Scintilla {
 
@@ -19,9 +18,9 @@ struct TScintillaParent;
 
 struct TScintillaEditor : public ScintillaBase {
 
-    Clipboard *clipboard {0};
+    Clipboard *clipboard;
 
-    TScintillaEditor();
+    TScintillaEditor(Clipboard *aClipboard = nullptr);
 
     void SetVerticalScrollPos() override;
     void SetHorizontalScrollPos() override;

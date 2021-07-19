@@ -14,6 +14,7 @@
 #include <utility>
 
 class TScrollBar;
+class Clipboard;
 
 namespace turbo {
 
@@ -24,7 +25,7 @@ enum : ushort {
 
 using Editor = Scintilla::TScintillaEditor;
 
-Editor &createEditor();
+Editor &createEditor(Clipboard *aClipboard = nullptr) noexcept;
 
 class EditorView;
 class LeftMarginView;
@@ -189,7 +190,9 @@ struct SilentFileDialogs : FileDialogs
 extern SilentFileDialogs silFileDialogs;
 
 bool readFile(Editor &editor, const char *path, FileDialogs & = defFileDialogs) noexcept;
-void openFile(FuncView<void(Editor &, const char *)> accept, FileDialogs & = defFileDialogs) noexcept;
+void openFile( FuncView<Editor&()> createEditor,
+               FuncView<void(Editor &, const char *)> accept,
+               FileDialogs & = defFileDialogs ) noexcept;
 bool writeFile(const char *path, Editor &editor, FileDialogs & = defFileDialogs) noexcept;
 bool renameFile(const char *dst, const char *src, Editor &editor, FileDialogs & = defFileDialogs) noexcept;
 

@@ -7,6 +7,7 @@
 #define Uses_TListViewer
 #include <tvision/tv.h>
 #include <turbo/turbo.h>
+#include <clipboard.h>
 #include <tpath.h>
 
 #include <memory>
@@ -33,9 +34,9 @@ using EditorStateList = std::forward_list<FileEditorState>;
 
 struct DemoApplication : public TApplication
 {
+    LcbClipboard clipboard;
 
     DemoApplication();
-
 };
 
 struct DemoEditorWindow : public TDialog, public turbo::EditorParent
@@ -49,8 +50,9 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
     TScrollBar *hScrollBar, *vScrollBar;
     DemoEditorListView *listView;
     std::vector<char> title;
+    Clipboard *clipboard;
 
-    DemoEditorWindow(const TRect &bounds);
+    DemoEditorWindow(const TRect &bounds, Clipboard *aClipboard);
 
     void shutDown() override;
     void handleEvent(TEvent &ev) override;
@@ -60,6 +62,7 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
 
     void handleNotification(ushort, turbo::EditorState &) override;
 
+    turbo::Editor &createEditor();
     void addEditor(turbo::Editor &, const char *filePath);
     void removeState(FileEditorState &aState);
     bool closeAllEditors();
@@ -89,14 +92,16 @@ DemoApplication::DemoApplication() :
 {
     insertWindow(
         new DemoEditorWindow(
-            deskTop->getExtent().grow(-2, -2)
+            deskTop->getExtent().grow(-2, -2),
+            &clipboard
         )
     );
 }
 
-DemoEditorWindow::DemoEditorWindow(const TRect &bounds) :
+DemoEditorWindow::DemoEditorWindow(const TRect &bounds, Clipboard *aClipboard) :
     TWindowInit(&initFrame),
-    TDialog(bounds, nullptr)
+    TDialog(bounds, nullptr),
+    clipboard(aClipboard)
 {
     using namespace turbo;
     flags |= wfGrow;
@@ -217,12 +222,14 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 break;
             }
             case cmNewFile:
-                addEditor(turbo::createEditor(), "");
+                addEditor(createEditor(), "");
                 clearEvent(ev);
                 break;
             case cmOpenFile:
             {
-                turbo::openFile([&] (turbo::Editor &editor, const char *path) {
+                turbo::openFile([&] () -> turbo::Editor& {
+                    return createEditor();
+                }, [&] (turbo::Editor &editor, const char *path) {
                     addEditor(editor, path);
                 });
                 clearEvent(ev);
@@ -316,6 +323,11 @@ void DemoEditorWindow::handleNotification(ushort code, turbo::EditorState &state
             listView->drawView();
             break;
     }
+}
+
+turbo::Editor &DemoEditorWindow::createEditor()
+{
+    return turbo::createEditor(clipboard);
 }
 
 void DemoEditorWindow::addEditor(turbo::Editor &editor, const char *filePath)

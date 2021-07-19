@@ -7,12 +7,14 @@ using std::chrono::milliseconds;
 using std::chrono::steady_clock;
 
 #include "tscintilla.h"
+#include "clipboard.h"
 
 using namespace Scintilla;
 
 #include "surface.h"
 
-TScintillaEditor::TScintillaEditor()
+TScintillaEditor::TScintillaEditor(Clipboard *aClipboard) :
+    clipboard(aClipboard)
 {
     // Block caret for both Insertion and Overwrite mode.
     WndProc(SCI_SETCARETSTYLE, CARETSTYLE_BLOCK | CARETSTYLE_OVERSTRIKE_BLOCK, 0U);

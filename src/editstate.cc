@@ -7,9 +7,9 @@
 
 namespace turbo {
 
-Editor &createEditor()
+Editor &createEditor(Clipboard *aClipboard) noexcept
 {
-    return *new Editor;
+    return *new Editor(aClipboard);
 }
 
 EditorState::EditorState(Editor &aEditor) :

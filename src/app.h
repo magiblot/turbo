@@ -45,7 +45,7 @@ struct TurboApp : public TApplication {
     bool argsParsed {false};
     int argc;
     const char **argv;
-    Clipboard clipboard;
+    LcbClipboard clipboard;
 
     static TurboApp *app;
 
