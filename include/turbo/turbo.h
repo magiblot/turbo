@@ -5,6 +5,7 @@
 #define Uses_TSurfaceView
 #include <tvision/tv.h>
 
+#include <turbo/funcview.h>
 #include <tscintilla.h>
 #include <editstates.h>
 #include <styles.h>
@@ -130,21 +131,67 @@ public:
     LeftMarginView(int aDistance);
 };
 
-enum : ushort {
-    // openFile/saveFile/renameFile options
-    ofShowError = 0x0001, // Show a dialog on error.
+struct FileEditorState;
+
+struct FileDialogs
+{
+    virtual ushort confirmSaveUntitled(FileEditorState &) noexcept = 0;
+    virtual ushort confirmSaveModified(FileEditorState &) noexcept = 0;
+    virtual ushort confirmOverwrite(const char *path) noexcept = 0;
+    virtual void removeRenamedWarning(const char *dst, const char *src, const char *cause) noexcept = 0;
+    virtual bool renameError(const char *dst, const char *src, const char *cause) noexcept = 0;
+    virtual bool fileTooBigError(const char *path, size_t size) noexcept = 0;
+    virtual bool readError(const char *path, const char *cause) noexcept = 0;
+    virtual bool writeError(const char *path, const char *cause) noexcept = 0;
+    virtual bool openForReadError(const char *path, const char *cause) noexcept = 0;
+    virtual bool openForWriteError(const char *path, const char *cause) noexcept = 0;
+    virtual void getOpenPath(FuncView<bool (const char *)> accept) noexcept = 0;
+    virtual void getSaveAsPath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept = 0;
+    virtual void getRenamePath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept = 0;
 };
 
-Editor *openFile(const char *filePath, ushort options);
+struct DefaultFileDialogs : FileDialogs
+{
+    ushort confirmSaveUntitled(FileEditorState &) noexcept override;
+    ushort confirmSaveModified(FileEditorState &) noexcept override;
+    ushort confirmOverwrite(const char *path) noexcept override;
+    void removeRenamedWarning(const char *dst, const char *src, const char *cause) noexcept override;
+    bool renameError(const char *dst, const char *src, const char *cause) noexcept override;
+    bool fileTooBigError(const char *path, size_t size) noexcept override;
+    bool readError(const char *path, const char *cause) noexcept override;
+    bool writeError(const char *path, const char *cause) noexcept override;
+    bool openForReadError(const char *path, const char *cause) noexcept override;
+    bool openForWriteError(const char *path, const char *cause) noexcept override;
+    void getOpenPath(FuncView<bool (const char *)> accept) noexcept override;
+    void getSaveAsPath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept override;
+    void getRenamePath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept override;
+};
 
-struct OpenFileWithDialogResult { Editor *editor; std::string filePath; };
-OpenFileWithDialogResult openFileWithDialog();
+extern DefaultFileDialogs defFileDialogs;
 
-bool saveFile(const char *filePath, Editor &editor, ushort options);
-std::string saveFileWithDialog(Editor &editor);
+struct SilentFileDialogs : FileDialogs
+{
+    ushort confirmSaveUntitled(FileEditorState &) noexcept override;
+    ushort confirmSaveModified(FileEditorState &) noexcept override;
+    ushort confirmOverwrite(const char *path) noexcept override;
+    void removeRenamedWarning(const char *dst, const char *src, const char *cause) noexcept override;
+    bool renameError(const char *dst, const char *src, const char *cause) noexcept override;
+    bool fileTooBigError(const char *path, size_t size) noexcept override;
+    bool readError(const char *path, const char *cause) noexcept override;
+    bool writeError(const char *path, const char *cause) noexcept override;
+    bool openForReadError(const char *path, const char *cause) noexcept override;
+    bool openForWriteError(const char *path, const char *cause) noexcept override;
+    void getOpenPath(FuncView<bool (const char *)> accept) noexcept override;
+    void getSaveAsPath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept override;
+    void getRenamePath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept override;
+};
 
-bool renameFile(const char *dst, const char *src, Editor &editor, ushort options);
-std::string renameFileWithDialog(const char *src, Editor &editor);
+extern SilentFileDialogs silFileDialogs;
+
+bool readFile(Editor &editor, const char *path, FileDialogs & = defFileDialogs) noexcept;
+void openFile(FuncView<void(Editor &, const char *)> accept, FileDialogs & = defFileDialogs) noexcept;
+bool writeFile(const char *path, Editor &editor, FileDialogs & = defFileDialogs) noexcept;
+bool renameFile(const char *dst, const char *src, Editor &editor, FileDialogs & = defFileDialogs) noexcept;
 
 struct FileEditorState : EditorState
 {
@@ -156,14 +203,14 @@ struct FileEditorState : EditorState
 
     FileEditorState(Editor &aEditor, std::string aFilePath);
 
-    void detectLanguage();
-    bool save();
-    bool saveAs();
-    bool rename();
-    bool close();
+    void detectLanguage() noexcept;
+    bool save(FileDialogs & = defFileDialogs) noexcept;
+    bool saveAs(FileDialogs & = defFileDialogs) noexcept;
+    bool rename(FileDialogs & = defFileDialogs) noexcept;
+    bool close(FileDialogs & = defFileDialogs) noexcept;
 
-    void beforeSave();
-    void afterSave();
+    void beforeSave() noexcept;
+    void afterSave() noexcept;
 
 };
 

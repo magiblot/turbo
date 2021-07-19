@@ -60,7 +60,7 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
 
     void handleNotification(ushort, turbo::EditorState &) override;
 
-    void addEditor(turbo::Editor &, TStringView filePath);
+    void addEditor(turbo::Editor &, const char *filePath);
     void removeState(FileEditorState &aState);
     bool closeAllEditors();
 
@@ -222,9 +222,9 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 break;
             case cmOpenFile:
             {
-                auto &&r = turbo::openFileWithDialog();
-                if (r.editor)
-                    addEditor(*r.editor, r.filePath);
+                turbo::openFile([&] (turbo::Editor &editor, const char *path) {
+                    addEditor(editor, path);
+                });
                 clearEvent(ev);
                 break;
             }
@@ -318,7 +318,7 @@ void DemoEditorWindow::handleNotification(ushort code, turbo::EditorState &state
     }
 }
 
-void DemoEditorWindow::addEditor(turbo::Editor &editor, TStringView filePath)
+void DemoEditorWindow::addEditor(turbo::Editor &editor, const char *filePath)
 {
     states.emplace_front(editor, filePath);
     listView->setRange(listView->range + 1);
