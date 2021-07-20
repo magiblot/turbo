@@ -14,7 +14,7 @@ Node::Node(Node *parent, std::string_view p) :
 }
 
 Node::Node(Node *parent, EditorWindow *w) :
-    TNode(w->title),
+    TNode(w->getTitle()),
     ptr(nullptr),
     parent(parent),
     data(w)
@@ -113,11 +113,11 @@ void DocumentTreeView::addEditor(EditorWindow *w)
 {
     Node *parent;
     TNode **list;
-    if (w->file.empty()) {
+    if (w->filePath().empty()) {
         parent = nullptr;
         list = &root;
     } else {
-        parent = getDirNode(TPath::dirname(w->file));
+        parent = getDirNode(TPath::dirname(w->filePath()));
         list = &parent->childList;
     }
     putNode(list, new Node(parent, w));

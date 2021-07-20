@@ -4,12 +4,16 @@
 #define Uses_TFrame
 #include <tvision/tv.h>
 
-struct EditorWindow;
+namespace Scintilla {
+
+struct TScintillaEditor;
+
+} // namespace Scintilla
 
 struct EditorFrame : public TFrame
 {
 
-    EditorWindow *editwin;
+    Scintilla::TScintillaEditor *editor;
 
     EditorFrame(const TRect &bounds);
 

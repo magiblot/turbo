@@ -8,9 +8,8 @@
 #include "app.h"
 #include "search.h"
 #include "editwindow.h"
-#include "docview.h"
 
-void SearchBox::init(EditorWindow &win)
+void insertSearchBox(EditorWindow &win)
 {
     TRect r = win.getExtent().grow(-1, -1);
     r.a.y = r.b.y - 2;
@@ -125,27 +124,23 @@ void SearchBox::draw()
     TGroup::redraw();
 }
 
-static inline void grow(TView *v, TPoint delta)
+static inline void grow(TView &v, TPoint delta)
 {
-    TRect r = v->getBounds();
+    TRect r = v.getBounds();
     r.b += delta;
-    v->changeBounds(r);
+    v.setBounds(r);
 }
 
 void SearchBox::open()
 {
     if (!visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
-        win.lock();
-        win.editorView.grow({0, -(size.y + 1)});
-        for (auto *v : std::initializer_list<TView*> {win.docView, win.leftMargin})
+        ::forEach<TView>({win.editorState.view, win.editorState.leftMargin}, [&] (auto &v) {
             grow(v, {0, -(size.y + 1)});
-        lock();
+        });
         show();
-        unlock();
         win.frame->drawView();
-        win.redrawEditor();
-        win.unlock();
+        win.editorState.redraw();
         visible = true;
     } else
         focus();
@@ -155,14 +150,12 @@ void SearchBox::close()
 {
     if (visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
-        win.lock();
-        win.editorView.grow({0, size.y + 1});
-        for (auto *v : std::initializer_list<TView*> {win.docView, win.leftMargin})
+        ::forEach<TView>({win.editorState.view, win.editorState.leftMargin}, [&] (auto &v) {
             grow(v, {0, size.y + 1});
+        });
         hide();
         win.frame->drawView();
-        win.redrawEditor();
-        win.unlock();
+        win.editorState.redraw();
         visible = false;
     }
 }
@@ -223,41 +216,45 @@ Boolean Searcher::isValidInput(char *s, Boolean)
 
 void Searcher::targetFromCurrent()
 {
+    auto &editor = win.editorState.editor;
     direction = forward;
-    auto cur = win.editor.WndProc(SCI_GETSELECTIONSTART, 0U, 0U);
-    auto end = win.editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
-    win.editor.WndProc(SCI_SETTARGETRANGE, cur, end);
+    auto cur = editor.WndProc(SCI_GETSELECTIONSTART, 0U, 0U);
+    auto end = editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
+    editor.WndProc(SCI_SETTARGETRANGE, cur, end);
 }
 
 void Searcher::targetNext()
 {
+    auto &editor = win.editorState.editor;
     direction = forward;
-    auto end = win.editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
+    auto end = editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
     auto start = resultEnd != -1 ? resultEnd : 0;
-    win.editor.WndProc(SCI_SETTARGETRANGE, start, end);
+    editor.WndProc(SCI_SETTARGETRANGE, start, end);
 }
 
 void Searcher::targetPrev()
 {
+    auto &editor = win.editorState.editor;
     direction = backwards;
-    auto start = result != -1 ? result : win.editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
-    win.editor.WndProc(SCI_SETTARGETRANGE, start, 0);
+    auto start = result != -1 ? result : editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
+    editor.WndProc(SCI_SETTARGETRANGE, start, 0);
 }
 
 void Searcher::searchText(std::string_view s, bool wrap)
 {
-    auto start = win.editor.WndProc(SCI_GETTARGETSTART, 0U, 0U);
-    auto end = win.editor.WndProc(SCI_GETTARGETEND, 0U, 0U);
-    result = win.editor.WndProc(SCI_SEARCHINTARGET, s.size(), (sptr_t) s.data());
+    auto &editor = win.editorState.editor;
+    auto start = editor.WndProc(SCI_GETTARGETSTART, 0U, 0U);
+    auto end = editor.WndProc(SCI_GETTARGETEND, 0U, 0U);
+    result = editor.WndProc(SCI_SEARCHINTARGET, s.size(), (sptr_t) s.data());
     // Restore search target as Scintilla sets it to the result text.
-    win.editor.WndProc(SCI_SETTARGETRANGE, start, end);
+    editor.WndProc(SCI_SETTARGETRANGE, start, end);
     if (result != -1) {
         resultEnd = result + s.size();
-        win.editor.WndProc(SCI_SETSEL, result, resultEnd);
+        editor.WndProc(SCI_SETSEL, result, resultEnd);
         // Since we cannot prevent TInputLine from doing duplicate searches,
         // at least search from the current point.
         auto newStart = direction == forward ? result : resultEnd;
-        win.editor.WndProc(SCI_SETTARGETSTART, newStart, 0U);
+        editor.WndProc(SCI_SETTARGETSTART, newStart, 0U);
     } else if (wrap && !typing) { // Do not wrap while typing.
         resultEnd = -1;
         if (direction == forward) {
@@ -266,16 +263,16 @@ void Searcher::searchText(std::string_view s, bool wrap)
                 return searchText(s, false);
             }
         } else {
-            auto docEnd = win.editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
+            auto docEnd = editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
             if (start != docEnd) {
                 targetPrev();
                 return searchText(s, false);
             }
         }
     } else {
-        auto cur = win.editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
-        win.editor.WndProc(SCI_SETEMPTYSELECTION, cur, 0U);
+        auto cur = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
+        editor.WndProc(SCI_SETEMPTYSELECTION, cur, 0U);
         resultEnd = -1;
     }
-    win.redrawEditor();
+    win.editorState.redraw();
 }

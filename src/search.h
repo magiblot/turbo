@@ -22,9 +22,9 @@ struct SearchBox : public TGroup {
     void open();
     void close();
 
-    static void init(EditorWindow &win);
-
 };
+
+void insertSearchBox(EditorWindow &win);
 
 struct Searcher : public TValidator {
 

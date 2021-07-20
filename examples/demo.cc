@@ -227,7 +227,7 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 break;
             case cmOpenFile:
             {
-                turbo::openFile([&] () -> turbo::Editor& {
+                turbo::openFile([&] () -> auto& {
                     return createEditor();
                 }, [&] (turbo::Editor &editor, const char *path) {
                     addEditor(editor, path);

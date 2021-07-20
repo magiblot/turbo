@@ -8,7 +8,9 @@
 #include <tvision/tv.h>
 #include "tpath.h"
 
+#include <string>
 #include <string_view>
+#include <forward_list>
 #include <unordered_map>
 #include <tvision/compat/dir.h>
 
@@ -270,6 +272,10 @@ struct CwdGuard
         else
             lastCwd = nullptr;
     }
+    CwdGuard(const std::string &newCwd) :
+        CwdGuard(newCwd.c_str())
+    {
+    }
     ~CwdGuard()
     {
         if (lastCwd)
@@ -278,6 +284,14 @@ struct CwdGuard
             ::free(lastCwd);
         }
     }
+};
+
+class FileCounter
+{
+    std::unordered_map<std::string_view, active_counter> map;
+    std::forward_list<std::string> strings;
+public:
+    active_counter &operator[](std::string_view) noexcept;
 };
 
 #endif

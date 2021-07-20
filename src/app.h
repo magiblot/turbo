@@ -7,12 +7,11 @@
 
 #include <ScintillaHeaders.h>
 
-#include <string_view>
-#include <unordered_map>
-#include <forward_list>
+#include <turbo/turbo.h>
 #include "util.h"
 #include "doctree.h"
 #include "clipboard.h"
+#include "editwindow.h"
 
 struct EditorWindow;
 class TClockView;
@@ -34,10 +33,10 @@ const ushort
 const ushort
     cmToggleTree    = 1000;
 
-struct TurboApp : public TApplication {
+struct TurboApp : public TApplication, EditorWindowParent
+{
 
-    std::unordered_map<std::string_view, active_counter> fileCount;
-    std::forward_list<std::string> files; // Storage for the strings referenced by fileCount;
+    FileCounter fileCount;
     list_head<EditorWindow> MRUlist;
     TClockView *clock;
     DocumentTreeWindow *docTree;
@@ -53,6 +52,7 @@ struct TurboApp : public TApplication {
     static TMenuBar* initMenuBar(TRect r);
     static TStatusLine* initStatusLine(TRect r);
 
+    void shutDown() override;
     void idle() override;
     void getEvent(TEvent &event) override;
     void handleEvent(TEvent& event) override;
@@ -60,58 +60,21 @@ struct TurboApp : public TApplication {
 
     void fileNew();
     void fileOpen();
-    void fileSave();
-    bool openEditor(std::string_view fileName, bool canFail=false);
+    void fileOpenOrNew(const char *path);
     void closeAll();
     TRect newEditorBounds() const;
-    void setEditorTitle(EditorWindow *w);
-    void updateEditorTitle(EditorWindow *w, std::string_view prevFile);
-    uint incFileCounter(std::string_view path);
-    void decFileCounter(std::string_view path);
-    active_counter& getFileCounter(std::string_view file);
-    void addEditor(EditorWindow *w);
-    void removeEditor(EditorWindow *w);
-
+    turbo::Editor &createEditor();
+    void addEditor(turbo::Editor &, const char *path);
     void showEditorList(TEvent *ev);
     void toggleTreeView();
 
-    // The path of the most recently focused editor, so that file dialogs
-    // are opened there.
-
-    std::string mostRecentDir;
-    void setFocusedEditor(EditorWindow *w); // Set from here.
-
-    template<typename Func>
-    void openFileDialog( std::string_view aWildCard, std::string_view aTitle,
-                         std::string_view inputName, ushort aOptions,
-                         uchar histId, Func &&callback );
+    void handleFocus(EditorWindow &w) override;
+    void handleTitleChange(EditorWindow &w) override;
+    void removeEditor(EditorWindow &w) override;
 
     TPalette& getPalette() const override;
 
 };
-
-inline uint TurboApp::incFileCounter(std::string_view path)
-{
-    return ++getFileCounter(TPath::basename(path));
-}
-
-inline void TurboApp::decFileCounter(std::string_view path)
-{
-    --getFileCounter(TPath::basename(path));
-}
-
-template<typename Func>
-inline void TurboApp::openFileDialog( std::string_view aWildCard, std::string_view aTitle,
-                                      std::string_view inputName, ushort aOptions,
-                                      uchar histId, Func &&callback )
-{
-    // Unfortunately, TFileDialog relies on the current directory.
-    [[maybe_unused]] int rr = chdir(mostRecentDir.c_str());
-    auto *dialog = new TFileDialog( aWildCard, aTitle,
-                                    inputName, aOptions,
-                                    histId );
-    execDialog(dialog, nullptr, callback);
-}
 
 enum : uchar
 {

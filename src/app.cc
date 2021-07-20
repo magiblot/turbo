@@ -25,6 +25,7 @@
 #include "widgets.h"
 #include "listviews.h"
 #include "doctree.h"
+#include <turbo/turbo.h>
 
 using namespace Scintilla;
 using namespace std::literals;
@@ -158,10 +159,18 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             );
 }
 
+void TurboApp::shutDown()
+{
+    docTree = nullptr;
+    clock = nullptr;
+    TApplication::shutDown();
+}
+
 void TurboApp::idle()
 {
     TApplication::idle();
-    clock->update();
+    if (clock)
+        clock->update();
 }
 
 void TurboApp::getEvent(TEvent &event)
@@ -247,7 +256,7 @@ void TurboApp::parseArgs()
             strncpy(str, argv[i], 255);
             current->setText(str);
             TScreen::flushScreen();
-            openEditor(argv[i], true);
+            fileOpenOrNew(argv[i]);
         }
         remove(w);
         TObject::destroy(w);
@@ -256,29 +265,27 @@ void TurboApp::parseArgs()
 
 void TurboApp::fileNew()
 {
-    openEditor({});
+    addEditor(createEditor(), "");
 }
 
 void TurboApp::fileOpen()
 {
-    openFileDialog( "*.*", "Open file", "~N~ame", fdOpenButton, 0,
-        [this] (TView *dialog) {
-            // MAXPATH as assumed by TFileDialog.
-            char fileName[MAXPATH];
-            dialog->getData(fileName);
-            return openEditor(fileName);
-        }
-    );
+    CwdGuard cwd {fileDialogDir};
+    turbo::openFile([&] () -> auto& {
+        return createEditor();
+    }, [&] (auto &editor, auto *path) {
+        addEditor(editor, path);
+    });
 }
 
-bool TurboApp::openEditor(std::string_view fileName, bool canFail)
+void TurboApp::fileOpenOrNew(const char *path)
 {
-    TRect r = newEditorBounds();
-    EditorWindow *w = new EditorWindow(r, fileName, canFail);
-    w = (EditorWindow *) validView(w);
-    if (w)
-        addEditor(w);
-    return w;
+    char abspath[MAXPATH];
+    strnzcpy(abspath, path, MAXPATH);
+    fexpand(abspath);
+    auto &editor = createEditor();
+    turbo::readFile(editor, abspath, turbo::silFileDialogs);
+    addEditor(editor, abspath);
 }
 
 void TurboApp::closeAll()
@@ -298,92 +305,35 @@ TRect TurboApp::newEditorBounds() const
         return MRUlist.next->self->getBounds();
     else {
         TRect r = deskTop->getExtent();
-        if (docTree->state & sfVisible) {
+        if (docTree && docTree->state & sfVisible) {
             TRect t = docTree->getBounds();
             // Align left.
             if (t.a.x > r.b.x - t.b.x)
-                r.b.x = max(t.a.x, EditorWindow::minEditWinSize.x);
+                r.b.x = max(t.a.x, EditorWindow::minSize.x);
             // Align right.
             else
-                r.a.x = min(t.b.x, r.b.x - EditorWindow::minEditWinSize.x);
+                r.a.x = min(t.b.x, r.b.x - EditorWindow::minSize.x);
         }
         return r;
     }
 }
 
-void TurboApp::setEditorTitle(EditorWindow *w)
+turbo::Editor &TurboApp::createEditor()
 {
-    uint number;
-    auto fileName = TPath::basename(w->file);
-    if (!fileName.empty()) {
-        w->title = fileName;
-        number = incFileCounter(w->file);
-    } else {
-        w->title = "Untitled"sv;
-        number = ++fileCount[{}];
-    }
-    if (number > 1)
-        w->title.append(fmt::format(" ({})", number));
-    w->name = w->title; // Copy!
-    w->frame->drawView();
+    return turbo::createEditor(&clipboard);
 }
 
-void TurboApp::updateEditorTitle(EditorWindow *w, std::string_view prevFile)
+void TurboApp::addEditor(turbo::Editor &editor, const char *path)
+// Pre: 'path' is an absolute path.
 {
-    if (w->MRUhead.detached()) // 'addEditor' not called yet.
-        return;
-    if (w->file != prevFile) {
-        decFileCounter(prevFile);
-        setEditorTitle(w);
-        if (docTree) {
-            docTree->tree->removeEditor(w);
-            docTree->tree->addEditor(w);
-            docTree->tree->focusEditor(w);
-        }
-    }
-    if (!w->file.empty())
-        mostRecentDir = TPath::dirname(w->file);
-}
-
-active_counter& TurboApp::getFileCounter(std::string_view file)
-{
-    // We need to keep at least one copy of the 'file' string alive.
-    // This is because I don't want fileCount to be a map of std::string.
-    auto it = fileCount.find(file);
-    if (it == fileCount.end()) {
-        // Allocate string for the filename. We use a forward_list to avoid
-        // reference invalidation.
-        const auto &s = files.emplace_front(file);
-        file = s; // Make file point to the allocated string.
-        it = fileCount.emplace(file, active_counter()).first;
-    }
-    return it->second;
-}
-
-void TurboApp::addEditor(EditorWindow *w)
-{
-    setEditorTitle(w);
+    TRect r = newEditorBounds();
+    auto &counter = fileCount[TPath::basename(path)];
+    EditorWindow &w = *new EditorWindow(r, editor, path, counter, *this);
     if (docTree)
-        docTree->tree->addEditor(w);
-    w->MRUhead.insert_after(&MRUlist);
-    deskTop->insert(w);
+        docTree->tree->addEditor(&w);
+    w.listHead.insert_after(&MRUlist);
+    deskTop->insert(&w);
     enableCommands(editorCmds);
-}
-
-void TurboApp::removeEditor(EditorWindow *w)
-{
-    decFileCounter(w->file);
-    w->MRUhead.remove();
-    if (MRUlist.empty())
-        disableCommands(editorCmds);
-    if (docTree) {
-        docTree->tree->removeEditor(w);
-        // We need to set the focus again as it had already been set before
-        // removing the editor, and so it would stay on the same position
-        // but not on the same element.
-        if (!MRUlist.empty())
-            docTree->tree->focusEditor(MRUlist.next->self);
-    }
 }
 
 void TurboApp::showEditorList(TEvent *ev)
@@ -407,9 +357,11 @@ void TurboApp::showEditorList(TEvent *ev)
 
 void TurboApp::toggleTreeView()
 {
-    MRUlist.forEach([] (auto *win) {
-        // Set exposed=False to prevent Turbo Vision from attempting
-        // to draw all views, which can lead to polinomial complexity.
+    if (!docTree)
+        return;
+    // Prevent editors from doing draw() on each changeBounds(). We'll draw all
+    // the views at the end.
+    MRUlist.forEach([&] (auto *win) {
         win->setState(sfExposed, False);
     });
     TRect dr = docTree->getBounds();
@@ -424,7 +376,6 @@ void TurboApp::toggleTreeView()
             win->locate(r);
         });
     } else {
-        docTree->show();
         MRUlist.forEach([this, dr] (auto *win) {
             TRect r = win->getBounds();
             if (r.a.x + docTree->size.x >= dr.b.x)
@@ -433,22 +384,55 @@ void TurboApp::toggleTreeView()
                 r.b.x -= docTree->size.x;
             win->locate(r);
         });
+        docTree->show();
     }
-    MRUlist.forEach([] (auto *win) {
+    MRUlist.forEach([&] (auto *win) {
         win->setState(sfExposed, True);
     });
     deskTop->redraw();
 }
 
-void TurboApp::setFocusedEditor(EditorWindow *w)
+void TurboApp::handleFocus(EditorWindow &w)
 {
     // w has been focused, so it becomes the first of our MRU list.
-    w->MRUhead.insert_after(&MRUlist);
+    w.listHead.insert_after(&MRUlist);
     if (docTree)
-        docTree->tree->focusEditor(w);
+        docTree->tree->focusEditor(&w);
     // We keep track of the most recent directory for file dialogs.
-    if (!w->file.empty())
-        mostRecentDir = TPath::dirname(w->file);
+    if (!w.filePath().empty())
+        fileDialogDir = TPath::dirname(w.filePath());
+}
+
+void TurboApp::handleTitleChange(EditorWindow &w)
+{
+    auto &counter = fileCount[TPath::basename(w.filePath())];
+    if (&counter != w.fileNumber.counter)
+    {
+        w.fileNumber = {counter};
+        if (docTree)
+        {
+            docTree->tree->removeEditor(&w);
+            docTree->tree->addEditor(&w);
+            docTree->tree->focusEditor(&w);
+        }
+    }
+    if (!w.filePath().empty() && w.state & sfActive)
+        fileDialogDir = TPath::dirname(w.filePath());
+}
+
+void TurboApp::removeEditor(EditorWindow &w)
+{
+    w.listHead.remove();
+    if (MRUlist.empty())
+        disableCommands(editorCmds);
+    if (docTree)
+    {
+        docTree->tree->removeEditor(&w);
+        // Removing the editor causes the focus to stay on the same position
+        // but maybe not on the right element.
+        if (!MRUlist.empty())
+            docTree->tree->focusEditor(MRUlist.next->self);
+    }
 }
 
 static constexpr TColorAttr cpTurboAppColor[167] =

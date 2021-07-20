@@ -102,6 +102,11 @@ struct EditorState : Scintilla::TScintillaParent
         lineNumbers.enabled ^= true;
     }
 
+    void toggleAutoIndent()
+    {
+        autoIndent.enabled ^= true;
+    }
+
     bool inSavePoint();
 
 };
