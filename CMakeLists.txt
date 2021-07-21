@@ -12,6 +12,7 @@ project (turbo)
 option(TURBO_USE_SYSTEM_DEPS "Use system-wide dependencies instead of submodules (except Turbo Vision)" OFF)
 option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
 option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the UI component" ON)
+option(TURBO_BUILD_EXAMPLES "Build example apps" OFF)
 
 # Target 'scintilla'
 
@@ -19,29 +20,29 @@ option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the UI 
 # for 'scintilla' and precompiled headers for 'scilexers'.
 
 file(GLOB_RECURSE SCINTILLA_SRC
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/src/*.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexlib/*.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/src/*.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexlib/*.cxx"
 )
 
 list(APPEND SCILEXERS_SRC
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexAsm.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexBash.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexCPP.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexMake.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexPython.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexRuby.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexers/LexRust.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexAsm.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexBash.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexCPP.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexMake.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexPython.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexRuby.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexRust.cxx"
 )
 
-add_library(scintilla STATIC ${SCINTILLA_SRC})
-add_library(scilexers STATIC ${SCILEXERS_SRC})
+add_library(scintilla OBJECT ${SCINTILLA_SRC})
+add_library(scilexers OBJECT ${SCILEXERS_SRC})
 
 foreach(t scintilla scilexers)
     target_compile_features(${t} PUBLIC cxx_std_17)
-    target_include_directories(${t} PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/scintilla/include"
-        "${CMAKE_CURRENT_LIST_DIR}/scintilla/lexlib"
-        "${CMAKE_CURRENT_LIST_DIR}/scintilla/src"
+    target_include_directories(${t} PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/turbo/scintilla/include"
+        "${CMAKE_CURRENT_LIST_DIR}/include/turbo/scintilla/lexlib"
+        "${CMAKE_CURRENT_LIST_DIR}/include/turbo/scintilla/src"
     )
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         target_compile_options(${t} PUBLIC
@@ -66,79 +67,64 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     )
 endif()
 
-# Address cyclic dependencies of static libraries
-
-target_link_libraries(scintilla scilexers)
-target_link_libraries(scilexers scintilla)
-
-# Target 'turbo-ui'
-
-file(GLOB TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.cc")
-set(TURBO_MAIN "${CMAKE_CURRENT_LIST_DIR}/src/main.cc")
-list(REMOVE_ITEM TURBO_SRC ${TURBO_MAIN})
-
-add_library(${PROJECT_NAME}-ui ${TURBO_SRC})
+# Dependencies
 
 include(deps/CMakeLists.txt)
 
-target_include_directories(${PROJECT_NAME}-ui PUBLIC
+# Target 'turbo-core'
+
+set(TURBO turbo)
+
+file(GLOB_RECURSE TURBO_CORE_SRC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}-core/*.cc")
+add_library(${TURBO}-core ${TURBO_CORE_SRC})
+
+target_compile_features(${TURBO}-core PUBLIC cxx_std_17)
+target_include_directories(${TURBO}-core PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
-    "${CMAKE_CURRENT_LIST_DIR}/src"
-    "${CMAKE_CURRENT_LIST_DIR}/src/platform"
+)
+target_include_directories(${TURBO}-core PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}-core"
+    "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}-core/platform"
     "${CMAKE_CURRENT_LIST_DIR}/deps/libclipboard/include" # libclipboard.h
     "${CMAKE_BINARY_DIR}/deps/libclipboard/include" # libclipboard-config.h
 )
-
-target_link_libraries(${PROJECT_NAME}-ui PUBLIC
+target_link_libraries(${TURBO}-core PRIVATE
     scintilla
+    scilexers
+)
+target_link_libraries(${TURBO}-core PUBLIC
     tvision
     fmt
     clipboard
 )
 
-# Other optional dependencies
+# Optional dependencies
+
 find_library(MAGIC magic)
 if (MAGIC)
-    target_link_libraries(${PROJECT_NAME}-ui PRIVATE ${MAGIC})
-    target_compile_definitions(${PROJECT_NAME}-ui PRIVATE HAVE_MAGIC)
-endif()
-
-# Target 'sciplatform'
-
-file(GLOB SCIPLATFORM_SRC "${CMAKE_CURRENT_LIST_DIR}/src/platform/*.cc")
-
-add_library(sciplatform ${SCIPLATFORM_SRC})
-
-target_include_directories(sciplatform PRIVATE
-    "${CMAKE_CURRENT_LIST_DIR}/include"
-    "${CMAKE_CURRENT_LIST_DIR}/src/platform"
-)
-
-# Address more cyclic dependencies
-
-target_link_libraries(scintilla sciplatform)
-target_link_libraries(sciplatform PRIVATE
-    scintilla
-    tvision
-)
-
-# Build optimization
-
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0" AND TURBO_OPTIMIZE_BUILD)
-    set_target_properties(${PROJECT_NAME}-ui PROPERTIES UNITY_BUILD ON)
-    target_precompile_headers(${PROJECT_NAME}-ui PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
-    )
-    set_target_properties(sciplatform PROPERTIES UNITY_BUILD ON)
+    target_link_libraries(${TURBO}-core PRIVATE ${MAGIC})
+    target_compile_definitions(${TURBO}-core PRIVATE HAVE_MAGIC)
 endif()
 
 # Target 'turbo'
 
-add_executable(${PROJECT_NAME} ${TURBO_MAIN})
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${PROJECT_NAME}-ui
+file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.cc")
+add_executable(${TURBO} ${TURBO_SRC})
+target_link_libraries(${TURBO} PRIVATE
+    ${TURBO}-core
 )
 
 # Examples
 
-add_subdirectory(examples)
+add_subdirectory(source/examples)
+
+# Optional build optimization
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0" AND TURBO_OPTIMIZE_BUILD)
+    set_target_properties(${TURBO}-core PROPERTIES UNITY_BUILD ON)
+    set_target_properties(${TURBO} PROPERTIES UNITY_BUILD ON)
+    target_precompile_headers(${TURBO}-core PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
+    )
+    target_precompile_headers(${TURBO} REUSE_FROM ${TURBO}-core)
+endif()

@@ -6,9 +6,9 @@
 #include <tvision/tv.h>
 
 #include <turbo/funcview.h>
-#include <tscintilla.h>
-#include <editstates.h>
-#include <styles.h>
+#include <turbo/tscintilla.h>
+#include <turbo/editstates.h>
+#include <turbo/styles.h>
 
 #include <string>
 #include <utility>

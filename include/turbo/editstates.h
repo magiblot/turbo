@@ -1,0 +1,101 @@
+#ifndef TURBO_EDITSTATES_H
+#define TURBO_EDITSTATES_H
+
+#include <tvision/tv.h>
+#include <turbo/scintilla.h>
+#include <string_view>
+
+namespace Scintilla {
+
+struct TScintillaEditor;
+
+} // namespace Scintilla
+
+class LineNumbersWidth
+{
+
+public:
+
+    int minWidth;
+    bool enabled {false};
+
+    LineNumbersWidth(int min) :
+        minWidth(min)
+    {
+    }
+
+    void toggle()
+    {
+        enabled ^= true;
+    }
+
+    int update(Scintilla::TScintillaEditor &editor);
+
+private:
+
+    int calcWidth(Scintilla::TScintillaEditor &editor);
+
+};
+
+class WrapState
+{
+    bool enabled {false};
+    bool confirmedOnce {false};
+
+public:
+
+    bool toggle(Scintilla::TScintillaEditor &editor, bool dialog=true);
+};
+
+struct AutoIndent
+{
+    bool enabled {true};
+
+    void toggle()
+    {
+        enabled ^= true;
+    }
+
+    void applyToCurrentLine(Scintilla::TScintillaEditor &editor);
+};
+
+#ifdef DocumentProperties
+#undef DocumentProperties
+#endif
+
+class DocumentProperties
+{
+    enum : uint {
+        ndEOL = 0x0001,
+    };
+
+    uint notDetected;
+    int eolType;
+
+public:
+
+    DocumentProperties()
+    {
+        reset();
+    }
+
+    void reset()
+    {
+        notDetected = ndEOL;
+        eolType = SC_EOL_LF; // Default EOL type is LF.
+    }
+
+    void analyze(std::string_view text);
+    void apply(Scintilla::TScintillaEditor &editor) const;
+
+    int getEOLType() const
+    {
+        return eolType;
+    }
+
+};
+
+void stripTrailingSpaces(Scintilla::TScintillaEditor &editor);
+void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor);
+
+#endif
