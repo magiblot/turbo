@@ -33,7 +33,7 @@ struct EditorState;
 
 struct EditorParent
 {
-    virtual void handleNotification(ushort code, EditorState &) = 0;
+    virtual void handleNotification(ushort code, EditorState &) noexcept = 0;
 };
 
 struct EditorState : Scintilla::TScintillaParent
@@ -68,41 +68,41 @@ struct EditorState : Scintilla::TScintillaParent
     WrapState wrapping;
     AutoIndent autoIndent;
 
-    EditorState(Editor &aEditor);
+    EditorState(Editor &aEditor) noexcept;
     virtual ~EditorState();
 
     void associate( EditorParent *aParent,
                     EditorView *aView, LeftMarginView *aLeftMargin,
-                    TScrollBar *aHScrollBar, TScrollBar *aVScrollBar );
-    void disassociate();
+                    TScrollBar *aHScrollBar, TScrollBar *aVScrollBar ) noexcept;
+    void disassociate() noexcept;
 
     void scrollBarEvent(TEvent &ev);
-    void scrollTo(TPoint delta);
-    void redraw();
-    void partialRedraw();
-    bool redraw(const TRect &area);
-    void drawViews();
-    void updateMarginWidth();
+    void scrollTo(TPoint delta) noexcept;
+    void redraw() noexcept;
+    void partialRedraw() noexcept;
+    bool redraw(const TRect &area) noexcept;
+    void drawViews() noexcept;
+    void updateMarginWidth() noexcept;
     bool handleScrollBarChanged(TScrollBar *);
 
-    TPoint getEditorSize() override;
-    void invalidate(TRect area) override;
+    TPoint getEditorSize() noexcept override;
+    void invalidate(TRect area) noexcept override;
     void handleNotification(const SCNotification &scn) override;
-    void setHorizontalScrollPos(int delta, int limit) override;
-    void setVerticalScrollPos(int delta, int limit) override;
+    void setHorizontalScrollPos(int delta, int limit) noexcept override;
+    void setVerticalScrollPos(int delta, int limit) noexcept override;
 
-    bool toggleLineWrapping(ushort options)
+    bool toggleLineWrapping(ushort options) noexcept
     // Post: returns true if line wrapping is enabled.
     {
         return wrapping.toggle(editor, options & lwConfirm);
     }
 
-    void toggleLineNumbers()
+    void toggleLineNumbers() noexcept
     {
         lineNumbers.enabled ^= true;
     }
 
-    void toggleAutoIndent()
+    void toggleAutoIndent() noexcept
     {
         autoIndent.enabled ^= true;
     }
@@ -117,7 +117,7 @@ public:
 
     EditorState *editorState {nullptr};
 
-    EditorView(const TRect &bounds);
+    EditorView(const TRect &bounds) noexcept;
 
     void handleEvent(TEvent &ev) override;
     void draw() override;
@@ -134,7 +134,7 @@ public:
 
     int distanceFromView;
 
-    LeftMarginView(int aDistance);
+    LeftMarginView(int aDistance) noexcept;
 };
 
 struct FileEditorState;
@@ -209,7 +209,7 @@ struct FileEditorState : EditorState
 
     std::string filePath;
 
-    FileEditorState(Editor &aEditor, std::string aFilePath);
+    FileEditorState(Editor &aEditor, std::string aFilePath) noexcept;
 
     void detectLanguage() noexcept;
     bool save(FileDialogs & = defFileDialogs) noexcept;
@@ -222,7 +222,7 @@ struct FileEditorState : EditorState
 
 };
 
-inline FileEditorState::FileEditorState(Editor &aEditor, std::string aFilePath) :
+inline FileEditorState::FileEditorState(Editor &aEditor, std::string aFilePath) noexcept :
     EditorState(aEditor),
     filePath(std::move(aFilePath))
 {

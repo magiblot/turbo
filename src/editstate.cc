@@ -12,7 +12,7 @@ Editor &createEditor(Clipboard *aClipboard) noexcept
     return *new Editor(aClipboard);
 }
 
-EditorState::EditorState(Editor &aEditor) :
+EditorState::EditorState(Editor &aEditor) noexcept :
     editor(aEditor)
 {
     // Editor should send notifications to this object.
@@ -54,7 +54,7 @@ EditorState::~EditorState()
 
 void EditorState::associate( EditorParent *aParent,
                              EditorView *aView, LeftMarginView *aLeftMargin,
-                             TScrollBar *aHScrollBar, TScrollBar *aVScrollBar )
+                             TScrollBar *aHScrollBar, TScrollBar *aVScrollBar ) noexcept
 {
     disassociate();
     parent = aParent;
@@ -79,7 +79,7 @@ void EditorState::associate( EditorParent *aParent,
     vScrollBar = aVScrollBar;
 }
 
-void EditorState::disassociate()
+void EditorState::disassociate() noexcept
 // Pre: if view != nullptr, view->editorState == this.
 // Post: if view != nullptr && leftMargin != nullptr, they are sized as if
 //       the line numbers were hidden.
@@ -103,7 +103,7 @@ void EditorState::disassociate()
     vScrollBar = nullptr;
 }
 
-TPoint EditorState::getEditorSize()
+TPoint EditorState::getEditorSize() noexcept
 {
     if (view)
         return {
@@ -127,7 +127,7 @@ void EditorState::scrollBarEvent(TEvent &ev)
     drawLock = lastDrawLock;
 }
 
-void EditorState::scrollTo(TPoint delta)
+void EditorState::scrollTo(TPoint delta) noexcept
 {
     // TScrollBar::setValue leads to a cmScrollBarChanged being messaged,
     // which EditorView handles with a call to redraw(). Hold the draw lock
@@ -142,20 +142,20 @@ void EditorState::scrollTo(TPoint delta)
 }
 
 
-void EditorState::redraw()
+void EditorState::redraw() noexcept
 {
     auto size = getEditorSize();
     if (redraw({0, 0, size.x, size.y}))
         invalidatedArea.clear();
 }
 
-void EditorState::partialRedraw()
+void EditorState::partialRedraw() noexcept
 {
     if (redraw(invalidatedArea))
         invalidatedArea.clear();
 }
 
-void EditorState::invalidate(TRect area)
+void EditorState::invalidate(TRect area) noexcept
 {
     if (invalidatedArea.empty())
         invalidatedArea = area;
@@ -163,7 +163,7 @@ void EditorState::invalidate(TRect area)
         invalidatedArea.Union(area);
 }
 
-bool EditorState::redraw(const TRect &area)
+bool EditorState::redraw(const TRect &area) noexcept
 {
     if ( !drawLock && 0 <= area.a.x && area.a.x < area.b.x
                    && 0 <= area.a.y && area.a.y < area.b.y )
@@ -199,7 +199,7 @@ bool EditorState::redraw(const TRect &area)
     return false;
 }
 
-void EditorState::drawViews()
+void EditorState::drawViews() noexcept
 {
     forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
         p.drawView();
@@ -208,7 +208,7 @@ void EditorState::drawViews()
         parent->handleNotification(ncPainted, *this);
 }
 
-void EditorState::updateMarginWidth()
+void EditorState::updateMarginWidth() noexcept
 {
     int width = lineNumbers.update(editor);
     if (leftMargin)
@@ -219,7 +219,7 @@ void EditorState::updateMarginWidth()
         if (view)
         {
             TRect vr = view->getBounds();
-            vr.a.x = mr.b.x + leftMargin->distanceFromView*(width != 0);
+            vr.a.x = mr.b.x + leftMargin->distanceFromView * (width != 0);
             view->setBounds(vr);
             view->delta = {width, 0};
         }
@@ -252,7 +252,7 @@ void EditorState::handleNotification(const SCNotification &scn)
     }
 }
 
-void EditorState::setHorizontalScrollPos(int delta, int limit)
+void EditorState::setHorizontalScrollPos(int delta, int limit) noexcept
 {
     if (view && hScrollBar)
     {
@@ -261,7 +261,7 @@ void EditorState::setHorizontalScrollPos(int delta, int limit)
     }
 }
 
-void EditorState::setVerticalScrollPos(int delta, int limit)
+void EditorState::setVerticalScrollPos(int delta, int limit) noexcept
 {
     if (view && vScrollBar)
     {

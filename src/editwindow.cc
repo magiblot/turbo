@@ -20,7 +20,7 @@ TFrame *EditorWindow::initFrame(TRect bounds)
 
 EditorWindow::EditorWindow( const TRect &bounds, turbo::Editor &editor,
                             const char *filePath, active_counter &fileCounter,
-                            EditorWindowParent &aParent ) :
+                            EditorWindowParent &aParent ) noexcept :
     TWindowInit(&initFrame),
     TWindow(bounds, nullptr, wnNoNumber),
     editorState(editor, filePath),
@@ -188,7 +188,7 @@ void EditorWindow::sizeLimits( TPoint& min, TPoint& max )
     min = minSize;
 }
 
-void EditorWindow::updateCommands()
+void EditorWindow::updateCommands() noexcept
 {
     if (!filePath().empty())
         enabledCmds += cmRename;
@@ -198,7 +198,7 @@ void EditorWindow::updateCommands()
         disableCommands(disabledCmds);
 }
 
-void EditorWindow::handleNotification(ushort code, turbo::EditorState &)
+void EditorWindow::handleNotification(ushort code, turbo::EditorState &) noexcept
 {
     using namespace turbo;
     switch (code)

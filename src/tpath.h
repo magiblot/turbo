@@ -19,14 +19,14 @@ public:
         return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
     }
 
-    static TStringView basename(TStringView path);
-    static TStringView dirname(TStringView path);
-    static TStringView extname(TStringView path);
-    static TStringView rootname(TStringView path);
-    static TStringView drivename(TStringView path);
-    static Boolean isAbsolute(TStringView path);
-    static Boolean exists(const char *path);
-    static TStringView resolve(char abspath[MAXPATH], TStringView path);
+    static TStringView basename(TStringView path) noexcept;
+    static TStringView dirname(TStringView path) noexcept;
+    static TStringView extname(TStringView path) noexcept;
+    static TStringView rootname(TStringView path) noexcept;
+    static TStringView drivename(TStringView path) noexcept;
+    static Boolean isAbsolute(TStringView path) noexcept;
+    static Boolean exists(const char *path) noexcept;
+    static TStringView resolve(char abspath[MAXPATH], TStringView path) noexcept;
 
 };
 

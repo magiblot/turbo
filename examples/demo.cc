@@ -36,7 +36,7 @@ struct DemoApplication : public TApplication
 {
     LcbClipboard clipboard;
 
-    DemoApplication();
+    DemoApplication() noexcept;
 };
 
 struct DemoEditorWindow : public TDialog, public turbo::EditorParent
@@ -52,7 +52,7 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
     std::vector<char> title;
     Clipboard *clipboard;
 
-    DemoEditorWindow(const TRect &bounds, Clipboard *aClipboard);
+    DemoEditorWindow(const TRect &bounds, Clipboard *aClipboard) noexcept;
 
     void shutDown() override;
     void handleEvent(TEvent &ev) override;
@@ -60,7 +60,7 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
     void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     const char *getTitle(short) override;
 
-    void handleNotification(ushort, turbo::EditorState &) override;
+    void handleNotification(ushort, turbo::EditorState &) noexcept override;
 
     turbo::Editor &createEditor();
     void addEditor(turbo::Editor &, const char *filePath);
@@ -73,7 +73,7 @@ struct DemoEditorListView : public TListViewer
 {
 
     DemoEditorListView( const TRect& bounds, TScrollBar *aHScrollBar,
-                     TScrollBar *aVScrollBar, EditorStateList &aList );
+                     TScrollBar *aVScrollBar, EditorStateList &aList ) noexcept;
 
     EditorStateList &list;
 
@@ -85,7 +85,7 @@ struct DemoEditorListView : public TListViewer
 
 };
 
-DemoApplication::DemoApplication() :
+DemoApplication::DemoApplication() noexcept :
     TProgInit(&initStatusLine,
               &initMenuBar,
               &initDeskTop)
@@ -98,7 +98,7 @@ DemoApplication::DemoApplication() :
     );
 }
 
-DemoEditorWindow::DemoEditorWindow(const TRect &bounds, Clipboard *aClipboard) :
+DemoEditorWindow::DemoEditorWindow(const TRect &bounds, Clipboard *aClipboard) noexcept :
     TWindowInit(&initFrame),
     TDialog(bounds, nullptr),
     clipboard(aClipboard)
@@ -309,7 +309,7 @@ const char *DemoEditorWindow::getTitle(short)
     return nullptr;
 }
 
-void DemoEditorWindow::handleNotification(ushort code, turbo::EditorState &state)
+void DemoEditorWindow::handleNotification(ushort code, turbo::EditorState &state) noexcept
 {
     using namespace turbo;
     switch (code)
@@ -367,7 +367,7 @@ bool DemoEditorWindow::closeAllEditors()
 }
 
 DemoEditorListView::DemoEditorListView( const TRect& bounds, TScrollBar *aHScrollBar,
-                                TScrollBar *aVScrollBar, EditorStateList &aList ) :
+                                TScrollBar *aVScrollBar, EditorStateList &aList ) noexcept :
     TListViewer(bounds, 1, aHScrollBar, aVScrollBar),
     list(aList)
 {

@@ -48,7 +48,7 @@ struct TurboApp : public TApplication, EditorWindowParent
 
     static TurboApp *app;
 
-    TurboApp(int argc=0, const char *argv[]=0);
+    TurboApp(int argc=0, const char *argv[]=0) noexcept;
     static TMenuBar* initMenuBar(TRect r);
     static TStatusLine* initStatusLine(TRect r);
 
@@ -63,14 +63,14 @@ struct TurboApp : public TApplication, EditorWindowParent
     void fileOpenOrNew(const char *path);
     void closeAll();
     TRect newEditorBounds() const;
-    turbo::Editor &createEditor();
+    turbo::Editor &createEditor() noexcept;
     void addEditor(turbo::Editor &, const char *path);
     void showEditorList(TEvent *ev);
     void toggleTreeView();
 
-    void handleFocus(EditorWindow &w) override;
-    void handleTitleChange(EditorWindow &w) override;
-    void removeEditor(EditorWindow &w) override;
+    void handleFocus(EditorWindow &w) noexcept override;
+    void handleTitleChange(EditorWindow &w) noexcept override;
+    void removeEditor(EditorWindow &w) noexcept override;
 
     TPalette& getPalette() const override;
 

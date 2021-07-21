@@ -5,7 +5,7 @@
 
 namespace turbo {
 
-EditorView::EditorView(const TRect &bounds) :
+EditorView::EditorView(const TRect &bounds) noexcept :
     TSurfaceView(bounds)
 {
     growMode = gfGrowHiX | gfGrowHiY;

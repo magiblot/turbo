@@ -145,7 +145,7 @@ static constexpr TColorAttr schemaDefault[StyleCount] = {
 };
 
 
-ThemingState::ThemingState() :
+ThemingState::ThemingState() noexcept :
     language(langNone),
     lexInfo(nullptr),
     schema(schemaDefault)

@@ -41,7 +41,7 @@ void turbo_main(int argc, const char *argv[])
     TurboApp::app = 0;
 }
 
-TurboApp::TurboApp(int argc, const char *argv[]) :
+TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     TProgInit( &TurboApp::initStatusLine,
                &TurboApp::initMenuBar,
                &TApplication::initDeskTop
@@ -318,7 +318,7 @@ TRect TurboApp::newEditorBounds() const
     }
 }
 
-turbo::Editor &TurboApp::createEditor()
+turbo::Editor &TurboApp::createEditor() noexcept
 {
     return turbo::createEditor(&clipboard);
 }
@@ -392,7 +392,7 @@ void TurboApp::toggleTreeView()
     deskTop->redraw();
 }
 
-void TurboApp::handleFocus(EditorWindow &w)
+void TurboApp::handleFocus(EditorWindow &w) noexcept
 {
     // w has been focused, so it becomes the first of our MRU list.
     w.listHead.insert_after(&MRUlist);
@@ -403,7 +403,7 @@ void TurboApp::handleFocus(EditorWindow &w)
         fileDialogDir = TPath::dirname(w.filePath());
 }
 
-void TurboApp::handleTitleChange(EditorWindow &w)
+void TurboApp::handleTitleChange(EditorWindow &w) noexcept
 {
     auto &counter = fileCount[TPath::basename(w.filePath())];
     if (&counter != w.fileNumber.counter)
@@ -420,7 +420,7 @@ void TurboApp::handleTitleChange(EditorWindow &w)
         fileDialogDir = TPath::dirname(w.filePath());
 }
 
-void TurboApp::removeEditor(EditorWindow &w)
+void TurboApp::removeEditor(EditorWindow &w) noexcept
 {
     w.listHead.remove();
     if (MRUlist.empty())

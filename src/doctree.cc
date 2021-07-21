@@ -5,7 +5,7 @@
 #include <cassert>
 using Node = DocumentTreeView::Node;
 
-Node::Node(Node *parent, std::string_view p) :
+Node::Node(Node *parent, std::string_view p) noexcept :
     TNode(TPath::basename(p)),
     ptr(nullptr),
     parent(parent),
@@ -13,7 +13,7 @@ Node::Node(Node *parent, std::string_view p) :
 {
 }
 
-Node::Node(Node *parent, EditorWindow *w) :
+Node::Node(Node *parent, EditorWindow *w) noexcept :
     TNode(w->getTitle()),
     ptr(nullptr),
     parent(parent),
@@ -21,17 +21,19 @@ Node::Node(Node *parent, EditorWindow *w) :
 {
 }
 
-bool Node::hasEditor() const {
+bool Node::hasEditor() const noexcept
+{
     return std::holds_alternative<EditorWindow *>(data);
 }
 
-EditorWindow* Node::getEditor() {
+EditorWindow* Node::getEditor() noexcept
+{
     if (auto **pw = std::get_if<EditorWindow *>(&data))
         return *pw;
     return nullptr;
 }
 
-void Node::remove()
+void Node::remove() noexcept
 {
     if (next)
         ((Node *) next)->ptr = ptr;
@@ -44,7 +46,7 @@ void Node::remove()
     parent = nullptr;
 }
 
-void Node::dispose()
+void Node::dispose() noexcept
 {
     assert(!childList);
     remove();
@@ -55,14 +57,14 @@ void Node::dispose()
 enum NodeType { ntDir, ntEditor };
 using NodeKey = std::pair<NodeType, std::string_view>;
 
-static NodeKey getKey(Node *node)
+static NodeKey getKey(Node *node) noexcept
 {
     if (node->hasEditor())
         return {ntEditor, node->text};
     return {ntDir, node->text};
 }
 
-static void putNode(TNode **indirect, Node *node)
+static void putNode(TNode **indirect, Node *node) noexcept
 // Pre: node->parent is properly set.
 {
     auto key = getKey(node);
@@ -81,7 +83,7 @@ static void putNode(TNode **indirect, Node *node)
     node->ptr = indirect;
 }
 
-static void setParent(Node *node, Node *parent)
+static void setParent(Node *node, Node *parent) noexcept
 {
     if (!parent)
         node->dispose();
@@ -93,7 +95,7 @@ static void setParent(Node *node, Node *parent)
     }
 }
 
-void DocumentTreeView::focused(int i)
+void DocumentTreeView::focused(int i) noexcept
 {
     // Avoid reentrancy on focus:
     // focused() => w->focus() => app->setFocusedEditor() => focusEditor() => focused()
@@ -109,7 +111,7 @@ void DocumentTreeView::focused(int i)
     }
 }
 
-void DocumentTreeView::addEditor(EditorWindow *w)
+void DocumentTreeView::addEditor(EditorWindow *w) noexcept
 {
     Node *parent;
     TNode **list;
@@ -125,7 +127,7 @@ void DocumentTreeView::addEditor(EditorWindow *w)
     drawView();
 }
 
-void DocumentTreeView::focusEditor(EditorWindow *w)
+void DocumentTreeView::focusEditor(EditorWindow *w) noexcept
 {
     // Avoid the reentrant case (see focused()).
     if (focusing)
@@ -136,7 +138,7 @@ void DocumentTreeView::focusEditor(EditorWindow *w)
     drawView();
 }
 
-void DocumentTreeView::removeEditor(EditorWindow *w)
+void DocumentTreeView::removeEditor(EditorWindow *w) noexcept
 {
     Node *f = findByEditor(w);
     if (f) {
@@ -146,7 +148,7 @@ void DocumentTreeView::removeEditor(EditorWindow *w)
     }
 }
 
-void DocumentTreeView::focusNext()
+void DocumentTreeView::focusNext() noexcept
 {
     firstThat([this] (auto *node, auto pos) {
         if (((Node *) node)->hasEditor() && pos > foc) {
@@ -158,7 +160,7 @@ void DocumentTreeView::focusNext()
     });
 }
 
-void DocumentTreeView::focusPrev()
+void DocumentTreeView::focusPrev() noexcept
 {
     int prevPos = -1;
     firstThat([this, &prevPos] (auto *node, auto pos) {
@@ -175,7 +177,7 @@ void DocumentTreeView::focusPrev()
     });
 }
 
-Node* DocumentTreeView::getDirNode(std::string_view dirPath)
+Node* DocumentTreeView::getDirNode(std::string_view dirPath) noexcept
 {
     // The list where the dir will be inserted.
     TNode **list {nullptr};
@@ -206,7 +208,7 @@ Node* DocumentTreeView::getDirNode(std::string_view dirPath)
     return dir;
 }
 
-Node* DocumentTreeView::findByEditor(const EditorWindow *w, int *pos)
+Node* DocumentTreeView::findByEditor(const EditorWindow *w, int *pos) noexcept
 {
     return firstThat(
     [w, pos] (Node *node, int position)
@@ -222,7 +224,7 @@ Node* DocumentTreeView::findByEditor(const EditorWindow *w, int *pos)
 }
 
 
-Node* DocumentTreeView::findByPath(std::string_view path)
+Node* DocumentTreeView::findByPath(std::string_view path) noexcept
 {
     return firstThat(
     [path] (Node *node, int)
@@ -232,7 +234,7 @@ Node* DocumentTreeView::findByPath(std::string_view path)
     });
 }
 
-DocumentTreeWindow::DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow **ptr) :
+DocumentTreeWindow::DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow **ptr) noexcept :
     TWindowInit(&DocumentTreeWindow::initFrame),
     TWindow(bounds, "Open Editors", wnNoNumber),
     ptr(ptr)

@@ -370,12 +370,12 @@ void TScintillaEditor::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool
     }
 }
 
-TPoint TScintillaParent::getEditorSize()
+TPoint TScintillaParent::getEditorSize() noexcept
 {
     return {0, 0};
 }
 
-void TScintillaParent::invalidate(TRect)
+void TScintillaParent::invalidate(TRect) noexcept
 {
 }
 
@@ -383,10 +383,10 @@ void TScintillaParent::handleNotification(const SCNotification &scn)
 {
 }
 
-void TScintillaParent::setVerticalScrollPos(int, int)
+void TScintillaParent::setVerticalScrollPos(int, int) noexcept
 {
 }
 
-void TScintillaParent::setHorizontalScrollPos(int, int)
+void TScintillaParent::setHorizontalScrollPos(int, int) noexcept
 {
 }

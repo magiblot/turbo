@@ -89,7 +89,7 @@ struct ThemingState
     const LexerInfo *lexInfo;
     const TColorAttr *schema;
 
-    ThemingState();
+    ThemingState() noexcept;
 
     void resetStyles(Scintilla::TScintillaEditor &editor) const;
     bool detectLanguage(const char *filePath, Scintilla::TScintillaEditor &editor);

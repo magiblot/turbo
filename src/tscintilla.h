@@ -119,11 +119,11 @@ inline TPoint TScintillaEditor::getDelta()
 
 struct TScintillaParent {
 
-    virtual TPoint getEditorSize();
-    virtual void invalidate(TRect area);
+    virtual TPoint getEditorSize() noexcept;
+    virtual void invalidate(TRect area) noexcept;
     virtual void handleNotification(const SCNotification &scn);
-    virtual void setVerticalScrollPos(int delta, int limit);
-    virtual void setHorizontalScrollPos(int delta, int limit);
+    virtual void setVerticalScrollPos(int delta, int limit) noexcept;
+    virtual void setHorizontalScrollPos(int delta, int limit) noexcept;
 
 };
 

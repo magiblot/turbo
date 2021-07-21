@@ -1,7 +1,7 @@
 #include "tpath.h"
 #include <tvision/compat/io.h>
 
-TStringView TPath::basename(TStringView path)
+TStringView TPath::basename(TStringView path) noexcept
 {
     size_t start = drivename(path).size();
     size_t end = start;
@@ -29,7 +29,7 @@ TStringView TPath::basename(TStringView path)
     return path.substr(beg, end - beg);
 }
 
-TStringView TPath::dirname(TStringView path)
+TStringView TPath::dirname(TStringView path) noexcept
 {
     TStringView bn = basename(path);
     size_t end = &bn[0] - &path[0];
@@ -51,7 +51,7 @@ TStringView TPath::dirname(TStringView path)
         return root;
 }
 
-TStringView TPath::extname(TStringView path)
+TStringView TPath::extname(TStringView path) noexcept
 {
     TStringView bn = basename(path);
     size_t end = bn.size();
@@ -69,7 +69,7 @@ TStringView TPath::extname(TStringView path)
     return TStringView();
 }
 
-TStringView TPath::rootname(TStringView path)
+TStringView TPath::rootname(TStringView path) noexcept
 {
     switch (path.size())
     {
@@ -90,7 +90,7 @@ TStringView TPath::rootname(TStringView path)
     return path.substr(0, 0);
 }
 
-TStringView TPath::drivename(TStringView path)
+TStringView TPath::drivename(TStringView path) noexcept
 {
     switch (path.size())
     {
@@ -116,7 +116,7 @@ TStringView TPath::drivename(TStringView path)
     return path.substr(0, 0);
 }
 
-Boolean TPath::isAbsolute(TStringView path)
+Boolean TPath::isAbsolute(TStringView path) noexcept
 {
     switch (path.size())
     {
@@ -130,12 +130,12 @@ Boolean TPath::isAbsolute(TStringView path)
     }
 }
 
-Boolean TPath::exists(const char *path)
+Boolean TPath::exists(const char *path) noexcept
 {
     return ::access(path, 0 /* F_OK */) == 0;
 }
 
-TStringView TPath::resolve(char abspath[MAXPATH], TStringView path)
+TStringView TPath::resolve(char abspath[MAXPATH], TStringView path) noexcept
 {
     strnzcpy(abspath, path, MAXPATH);
     fexpand(abspath);

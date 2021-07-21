@@ -2,7 +2,7 @@
 
 namespace turbo {
 
-LeftMarginView::LeftMarginView(int aDistance) :
+LeftMarginView::LeftMarginView(int aDistance) noexcept :
     TSurfaceView(TRect(0, 0, 0, 0)),
     distanceFromView(aDistance)
 {

@@ -19,12 +19,12 @@ struct DocumentTreeView : public TOutline {
         Node *parent;
         std::variant<std::string, EditorWindow *> data;
 
-        Node(Node *parent, std::string_view path);
-        Node(Node *parent, EditorWindow *w);
-        bool hasEditor() const;
-        EditorWindow* getEditor();
-        void remove();
-        void dispose();
+        Node(Node *parent, std::string_view path) noexcept;
+        Node(Node *parent, EditorWindow *w) noexcept;
+        bool hasEditor() const noexcept;
+        EditorWindow* getEditor() noexcept;
+        void remove() noexcept;
+        void dispose() noexcept;
 
     };
 
@@ -32,23 +32,23 @@ struct DocumentTreeView : public TOutline {
 
     using TOutline::TOutline;
 
-    void focused(int i) override;
+    void focused(int i) noexcept override;
 
-    void addEditor(EditorWindow *w);
-    void focusEditor(EditorWindow *w);
-    void removeEditor(EditorWindow *w);
-    void focusNext();
-    void focusPrev();
-    Node *getDirNode(std::string_view dirPath);
-    Node *findByEditor(const EditorWindow *w, int *pos=nullptr);
-    Node *findByPath(std::string_view path);
+    void addEditor(EditorWindow *w) noexcept;
+    void focusEditor(EditorWindow *w) noexcept;
+    void removeEditor(EditorWindow *w) noexcept;
+    void focusNext() noexcept;
+    void focusPrev() noexcept;
+    Node *getDirNode(std::string_view dirPath) noexcept;
+    Node *findByEditor(const EditorWindow *w, int *pos=nullptr) noexcept;
+    Node *findByPath(std::string_view path) noexcept;
     template <class Func>
-    Node *firstThat(Func &&func);
+    Node *firstThat(Func &&func) noexcept;
 
 };
 
 template <class Func>
-inline DocumentTreeView::Node *DocumentTreeView::firstThat(Func &&func)
+inline DocumentTreeView::Node *DocumentTreeView::firstThat(Func &&func) noexcept
 {
     auto applyCallback =
     [] ( TOutlineViewer *, TNode *node, int, int position,
@@ -65,7 +65,7 @@ struct DocumentTreeWindow : public TWindow {
     DocumentTreeView *tree;
     DocumentTreeWindow **ptr;
 
-    DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow **ptr);
+    DocumentTreeWindow(const TRect &bounds, DocumentTreeWindow **ptr) noexcept;
     ~DocumentTreeWindow();
 
     void close() override;
