@@ -219,7 +219,8 @@ struct FileEditorState : EditorState
     bool close(FileDialogs & = defFileDialogs) noexcept;
 
     void beforeSave() noexcept;
-    void afterSave() noexcept;
+    virtual void afterSave() noexcept;
+    void notifyAfterSave() noexcept;
 
 };
 
@@ -228,6 +229,11 @@ inline FileEditorState::FileEditorState(Editor &aEditor, std::string aFilePath) 
     filePath(std::move(aFilePath))
 {
     detectLanguage();
+}
+
+inline void FileEditorState::detectLanguage() noexcept
+{
+    theming.detectLanguage(filePath.c_str(), editor);
 }
 
 } // namespace turbo

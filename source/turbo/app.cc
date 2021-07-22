@@ -271,7 +271,7 @@ void TurboApp::fileNew()
 
 void TurboApp::fileOpen()
 {
-    AppFileDialogs dlgs {*this};
+    TurboFileDialogs dlgs {*this};
     turbo::openFile([&] () -> auto& {
         return createEditor();
     }, [&] (auto &editor, auto *path) {

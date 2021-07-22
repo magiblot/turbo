@@ -15,14 +15,6 @@
 
 namespace turbo {
 
-void FileEditorState::detectLanguage() noexcept
-{
-    Language lastLang = theming.language;
-    if ( theming.detectLanguage(filePath.c_str(), editor) &&
-         lastLang == langNone && theming.language != langNone )
-        lineNumbers.enabled = true;
-}
-
 class PropertyDetector
 {
     enum : uint {
@@ -174,7 +166,7 @@ bool FileEditorState::save(FileDialogs &dlgs) noexcept
     beforeSave();
     if (writeFile(filePath.c_str(), editor, dlgs))
     {
-        afterSave();
+        notifyAfterSave();
         return true;
     }
     return false;
@@ -188,7 +180,7 @@ bool FileEditorState::saveAs(FileDialogs &dlgs) noexcept
         if (writeFile(path, editor, dlgs))
         {
             filePath = path;
-            afterSave();
+            notifyAfterSave();
             return (ok = true);
         }
         return false;
@@ -206,7 +198,7 @@ bool FileEditorState::rename(FileDialogs &dlgs) noexcept
         if (renameFile(path, filePath.c_str(), editor, dlgs))
         {
             filePath = path;
-            afterSave();
+            notifyAfterSave();
             return (ok = true);
         }
         return false;
@@ -241,6 +233,11 @@ void FileEditorState::afterSave() noexcept
 {
     editor.WndProc(SCI_SETSAVEPOINT, 0U, 0U);
     detectLanguage();
+}
+
+void FileEditorState::notifyAfterSave() noexcept
+{
+    afterSave();
     if (parent)
         parent->handleNotification(ncSaved, *this);
 }

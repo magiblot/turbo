@@ -79,7 +79,7 @@ void EditorWindow::shutDown()
 void EditorWindow::handleEvent(TEvent &ev) {
     if (ev.what == evCommand) {
         bool handled = true;
-        AppFileDialogs dlgs {parent};
+        TurboFileDialogs dlgs {parent};
         switch (ev.message.command) {
             case cmSave:
                 editorState.save(dlgs);
@@ -152,7 +152,7 @@ Boolean EditorWindow::valid(ushort command)
     {
         if (command != cmValid)
         {
-            AppFileDialogs dlgs {parent};
+            TurboFileDialogs dlgs {parent};
             return editorState.close(dlgs);
         }
         return true;
@@ -215,22 +215,4 @@ TPalette& EditorWindow::getPalette() const
 {
     static TPalette palette(cpEditorWindow, sizeof(cpEditorWindow) - 1);
     return palette;
-}
-
-void AppFileDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexcept
-{
-    CwdGuard cwd {app.fileDialogDir};
-    super::getOpenPath(accept);
-}
-
-void AppFileDialogs::getSaveAsPath(turbo::FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
-{
-    CwdGuard cwd {app.fileDialogDir};
-    super::getSaveAsPath(state, accept);
-}
-
-void AppFileDialogs::getRenamePath(turbo::FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
-{
-    CwdGuard cwd {app.fileDialogDir};
-    super::getRenamePath(state, accept);
 }

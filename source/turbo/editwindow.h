@@ -7,6 +7,7 @@
 
 #include <turbo/turbo.h>
 #include "apputils.h"
+#include "editor.h"
 
 struct FileNumberState
 {
@@ -42,30 +43,12 @@ struct EditorWindowParent
     std::string fileDialogDir;
 };
 
-class AppFileDialogs : public turbo::DefaultFileDialogs
-{
-    using super = turbo::DefaultFileDialogs;
-
-    EditorWindowParent &app;
-
-    void getOpenPath(TFuncView<bool (const char *)> accept) noexcept override;
-    void getSaveAsPath(turbo::FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
-    void getRenamePath(turbo::FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
-
-public:
-
-    AppFileDialogs(EditorWindowParent &aApp) :
-        app(aApp)
-    {
-    }
-};
-
 struct EditorWindow : public TWindow, turbo::EditorParent
 {
     enum { leftMarginSep = 1 };
     static constexpr TPoint minSize {24, 6};
 
-    turbo::FileEditorState editorState;
+    TurboEditorState editorState;
     list_head<EditorWindow> listHead;
     FileNumberState fileNumber;
     EditorWindowParent &parent;
