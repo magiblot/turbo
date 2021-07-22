@@ -200,7 +200,7 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
             case cmToggleLineWrapping:
                 if (edView->editorState)
                 {
-                    edView->editorState->toggleLineWrapping(turbo::lwConfirm);
+                    edView->editorState->toggleLineWrapping();
                     edView->editorState->redraw();
                     clearEvent(ev);
                 }

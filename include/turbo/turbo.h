@@ -19,11 +19,6 @@ namespace turbo {
 
 class Clipboard;
 
-enum : ushort {
-    // Line Wrapping options
-    lwConfirm = 0x0001, // Ask for confirmation when document too big.
-};
-
 using Editor = Scintilla::TScintillaEditor;
 
 Editor &createEditor(Clipboard *aClipboard = nullptr) noexcept;
@@ -92,10 +87,10 @@ struct EditorState : Scintilla::TScintillaParent
     void setHorizontalScrollPos(int delta, int limit) noexcept override;
     void setVerticalScrollPos(int delta, int limit) noexcept override;
 
-    bool toggleLineWrapping(ushort options) noexcept
+    bool toggleLineWrapping(TFuncView<bool(int)> wrapIfBig = defWrapIfBig) noexcept
     // Post: returns true if line wrapping is enabled.
     {
-        return wrapping.toggle(editor, options & lwConfirm);
+        return wrapping.toggle(editor, wrapIfBig);
     }
 
     void toggleLineNumbers() noexcept

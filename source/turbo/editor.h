@@ -35,6 +35,7 @@ public:
     {
         if (theming.language != turbo::langNone)
             lineNumbers.enabled = true;
+        wrapping.toggle(editor, [] (int) { return false; });
     }
 
     void afterSave() noexcept override;

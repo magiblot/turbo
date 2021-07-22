@@ -37,6 +37,8 @@ private:
 
 };
 
+bool defWrapIfBig(int width);
+
 class WrapState
 {
     bool enabled {false};
@@ -44,7 +46,7 @@ class WrapState
 
 public:
 
-    bool toggle(Scintilla::TScintillaEditor &editor, bool dialog=true);
+    bool toggle(Scintilla::TScintillaEditor &editor, TFuncView<bool(int)> wrapIfBig = defWrapIfBig);
 };
 
 struct AutoIndent

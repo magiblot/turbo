@@ -31,7 +31,7 @@ int LineNumbersWidth::calcWidth(Scintilla::TScintillaEditor &editor)
 /////////////////////////////////////////////////////////////////////////
 // WrapState
 
-bool WrapState::toggle(Scintilla::TScintillaEditor &editor, bool dialog)
+bool WrapState::toggle(Scintilla::TScintillaEditor &editor, TFuncView<bool(int)> wrapIfBig)
 {
     bool proceed = true;
     if (enabled)
@@ -43,19 +43,12 @@ bool WrapState::toggle(Scintilla::TScintillaEditor &editor, bool dialog)
     }
     else
     {
-        const int size = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
-        const bool documentBig = size >= (1 << 19);
+        int size = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
+        bool documentBig = size >= (1 << 19);
         if (documentBig && !confirmedOnce)
         {
-            if (dialog)
-            {
-                const int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
-                auto &&text = fmt::format("This document is very big and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
-                ushort res = messageBox(text, mfInformation | mfYesButton | mfNoButton);
-                proceed = confirmedOnce = (res == cmYes);
-            }
-            else
-                proceed = false;
+            const int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
+            proceed = confirmedOnce = wrapIfBig(width);
         }
         if (proceed)
         {
@@ -64,6 +57,12 @@ bool WrapState::toggle(Scintilla::TScintillaEditor &editor, bool dialog)
         }
     }
     return proceed;
+}
+
+bool defWrapIfBig(int width)
+{
+    auto &&text = fmt::format("This document is very big and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
+    return messageBox(text, mfInformation | mfYesButton | mfNoButton) == cmYes;
 }
 
 /////////////////////////////////////////////////////////////////////////

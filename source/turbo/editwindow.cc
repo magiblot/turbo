@@ -91,7 +91,7 @@ void EditorWindow::handleEvent(TEvent &ev) {
                 editorState.rename(dlgs);
                 break;
             case cmToggleWrap:
-                editorState.toggleLineWrapping(turbo::lwConfirm);
+                editorState.toggleLineWrapping();
                 editorState.redraw();
                 break;
             case cmToggleLineNums:
