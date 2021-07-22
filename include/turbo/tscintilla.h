@@ -12,7 +12,9 @@ struct TEvent;
 struct TColorAttr;
 struct KeyDownEvent;
 class TDrawSurface;
+namespace turbo {
 class Clipboard;
+} // namespace turbo
 
 namespace Scintilla {
 
@@ -20,9 +22,9 @@ struct TScintillaParent;
 
 struct TScintillaEditor : public ScintillaBase {
 
-    Clipboard *clipboard;
+    turbo::Clipboard *clipboard;
 
-    TScintillaEditor(Clipboard *aClipboard = nullptr);
+    TScintillaEditor(turbo::Clipboard *aClipboard = nullptr);
 
     void SetVerticalScrollPos() override;
     void SetHorizontalScrollPos() override;

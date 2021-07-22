@@ -97,7 +97,7 @@ public:
 
 };
 
-#include <turbo/util.h>
+#include "apputils.h"
 #include "editwindow.h"
 
 class EditorList : public ListWindow::List, public list_head_iterator<EditorWindow>

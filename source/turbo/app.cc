@@ -20,6 +20,7 @@
 #include <csignal>
 
 #include "app.h"
+#include "apputils.h"
 #include "editwindow.h"
 #include "widgets.h"
 #include "listviews.h"
@@ -32,7 +33,7 @@ using namespace std::literals;
 
 TurboApp* TurboApp::app = 0;
 
-void turbo_main(int argc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     TurboApp app(argc, argv);
     TurboApp::app = &app;
@@ -270,12 +271,12 @@ void TurboApp::fileNew()
 
 void TurboApp::fileOpen()
 {
-    CwdGuard cwd {fileDialogDir};
+    AppFileDialogs dlgs {*this};
     turbo::openFile([&] () -> auto& {
         return createEditor();
     }, [&] (auto &editor, auto *path) {
         addEditor(editor, path);
-    });
+    }, dlgs);
 }
 
 void TurboApp::fileOpenOrNew(const char *path)
@@ -329,12 +330,12 @@ void TurboApp::addEditor(turbo::Editor &editor, const char *path)
     TRect r = newEditorBounds();
     auto &counter = fileCount[TPath::basename(path)];
     EditorWindow &w = *new EditorWindow(r, editor, path, counter, *this);
+    updatePalette(w);
     if (docTree)
         docTree->tree->addEditor(&w);
     w.listHead.insert_after(&MRUlist);
     deskTop->insert(&w);
     enableCommands(editorCmds);
-    updatePalette(w);
 }
 
 void TurboApp::showEditorList(TEvent *ev)
@@ -480,6 +481,7 @@ TPalette& TurboApp::getPalette() const
 
 void TurboApp::updatePalette(EditorWindow &w) const
 {
+    using namespace turbo;
     auto &pal = getPalette();
     auto &th = w.editorState.theming;
     pal[edFramePassive  ] = th.normalize(sFramePassive  );

@@ -14,7 +14,7 @@ using std::chrono::steady_clock;
 
 namespace Scintilla {
 
-TScintillaEditor::TScintillaEditor(Clipboard *aClipboard) :
+TScintillaEditor::TScintillaEditor(turbo::Clipboard *aClipboard) :
     clipboard(aClipboard)
 {
     // Block caret for both Insertion and Overwrite mode.

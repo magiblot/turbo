@@ -8,6 +8,7 @@
 #include "app.h"
 #include "search.h"
 #include "editwindow.h"
+#include <turbo/util.h>
 
 void insertSearchBox(EditorWindow &win)
 {
@@ -135,7 +136,7 @@ void SearchBox::open()
 {
     if (!visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
-        ::forEach<TView>({win.editorState.view, win.editorState.leftMargin}, [&] (auto &v) {
+        turbo::forEach<TView>({win.editorState.view, win.editorState.leftMargin}, [&] (auto &v) {
             grow(v, {0, -(size.y + 1)});
         });
         show();
@@ -150,7 +151,7 @@ void SearchBox::close()
 {
     if (visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
-        ::forEach<TView>({win.editorState.view, win.editorState.leftMargin}, [&] (auto &v) {
+        turbo::forEach<TView>({win.editorState.view, win.editorState.leftMargin}, [&] (auto &v) {
             grow(v, {0, size.y + 1});
         });
         hide();

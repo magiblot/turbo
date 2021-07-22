@@ -34,7 +34,7 @@ using EditorStateList = std::forward_list<FileEditorState>;
 
 struct DemoApplication : public TApplication
 {
-    LcbClipboard clipboard;
+    turbo::LcbClipboard clipboard;
 
     DemoApplication() noexcept;
 };
@@ -50,9 +50,9 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
     TScrollBar *hScrollBar, *vScrollBar;
     DemoEditorListView *listView;
     std::vector<char> title;
-    Clipboard *clipboard;
+    turbo::Clipboard *clipboard;
 
-    DemoEditorWindow(const TRect &bounds, Clipboard *aClipboard) noexcept;
+    DemoEditorWindow(const TRect &bounds, turbo::Clipboard *aClipboard) noexcept;
 
     void shutDown() override;
     void handleEvent(TEvent &ev) override;
@@ -98,7 +98,7 @@ DemoApplication::DemoApplication() noexcept :
     );
 }
 
-DemoEditorWindow::DemoEditorWindow(const TRect &bounds, Clipboard *aClipboard) noexcept :
+DemoEditorWindow::DemoEditorWindow(const TRect &bounds, turbo::Clipboard *aClipboard) noexcept :
     TWindowInit(&initFrame),
     TDialog(bounds, nullptr),
     clipboard(aClipboard)

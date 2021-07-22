@@ -14,9 +14,10 @@
 #include <utility>
 
 class TScrollBar;
-class Clipboard;
 
 namespace turbo {
+
+class Clipboard;
 
 enum : ushort {
     // Line Wrapping options
@@ -151,9 +152,9 @@ struct FileDialogs
     virtual bool writeError(const char *path, const char *cause) noexcept = 0;
     virtual bool openForReadError(const char *path, const char *cause) noexcept = 0;
     virtual bool openForWriteError(const char *path, const char *cause) noexcept = 0;
-    virtual void getOpenPath(FuncView<bool (const char *)> accept) noexcept = 0;
-    virtual void getSaveAsPath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept = 0;
-    virtual void getRenamePath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept = 0;
+    virtual void getOpenPath(TFuncView<bool (const char *)> accept) noexcept = 0;
+    virtual void getSaveAsPath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept = 0;
+    virtual void getRenamePath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept = 0;
 };
 
 struct DefaultFileDialogs : FileDialogs
@@ -168,9 +169,9 @@ struct DefaultFileDialogs : FileDialogs
     bool writeError(const char *path, const char *cause) noexcept override;
     bool openForReadError(const char *path, const char *cause) noexcept override;
     bool openForWriteError(const char *path, const char *cause) noexcept override;
-    void getOpenPath(FuncView<bool (const char *)> accept) noexcept override;
-    void getSaveAsPath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept override;
-    void getRenamePath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept override;
+    void getOpenPath(TFuncView<bool (const char *)> accept) noexcept override;
+    void getSaveAsPath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getRenamePath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
 };
 
 extern DefaultFileDialogs defFileDialogs;
@@ -187,16 +188,16 @@ struct SilentFileDialogs : FileDialogs
     bool writeError(const char *path, const char *cause) noexcept override;
     bool openForReadError(const char *path, const char *cause) noexcept override;
     bool openForWriteError(const char *path, const char *cause) noexcept override;
-    void getOpenPath(FuncView<bool (const char *)> accept) noexcept override;
-    void getSaveAsPath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept override;
-    void getRenamePath(FileEditorState &, FuncView<bool (const char *)> accept) noexcept override;
+    void getOpenPath(TFuncView<bool (const char *)> accept) noexcept override;
+    void getSaveAsPath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getRenamePath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
 };
 
 extern SilentFileDialogs silFileDialogs;
 
 bool readFile(Editor &editor, const char *path, FileDialogs & = defFileDialogs) noexcept;
-void openFile( FuncView<Editor&()> createEditor,
-               FuncView<void(Editor &, const char *)> accept,
+void openFile( TFuncView<Editor&()> createEditor,
+               TFuncView<void(Editor &, const char *)> accept,
                FileDialogs & = defFileDialogs ) noexcept;
 bool writeFile(const char *path, Editor &editor, FileDialogs & = defFileDialogs) noexcept;
 bool renameFile(const char *dst, const char *src, Editor &editor, FileDialogs & = defFileDialogs) noexcept;

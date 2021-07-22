@@ -6,9 +6,9 @@
 #include <tvision/tv.h>
 
 #include <turbo/turbo.h>
-#include <turbo/util.h>
 #include <turbo/clipboard.h>
 #include "doctree.h"
+#include "apputils.h"
 #include "editwindow.h"
 
 struct EditorWindow;
@@ -42,7 +42,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     bool argsParsed {false};
     int argc;
     const char **argv;
-    LcbClipboard clipboard;
+    turbo::LcbClipboard clipboard;
 
     static TurboApp *app;
 

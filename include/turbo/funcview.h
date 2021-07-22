@@ -3,7 +3,6 @@
 
 #include <type_traits>
 
-namespace turbo {
 namespace detail {
 
 template<class A, class B>
@@ -18,24 +17,24 @@ using enable_if_not_same_t =
 } // namespace detail
 
 template<class Signature>
-class FuncView;
+class TFuncView;
 
 template<class R, class... Args>
-class FuncView<R(Args...)>
+class TFuncView<R(Args...)>
 {
 
     // This class implements a function view.
     //
-    // FuncView can be initialized with a function reference or with a
+    // TFuncView can be initialized with a function reference or with a
     // callable object (such as a lambda). If you have a function pointer
     // instead, you'll have to ensure it is not null and dereference it:
     //
     //  void (*func_ptr)() = &some_function;
-    //  FuncView<void()> func_view {*func_ptr};
+    //  TFuncView<void()> func_view {*func_ptr};
     //
-    // FuncView cannot be empty; unlike std::function, it always contains
+    // TFuncView cannot be empty; unlike std::function, it always contains
     // a target. That's one less case you have to check. Also unlike std::function,
-    // 'operator()' is 'noexcept'; this means FuncView cannot propagate exceptions.
+    // 'operator()' is 'noexcept'; this means TFuncView cannot propagate exceptions.
     //
     // Like string views, function views do not control the lifetime of
     // whatever they reference. Watch out.
@@ -63,16 +62,16 @@ class FuncView<R(Args...)>
 
 public:
 
-    constexpr FuncView(R (&func)(Args...)) noexcept :
+    constexpr TFuncView(R (&func)(Args...)) noexcept :
         ctx(func),
         invk(&invkStatic)
     {
     }
 
     template <class Functor,
-              class = detail::enable_if_not_same_t<FuncView, Functor>, // Avoid infinite recursion.
+              class = detail::enable_if_not_same_t<TFuncView, Functor>, // Avoid infinite recursion.
               class = detail::enable_if_not_same_t<R (*)(Args...), Functor>> // Avoid function pointers.
-    FuncView(Functor &&func) noexcept :
+    TFuncView(Functor &&func) noexcept :
         ctx((void *) &func),
         invk(&invkFunctor<Functor>)
     // Pre: the lifetime of 'func' exceeds the lifetime of 'this'.
@@ -85,7 +84,5 @@ public:
     }
 
 };
-
-} // namespace turbo
 
 #endif // TURBO_FUNCVIEW_H

@@ -7,6 +7,7 @@
 #include "editwindow.h"
 #include "editframe.h"
 #include "app.h"
+#include "apputils.h"
 #include "search.h"
 #include <fmt/core.h>
 #include <iostream>
@@ -78,25 +79,17 @@ void EditorWindow::shutDown()
 void EditorWindow::handleEvent(TEvent &ev) {
     if (ev.what == evCommand) {
         bool handled = true;
+        AppFileDialogs dlgs {parent};
         switch (ev.message.command) {
             case cmSave:
-            {
-                CwdGuard cwd {parent.fileDialogDir};
-                editorState.save();
+                editorState.save(dlgs);
                 break;
-            }
             case cmSaveAs:
-            {
-                CwdGuard cwd {parent.fileDialogDir};
-                editorState.saveAs();
+                editorState.saveAs(dlgs);
                 break;
-            }
             case cmRename:
-            {
-                CwdGuard cwd {parent.fileDialogDir};
-                editorState.rename();
+                editorState.rename(dlgs);
                 break;
-            }
             case cmToggleWrap:
                 editorState.toggleLineWrapping(turbo::lwConfirm);
                 editorState.redraw();
@@ -159,8 +152,8 @@ Boolean EditorWindow::valid(ushort command)
     {
         if (command != cmValid)
         {
-            CwdGuard cwd {parent.fileDialogDir};
-            return editorState.close();
+            AppFileDialogs dlgs {parent};
+            return editorState.close(dlgs);
         }
         return true;
     }
@@ -222,4 +215,22 @@ TPalette& EditorWindow::getPalette() const
 {
     static TPalette palette(cpEditorWindow, sizeof(cpEditorWindow) - 1);
     return palette;
+}
+
+void AppFileDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexcept
+{
+    CwdGuard cwd {app.fileDialogDir};
+    super::getOpenPath(accept);
+}
+
+void AppFileDialogs::getSaveAsPath(turbo::FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
+{
+    CwdGuard cwd {app.fileDialogDir};
+    super::getSaveAsPath(state, accept);
+}
+
+void AppFileDialogs::getRenamePath(turbo::FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
+{
+    CwdGuard cwd {app.fileDialogDir};
+    super::getRenamePath(state, accept);
 }

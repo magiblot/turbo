@@ -5,13 +5,14 @@
 #include <utility>
 #include <string>
 
-struct EditorWindow;
-struct LexerInfo;
 struct TColorAttr;
-namespace Scintilla
-{
-    struct TScintillaEditor;
-}
+namespace Scintilla {
+struct TScintillaEditor;
+} // namespace Scintilla
+
+namespace turbo {
+
+struct LexerInfo;
 
 enum Language : unsigned char {
     langNone,
@@ -102,5 +103,7 @@ private:
     TColorAttr braceAttr(LexerStyles, uchar) const;
 
 };
+
+} // namespace turbo
 
 #endif

@@ -1,15 +1,17 @@
 #include <tvision/tv.h>
-#include <turbo/util.h>
 #include <turbo/tscintilla.h>
 #include <turbo/styles.h>
 #include <turbo/tpath.h>
 #include <utility>
+#include "utils.h"
 using namespace Scintilla;
 using std::pair;
 
 #ifdef HAVE_MAGIC
 #include <magic.h>
 #endif
+
+namespace turbo {
 
 static const const_unordered_map<std::string_view, Language> mime2lang = {
     {"text/x-c++",                  langCPP},
@@ -495,3 +497,5 @@ void ThemingState::updateBraces(Scintilla::TScintillaEditor &editor) const
             editor.WndProc(SCI_BRACEHIGHLIGHT, -1, -1);
     }
 }
+
+} // namespace turbo

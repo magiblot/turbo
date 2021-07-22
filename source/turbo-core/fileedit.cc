@@ -3,6 +3,7 @@
 
 #include <turbo/turbo.h>
 #include <turbo/tpath.h>
+#include <turbo/tscintilla.h>
 
 #include <fmt/core.h>
 #include <memory>
@@ -20,6 +21,56 @@ void FileEditorState::detectLanguage() noexcept
     if ( theming.detectLanguage(filePath.c_str(), editor) &&
          lastLang == langNone && theming.language != langNone )
         lineNumbers.enabled = true;
+}
+
+class PropertyDetector
+{
+    enum : uint {
+        ndEOL = 0x0001,
+    };
+
+    uint notDetected {ndEOL};
+    int eolType {SC_EOL_LF}; // Default EOL type is LF.
+
+public:
+
+    void analyze(TStringView text);
+    void apply(Editor &editor) const;
+
+};
+
+void PropertyDetector::analyze(TStringView text)
+{
+    if (text.size())
+    {
+        char cur = text[0];
+        char next = text.size() > 0 ? text[1] : '\0';
+        size_t i = 1;
+        while (notDetected)
+        {
+            if (notDetected & ndEOL)
+            {
+                if (cur == '\r' && next == '\n')
+                    eolType = SC_EOL_CRLF, notDetected &= ~ndEOL;
+                else if (cur == '\n')
+                    eolType = SC_EOL_LF, notDetected &= ~ndEOL;
+                else if (cur == '\r')
+                    eolType = SC_EOL_CR, notDetected &= ~ndEOL;
+            }
+            if (++i < text.size())
+            {
+                cur = next;
+                next = text[i];
+            }
+            else
+                break;
+        }
+    }
+}
+
+void PropertyDetector::apply(Editor &editor) const
+{
+    editor.WndProc(SCI_SETEOLMODE, eolType, 0U);
 }
 
 static thread_local char ioBuffer alignas(4*1024) [128*1024];
@@ -43,7 +94,7 @@ bool readFile(Editor &editor, const char *path, FileDialogs &dlgs) noexcept
         {
             return dlgs.fileTooBigError(path, bytesLeft);
         }
-        DocumentProperties props;
+        PropertyDetector props;
         bool ok = true;
         size_t readSize;
         while ( readSize = min(bytesLeft, sizeof(ioBuffer)),
@@ -62,8 +113,8 @@ bool readFile(Editor &editor, const char *path, FileDialogs &dlgs) noexcept
     return true;
 }
 
-void openFile( FuncView<Editor&()> createEditor,
-               FuncView<void(Editor &, const char *)> accept, FileDialogs &dlgs ) noexcept
+void openFile( TFuncView<Editor&()> createEditor,
+               TFuncView<void(Editor &, const char *)> accept, FileDialogs &dlgs ) noexcept
 {
     dlgs.getOpenPath([&] (const char *path) {
         std::unique_ptr<Editor> editor {&createEditor()};
@@ -255,7 +306,7 @@ bool DefaultFileDialogs::openForWriteError(const char *path, const char *cause) 
                        mfError | mfOKButton ), false;
 }
 
-void DefaultFileDialogs::getOpenPath(FuncView<bool (const char *)> accept) noexcept
+void DefaultFileDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexcept
 {
     char path[MAXPATH];
     openFileDialog("*.*", "Open file", "~N~ame", fdOpenButton, 0, [&] (TView *dialog) {
@@ -270,7 +321,7 @@ static bool canOverwrite(FileDialogs &dlgs, const char *path) noexcept
     return !TPath::exists(path) || dlgs.confirmOverwrite(path) == cmYes;
 }
 
-void DefaultFileDialogs::getSaveAsPath(FileEditorState &state, FuncView<bool (const char *)> accept) noexcept
+void DefaultFileDialogs::getSaveAsPath(FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
 {
     char path[MAXPATH];
     auto &&title = state.filePath.empty() ? "Save untitled file" : fmt::format("Save file '{}' as", TPath::basename(state.filePath));
@@ -281,7 +332,7 @@ void DefaultFileDialogs::getSaveAsPath(FileEditorState &state, FuncView<bool (co
     });
 }
 
-void DefaultFileDialogs::getRenamePath(FileEditorState &state, FuncView<bool (const char *)> accept) noexcept
+void DefaultFileDialogs::getRenamePath(FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
 {
     char path[MAXPATH];
     auto &&title = fmt::format("Rename file '{}'", TPath::basename(state.filePath));
@@ -307,8 +358,8 @@ bool SilentFileDialogs::readError(const char *path, const char *cause) noexcept 
 bool SilentFileDialogs::writeError(const char *path, const char *cause) noexcept { return false; }
 bool SilentFileDialogs::openForReadError(const char *path, const char *cause) noexcept { return false; }
 bool SilentFileDialogs::openForWriteError(const char *path, const char *cause) noexcept { return false; }
-void SilentFileDialogs::getOpenPath(FuncView<bool (const char *)> accept) noexcept {}
-void SilentFileDialogs::getSaveAsPath(FileEditorState &state, FuncView<bool (const char *)> accept) noexcept {}
-void SilentFileDialogs::getRenamePath(FileEditorState &state, FuncView<bool (const char *)> accept) noexcept {}
+void SilentFileDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexcept {}
+void SilentFileDialogs::getSaveAsPath(FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept {}
+void SilentFileDialogs::getRenamePath(FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept {}
 
 } // namespace turbo

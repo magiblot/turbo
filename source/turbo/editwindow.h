@@ -6,7 +6,7 @@
 #include <tvision/tv.h>
 
 #include <turbo/turbo.h>
-#include <turbo/util.h>
+#include "apputils.h"
 
 struct FileNumberState
 {
@@ -40,6 +40,24 @@ struct EditorWindowParent
     virtual void removeEditor(EditorWindow &w) noexcept = 0;
 
     std::string fileDialogDir;
+};
+
+class AppFileDialogs : public turbo::DefaultFileDialogs
+{
+    using super = turbo::DefaultFileDialogs;
+
+    EditorWindowParent &app;
+
+    void getOpenPath(TFuncView<bool (const char *)> accept) noexcept override;
+    void getSaveAsPath(turbo::FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getRenamePath(turbo::FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
+
+public:
+
+    AppFileDialogs(EditorWindowParent &aApp) :
+        app(aApp)
+    {
+    }
 };
 
 struct EditorWindow : public TWindow, turbo::EditorParent

@@ -2,14 +2,14 @@
 #define TURBO_EDITSTATES_H
 
 #include <tvision/tv.h>
-#include <turbo/scintilla.h>
-#include <string_view>
 
 namespace Scintilla {
 
 struct TScintillaEditor;
 
 } // namespace Scintilla
+
+namespace turbo {
 
 class LineNumbersWidth
 {
@@ -59,43 +59,9 @@ struct AutoIndent
     void applyToCurrentLine(Scintilla::TScintillaEditor &editor);
 };
 
-#ifdef DocumentProperties
-#undef DocumentProperties
-#endif
-
-class DocumentProperties
-{
-    enum : uint {
-        ndEOL = 0x0001,
-    };
-
-    uint notDetected;
-    int eolType;
-
-public:
-
-    DocumentProperties()
-    {
-        reset();
-    }
-
-    void reset()
-    {
-        notDetected = ndEOL;
-        eolType = SC_EOL_LF; // Default EOL type is LF.
-    }
-
-    void analyze(std::string_view text);
-    void apply(Scintilla::TScintillaEditor &editor) const;
-
-    int getEOLType() const
-    {
-        return eolType;
-    }
-
-};
-
 void stripTrailingSpaces(Scintilla::TScintillaEditor &editor);
 void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor);
+
+} // namespace turbo
 
 #endif

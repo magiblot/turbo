@@ -5,7 +5,9 @@
 #include <turbo/funcview.h>
 #include <turbo/scintilla.h>
 
-using turbo::FuncView;
+struct clipboard_c;
+
+namespace turbo {
 
 class Clipboard
 {
@@ -14,7 +16,7 @@ class Clipboard
 public:
 
     virtual void xSetText(TStringView) noexcept = 0;
-    virtual void xGetText(FuncView<void(bool, TStringView)> accept) noexcept = 0;
+    virtual void xGetText(TFuncView<void(bool, TStringView)> accept) noexcept = 0;
 
     template <class Func>
     void copy(Func &&fillSel) noexcept;
@@ -53,8 +55,10 @@ public:
     LcbClipboard& operator=(const LcbClipboard &) = delete;
 
     void xSetText(TStringView) noexcept override;
-    void xGetText(FuncView<void(bool, TStringView)> accept) noexcept override;
+    void xGetText(TFuncView<void(bool, TStringView)> accept) noexcept override;
 
 };
+
+} // namespace turbo
 
 #endif // TURBO_CLIPBOARD_H
