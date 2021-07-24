@@ -6,48 +6,20 @@
 // and each of these groups are then divided into directory groups.
 
 // C standard library
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
 #include <assert.h>
-#include <ctype.h>
 
 // C++ wrappers of C standard library
-#include <cstddef>
-#include <cstdlib>
-#include <cstdint>
-#include <cassert>
-#include <cstring>
-#include <cctype>
-#include <cstdio>
-#include <cstdarg>
-#include <ctime>
-#include <cmath>
-#include <climits>
 
 // C++ standard library
 #include <stdexcept>
-#include <new>
-#include <utility>
 #include <string>
-#include <string_view>
 #include <vector>
 #include <map>
-#include <set>
 #include <forward_list>
 #include <algorithm>
-#include <iterator>
-#include <functional>
 #include <memory>
-#include <numeric>
 #include <chrono>
-#include <regex>
-#include <iostream>
-#include <sstream>
-#include <fstream>
 
 // Scintilla headers
 
