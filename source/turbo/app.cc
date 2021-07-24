@@ -402,7 +402,7 @@ void TurboApp::handleFocus(EditorWindow &w) noexcept
         docTree->tree->focusEditor(&w);
     // We keep track of the most recent directory for file dialogs.
     if (!w.filePath().empty())
-        fileDialogDir = TPath::dirname(w.filePath());
+        mostRecentDir = TPath::dirname(w.filePath());
 }
 
 void TurboApp::handleTitleChange(EditorWindow &w) noexcept
@@ -419,7 +419,7 @@ void TurboApp::handleTitleChange(EditorWindow &w) noexcept
         }
     }
     if (!w.filePath().empty() && w.state & sfActive)
-        fileDialogDir = TPath::dirname(w.filePath());
+        mostRecentDir = TPath::dirname(w.filePath());
 }
 
 void TurboApp::removeEditor(EditorWindow &w) noexcept
@@ -435,6 +435,11 @@ void TurboApp::removeEditor(EditorWindow &w) noexcept
         if (!MRUlist.empty())
             docTree->tree->focusEditor(MRUlist.next->self);
     }
+}
+
+const char *TurboApp::getFileDialogDir() noexcept
+{
+    return mostRecentDir.c_str();
 }
 
 static constexpr TColorAttr cpTurboAppColor[167] =

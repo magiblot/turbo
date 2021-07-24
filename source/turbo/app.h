@@ -43,6 +43,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     int argc;
     const char **argv;
     turbo::LcbClipboard clipboard;
+    std::string mostRecentDir;
 
     static TurboApp *app;
 
@@ -69,6 +70,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     void handleFocus(EditorWindow &w) noexcept override;
     void handleTitleChange(EditorWindow &w) noexcept override;
     void removeEditor(EditorWindow &w) noexcept override;
+    const char *getFileDialogDir() noexcept override;
 
     TPalette& getPalette() const override;
     void updatePalette(EditorWindow &w) const;

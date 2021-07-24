@@ -171,17 +171,13 @@ struct CwdGuard
     char *lastCwd;
     CwdGuard(const char *newCwd)
     {
-        if (newCwd)
+        if (newCwd && newCwd[0])
         {
             lastCwd = ::getcwd(nullptr, 0);
             int r = ::chdir(newCwd); (void) r;
         }
         else
             lastCwd = nullptr;
-    }
-    CwdGuard(const std::string &newCwd) :
-        CwdGuard(newCwd.c_str())
-    {
     }
     ~CwdGuard()
     {

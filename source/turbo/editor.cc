@@ -12,18 +12,18 @@ void TurboEditorState::afterSave() noexcept
 
 void TurboFileDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexcept
 {
-    CwdGuard cwd {app.fileDialogDir};
+    CwdGuard cwd {app.getFileDialogDir()};
     super::getOpenPath(accept);
 }
 
 void TurboFileDialogs::getSaveAsPath(turbo::FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
 {
-    CwdGuard cwd {app.fileDialogDir};
+    CwdGuard cwd {app.getFileDialogDir()};
     super::getSaveAsPath(state, accept);
 }
 
 void TurboFileDialogs::getRenamePath(turbo::FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
 {
-    CwdGuard cwd {app.fileDialogDir};
+    CwdGuard cwd {app.getFileDialogDir()};
     super::getRenamePath(state, accept);
 }

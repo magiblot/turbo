@@ -39,8 +39,7 @@ struct EditorWindowParent
     virtual void handleFocus(EditorWindow &w) noexcept = 0;
     virtual void handleTitleChange(EditorWindow &w) noexcept = 0;
     virtual void removeEditor(EditorWindow &w) noexcept = 0;
-
-    std::string fileDialogDir;
+    virtual const char *getFileDialogDir() noexcept = 0;
 };
 
 struct EditorWindow : public TWindow, turbo::EditorParent
