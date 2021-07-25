@@ -47,7 +47,7 @@ struct EditorWindow : public TWindow, turbo::EditorParent
     enum { leftMarginSep = 1 };
     static constexpr TPoint minSize {24, 6};
 
-    TurboEditorState editorState;
+    TurboEditor editor;
     list_head<EditorWindow> listHead;
     FileNumberState fileNumber;
     EditorWindowParent &parent;
@@ -69,10 +69,10 @@ struct EditorWindow : public TWindow, turbo::EditorParent
     const char *getTitle(short = 0) override;
     void sizeLimits(TPoint &min, TPoint &max) override;
     void updateCommands() noexcept;
-    void handleNotification(ushort, turbo::EditorState &) noexcept override;
+    void handleNotification(ushort, turbo::Editor &) noexcept override;
     TPalette& getPalette() const override;
 
-    auto &filePath() { return editorState.filePath; }
+    auto &filePath() { return editor.filePath; }
 
 };
 

@@ -29,8 +29,8 @@ enum : ushort
 };
 
 struct DemoEditorListView;
-using turbo::FileEditorState;
-using EditorStateList = std::forward_list<FileEditorState>;
+using turbo::FileEditor;
+using EditorList = std::forward_list<FileEditor>;
 
 struct DemoApplication : public TApplication
 {
@@ -44,7 +44,7 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
 
     enum { listWidth = 20 };
 
-    EditorStateList states;
+    EditorList states;
     turbo::EditorView *edView;
     turbo::LeftMarginView *leftMargin;
     TScrollBar *hScrollBar, *vScrollBar;
@@ -60,11 +60,11 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
     void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     const char *getTitle(short) override;
 
-    void handleNotification(ushort, turbo::EditorState &) noexcept override;
+    void handleNotification(ushort, turbo::Editor &) noexcept override;
 
     turbo::Scintilla &createScintilla();
     void addEditor(turbo::Scintilla &, const char *filePath);
-    void removeState(FileEditorState &aState);
+    void removeState(FileEditor &aState);
     bool closeAllEditors();
 
 };
@@ -73,9 +73,9 @@ struct DemoEditorListView : public TListViewer
 {
 
     DemoEditorListView( const TRect& bounds, TScrollBar *aHScrollBar,
-                     TScrollBar *aVScrollBar, EditorStateList &aList ) noexcept;
+                     TScrollBar *aVScrollBar, EditorList &aList ) noexcept;
 
-    EditorStateList &list;
+    EditorList &list;
 
     void getText(char *dest, short item, short maxLen) override;
     void focusItemNum(short item) override;
@@ -173,8 +173,8 @@ DemoEditorWindow::DemoEditorWindow(const TRect &bounds, turbo::Clipboard *aClipb
 
 void DemoEditorWindow::shutDown()
 {
-    if (edView && edView->editorState)
-        edView->editorState->disassociate();
+    if (edView && edView->editor)
+        edView->editor->disassociate();
     edView = nullptr;
     leftMargin = nullptr;
     hScrollBar = nullptr;
@@ -190,24 +190,24 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
         switch (ev.message.command)
         {
             case cmToggleLineNumbers:
-                if (edView->editorState)
+                if (edView->editor)
                 {
-                    edView->editorState->toggleLineNumbers();
-                    edView->editorState->redraw();
+                    edView->editor->toggleLineNumbers();
+                    edView->editor->redraw();
                     clearEvent(ev);
                 }
                 break;
             case cmToggleLineWrapping:
-                if (edView->editorState)
+                if (edView->editor)
                 {
-                    edView->editorState->toggleLineWrapping();
-                    edView->editorState->redraw();
+                    edView->editor->toggleLineWrapping();
+                    edView->editor->redraw();
                     clearEvent(ev);
                 }
                 break;
             case cmEditorFocused:
             {
-                auto *state = (FileEditorState *) ev.message.infoPtr;
+                auto *state = (FileEditor *) ev.message.infoPtr;
                 if (state)
                 {
                     state->associate(this, edView, leftMargin, hScrollBar, vScrollBar);
@@ -236,23 +236,23 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 break;
             }
             case cmSaveFile:
-                if (edView->editorState)
-                    ((FileEditorState *) edView->editorState)->save();
+                if (edView->editor)
+                    ((FileEditor *) edView->editor)->save();
                 clearEvent(ev);
                 break;
             case cmSaveFileAs:
-                if (edView->editorState)
-                    ((FileEditorState *) edView->editorState)->saveAs();
+                if (edView->editor)
+                    ((FileEditor *) edView->editor)->saveAs();
                 clearEvent(ev);
                 break;
             case cmRenameFile:
-                if (edView->editorState)
-                    ((FileEditorState *) edView->editorState)->rename();
+                if (edView->editor)
+                    ((FileEditor *) edView->editor)->rename();
                 clearEvent(ev);
                 break;
             case cmCloseFile:
-                if (edView->editorState && ((FileEditorState *) edView->editorState)->close())
-                    removeState(*(FileEditorState *) edView->editorState);
+                if (edView->editor && ((FileEditor *) edView->editor)->close())
+                    removeState(*(FileEditor *) edView->editor);
                 clearEvent(ev);
                 break;
         }
@@ -276,15 +276,15 @@ Boolean DemoEditorWindow::valid(ushort command)
 
 void DemoEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
 {
-    if (edView && edView->editorState)
+    if (edView && edView->editor)
     {
-        auto lastResizeLock = edView->editorState->resizeLock;
+        auto lastResizeLock = edView->editor->resizeLock;
         auto lastSize = edView->size;
-        edView->editorState->resizeLock = true;
+        edView->editor->resizeLock = true;
         TDialog::dragView(event, mode, limits, minSize, maxSize);
-        edView->editorState->resizeLock = lastResizeLock;
+        edView->editor->resizeLock = lastResizeLock;
         if (lastSize != edView->size)
-            edView->editorState->redraw(); // Redraw without 'resizeLock = true'.
+            edView->editor->redraw(); // Redraw without 'resizeLock = true'.
     }
     else
         TDialog::dragView(event, mode, limits, minSize, maxSize);
@@ -292,9 +292,9 @@ void DemoEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint
 
 const char *DemoEditorWindow::getTitle(short)
 {
-    if (edView && edView->editorState)
+    if (edView && edView->editor)
     {
-        auto &state = *(turbo::FileEditorState *) edView->editorState;
+        auto &state = *(turbo::FileEditor *) edView->editor;
         auto name = TPath::basename(state.filePath);
         if (name.empty()) name = "Untitled";
         bool dirty = !state.inSavePoint();
@@ -309,16 +309,16 @@ const char *DemoEditorWindow::getTitle(short)
     return nullptr;
 }
 
-void DemoEditorWindow::handleNotification(ushort code, turbo::EditorState &state) noexcept
+void DemoEditorWindow::handleNotification(ushort code, turbo::Editor &state) noexcept
 {
     using namespace turbo;
     switch (code)
     {
-        case EditorState::ncPainted:
+        case Editor::ncPainted:
             if (!state.resizeLock) // These already get drawn when resizing.
                 frame->drawView(); // The frame is sensible to the save point state.
             break;
-        case FileEditorState::ncSaved:
+        case FileEditor::ncSaved:
             state.redraw();
             listView->drawView();
             break;
@@ -334,11 +334,11 @@ void DemoEditorWindow::addEditor(turbo::Scintilla &scintilla, const char *filePa
 {
     states.emplace_front(scintilla, filePath);
     listView->setRange(listView->range + 1);
-    listView->focusItemNum(0); // Triggers EditorState::associate.
+    listView->focusItemNum(0); // Triggers Editor::associate.
     listView->drawView();
 }
 
-void DemoEditorWindow::removeState(FileEditorState &aState)
+void DemoEditorWindow::removeState(FileEditor &aState)
 // Pre: 'aState' belongs to 'states'.
 {
     states.remove_if([&] (const auto &state) {
@@ -355,9 +355,9 @@ void DemoEditorWindow::removeState(FileEditorState &aState)
 bool DemoEditorWindow::closeAllEditors()
 {
     if (edView)
-        while (edView->editorState)
+        while (edView->editor)
         {
-            auto &state = *(FileEditorState *) edView->editorState;
+            auto &state = *(FileEditor *) edView->editor;
             if (state.close())
                 removeState(state);
             else
@@ -367,7 +367,7 @@ bool DemoEditorWindow::closeAllEditors()
 }
 
 DemoEditorListView::DemoEditorListView( const TRect& bounds, TScrollBar *aHScrollBar,
-                                TScrollBar *aVScrollBar, EditorStateList &aList ) noexcept :
+                                TScrollBar *aVScrollBar, EditorList &aList ) noexcept :
     TListViewer(bounds, 1, aHScrollBar, aVScrollBar),
     list(aList)
 {

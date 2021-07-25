@@ -488,7 +488,7 @@ void TurboApp::updatePalette(EditorWindow &w) const
 {
     using namespace turbo;
     auto &pal = getPalette();
-    auto &th = w.editorState.theming;
+    auto &th = w.editor.theming;
     pal[edFramePassive  ] = th.normalize(sFramePassive  );
     pal[edFrameActive   ] = th.normalize(sFrameActive   );
     pal[edFrameIcon     ] = th.normalize(sFrameIcon     );

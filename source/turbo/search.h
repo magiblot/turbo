@@ -28,13 +28,13 @@ void insertSearchBox(EditorWindow &win);
 
 struct Searcher : public TValidator {
 
-    EditorWindow &win;
+    turbo::Editor &editor;
     bool onDemand {false}, typing {false};
     sptr_t result, resultEnd;
     enum {forward=0, backwards=1} direction;
 
-    Searcher(EditorWindow &win) :
-        win(win)
+    Searcher(turbo::Editor &aEditor) :
+        editor(aEditor)
     {
     }
 

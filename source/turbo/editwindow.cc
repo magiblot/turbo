@@ -23,13 +23,13 @@ EditorWindow::EditorWindow( const TRect &bounds, turbo::Scintilla &scintilla,
                             EditorWindowParent &aParent ) noexcept :
     TWindowInit(&initFrame),
     TWindow(bounds, nullptr, wnNoNumber),
-    editorState(scintilla, filePath),
+    editor(scintilla, filePath),
     listHead(this),
     fileNumber(fileCounter),
     parent(aParent)
 {
     using namespace turbo;
-    ((EditorFrame *) frame)->scintilla = &editorState.scintilla;
+    ((EditorFrame *) frame)->scintilla = &editor.scintilla;
 
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
@@ -49,7 +49,7 @@ EditorWindow::EditorWindow( const TRect &bounds, turbo::Scintilla &scintilla,
     vScrollBar->hide();
     insert(vScrollBar);
 
-    editorState.associate(this, editorView, leftMargin, hScrollBar, vScrollBar);
+    editor.associate(this, editorView, leftMargin, hScrollBar, vScrollBar);
 
     insertSearchBox(*this);
 
@@ -71,7 +71,7 @@ EditorWindow::EditorWindow( const TRect &bounds, turbo::Scintilla &scintilla,
 
 void EditorWindow::shutDown()
 {
-    editorState.disassociate();
+    editor.disassociate();
     TWindow::shutDown();
     parent.removeEditor(*this);
 }
@@ -82,24 +82,24 @@ void EditorWindow::handleEvent(TEvent &ev) {
         TurboFileDialogs dlgs {parent};
         switch (ev.message.command) {
             case cmSave:
-                editorState.save(dlgs);
+                editor.save(dlgs);
                 break;
             case cmSaveAs:
-                editorState.saveAs(dlgs);
+                editor.saveAs(dlgs);
                 break;
             case cmRename:
-                editorState.rename(dlgs);
+                editor.rename(dlgs);
                 break;
             case cmToggleWrap:
-                editorState.toggleLineWrapping();
-                editorState.redraw();
+                editor.toggleLineWrapping();
+                editor.redraw();
                 break;
             case cmToggleLineNums:
-                editorState.toggleLineNumbers();
-                editorState.redraw();
+                editor.toggleLineNumbers();
+                editor.redraw();
                 break;
             case cmToggleIndent:
-                editorState.toggleAutoIndent();
+                editor.toggleAutoIndent();
                 break;
             case cmCloseEditor:
                 handled = message(this, evCommand, cmClose, nullptr); // May delete 'this'!
@@ -119,13 +119,13 @@ void EditorWindow::handleEvent(TEvent &ev) {
 
 void EditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
 {
-    auto lastResizeLock = editorState.resizeLock;
+    auto lastResizeLock = editor.resizeLock;
     auto lastSize = size;
-    editorState.resizeLock = true;
+    editor.resizeLock = true;
     TWindow::dragView(event, mode, limits, minSize, maxSize);
-    editorState.resizeLock = lastResizeLock;
+    editor.resizeLock = lastResizeLock;
     if (lastSize != size)
-        editorState.redraw(); // Redraw without 'resizeLock = true'.
+        editor.redraw(); // Redraw without 'resizeLock = true'.
 }
 
 void EditorWindow::setState(ushort aState, Boolean enable)
@@ -135,10 +135,10 @@ void EditorWindow::setState(ushort aState, Boolean enable)
     {
         case sfActive:
             updateCommands();
-            if (editorState.parent == this) // 'disassociate' not invoked yet.
+            if (editor.parent == this) // 'disassociate' not invoked yet.
             {
-                editorState.hScrollBar->setState(sfVisible, enable);
-                editorState.vScrollBar->setState(sfVisible, enable);
+                editor.hScrollBar->setState(sfVisible, enable);
+                editor.vScrollBar->setState(sfVisible, enable);
                 if (enable)
                     parent.handleFocus(*this);
             }
@@ -153,7 +153,7 @@ Boolean EditorWindow::valid(ushort command)
         if (command != cmValid)
         {
             TurboFileDialogs dlgs {parent};
-            return editorState.close(dlgs);
+            return editor.close(dlgs);
         }
         return true;
     }
@@ -162,12 +162,12 @@ Boolean EditorWindow::valid(ushort command)
 
 const char* EditorWindow::getTitle(short)
 {
-    TitleState titleState {fileNumber.counter, fileNumber.number, editorState.inSavePoint()};
+    TitleState titleState {fileNumber.counter, fileNumber.number, editor.inSavePoint()};
     if (lastTitleState != titleState)
     {
         lastTitleState = titleState;
         TStringView name = !filePath().empty() ? TPath::basename(filePath()) : "Untitled";
-        TStringView savePoint = editorState.inSavePoint() ? "" : "*";
+        TStringView savePoint = editor.inSavePoint() ? "" : "*";
         auto &&number = fileNumber.number > 1 ? fmt::format(" ({})", fileNumber.number) : std::string();
         title = fmt::format("{}{}{}", name, savePoint, number);
     }
@@ -190,19 +190,19 @@ void EditorWindow::updateCommands() noexcept
         disableCommands(disabledCmds);
 }
 
-void EditorWindow::handleNotification(ushort code, turbo::EditorState &) noexcept
+void EditorWindow::handleNotification(ushort code, turbo::Editor &) noexcept
 {
     using namespace turbo;
     switch (code)
     {
-        case EditorState::ncPainted:
-            if (!editorState.resizeLock && frame) // These already get drawn when resizing.
+        case Editor::ncPainted:
+            if (!editor.resizeLock && frame) // These already get drawn when resizing.
                 frame->drawView(); // The frame is sensible to the save point state.
             break;
-        case FileEditorState::ncSaved:
+        case FileEditor::ncSaved:
             updateCommands();
             parent.handleTitleChange(*this);
-            editorState.redraw();
+            editor.redraw();
             break;
     }
 }

@@ -20,14 +20,14 @@ namespace turbo {
 class Clipboard;
 class EditorView;
 class LeftMarginView;
-struct EditorState;
+struct Editor;
 
 struct EditorParent
 {
-    virtual void handleNotification(ushort code, EditorState &) noexcept = 0;
+    virtual void handleNotification(ushort code, Editor &) noexcept = 0;
 };
 
-struct EditorState : ScintillaParent
+struct Editor : ScintillaParent
 {
     enum : ushort { // Notification Codes
         ncPainted = 1,
@@ -59,8 +59,8 @@ struct EditorState : ScintillaParent
     WrapState wrapping;
     AutoIndent autoIndent;
 
-    EditorState(Scintilla &aScintilla) noexcept;
-    virtual ~EditorState();
+    Editor(Scintilla &aScintilla) noexcept;
+    virtual ~Editor();
 
     void associate( EditorParent *aParent,
                     EditorView *aView, LeftMarginView *aLeftMargin,
@@ -106,7 +106,7 @@ class EditorView : public TSurfaceView
 {
 public:
 
-    EditorState *editorState {nullptr};
+    Editor *editor {nullptr};
 
     EditorView(const TRect &bounds) noexcept;
 
@@ -128,12 +128,12 @@ public:
     LeftMarginView(int aDistance) noexcept;
 };
 
-struct FileEditorState;
+struct FileEditor;
 
 struct FileDialogs
 {
-    virtual ushort confirmSaveUntitled(FileEditorState &) noexcept = 0;
-    virtual ushort confirmSaveModified(FileEditorState &) noexcept = 0;
+    virtual ushort confirmSaveUntitled(FileEditor &) noexcept = 0;
+    virtual ushort confirmSaveModified(FileEditor &) noexcept = 0;
     virtual ushort confirmOverwrite(const char *path) noexcept = 0;
     virtual void removeRenamedWarning(const char *dst, const char *src, const char *cause) noexcept = 0;
     virtual bool renameError(const char *dst, const char *src, const char *cause) noexcept = 0;
@@ -143,14 +143,14 @@ struct FileDialogs
     virtual bool openForReadError(const char *path, const char *cause) noexcept = 0;
     virtual bool openForWriteError(const char *path, const char *cause) noexcept = 0;
     virtual void getOpenPath(TFuncView<bool (const char *)> accept) noexcept = 0;
-    virtual void getSaveAsPath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept = 0;
-    virtual void getRenamePath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept = 0;
+    virtual void getSaveAsPath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept = 0;
+    virtual void getRenamePath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept = 0;
 };
 
 struct DefaultFileDialogs : FileDialogs
 {
-    ushort confirmSaveUntitled(FileEditorState &) noexcept override;
-    ushort confirmSaveModified(FileEditorState &) noexcept override;
+    ushort confirmSaveUntitled(FileEditor &) noexcept override;
+    ushort confirmSaveModified(FileEditor &) noexcept override;
     ushort confirmOverwrite(const char *path) noexcept override;
     void removeRenamedWarning(const char *dst, const char *src, const char *cause) noexcept override;
     bool renameError(const char *dst, const char *src, const char *cause) noexcept override;
@@ -160,16 +160,16 @@ struct DefaultFileDialogs : FileDialogs
     bool openForReadError(const char *path, const char *cause) noexcept override;
     bool openForWriteError(const char *path, const char *cause) noexcept override;
     void getOpenPath(TFuncView<bool (const char *)> accept) noexcept override;
-    void getSaveAsPath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
-    void getRenamePath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getSaveAsPath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getRenamePath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
 };
 
 extern DefaultFileDialogs defFileDialogs;
 
 struct SilentFileDialogs : FileDialogs
 {
-    ushort confirmSaveUntitled(FileEditorState &) noexcept override;
-    ushort confirmSaveModified(FileEditorState &) noexcept override;
+    ushort confirmSaveUntitled(FileEditor &) noexcept override;
+    ushort confirmSaveModified(FileEditor &) noexcept override;
     ushort confirmOverwrite(const char *path) noexcept override;
     void removeRenamedWarning(const char *dst, const char *src, const char *cause) noexcept override;
     bool renameError(const char *dst, const char *src, const char *cause) noexcept override;
@@ -179,8 +179,8 @@ struct SilentFileDialogs : FileDialogs
     bool openForReadError(const char *path, const char *cause) noexcept override;
     bool openForWriteError(const char *path, const char *cause) noexcept override;
     void getOpenPath(TFuncView<bool (const char *)> accept) noexcept override;
-    void getSaveAsPath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
-    void getRenamePath(FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getSaveAsPath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getRenamePath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
 };
 
 extern SilentFileDialogs silFileDialogs;
@@ -192,7 +192,7 @@ void openFile( TFuncView<Scintilla&()> createScintilla,
 bool writeFile(const char *path, Scintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
 bool renameFile(const char *dst, const char *src, Scintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
 
-struct FileEditorState : EditorState
+struct FileEditor : Editor
 {
     enum : ushort { // Notification Codes
         ncSaved = 100,
@@ -200,7 +200,7 @@ struct FileEditorState : EditorState
 
     std::string filePath;
 
-    FileEditorState(Scintilla &aScintilla, std::string aFilePath) noexcept;
+    FileEditor(Scintilla &aScintilla, std::string aFilePath) noexcept;
 
     void detectLanguage() noexcept;
     bool save(FileDialogs & = defFileDialogs) noexcept;
@@ -214,14 +214,14 @@ struct FileEditorState : EditorState
 
 };
 
-inline FileEditorState::FileEditorState(Scintilla &aScintilla, std::string aFilePath) noexcept :
-    EditorState(aScintilla),
+inline FileEditor::FileEditor(Scintilla &aScintilla, std::string aFilePath) noexcept :
+    Editor(aScintilla),
     filePath(std::move(aFilePath))
 {
     detectLanguage();
 }
 
-inline void FileEditorState::detectLanguage() noexcept
+inline void FileEditor::detectLanguage() noexcept
 {
     theming.detectLanguage(filePath.c_str(), scintilla);
 }

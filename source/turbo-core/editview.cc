@@ -24,10 +24,10 @@ static TPoint getDelta(Scintilla &scintilla)
 
 void EditorView::handleEvent(TEvent &ev)
 {
-    if (!editorState)
+    if (!editor)
         return;
     TView::handleEvent(ev);
-    auto &scintilla = editorState->scintilla;
+    auto &scintilla = editor->scintilla;
     switch (ev.what)
     {
         case evKeyDown:
@@ -39,7 +39,7 @@ void EditorView::handleEvent(TEvent &ev)
                 handleKeyDown(scintilla, ev.keyDown);
             else
                 consumeInputText(ev);
-            editorState->partialRedraw();
+            editor->partialRedraw();
             clearEvent(ev);
             break;
         case evMouseDown:
@@ -51,8 +51,8 @@ void EditorView::handleEvent(TEvent &ev)
                 {
                     TPoint mouse = makeLocal(ev.mouse.where);
                     TPoint d = getDelta(scintilla) + (lastMouse - mouse);
-                    editorState->scrollTo(d);
-                    editorState->partialRedraw();
+                    editor->scrollTo(d);
+                    editor->partialRedraw();
                     lastMouse = mouse;
                 }
             }
@@ -64,7 +64,7 @@ void EditorView::handleEvent(TEvent &ev)
                     if (ev.what == evMouseWheel)
                     {
                         // Mouse wheel while holding button down.
-                        editorState->scrollBarEvent(ev);
+                        editor->scrollBarEvent(ev);
                         ev.mouse.where = where;
                         ev.what = evMouseMove;
                         // For some reason, the caret is not always updated
@@ -77,20 +77,20 @@ void EditorView::handleEvent(TEvent &ev)
                         ev.mouse.where = where;
                         if (!handleMouse(scintilla, ev.what, ev.mouse))
                         {
-                            editorState->partialRedraw();
+                            editor->partialRedraw();
                             break;
                         }
                     }
-                    editorState->partialRedraw();
+                    editor->partialRedraw();
                 } while (mouseEvent(ev, evMouseDown | evMouseMove | evMouseAuto | evMouseWheel));
             }
             clearEvent(ev);
             break;
         case evBroadcast:
             if ( ev.message.command == cmScrollBarChanged &&
-                 editorState->handleScrollBarChanged((TScrollBar *) ev.message.infoPtr) )
+                 editor->handleScrollBarChanged((TScrollBar *) ev.message.infoPtr) )
             {
-                editorState->partialRedraw();
+                editor->partialRedraw();
                 clearEvent(ev);
             }
             break;
@@ -118,9 +118,9 @@ static void insertOneByOne(Scintilla &scintilla, std::string_view text)
 }
 
 void EditorView::consumeInputText(TEvent &ev)
-// Pre: 'editorState' is non-null.
+// Pre: 'editor' is non-null.
 {
-    auto &scintilla = editorState->scintilla;
+    auto &scintilla = editor->scintilla;
     clearBeforeTentativeStart(scintilla);
 
     char buf[4096];
@@ -147,14 +147,14 @@ void EditorView::consumeInputText(TEvent &ev)
 
 void EditorView::draw()
 {
-    if (!editorState)
+    if (!editor)
         TSurfaceView::draw();
     // 'surface' is only set when the draw is triggered by EditorState.
     else if (!surface)
-        editorState->redraw();
+        editor->redraw();
     else
     {
-        TPoint p = pointMainCaret(editorState->scintilla);
+        TPoint p = pointMainCaret(editor->scintilla);
         cursor = p - delta;
         TSurfaceView::draw();
     }

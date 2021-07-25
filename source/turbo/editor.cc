@@ -1,7 +1,7 @@
 #include "editor.h"
 #include "editwindow.h"
 
-void TurboEditorState::afterSave() noexcept
+void TurboEditor::afterSave() noexcept
 {
     using namespace turbo;
     auto lastLang = theming.language;
@@ -16,14 +16,14 @@ void TurboFileDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexce
     super::getOpenPath(accept);
 }
 
-void TurboFileDialogs::getSaveAsPath(turbo::FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
+void TurboFileDialogs::getSaveAsPath(turbo::FileEditor &editor, TFuncView<bool (const char *)> accept) noexcept
 {
     CwdGuard cwd {app.getFileDialogDir()};
-    super::getSaveAsPath(state, accept);
+    super::getSaveAsPath(editor, accept);
 }
 
-void TurboFileDialogs::getRenamePath(turbo::FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
+void TurboFileDialogs::getRenamePath(turbo::FileEditor &editor, TFuncView<bool (const char *)> accept) noexcept
 {
     CwdGuard cwd {app.getFileDialogDir()};
-    super::getRenamePath(state, accept);
+    super::getRenamePath(editor, accept);
 }

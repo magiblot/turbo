@@ -159,7 +159,7 @@ bool renameFile(const char *dst, const char *src, Scintilla &scintilla, FileDial
     return dlgs.renameError(dst, src, strerror(errno));
 }
 
-bool FileEditorState::save(FileDialogs &dlgs) noexcept
+bool FileEditor::save(FileDialogs &dlgs) noexcept
 {
     if (filePath.empty())
         return saveAs(dlgs);
@@ -172,7 +172,7 @@ bool FileEditorState::save(FileDialogs &dlgs) noexcept
     return false;
 }
 
-bool FileEditorState::saveAs(FileDialogs &dlgs) noexcept
+bool FileEditor::saveAs(FileDialogs &dlgs) noexcept
 {
     bool ok = false;
     dlgs.getSaveAsPath(*this, [&] (const char *path) {
@@ -188,7 +188,7 @@ bool FileEditorState::saveAs(FileDialogs &dlgs) noexcept
     return ok;
 }
 
-bool FileEditorState::rename(FileDialogs &dlgs) noexcept
+bool FileEditor::rename(FileDialogs &dlgs) noexcept
 {
     if (filePath.empty())
         return saveAs(dlgs);
@@ -206,7 +206,7 @@ bool FileEditorState::rename(FileDialogs &dlgs) noexcept
     return ok;
 }
 
-bool FileEditorState::close(FileDialogs &dlgs) noexcept
+bool FileEditor::close(FileDialogs &dlgs) noexcept
 {
     if (!inSavePoint())
     {
@@ -218,7 +218,7 @@ bool FileEditorState::close(FileDialogs &dlgs) noexcept
     return true;
 }
 
-void FileEditorState::beforeSave() noexcept
+void FileEditor::beforeSave() noexcept
 {
     if (!inSavePoint() && !call(scintilla, SCI_CANREDO, 0U, 0U))
     {
@@ -229,13 +229,13 @@ void FileEditorState::beforeSave() noexcept
     }
 }
 
-void FileEditorState::afterSave() noexcept
+void FileEditor::afterSave() noexcept
 {
     call(scintilla, SCI_SETSAVEPOINT, 0U, 0U);
     detectLanguage();
 }
 
-void FileEditorState::notifyAfterSave() noexcept
+void FileEditor::notifyAfterSave() noexcept
 {
     afterSave();
     if (parent)
@@ -244,14 +244,14 @@ void FileEditorState::notifyAfterSave() noexcept
 
 DefaultFileDialogs defFileDialogs;
 
-ushort DefaultFileDialogs::confirmSaveUntitled(FileEditorState &) noexcept
+ushort DefaultFileDialogs::confirmSaveUntitled(FileEditor &) noexcept
 {
     return messageBox("Save untitled file?", mfConfirmation | mfYesNoCancel);
 }
 
-ushort DefaultFileDialogs::confirmSaveModified(FileEditorState &state) noexcept
+ushort DefaultFileDialogs::confirmSaveModified(FileEditor &editor) noexcept
 {
-    return messageBox( fmt::format("'{}' has been modified. Save?", state.filePath),
+    return messageBox( fmt::format("'{}' has been modified. Save?", editor.filePath),
                        mfConfirmation | mfYesNoCancel );
 }
 
@@ -318,10 +318,10 @@ static bool canOverwrite(FileDialogs &dlgs, const char *path) noexcept
     return !TPath::exists(path) || dlgs.confirmOverwrite(path) == cmYes;
 }
 
-void DefaultFileDialogs::getSaveAsPath(FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
+void DefaultFileDialogs::getSaveAsPath(FileEditor &editor, TFuncView<bool (const char *)> accept) noexcept
 {
     char path[MAXPATH];
-    auto &&title = state.filePath.empty() ? "Save untitled file" : fmt::format("Save file '{}' as", TPath::basename(state.filePath));
+    auto &&title = editor.filePath.empty() ? "Save untitled file" : fmt::format("Save file '{}' as", TPath::basename(editor.filePath));
     openFileDialog("*.*", title, "~N~ame", fdOKButton, 0, [&] (TView *dialog) {
         dialog->getData(path);
         fexpand(path);
@@ -329,24 +329,24 @@ void DefaultFileDialogs::getSaveAsPath(FileEditorState &state, TFuncView<bool (c
     });
 }
 
-void DefaultFileDialogs::getRenamePath(FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept
+void DefaultFileDialogs::getRenamePath(FileEditor &editor, TFuncView<bool (const char *)> accept) noexcept
 {
     char path[MAXPATH];
-    auto &&title = fmt::format("Rename file '{}'", TPath::basename(state.filePath));
+    auto &&title = fmt::format("Rename file '{}'", TPath::basename(editor.filePath));
     openFileDialog("*.*", title, "~N~ame", fdOKButton, 0, [&] (TView *dialog) {
         dialog->getData(path);
         fexpand(path);
         // Don't do anything if renaming to the same file. If the user needed to
         // save the file, they would use the 'save' feature.
-        return strcmp(path, state.filePath.c_str()) == 0 ||
+        return strcmp(path, editor.filePath.c_str()) == 0 ||
             (canOverwrite(*this, path) && accept(path));
     });
 }
 
 SilentFileDialogs silFileDialogs;
 
-ushort SilentFileDialogs::confirmSaveUntitled(FileEditorState &) noexcept { return cmCancel; }
-ushort SilentFileDialogs::confirmSaveModified(FileEditorState &state) noexcept { return cmCancel; }
+ushort SilentFileDialogs::confirmSaveUntitled(FileEditor &) noexcept { return cmCancel; }
+ushort SilentFileDialogs::confirmSaveModified(FileEditor &editor) noexcept { return cmCancel; }
 ushort SilentFileDialogs::confirmOverwrite(const char *path) noexcept { return cmCancel; }
 void SilentFileDialogs::removeRenamedWarning(const char *dst, const char *src, const char *cause) noexcept {}
 bool SilentFileDialogs::renameError(const char *dst, const char *src, const char *cause) noexcept { return false; }
@@ -356,7 +356,7 @@ bool SilentFileDialogs::writeError(const char *path, const char *cause) noexcept
 bool SilentFileDialogs::openForReadError(const char *path, const char *cause) noexcept { return false; }
 bool SilentFileDialogs::openForWriteError(const char *path, const char *cause) noexcept { return false; }
 void SilentFileDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexcept {}
-void SilentFileDialogs::getSaveAsPath(FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept {}
-void SilentFileDialogs::getRenamePath(FileEditorState &state, TFuncView<bool (const char *)> accept) noexcept {}
+void SilentFileDialogs::getSaveAsPath(FileEditor &editor, TFuncView<bool (const char *)> accept) noexcept {}
+void SilentFileDialogs::getRenamePath(FileEditor &editor, TFuncView<bool (const char *)> accept) noexcept {}
 
 } // namespace turbo

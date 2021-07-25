@@ -8,7 +8,7 @@
 
 namespace turbo {
 
-EditorState::EditorState(Scintilla &aScintilla) noexcept :
+Editor::Editor(Scintilla &aScintilla) noexcept :
     scintilla(aScintilla)
 {
     // Editor should send notifications to this object.
@@ -43,22 +43,22 @@ EditorState::EditorState(Scintilla &aScintilla) noexcept :
     call(scintilla, SCI_SETSAVEPOINT, 0U, 0U);
 }
 
-EditorState::~EditorState()
+Editor::~Editor()
 {
     destroyScintilla(scintilla);
 }
 
-void EditorState::associate( EditorParent *aParent,
-                             EditorView *aView, LeftMarginView *aLeftMargin,
-                             TScrollBar *aHScrollBar, TScrollBar *aVScrollBar ) noexcept
+void Editor::associate( EditorParent *aParent,
+                        EditorView *aView, LeftMarginView *aLeftMargin,
+                        TScrollBar *aHScrollBar, TScrollBar *aVScrollBar ) noexcept
 {
     disassociate();
     parent = aParent;
     if (aView)
     {
-        if (aView->editorState)
-            aView->editorState->disassociate();
-        aView->editorState = this;
+        if (aView->editor)
+            aView->editor->disassociate();
+        aView->editor = this;
         aView->state |= sfCursorVis;
     }
     view = aView;
@@ -75,8 +75,8 @@ void EditorState::associate( EditorParent *aParent,
     vScrollBar = aVScrollBar;
 }
 
-void EditorState::disassociate() noexcept
-// Pre: if view != nullptr, view->editorState == this.
+void Editor::disassociate() noexcept
+// Pre: if view != nullptr, view->editor == this.
 // Post: if view != nullptr && leftMargin != nullptr, they are sized as if
 //       the line numbers were hidden.
 {
@@ -90,7 +90,7 @@ void EditorState::disassociate() noexcept
             view->setBounds(r);
             leftMargin->size.x = 0;
         }
-        view->editorState = nullptr;
+        view->editor = nullptr;
         view->state &= ~sfCursorVis;
     }
     view = nullptr;
@@ -99,7 +99,7 @@ void EditorState::disassociate() noexcept
     vScrollBar = nullptr;
 }
 
-TPoint EditorState::getEditorSize() noexcept
+TPoint Editor::getEditorSize() noexcept
 {
     if (view)
         return {
@@ -109,7 +109,7 @@ TPoint EditorState::getEditorSize() noexcept
     return {0, 0};
 }
 
-void EditorState::scrollBarEvent(TEvent &ev)
+void Editor::scrollBarEvent(TEvent &ev)
 {
     // TScrollBar::handleEvent leads to a cmScrollBarChanged being messaged,
     // which EditorView handles with a call to redraw(). Hold the draw lock
@@ -123,7 +123,7 @@ void EditorState::scrollBarEvent(TEvent &ev)
     drawLock = lastDrawLock;
 }
 
-void EditorState::scrollTo(TPoint delta) noexcept
+void Editor::scrollTo(TPoint delta) noexcept
 {
     // TScrollBar::setValue leads to a cmScrollBarChanged being messaged,
     // which EditorView handles with a call to redraw(). Hold the draw lock
@@ -138,20 +138,20 @@ void EditorState::scrollTo(TPoint delta) noexcept
 }
 
 
-void EditorState::redraw() noexcept
+void Editor::redraw() noexcept
 {
     auto size = getEditorSize();
     if (redraw({0, 0, size.x, size.y}))
         invalidatedArea.clear();
 }
 
-void EditorState::partialRedraw() noexcept
+void Editor::partialRedraw() noexcept
 {
     if (redraw(invalidatedArea))
         invalidatedArea.clear();
 }
 
-void EditorState::invalidate(TRect area) noexcept
+void Editor::invalidate(TRect area) noexcept
 {
     if (invalidatedArea.empty())
         invalidatedArea = area;
@@ -159,7 +159,7 @@ void EditorState::invalidate(TRect area) noexcept
         invalidatedArea.Union(area);
 }
 
-bool EditorState::redraw(const TRect &area) noexcept
+bool Editor::redraw(const TRect &area) noexcept
 {
     if ( !drawLock && 0 <= area.a.x && area.a.x < area.b.x
                    && 0 <= area.a.y && area.a.y < area.b.y )
@@ -195,7 +195,7 @@ bool EditorState::redraw(const TRect &area) noexcept
     return false;
 }
 
-void EditorState::drawViews() noexcept
+void Editor::drawViews() noexcept
 {
     forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
         p.drawView();
@@ -204,7 +204,7 @@ void EditorState::drawViews() noexcept
         parent->handleNotification(ncPainted, *this);
 }
 
-void EditorState::updateMarginWidth() noexcept
+void Editor::updateMarginWidth() noexcept
 {
     int width = lineNumbers.update(scintilla);
     if (leftMargin)
@@ -222,7 +222,7 @@ void EditorState::updateMarginWidth() noexcept
     }
 }
 
-bool EditorState::handleScrollBarChanged(TScrollBar *s)
+bool Editor::handleScrollBarChanged(TScrollBar *s)
 {
     if (s == hScrollBar)
     {
@@ -237,7 +237,7 @@ bool EditorState::handleScrollBarChanged(TScrollBar *s)
     return false;
 }
 
-void EditorState::handleNotification(const SCNotification &scn)
+void Editor::handleNotification(const SCNotification &scn)
 {
     switch (scn.nmhdr.code)
     {
@@ -248,7 +248,7 @@ void EditorState::handleNotification(const SCNotification &scn)
     }
 }
 
-void EditorState::setHorizontalScrollPos(int delta, int limit) noexcept
+void Editor::setHorizontalScrollPos(int delta, int limit) noexcept
 {
     if (view && hScrollBar)
     {
@@ -257,7 +257,7 @@ void EditorState::setHorizontalScrollPos(int delta, int limit) noexcept
     }
 }
 
-void EditorState::setVerticalScrollPos(int delta, int limit) noexcept
+void Editor::setVerticalScrollPos(int delta, int limit) noexcept
 {
     if (view && vScrollBar)
     {
@@ -266,7 +266,7 @@ void EditorState::setVerticalScrollPos(int delta, int limit) noexcept
     }
 }
 
-bool EditorState::inSavePoint()
+bool Editor::inSavePoint()
 {
     return call(scintilla, SCI_GETMODIFY, 0U, 0U) == 0;
 }

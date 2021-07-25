@@ -12,8 +12,8 @@ class TurboFileDialogs : public turbo::DefaultFileDialogs
     EditorWindowParent &app;
 
     void getOpenPath(TFuncView<bool (const char *)> accept) noexcept override;
-    void getSaveAsPath(turbo::FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
-    void getRenamePath(turbo::FileEditorState &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getSaveAsPath(turbo::FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
+    void getRenamePath(turbo::FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
 
 public:
 
@@ -23,14 +23,14 @@ public:
     }
 };
 
-class TurboEditorState : public turbo::FileEditorState
+class TurboEditor : public turbo::FileEditor
 {
-    using super = turbo::FileEditorState;
+    using super = turbo::FileEditor;
 
 public:
 
     template <class... Args>
-    TurboEditorState(Args&&... args) noexcept :
+    TurboEditor(Args&&... args) noexcept :
         super(static_cast<Args&&>(args)...)
     {
         if (theming.language != turbo::langNone)

@@ -33,7 +33,7 @@ SearchBox::SearchBox(const TRect &bounds, EditorWindow &win) :
     auto rNext = TRect(rPrev.a.x - cstrlen(nextText) - 5, 0, rPrev.a.x, 2);
     auto rBoxF = TRect(rLabelF.b.x + 1, 0, rNext.a.x, 1);
     {
-        findBox = new SearchInputLine(new Searcher(win), rBoxF, 256);
+        findBox = new SearchInputLine(new Searcher(win.editor), rBoxF, 256);
         findBox->growMode = gfGrowHiX;
         // Enable ofPostProcess so that it can receive commands even when not selected.
         findBox->options |= ofPostProcess;
@@ -136,12 +136,11 @@ void SearchBox::open()
 {
     if (!visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
-        turbo::forEach<TView>({win.editorState.view, win.editorState.leftMargin}, [&] (auto &v) {
+        turbo::forEach<TView>({win.editor.view, win.editor.leftMargin}, [&] (auto &v) {
             grow(v, {0, -(size.y + 1)});
         });
         show();
-        win.frame->drawView();
-        win.editorState.redraw();
+        win.editor.redraw();
         visible = true;
     } else
         focus();
@@ -151,12 +150,11 @@ void SearchBox::close()
 {
     if (visible && owner) {
         EditorWindow &win = *(EditorWindow *) owner;
-        turbo::forEach<TView>({win.editorState.view, win.editorState.leftMargin}, [&] (auto &v) {
+        turbo::forEach<TView>({win.editor.view, win.editor.leftMargin}, [&] (auto &v) {
             grow(v, {0, size.y + 1});
         });
         hide();
-        win.frame->drawView();
-        win.editorState.redraw();
+        win.editor.redraw();
         visible = false;
     }
 }
@@ -218,7 +216,7 @@ Boolean Searcher::isValidInput(char *s, Boolean)
 void Searcher::targetFromCurrent()
 {
     using namespace turbo;
-    auto &scintilla = win.editorState.scintilla;
+    auto &scintilla = editor.scintilla;
     direction = forward;
     auto cur = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
     auto end = call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
@@ -228,7 +226,7 @@ void Searcher::targetFromCurrent()
 void Searcher::targetNext()
 {
     using namespace turbo;
-    auto &scintilla = win.editorState.scintilla;
+    auto &scintilla = editor.scintilla;
     direction = forward;
     auto end = call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
     auto start = resultEnd != -1 ? resultEnd : 0;
@@ -238,7 +236,7 @@ void Searcher::targetNext()
 void Searcher::targetPrev()
 {
     using namespace turbo;
-    auto &scintilla = win.editorState.scintilla;
+    auto &scintilla = editor.scintilla;
     direction = backwards;
     auto start = result != -1 ? result : call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
     call(scintilla, SCI_SETTARGETRANGE, start, 0);
@@ -247,7 +245,7 @@ void Searcher::targetPrev()
 void Searcher::searchText(std::string_view s, bool wrap)
 {
     using namespace turbo;
-    auto &scintilla = win.editorState.scintilla;
+    auto &scintilla = editor.scintilla;
     auto start = call(scintilla, SCI_GETTARGETSTART, 0U, 0U);
     auto end = call(scintilla, SCI_GETTARGETEND, 0U, 0U);
     result = call(scintilla, SCI_SEARCHINTARGET, s.size(), (sptr_t) s.data());
@@ -279,5 +277,5 @@ void Searcher::searchText(std::string_view s, bool wrap)
         call(scintilla, SCI_SETEMPTYSELECTION, cur, 0U);
         resultEnd = -1;
     }
-    win.editorState.redraw();
+    editor.redraw();
 }
