@@ -31,7 +31,7 @@ void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
 
 PRectangle Window::GetClientPosition() const
 {
-    auto *p = (turbo::ScintillaParent *) wid;
+    auto *p = (turbo::TScintillaParent *) wid;
     if (p)
     {
         auto size = p->getEditorSize();
@@ -46,14 +46,14 @@ void Window::Show(bool show)
 
 void Window::InvalidateAll()
 {
-    auto *p = (turbo::ScintillaParent *) wid;
+    auto *p = (turbo::TScintillaParent *) wid;
     if (p)
         p->invalidate({{0, 0}, p->getEditorSize()});
 }
 
 void Window::InvalidateRectangle(PRectangle rc)
 {
-    auto *p = (turbo::ScintillaParent *) wid;
+    auto *p = (turbo::TScintillaParent *) wid;
     if (p)
         p->invalidate(TPRect(rc));
 }

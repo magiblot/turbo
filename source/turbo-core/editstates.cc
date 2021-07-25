@@ -10,14 +10,14 @@ namespace turbo {
 /////////////////////////////////////////////////////////////////////////
 // LineNumbersWidth
 
-int LineNumbersWidth::update(Scintilla &scintilla)
+int LineNumbersWidth::update(TScintilla &scintilla)
 {
     int newWidth = enabled ? calcWidth(scintilla) : 0;
     call(scintilla, SCI_SETMARGINWIDTHN, 0, newWidth); // Does nothing if width hasn't changed.
     return newWidth;
 }
 
-int LineNumbersWidth::calcWidth(Scintilla &scintilla)
+int LineNumbersWidth::calcWidth(TScintilla &scintilla)
 {
     int width = 1;
     size_t lines = call(scintilla, SCI_GETLINECOUNT, 0U, 0U);
@@ -31,7 +31,7 @@ int LineNumbersWidth::calcWidth(Scintilla &scintilla)
 /////////////////////////////////////////////////////////////////////////
 // WrapState
 
-bool WrapState::toggle(Scintilla &scintilla, TFuncView<bool(int)> wrapIfBig)
+bool WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int)> wrapIfBig)
 {
     bool proceed = true;
     if (enabled)
@@ -68,7 +68,7 @@ bool defWrapIfBig(int width)
 /////////////////////////////////////////////////////////////////////////
 // AutoIndent
 
-void AutoIndent::applyToCurrentLine(Scintilla &scintilla)
+void AutoIndent::applyToCurrentLine(TScintilla &scintilla)
 {
     if (enabled)
     {
@@ -88,7 +88,7 @@ void AutoIndent::applyToCurrentLine(Scintilla &scintilla)
 
 /////////////////////////////////////////////////////////////////////////
 
-void stripTrailingSpaces(Scintilla &scintilla)
+void stripTrailingSpaces(TScintilla &scintilla)
 {
     Sci::Line lineCount = call(scintilla, SCI_GETLINECOUNT, 0U, 0U);
     for (Sci::Line line = 0; line < lineCount; ++line) {
@@ -107,7 +107,7 @@ void stripTrailingSpaces(Scintilla &scintilla)
     }
 }
 
-void ensureNewlineAtEnd(Scintilla &scintilla)
+void ensureNewlineAtEnd(TScintilla &scintilla)
 {
     int EOLType = call(scintilla, SCI_GETEOLMODE, 0U, 0U);
     Sci::Line lineCount = call(scintilla, SCI_GETLINECOUNT, 0U, 0U);

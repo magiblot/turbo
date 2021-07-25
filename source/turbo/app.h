@@ -62,8 +62,8 @@ struct TurboApp : public TApplication, EditorWindowParent
     void fileOpenOrNew(const char *path);
     void closeAll();
     TRect newEditorBounds() const;
-    turbo::Scintilla &createScintilla() noexcept;
-    void addEditor(turbo::Scintilla &, const char *path);
+    turbo::TScintilla &createScintilla() noexcept;
+    void addEditor(turbo::TScintilla &, const char *path);
     void showEditorList(TEvent *ev);
     void toggleTreeView();
 

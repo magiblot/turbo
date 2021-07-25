@@ -14,7 +14,7 @@ EditorView::EditorView(const TRect &bounds) noexcept :
     eventMask |= evMouseUp | evMouseMove | evMouseAuto | evBroadcast;
 }
 
-static TPoint getDelta(Scintilla &scintilla)
+static TPoint getDelta(TScintilla &scintilla)
 {
     return {
         (int) call(scintilla, SCI_GETXOFFSET, 0U, 0U),
@@ -106,7 +106,7 @@ static bool isPastedText(std::string_view text)
     return false;
 }
 
-static void insertOneByOne(Scintilla &scintilla, std::string_view text)
+static void insertOneByOne(TScintilla &scintilla, std::string_view text)
 {
     size_t i = 0, j = 0;
     while (TText::next(text, j))

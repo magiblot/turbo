@@ -69,7 +69,7 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {"PKGBUILD",    langBash},
 };
 
-bool ThemingState::detectLanguage(const char *filePath, Scintilla &scintilla)
+bool ThemingState::detectLanguage(const char *filePath, TScintilla &scintilla)
 {
     Language lang = langNone;
     {
@@ -407,7 +407,7 @@ static const std::unordered_map<Language, LexerInfo> lexerStyles = {
     {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
 };
 
-bool ThemingState::loadLexer(Language lang, Scintilla &scintilla)
+bool ThemingState::loadLexer(Language lang, TScintilla &scintilla)
 {
     auto it = lexerStyles.find(lang);
     if (it != lexerStyles.end())
@@ -448,7 +448,7 @@ TColorAttr ThemingState::normalize(Styles index) const
     return normal;
 }
 
-void ThemingState::resetStyles(Scintilla &scintilla) const
+void ThemingState::resetStyles(TScintilla &scintilla) const
 {
     setStyleColor(scintilla, STYLE_DEFAULT, schema[sNormal]);
     call(scintilla, SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
@@ -471,7 +471,7 @@ static bool isBrace(TSpan<const char> braces, char ch)
     return memchr(braces.data(), ch, braces.size()) != nullptr;
 }
 
-void ThemingState::updateBraces(Scintilla &scintilla) const
+void ThemingState::updateBraces(TScintilla &scintilla) const
 {
     if (lexInfo)
     {

@@ -319,12 +319,12 @@ TRect TurboApp::newEditorBounds() const
     }
 }
 
-turbo::Scintilla &TurboApp::createScintilla() noexcept
+turbo::TScintilla &TurboApp::createScintilla() noexcept
 {
     return turbo::createScintilla(&clipboard);
 }
 
-void TurboApp::addEditor(turbo::Scintilla &scintilla, const char *path)
+void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)
 // Pre: 'path' is an absolute path.
 {
     TRect r = newEditorBounds();

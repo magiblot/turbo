@@ -18,7 +18,7 @@ TFrame *EditorWindow::initFrame(TRect bounds)
     return new EditorFrame(bounds);
 }
 
-EditorWindow::EditorWindow( const TRect &bounds, turbo::Scintilla &scintilla,
+EditorWindow::EditorWindow( const TRect &bounds, turbo::TScintilla &scintilla,
                             const char *filePath, active_counter &fileCounter,
                             EditorWindowParent &aParent ) noexcept :
     TWindowInit(&initFrame),

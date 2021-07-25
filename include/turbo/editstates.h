@@ -24,11 +24,11 @@ public:
         enabled ^= true;
     }
 
-    int update(Scintilla &scintilla);
+    int update(TScintilla &scintilla);
 
 private:
 
-    int calcWidth(Scintilla &scintilla);
+    int calcWidth(TScintilla &scintilla);
 
 };
 
@@ -41,7 +41,7 @@ class WrapState
 
 public:
 
-    bool toggle(Scintilla &scintilla, TFuncView<bool(int)> wrapIfBig = defWrapIfBig);
+    bool toggle(TScintilla &scintilla, TFuncView<bool(int)> wrapIfBig = defWrapIfBig);
 };
 
 struct AutoIndent
@@ -53,11 +53,11 @@ struct AutoIndent
         enabled ^= true;
     }
 
-    void applyToCurrentLine(Scintilla &scintilla);
+    void applyToCurrentLine(TScintilla &scintilla);
 };
 
-void stripTrailingSpaces(Scintilla &scintilla);
-void ensureNewlineAtEnd(Scintilla &scintilla);
+void stripTrailingSpaces(TScintilla &scintilla);
+void ensureNewlineAtEnd(TScintilla &scintilla);
 
 } // namespace turbo
 

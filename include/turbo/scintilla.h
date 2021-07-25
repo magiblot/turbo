@@ -11,36 +11,35 @@ struct KeyDownEvent;
 struct MouseEventType;
 
 namespace Scintilla {
-class ScintillaTV;
+class TScintilla;
 } // namespace Scintilla
 
 namespace turbo {
 
 class Clipboard;
-class ScintillaParent;
-using Scintilla = ::Scintilla::ScintillaTV;
+using TScintilla = Scintilla::TScintilla;
+class TScintillaParent;
 
-Scintilla &createScintilla(Clipboard *aClipboard) noexcept;
-void destroyScintilla(Scintilla &) noexcept;
+TScintilla &createScintilla(Clipboard *aClipboard) noexcept;
+void destroyScintilla(TScintilla &) noexcept;
 
-sptr_t call(Scintilla &, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+sptr_t call(TScintilla &, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
-void setParent(Scintilla &, ScintillaParent *aParent);
-void changeSize(Scintilla &);
-void clearBeforeTentativeStart(Scintilla &);
-void insertPasteStream(Scintilla &, TStringView text);
-void insertCharacter(Scintilla &, TStringView mbc);
-void idleWork(Scintilla &);
-TPoint pointMainCaret(Scintilla &);
-bool handleKeyDown(Scintilla &, const KeyDownEvent &keyDown);
-bool handleMouse(Scintilla &, unsigned short what, const MouseEventType &mouse);
-void paint(Scintilla &, TDrawSurface &surface, TRect area);
-void setStyleColor(Scintilla &, int style, TColorAttr attr);
-TColorAttr getStyleColor(Scintilla &, int style);
-void setSelectionColor(Scintilla &, TColorAttr attr);
-void setWhitespaceColor(Scintilla &, TColorAttr attr);
+void setParent(TScintilla &, TScintillaParent *aParent);
+void changeSize(TScintilla &);
+void clearBeforeTentativeStart(TScintilla &);
+void insertPasteStream(TScintilla &, TStringView text);
+void insertCharacter(TScintilla &, TStringView mbc);
+void idleWork(TScintilla &);
+TPoint pointMainCaret(TScintilla &);
+bool handleKeyDown(TScintilla &, const KeyDownEvent &keyDown);
+bool handleMouse(TScintilla &, unsigned short what, const MouseEventType &mouse);
+void paint(TScintilla &, TDrawSurface &surface, TRect area);
+void setStyleColor(TScintilla &, int style, TColorAttr attr);
+void setSelectionColor(TScintilla &, TColorAttr attr);
+void setWhitespaceColor(TScintilla &, TColorAttr attr);
 
-class ScintillaParent
+class TScintillaParent
 {
 public:
     virtual TPoint getEditorSize() noexcept;

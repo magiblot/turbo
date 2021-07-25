@@ -90,14 +90,14 @@ struct ThemingState
 
     ThemingState() noexcept;
 
-    void resetStyles(Scintilla &editor) const;
-    bool detectLanguage(const char *filePath, Scintilla &editor);
-    void updateBraces(Scintilla &editor) const;
+    void resetStyles(TScintilla &editor) const;
+    bool detectLanguage(const char *filePath, TScintilla &editor);
+    void updateBraces(TScintilla &editor) const;
     TColorAttr normalize(Styles) const;
 
 private:
 
-    bool loadLexer(Language lang, Scintilla &editor);
+    bool loadLexer(Language lang, TScintilla &editor);
     TColorAttr braceAttr(LexerStyles, uchar) const;
 
 };

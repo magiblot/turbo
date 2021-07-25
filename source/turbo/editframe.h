@@ -8,7 +8,7 @@
 struct EditorFrame : public TFrame
 {
 
-    turbo::Scintilla *scintilla;
+    turbo::TScintilla *scintilla;
 
     EditorFrame(const TRect &bounds);
 

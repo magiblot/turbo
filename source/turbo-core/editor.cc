@@ -8,7 +8,7 @@
 
 namespace turbo {
 
-Editor::Editor(Scintilla &aScintilla) noexcept :
+Editor::Editor(TScintilla &aScintilla) noexcept :
     scintilla(aScintilla)
 {
     // Editor should send notifications to this object.

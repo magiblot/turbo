@@ -26,7 +26,7 @@ class PropertyDetector
 public:
 
     void analyze(TStringView text);
-    void apply(Scintilla &scintilla) const;
+    void apply(TScintilla &scintilla) const;
 
 };
 
@@ -59,14 +59,14 @@ void PropertyDetector::analyze(TStringView text)
     }
 }
 
-void PropertyDetector::apply(Scintilla &scintilla) const
+void PropertyDetector::apply(TScintilla &scintilla) const
 {
     call(scintilla, SCI_SETEOLMODE, eolType, 0U);
 }
 
 static thread_local char ioBuffer alignas(4*1024) [128*1024];
 
-bool readFile(Scintilla &scintilla, const char *path, FileDialogs &dlgs) noexcept
+bool readFile(TScintilla &scintilla, const char *path, FileDialogs &dlgs) noexcept
 // Pre: 'scintilla' has no text in it.
 {
     using std::ios;
@@ -104,8 +104,8 @@ bool readFile(Scintilla &scintilla, const char *path, FileDialogs &dlgs) noexcep
     return true;
 }
 
-void openFile( TFuncView<Scintilla&()> createScintilla,
-               TFuncView<void(Scintilla &, const char *)> accept, FileDialogs &dlgs ) noexcept
+void openFile( TFuncView<TScintilla&()> createScintilla,
+               TFuncView<void(TScintilla &, const char *)> accept, FileDialogs &dlgs ) noexcept
 {
     dlgs.getOpenPath([&] (const char *path) {
         auto &scintilla = createScintilla();
@@ -119,7 +119,7 @@ void openFile( TFuncView<Scintilla&()> createScintilla,
     });
 }
 
-bool writeFile(const char *path, Scintilla &scintilla, FileDialogs &dlgs) noexcept
+bool writeFile(const char *path, TScintilla &scintilla, FileDialogs &dlgs) noexcept
 {
     using std::ios;
     std::ofstream f(path, ios::out | ios::binary);
@@ -143,7 +143,7 @@ bool writeFile(const char *path, Scintilla &scintilla, FileDialogs &dlgs) noexce
     return true;
 }
 
-bool renameFile(const char *dst, const char *src, Scintilla &scintilla, FileDialogs &dlgs) noexcept
+bool renameFile(const char *dst, const char *src, TScintilla &scintilla, FileDialogs &dlgs) noexcept
 {
     // Try saving first, then renaming.
     if (writeFile(src, scintilla, silFileDialogs) && ::rename(src, dst) == 0)

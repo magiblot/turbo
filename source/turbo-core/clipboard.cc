@@ -1,6 +1,6 @@
 #include <turbo/clipboard.h>
 #include <libclipboard.h>
-#include <turbo/scintilla/ScintillaInternals.h>
+#include <turbo/scintilla/internals.h>
 
 namespace turbo {
 

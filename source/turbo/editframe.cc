@@ -17,7 +17,7 @@ void EditorFrame::draw()
         drawIndicator();
 }
 
-static TPoint cursorPos(turbo::Scintilla &scintilla)
+static TPoint cursorPos(turbo::TScintilla &scintilla)
 {
     using namespace turbo;
     auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);

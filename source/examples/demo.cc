@@ -62,8 +62,8 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
 
     void handleNotification(ushort, turbo::Editor &) noexcept override;
 
-    turbo::Scintilla &createScintilla();
-    void addEditor(turbo::Scintilla &, const char *filePath);
+    turbo::TScintilla &createScintilla();
+    void addEditor(turbo::TScintilla &, const char *filePath);
     void removeState(FileEditor &aState);
     bool closeAllEditors();
 
@@ -229,7 +229,7 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
             {
                 turbo::openFile([&] () -> auto& {
                     return createScintilla();
-                }, [&] (turbo::Scintilla &scintilla, const char *path) {
+                }, [&] (turbo::TScintilla &scintilla, const char *path) {
                     addEditor(scintilla, path);
                 });
                 clearEvent(ev);
@@ -325,12 +325,12 @@ void DemoEditorWindow::handleNotification(ushort code, turbo::Editor &state) noe
     }
 }
 
-turbo::Scintilla &DemoEditorWindow::createScintilla()
+turbo::TScintilla &DemoEditorWindow::createScintilla()
 {
     return turbo::createScintilla(clipboard);
 }
 
-void DemoEditorWindow::addEditor(turbo::Scintilla &scintilla, const char *filePath)
+void DemoEditorWindow::addEditor(turbo::TScintilla &scintilla, const char *filePath)
 {
     states.emplace_front(scintilla, filePath);
     listView->setRange(listView->range + 1);

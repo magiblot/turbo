@@ -4,14 +4,14 @@
 
 #include <chrono>
 
-#include <turbo/scintilla/ScintillaTV.h>
+#include <turbo/scintilla/tscintilla.h>
 #include <turbo/clipboard.h>
 
 #include "platform/surface.h"
 
 namespace Scintilla {
 
-ScintillaTV::ScintillaTV(turbo::Clipboard *aClipboard) :
+TScintilla::TScintilla(turbo::Clipboard *aClipboard) :
     clipboard(aClipboard)
 {
     // Block caret for both Insertion and Overwrite mode.
@@ -68,7 +68,7 @@ ScintillaTV::ScintillaTV(turbo::Clipboard *aClipboard) :
     WndProc(SCI_ASSIGNCMDKEY, SCK_END | (SCI_SHIFT << 16), SCI_LINEENDWRAPEXTEND);
 }
 
-void ScintillaTV::SetVerticalScrollPos()
+void TScintilla::SetVerticalScrollPos()
 {
     auto *parent = getParent();
     if (parent) {
@@ -77,14 +77,14 @@ void ScintillaTV::SetVerticalScrollPos()
     }
 }
 
-void ScintillaTV::SetHorizontalScrollPos()
+void TScintilla::SetHorizontalScrollPos()
 {
     auto *parent = getParent();
     if (parent)
         parent->setHorizontalScrollPos(xOffset, vs.wrapState == SC_WRAP_NONE ? scrollWidth : 1);
 }
 
-bool ScintillaTV::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
+bool TScintilla::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 {
     SetVerticalScrollPos();
     SetHorizontalScrollPos();
@@ -101,7 +101,7 @@ static inline void copy(turbo::Clipboard &self, Func &&fillSel) noexcept
     self.xSetText({selText.Data(), selText.Length()});
 }
 
-void ScintillaTV::Copy()
+void TScintilla::Copy()
 {
     if (clipboard && !sel.Empty())
         copy(
@@ -124,7 +124,7 @@ static inline void paste(turbo::Clipboard &self, Func &&fillSel) noexcept
     });
 }
 
-void ScintillaTV::Paste()
+void TScintilla::Paste()
 {
     if (clipboard)
         paste(
@@ -148,138 +148,135 @@ void ScintillaTV::Paste()
         );
 }
 
-void ScintillaTV::ClaimSelection()
+void TScintilla::ClaimSelection()
 {
 }
 
-void ScintillaTV::NotifyChange()
+void TScintilla::NotifyChange()
 {
 }
 
-void ScintillaTV::NotifyParent(SCNotification scn)
+void TScintilla::NotifyParent(SCNotification scn)
 {
     auto *parent = getParent();
     if (parent)
         parent->handleNotification(scn);
 }
 
-void ScintillaTV::CopyToClipboard(const SelectionText &selectedText)
+void TScintilla::CopyToClipboard(const SelectionText &selectedText)
 {
 }
 
-bool ScintillaTV::FineTickerRunning(TickReason reason)
+bool TScintilla::FineTickerRunning(TickReason reason)
 {
     return false;
 }
 
-void ScintillaTV::FineTickerStart(TickReason reason, int millis, int tolerance)
+void TScintilla::FineTickerStart(TickReason reason, int millis, int tolerance)
 {
 }
 
-void ScintillaTV::FineTickerCancel(TickReason reason)
+void TScintilla::FineTickerCancel(TickReason reason)
 {
 }
 
-void ScintillaTV::SetMouseCapture(bool on)
+void TScintilla::SetMouseCapture(bool on)
 {
 }
 
-bool ScintillaTV::HaveMouseCapture()
+bool TScintilla::HaveMouseCapture()
 {
     return true;
 }
 
-sptr_t ScintillaTV::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
+sptr_t TScintilla::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
     return 0;
 }
 
-void ScintillaTV::CreateCallTipWindow(PRectangle rc)
+void TScintilla::CreateCallTipWindow(PRectangle rc)
 {
 }
 
-void ScintillaTV::AddToPopUp(const char *label, int cmd, bool enabled)
+void TScintilla::AddToPopUp(const char *label, int cmd, bool enabled)
 {
 }
 
-CaseFolder *ScintillaTV::CaseFolderForEncoding()
+CaseFolder *TScintilla::CaseFolderForEncoding()
 {
     if (IsUnicodeMode())
         return new CaseFolderUnicode();
-    return ScintillaBase::CaseFolderForEncoding();
+    return super::CaseFolderForEncoding();
 }
 
-int ScintillaTV::KeyDefault(int key, int modifiers) {
-    if (!modifiers) {
-        Editor::AddChar(key);
+int TScintilla::KeyDefault(int key, int modifiers) {
+    if (!modifiers)
+    {
+        super::AddChar(key);
         return 1;
     }
     return 0;
 }
 
-void ScintillaTV::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour)
+void TScintilla::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour)
 {
     auto *s = (TScintillaSurface *) surface;
     Font f {};
-    if (isEndMarker) {
+    if (isEndMarker)
         // Imitate the Tilde text editor.
         s->DrawTextTransparent(rcPlace, f, rcPlace.bottom, "↵", wrapColour);
-    }
 }
 
 } // namespace Scintilla
 
 namespace turbo {
 
-::Scintilla::ScintillaTV &createScintilla(Clipboard *aClipboard) noexcept
+TScintilla &createScintilla(Clipboard *aClipboard) noexcept
 {
-    using namespace Scintilla;
-    return *new ScintillaTV(aClipboard);
+    return *new TScintilla(aClipboard);
 }
 
-void destroyScintilla(::Scintilla::ScintillaTV &self) noexcept
+void destroyScintilla(TScintilla &self) noexcept
 {
     delete &self;
 }
 
-sptr_t call(Scintilla &self, uint iMessage, uptr_t wParam, sptr_t lParam)
+sptr_t call(TScintilla &self, uint iMessage, uptr_t wParam, sptr_t lParam)
 {
     return self.WndProc(iMessage, wParam, lParam);
 }
 
-void setParent(Scintilla &self, ScintillaParent *aParent)
+void setParent(TScintilla &self, TScintillaParent *aParent)
 {
     self.setParent(aParent);
 }
 
-void changeSize(Scintilla &self)
+void changeSize(TScintilla &self)
 {
     self.ChangeSize();
 }
 
-void clearBeforeTentativeStart(Scintilla &self)
+void clearBeforeTentativeStart(TScintilla &self)
 {
     self.ClearBeforeTentativeStart();
 }
 
-void insertPasteStream(Scintilla &self, TStringView text)
+void insertPasteStream(TScintilla &self, TStringView text)
 {
-    using namespace Scintilla;
-    self.InsertPasteShape(text.data(), text.size(), ScintillaTV::pasteStream);
+    self.InsertPasteShape(text.data(), text.size(), TScintilla::pasteStream);
 }
 
-void insertCharacter(Scintilla &self, TStringView text)
+void insertCharacter(TScintilla &self, TStringView text)
 {
-    using namespace Scintilla;
-    self.InsertCharacter(text, ScintillaTV::CharacterSource::directInput);
+    self.InsertCharacter(text, TScintilla::CharacterSource::directInput);
 }
 
-void idleWork(Scintilla &self)
+void idleWork(TScintilla &self)
 {
     self.IdleWork();
 }
 
-TPoint pointMainCaret(Scintilla &self)
+TPoint pointMainCaret(TScintilla &self)
 {
     auto p = self.PointMainCaret();
     return {(int) p.x, (int) p.y};
@@ -301,9 +298,8 @@ static int convertModifiers(ulong controlKeyState)
     return modifiers;
 }
 
-bool handleKeyDown(Scintilla &self, const KeyDownEvent &keyDown)
+bool handleKeyDown(TScintilla &self, const KeyDownEvent &keyDown)
 {
-    using namespace Scintilla;
     static constexpr struct { ushort tv; int sck; } keysTable[] =
     {
         {kbDown,        SCK_DOWN},
@@ -373,12 +369,12 @@ bool handleKeyDown(Scintilla &self, const KeyDownEvent &keyDown)
     }
     else
     {
-        self.InsertCharacter({keyDown.text, keyDown.textLength}, ScintillaTV::CharacterSource::directInput);
+        self.InsertCharacter({keyDown.text, keyDown.textLength}, TScintilla::CharacterSource::directInput);
         return true;
     }
 }
 
-bool handleMouse(Scintilla &self, ushort what, const MouseEventType &mouse)
+bool handleMouse(TScintilla &self, ushort what, const MouseEventType &mouse)
 {
     using namespace Scintilla;
     using std::chrono::duration_cast;
@@ -409,27 +405,7 @@ bool handleMouse(Scintilla &self, ushort what, const MouseEventType &mouse)
     return false;
 }
 
-void paint(Scintilla &self, TDrawSurface &d, TRect area)
-{
-    using namespace Scintilla;
-    TScintillaSurface s;
-    s.surface = &d;
-    s.defaultTextAttr = getStyleColor(self, STYLE_DEFAULT);
-    self.Paint(
-        &s,
-        PRectangle::FromInts(area.a.x, area.a.y, area.b.x, area.b.y)
-    );
-}
-
-void setStyleColor(Scintilla &self, int style, TColorAttr attr)
-{
-    using namespace Scintilla;
-    call(self, SCI_STYLESETFORE, style, convertColor(::getFore(attr)).AsInteger());
-    call(self, SCI_STYLESETBACK, style, convertColor(::getBack(attr)).AsInteger());
-    call(self, SCI_STYLESETWEIGHT, style, ::getStyle(attr));
-}
-
-TColorAttr getStyleColor(Scintilla &self, int style)
+static TColorAttr getStyleColor(TScintilla &self, int style)
 {
     using namespace Scintilla;
     ColourDesired fore {(int) call(self, SCI_STYLEGETFORE, style, 0U)};
@@ -442,7 +418,27 @@ TColorAttr getStyleColor(Scintilla &self, int style)
     };
 }
 
-void setSelectionColor(Scintilla &self, TColorAttr attr)
+void paint(TScintilla &self, TDrawSurface &d, TRect area)
+{
+    using namespace Scintilla;
+    TScintillaSurface s;
+    s.surface = &d;
+    s.defaultTextAttr = getStyleColor(self, STYLE_DEFAULT);
+    self.Paint(
+        &s,
+        PRectangle::FromInts(area.a.x, area.a.y, area.b.x, area.b.y)
+    );
+}
+
+void setStyleColor(TScintilla &self, int style, TColorAttr attr)
+{
+    using namespace Scintilla;
+    call(self, SCI_STYLESETFORE, style, convertColor(::getFore(attr)).AsInteger());
+    call(self, SCI_STYLESETBACK, style, convertColor(::getBack(attr)).AsInteger());
+    call(self, SCI_STYLESETWEIGHT, style, ::getStyle(attr));
+}
+
+void setSelectionColor(TScintilla &self, TColorAttr attr)
 {
     using namespace Scintilla;
     auto fg = ::getFore(attr),
@@ -451,7 +447,7 @@ void setSelectionColor(Scintilla &self, TColorAttr attr)
     call(self, SCI_SETSELBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
-void setWhitespaceColor(Scintilla &self, TColorAttr attr)
+void setWhitespaceColor(TScintilla &self, TColorAttr attr)
 {
     using namespace Scintilla;
     auto fg = ::getFore(attr),
@@ -460,24 +456,24 @@ void setWhitespaceColor(Scintilla &self, TColorAttr attr)
     call(self, SCI_SETWHITESPACEBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
-TPoint ScintillaParent::getEditorSize() noexcept
+TPoint TScintillaParent::getEditorSize() noexcept
 {
     return {0, 0};
 }
 
-void ScintillaParent::invalidate(TRect) noexcept
+void TScintillaParent::invalidate(TRect) noexcept
 {
 }
 
-void ScintillaParent::handleNotification(const SCNotification &scn)
+void TScintillaParent::handleNotification(const SCNotification &scn)
 {
 }
 
-void ScintillaParent::setVerticalScrollPos(int, int) noexcept
+void TScintillaParent::setVerticalScrollPos(int, int) noexcept
 {
 }
 
-void ScintillaParent::setHorizontalScrollPos(int, int) noexcept
+void TScintillaParent::setHorizontalScrollPos(int, int) noexcept
 {
 }
 

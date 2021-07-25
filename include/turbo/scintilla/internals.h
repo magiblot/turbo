@@ -1,5 +1,5 @@
-#ifndef TURBO_SCINTILLAINTERNALS_H
-#define TURBO_SCINTILLAINTERNALS_H
+#ifndef TURBO_SCINTILLA_INTERNALS_H
+#define TURBO_SCINTILLA_INTERNALS_H
 
 // Define the standard order in which to include header files
 // All platform headers should be included before Scintilla headers
@@ -93,4 +93,4 @@
 #include "src/ScintillaBase.h"
 #include "src/ExternalLexer.h"
 
-#endif // TURBO_SCINTILLAINTERNALS_H
+#endif // TURBO_SCINTILLA_INTERNALS_H

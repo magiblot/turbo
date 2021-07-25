@@ -27,7 +27,7 @@ struct EditorParent
     virtual void handleNotification(ushort code, Editor &) noexcept = 0;
 };
 
-struct Editor : ScintillaParent
+struct Editor : TScintillaParent
 {
     enum : ushort { // Notification Codes
         ncPainted = 1,
@@ -44,7 +44,7 @@ struct Editor : ScintillaParent
 
     enum { minLineNumbersWidth = 5 };
 
-    Scintilla &scintilla;
+    TScintilla &scintilla;
     ThemingState theming;
     EditorParent *parent {nullptr};
     EditorView *view {nullptr};
@@ -59,7 +59,7 @@ struct Editor : ScintillaParent
     WrapState wrapping;
     AutoIndent autoIndent;
 
-    Editor(Scintilla &aScintilla) noexcept;
+    Editor(TScintilla &aScintilla) noexcept;
     virtual ~Editor();
 
     void associate( EditorParent *aParent,
@@ -82,25 +82,34 @@ struct Editor : ScintillaParent
     void setHorizontalScrollPos(int delta, int limit) noexcept override;
     void setVerticalScrollPos(int delta, int limit) noexcept override;
 
-    bool toggleLineWrapping(TFuncView<bool(int)> wrapIfBig = defWrapIfBig) noexcept
-    // Post: returns true if line wrapping is enabled.
-    {
-        return wrapping.toggle(scintilla, wrapIfBig);
-    }
-
-    void toggleLineNumbers() noexcept
-    {
-        lineNumbers.enabled ^= true;
-    }
-
-    void toggleAutoIndent() noexcept
-    {
-        autoIndent.enabled ^= true;
-    }
-
+    inline bool toggleLineWrapping(TFuncView<bool(int)> wrapIfBig = defWrapIfBig) noexcept;
+    inline void toggleLineNumbers() noexcept;
+    inline void toggleAutoIndent() noexcept;
     bool inSavePoint();
+    inline sptr_t callScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
 };
+
+inline bool Editor::toggleLineWrapping(TFuncView<bool(int)> wrapIfBig) noexcept
+// Post: returns whether line wrapping is enabled.
+{
+    return wrapping.toggle(scintilla, wrapIfBig);
+}
+
+inline void Editor::toggleLineNumbers() noexcept
+{
+    lineNumbers.enabled ^= true;
+}
+
+inline void Editor::toggleAutoIndent() noexcept
+{
+    autoIndent.enabled ^= true;
+}
+
+inline sptr_t Editor::callScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
+{
+    return turbo::call(scintilla, iMessage, wParam, lParam);
+}
 
 class EditorView : public TSurfaceView
 {
@@ -185,12 +194,12 @@ struct SilentFileDialogs : FileDialogs
 
 extern SilentFileDialogs silFileDialogs;
 
-bool readFile(Scintilla &scintilla, const char *path, FileDialogs & = defFileDialogs) noexcept;
-void openFile( TFuncView<Scintilla&()> createScintilla,
-               TFuncView<void(Scintilla &, const char *)> accept,
+bool readFile(TScintilla &scintilla, const char *path, FileDialogs & = defFileDialogs) noexcept;
+void openFile( TFuncView<TScintilla&()> createScintilla,
+               TFuncView<void(TScintilla &, const char *)> accept,
                FileDialogs & = defFileDialogs ) noexcept;
-bool writeFile(const char *path, Scintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
-bool renameFile(const char *dst, const char *src, Scintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
+bool writeFile(const char *path, TScintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
+bool renameFile(const char *dst, const char *src, TScintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
 
 struct FileEditor : Editor
 {
@@ -200,7 +209,7 @@ struct FileEditor : Editor
 
     std::string filePath;
 
-    FileEditor(Scintilla &aScintilla, std::string aFilePath) noexcept;
+    FileEditor(TScintilla &aScintilla, std::string aFilePath) noexcept;
 
     void detectLanguage() noexcept;
     bool save(FileDialogs & = defFileDialogs) noexcept;
@@ -214,7 +223,7 @@ struct FileEditor : Editor
 
 };
 
-inline FileEditor::FileEditor(Scintilla &aScintilla, std::string aFilePath) noexcept :
+inline FileEditor::FileEditor(TScintilla &aScintilla, std::string aFilePath) noexcept :
     Editor(aScintilla),
     filePath(std::move(aFilePath))
 {

@@ -57,7 +57,7 @@ struct EditorWindow : public TWindow, turbo::EditorParent
 
     static TFrame* initFrame(TRect bounds);
 
-    EditorWindow( const TRect &bounds, turbo::Scintilla &scintilla,
+    EditorWindow( const TRect &bounds, turbo::TScintilla &scintilla,
                   const char *filePath, active_counter &fileCounter,
                   EditorWindowParent &aParent ) noexcept;
 
