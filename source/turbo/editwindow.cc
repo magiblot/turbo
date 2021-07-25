@@ -18,18 +18,18 @@ TFrame *EditorWindow::initFrame(TRect bounds)
     return new EditorFrame(bounds);
 }
 
-EditorWindow::EditorWindow( const TRect &bounds, turbo::Editor &editor,
+EditorWindow::EditorWindow( const TRect &bounds, turbo::Scintilla &scintilla,
                             const char *filePath, active_counter &fileCounter,
                             EditorWindowParent &aParent ) noexcept :
     TWindowInit(&initFrame),
     TWindow(bounds, nullptr, wnNoNumber),
-    editorState(editor, filePath),
+    editorState(scintilla, filePath),
     listHead(this),
     fileNumber(fileCounter),
     parent(aParent)
 {
     using namespace turbo;
-    ((EditorFrame *) frame)->editor = &editorState.editor;
+    ((EditorFrame *) frame)->scintilla = &editorState.scintilla;
 
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);

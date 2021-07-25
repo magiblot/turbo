@@ -3,17 +3,12 @@
 
 #define Uses_TFrame
 #include <tvision/tv.h>
-
-namespace Scintilla {
-
-struct TScintillaEditor;
-
-} // namespace Scintilla
+#include <turbo/scintilla.h>
 
 struct EditorFrame : public TFrame
 {
 
-    Scintilla::TScintillaEditor *editor;
+    turbo::Scintilla *scintilla;
 
     EditorFrame(const TRect &bounds);
 

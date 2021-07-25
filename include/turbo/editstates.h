@@ -2,12 +2,7 @@
 #define TURBO_EDITSTATES_H
 
 #include <tvision/tv.h>
-
-namespace Scintilla {
-
-struct TScintillaEditor;
-
-} // namespace Scintilla
+#include <turbo/scintilla.h>
 
 namespace turbo {
 
@@ -29,11 +24,11 @@ public:
         enabled ^= true;
     }
 
-    int update(Scintilla::TScintillaEditor &editor);
+    int update(Scintilla &scintilla);
 
 private:
 
-    int calcWidth(Scintilla::TScintillaEditor &editor);
+    int calcWidth(Scintilla &scintilla);
 
 };
 
@@ -46,7 +41,7 @@ class WrapState
 
 public:
 
-    bool toggle(Scintilla::TScintillaEditor &editor, TFuncView<bool(int)> wrapIfBig = defWrapIfBig);
+    bool toggle(Scintilla &scintilla, TFuncView<bool(int)> wrapIfBig = defWrapIfBig);
 };
 
 struct AutoIndent
@@ -58,11 +53,11 @@ struct AutoIndent
         enabled ^= true;
     }
 
-    void applyToCurrentLine(Scintilla::TScintillaEditor &editor);
+    void applyToCurrentLine(Scintilla &scintilla);
 };
 
-void stripTrailingSpaces(Scintilla::TScintillaEditor &editor);
-void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor);
+void stripTrailingSpaces(Scintilla &scintilla);
+void ensureNewlineAtEnd(Scintilla &scintilla);
 
 } // namespace turbo
 

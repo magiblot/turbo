@@ -3,7 +3,7 @@
 #include <tvision/tv.h>
 
 #include <turbo/scintilla.h>
-#include <turbo/tscintilla.h>
+#include <turbo/scintilla/include/Platform.h>
 #include "surface.h"
 
 namespace Scintilla {
@@ -31,7 +31,7 @@ void Window::SetPositionRelative(PRectangle rc, const Window *relativeTo)
 
 PRectangle Window::GetClientPosition() const
 {
-    auto *p = (TScintillaParent *) wid;
+    auto *p = (turbo::ScintillaParent *) wid;
     if (p)
     {
         auto size = p->getEditorSize();
@@ -46,14 +46,14 @@ void Window::Show(bool show)
 
 void Window::InvalidateAll()
 {
-    auto *p = (TScintillaParent *) wid;
+    auto *p = (turbo::ScintillaParent *) wid;
     if (p)
         p->invalidate({{0, 0}, p->getEditorSize()});
 }
 
 void Window::InvalidateRectangle(PRectangle rc)
 {
-    auto *p = (TScintillaParent *) wid;
+    auto *p = (turbo::ScintillaParent *) wid;
     if (p)
         p->invalidate(TPRect(rc));
 }

@@ -6,7 +6,7 @@
 #define Uses_TScreenCell
 #include <tvision/tv.h>
 
-#include <turbo/scintilla.h>
+#include <turbo/scintilla/ScintillaInternals.h>
 
 class TDrawSurface;
 

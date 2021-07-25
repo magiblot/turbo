@@ -62,8 +62,8 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
 
     void handleNotification(ushort, turbo::EditorState &) noexcept override;
 
-    turbo::Editor &createEditor();
-    void addEditor(turbo::Editor &, const char *filePath);
+    turbo::Scintilla &createScintilla();
+    void addEditor(turbo::Scintilla &, const char *filePath);
     void removeState(FileEditorState &aState);
     bool closeAllEditors();
 
@@ -222,15 +222,15 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 break;
             }
             case cmNewFile:
-                addEditor(createEditor(), "");
+                addEditor(createScintilla(), "");
                 clearEvent(ev);
                 break;
             case cmOpenFile:
             {
                 turbo::openFile([&] () -> auto& {
-                    return createEditor();
-                }, [&] (turbo::Editor &editor, const char *path) {
-                    addEditor(editor, path);
+                    return createScintilla();
+                }, [&] (turbo::Scintilla &scintilla, const char *path) {
+                    addEditor(scintilla, path);
                 });
                 clearEvent(ev);
                 break;
@@ -325,14 +325,14 @@ void DemoEditorWindow::handleNotification(ushort code, turbo::EditorState &state
     }
 }
 
-turbo::Editor &DemoEditorWindow::createEditor()
+turbo::Scintilla &DemoEditorWindow::createScintilla()
 {
-    return turbo::createEditor(clipboard);
+    return turbo::createScintilla(clipboard);
 }
 
-void DemoEditorWindow::addEditor(turbo::Editor &editor, const char *filePath)
+void DemoEditorWindow::addEditor(turbo::Scintilla &scintilla, const char *filePath)
 {
-    states.emplace_front(editor, filePath);
+    states.emplace_front(scintilla, filePath);
     listView->setRange(listView->range + 1);
     listView->focusItemNum(0); // Triggers EditorState::associate.
     listView->drawView();

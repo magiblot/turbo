@@ -8,49 +8,44 @@
 
 namespace turbo {
 
-Editor &createEditor(Clipboard *aClipboard) noexcept
-{
-    return *new Editor(aClipboard);
-}
-
-EditorState::EditorState(Editor &aEditor) noexcept :
-    editor(aEditor)
+EditorState::EditorState(Scintilla &aScintilla) noexcept :
+    scintilla(aScintilla)
 {
     // Editor should send notifications to this object.
-    editor.setParent(this);
+    setParent(scintilla, this);
     // Set color defaults.
-    theming.resetStyles(editor);
+    theming.resetStyles(scintilla);
 
     // Dynamic horizontal scroll.
-    editor.WndProc(SCI_SETSCROLLWIDTHTRACKING, true, 0U);
-    editor.WndProc(SCI_SETSCROLLWIDTH, 1, 0U);
-    editor.WndProc(SCI_SETXCARETPOLICY, CARET_EVEN, 0);
+    call(scintilla, SCI_SETSCROLLWIDTHTRACKING, true, 0U);
+    call(scintilla, SCI_SETSCROLLWIDTH, 1, 0U);
+    call(scintilla, SCI_SETXCARETPOLICY, CARET_EVEN, 0);
     // Trick so that the scroll width gets computed.
-    editor.WndProc(SCI_SETFIRSTVISIBLELINE, 1, 0U);
-    editor.WndProc(SCI_SETFIRSTVISIBLELINE, 0, 0U);
+    call(scintilla, SCI_SETFIRSTVISIBLELINE, 1, 0U);
+    call(scintilla, SCI_SETFIRSTVISIBLELINE, 0, 0U);
 
     // Enable wrapping markers
-    editor.WndProc(SCI_SETWRAPVISUALFLAGS, SC_WRAPVISUALFLAG_END, 0U);
+    call(scintilla, SCI_SETWRAPVISUALFLAGS, SC_WRAPVISUALFLAG_END, 0U);
 
     // Indentation
-    editor.WndProc(SCI_SETUSETABS, false, 0U);
-    editor.WndProc(SCI_SETINDENT, 4, 0U);
-    editor.WndProc(SCI_SETTABINDENTS, true, 0U);
-    editor.WndProc(SCI_SETBACKSPACEUNINDENTS, true, 0U);
+    call(scintilla, SCI_SETUSETABS, false, 0U);
+    call(scintilla, SCI_SETINDENT, 4, 0U);
+    call(scintilla, SCI_SETTABINDENTS, true, 0U);
+    call(scintilla, SCI_SETBACKSPACEUNINDENTS, true, 0U);
 
     // Line numbers
-    editor.WndProc(SCI_SETMARGINS, 1, 0U);
-    editor.WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
+    call(scintilla, SCI_SETMARGINS, 1, 0U);
+    call(scintilla, SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
     updateMarginWidth();
 
     // Savepoint and undo buffer.
-    editor.WndProc(SCI_EMPTYUNDOBUFFER, 0U, 0U);
-    editor.WndProc(SCI_SETSAVEPOINT, 0U, 0U);
+    call(scintilla, SCI_EMPTYUNDOBUFFER, 0U, 0U);
+    call(scintilla, SCI_SETSAVEPOINT, 0U, 0U);
 }
 
 EditorState::~EditorState()
 {
-    delete &editor;
+    destroyScintilla(scintilla);
 }
 
 void EditorState::associate( EditorParent *aParent,
@@ -173,8 +168,8 @@ bool EditorState::redraw(const TRect &area) noexcept
         updateMarginWidth();
         if (!resizeLock)
         {
-            editor.changeSize();
-            theming.updateBraces(editor); // May mutate 'invalidatedArea', which may be 'area'.
+            changeSize(scintilla);
+            theming.updateBraces(scintilla); // May mutate 'invalidatedArea', which may be 'area'.
         }
         auto size = getEditorSize();
         TRect paintArea;
@@ -186,7 +181,7 @@ bool EditorState::redraw(const TRect &area) noexcept
         }
         else
             paintArea = area;
-        editor.paint(surface, paintArea);
+        paint(scintilla, surface, paintArea);
         forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
             p.surface = &surface;
         });
@@ -211,7 +206,7 @@ void EditorState::drawViews() noexcept
 
 void EditorState::updateMarginWidth() noexcept
 {
-    int width = lineNumbers.update(editor);
+    int width = lineNumbers.update(scintilla);
     if (leftMargin)
     {
         TRect mr = leftMargin->getBounds();
@@ -231,12 +226,12 @@ bool EditorState::handleScrollBarChanged(TScrollBar *s)
 {
     if (s == hScrollBar)
     {
-        editor.WndProc(SCI_SETXOFFSET, s->value, 0U);
+        call(scintilla, SCI_SETXOFFSET, s->value, 0U);
         return true;
     }
     else if (s == vScrollBar)
     {
-        editor.WndProc(SCI_SETFIRSTVISIBLELINE, s->value, 0U);
+        call(scintilla, SCI_SETFIRSTVISIBLELINE, s->value, 0U);
         return true;
     }
     return false;
@@ -248,7 +243,7 @@ void EditorState::handleNotification(const SCNotification &scn)
     {
         case SCN_CHARADDED:
             if (scn.ch == '\n')
-                autoIndent.applyToCurrentLine(editor);
+                autoIndent.applyToCurrentLine(scintilla);
             break;
     }
 }
@@ -273,7 +268,7 @@ void EditorState::setVerticalScrollPos(int delta, int limit) noexcept
 
 bool EditorState::inSavePoint()
 {
-    return editor.WndProc(SCI_GETMODIFY, 0U, 0U) == 0;
+    return call(scintilla, SCI_GETMODIFY, 0U, 0U) == 0;
 }
 
 } // namespace turbo

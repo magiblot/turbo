@@ -3,44 +3,28 @@
 
 #include <tvision/tv.h>
 #include <turbo/funcview.h>
-#include <turbo/scintilla.h>
 
 struct clipboard_c;
+
+namespace Scintilla {
+class SelectionText;
+} // namespace Scintilla
 
 namespace turbo {
 
 class Clipboard
 {
-    Scintilla::SelectionText selText;
-
 public:
+
+    ::Scintilla::SelectionText &selText;
+
+    Clipboard() noexcept;
+    ~Clipboard();
 
     virtual void xSetText(TStringView) noexcept = 0;
     virtual void xGetText(TFuncView<void(bool, TStringView)> accept) noexcept = 0;
 
-    template <class Func>
-    void copy(Func &&fillSel) noexcept;
-    template <class Func>
-    void paste(Func &&fillSel) noexcept;
 };
-
-template <class Func>
-inline void Clipboard::copy(Func &&fillSel) noexcept
-{
-    fillSel(selText);
-    xSetText({selText.Data(), selText.Length()});
-}
-
-template <class Func>
-inline void Clipboard::paste(Func &&fillSel) noexcept
-{
-    xGetText([&] (bool ok, TStringView text) {
-        fillSel(
-            selText,
-            ok ? text : TStringView {selText.Data(), selText.Length()}
-        );
-    });
-}
 
 class LcbClipboard : public Clipboard
 {
@@ -49,7 +33,7 @@ class LcbClipboard : public Clipboard
 public:
 
     LcbClipboard() noexcept;
-    ~LcbClipboard() noexcept;
+    ~LcbClipboard();
 
     LcbClipboard(const LcbClipboard &) = delete;
     LcbClipboard& operator=(const LcbClipboard &) = delete;

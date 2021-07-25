@@ -14,12 +14,20 @@ EditorView::EditorView(const TRect &bounds) noexcept :
     eventMask |= evMouseUp | evMouseMove | evMouseAuto | evBroadcast;
 }
 
+static TPoint getDelta(Scintilla &scintilla)
+{
+    return {
+        (int) call(scintilla, SCI_GETXOFFSET, 0U, 0U),
+        (int) call(scintilla, SCI_GETFIRSTVISIBLELINE, 0U, 0U),
+    };
+}
+
 void EditorView::handleEvent(TEvent &ev)
 {
     if (!editorState)
         return;
     TView::handleEvent(ev);
-    auto &editor = editorState->editor;
+    auto &scintilla = editorState->scintilla;
     switch (ev.what)
     {
         case evKeyDown:
@@ -28,7 +36,7 @@ void EditorView::handleEvent(TEvent &ev)
             // If we always began reading events in consumeInputText,
             // we would never autoindent newlines.
             if (!ev.keyDown.textLength)
-                editor.KeyDownWithModifiers(ev.keyDown, nullptr);
+                handleKeyDown(scintilla, ev.keyDown);
             else
                 consumeInputText(ev);
             editorState->partialRedraw();
@@ -42,7 +50,7 @@ void EditorView::handleEvent(TEvent &ev)
                 while (mouseEvent(ev, evMouse))
                 {
                     TPoint mouse = makeLocal(ev.mouse.where);
-                    TPoint d = editor.getDelta() + (lastMouse - mouse);
+                    TPoint d = getDelta(scintilla) + (lastMouse - mouse);
                     editorState->scrollTo(d);
                     editorState->partialRedraw();
                     lastMouse = mouse;
@@ -61,13 +69,13 @@ void EditorView::handleEvent(TEvent &ev)
                         ev.what = evMouseMove;
                         // For some reason, the caret is not always updated
                         // unless this is invoked twice.
-                        editor.MouseEvent(ev);
-                        editor.MouseEvent(ev);
+                        handleMouse(scintilla, ev.what, ev.mouse);
+                        handleMouse(scintilla, ev.what, ev.mouse);
                     }
                     else
                     {
                         ev.mouse.where = where;
-                        if (!editor.MouseEvent(ev))
+                        if (!handleMouse(scintilla, ev.what, ev.mouse))
                         {
                             editorState->partialRedraw();
                             break;
@@ -98,13 +106,13 @@ static bool isPastedText(std::string_view text)
     return false;
 }
 
-static void insertOneByOne(Editor &editor, std::string_view text)
+static void insertOneByOne(Scintilla &scintilla, std::string_view text)
 {
     size_t i = 0, j = 0;
     while (TText::next(text, j))
     {
         // Allow overwrite on Ins.
-        editor.insertCharacter(text.substr(i, j));
+        insertCharacter(scintilla, text.substr(i, j));
         i = j;
     }
 }
@@ -112,8 +120,8 @@ static void insertOneByOne(Editor &editor, std::string_view text)
 void EditorView::consumeInputText(TEvent &ev)
 // Pre: 'editorState' is non-null.
 {
-    auto &editor = editorState->editor;
-    editor.clearBeforeTentativeStart();
+    auto &scintilla = editorState->scintilla;
+    clearBeforeTentativeStart(scintilla);
 
     char buf[4096];
     size_t length;
@@ -124,17 +132,17 @@ void EditorView::consumeInputText(TEvent &ev)
         if (!undogroup && isPastedText(text))
         {
             undogroup = true;
-            editor.WndProc(SCI_BEGINUNDOACTION, 0U, 0U);
+            call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
         }
         if (!undogroup) // Individual typing.
-            insertOneByOne(editor, text);
+            insertOneByOne(scintilla, text);
         else
-            editor.pasteText(text);
+            insertPasteStream(scintilla, text);
     }
 
-    editor.WndProc(SCI_SCROLLCARET, 0U, 0U);
+    call(scintilla, SCI_SCROLLCARET, 0U, 0U);
     if (undogroup)
-        editor.WndProc(SCI_ENDUNDOACTION, 0U, 0U);
+        call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
 }
 
 void EditorView::draw()
@@ -146,7 +154,7 @@ void EditorView::draw()
         editorState->redraw();
     else
     {
-        TPoint p = editorState->editor.getCaretPosition();
+        TPoint p = pointMainCaret(editorState->scintilla);
         cursor = p - delta;
         TSurfaceView::draw();
     }

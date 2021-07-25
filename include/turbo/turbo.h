@@ -6,7 +6,7 @@
 #include <tvision/tv.h>
 
 #include <turbo/funcview.h>
-#include <turbo/tscintilla.h>
+#include <turbo/scintilla.h>
 #include <turbo/editstates.h>
 #include <turbo/styles.h>
 
@@ -18,11 +18,6 @@ class TScrollBar;
 namespace turbo {
 
 class Clipboard;
-
-using Editor = Scintilla::TScintillaEditor;
-
-Editor &createEditor(Clipboard *aClipboard = nullptr) noexcept;
-
 class EditorView;
 class LeftMarginView;
 struct EditorState;
@@ -32,7 +27,7 @@ struct EditorParent
     virtual void handleNotification(ushort code, EditorState &) noexcept = 0;
 };
 
-struct EditorState : Scintilla::TScintillaParent
+struct EditorState : ScintillaParent
 {
     enum : ushort { // Notification Codes
         ncPainted = 1,
@@ -49,7 +44,7 @@ struct EditorState : Scintilla::TScintillaParent
 
     enum { minLineNumbersWidth = 5 };
 
-    Editor &editor;
+    Scintilla &scintilla;
     ThemingState theming;
     EditorParent *parent {nullptr};
     EditorView *view {nullptr};
@@ -64,7 +59,7 @@ struct EditorState : Scintilla::TScintillaParent
     WrapState wrapping;
     AutoIndent autoIndent;
 
-    EditorState(Editor &aEditor) noexcept;
+    EditorState(Scintilla &aScintilla) noexcept;
     virtual ~EditorState();
 
     void associate( EditorParent *aParent,
@@ -90,7 +85,7 @@ struct EditorState : Scintilla::TScintillaParent
     bool toggleLineWrapping(TFuncView<bool(int)> wrapIfBig = defWrapIfBig) noexcept
     // Post: returns true if line wrapping is enabled.
     {
-        return wrapping.toggle(editor, wrapIfBig);
+        return wrapping.toggle(scintilla, wrapIfBig);
     }
 
     void toggleLineNumbers() noexcept
@@ -190,12 +185,12 @@ struct SilentFileDialogs : FileDialogs
 
 extern SilentFileDialogs silFileDialogs;
 
-bool readFile(Editor &editor, const char *path, FileDialogs & = defFileDialogs) noexcept;
-void openFile( TFuncView<Editor&()> createEditor,
-               TFuncView<void(Editor &, const char *)> accept,
+bool readFile(Scintilla &scintilla, const char *path, FileDialogs & = defFileDialogs) noexcept;
+void openFile( TFuncView<Scintilla&()> createScintilla,
+               TFuncView<void(Scintilla &, const char *)> accept,
                FileDialogs & = defFileDialogs ) noexcept;
-bool writeFile(const char *path, Editor &editor, FileDialogs & = defFileDialogs) noexcept;
-bool renameFile(const char *dst, const char *src, Editor &editor, FileDialogs & = defFileDialogs) noexcept;
+bool writeFile(const char *path, Scintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
+bool renameFile(const char *dst, const char *src, Scintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
 
 struct FileEditorState : EditorState
 {
@@ -205,7 +200,7 @@ struct FileEditorState : EditorState
 
     std::string filePath;
 
-    FileEditorState(Editor &aEditor, std::string aFilePath) noexcept;
+    FileEditorState(Scintilla &aScintilla, std::string aFilePath) noexcept;
 
     void detectLanguage() noexcept;
     bool save(FileDialogs & = defFileDialogs) noexcept;
@@ -219,8 +214,8 @@ struct FileEditorState : EditorState
 
 };
 
-inline FileEditorState::FileEditorState(Editor &aEditor, std::string aFilePath) noexcept :
-    EditorState(aEditor),
+inline FileEditorState::FileEditorState(Scintilla &aScintilla, std::string aFilePath) noexcept :
+    EditorState(aScintilla),
     filePath(std::move(aFilePath))
 {
     detectLanguage();
@@ -228,7 +223,7 @@ inline FileEditorState::FileEditorState(Editor &aEditor, std::string aFilePath) 
 
 inline void FileEditorState::detectLanguage() noexcept
 {
-    theming.detectLanguage(filePath.c_str(), editor);
+    theming.detectLanguage(filePath.c_str(), scintilla);
 }
 
 } // namespace turbo

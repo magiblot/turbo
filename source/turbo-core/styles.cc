@@ -1,5 +1,5 @@
 #include <tvision/tv.h>
-#include <turbo/tscintilla.h>
+#include <turbo/scintilla.h>
 #include <turbo/styles.h>
 #include <turbo/tpath.h>
 #include <utility>
@@ -69,7 +69,7 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {"PKGBUILD",    langBash},
 };
 
-bool ThemingState::detectLanguage(const char *filePath, Scintilla::TScintillaEditor &editor)
+bool ThemingState::detectLanguage(const char *filePath, Scintilla &scintilla)
 {
     Language lang = langNone;
     {
@@ -104,7 +104,7 @@ bool ThemingState::detectLanguage(const char *filePath, Scintilla::TScintillaEdi
     }
 #endif
 
-    if (loadLexer(lang, editor))
+    if (loadLexer(lang, scintilla))
     {
         language = lang;
         return true;
@@ -407,20 +407,20 @@ static const std::unordered_map<Language, LexerInfo> lexerStyles = {
     {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
 };
 
-bool ThemingState::loadLexer(Language lang, Scintilla::TScintillaEditor &editor)
+bool ThemingState::loadLexer(Language lang, Scintilla &scintilla)
 {
     auto it = lexerStyles.find(lang);
     if (it != lexerStyles.end())
     {
         lexInfo = &it->second;
-        editor.WndProc(SCI_SETLEXER, lexInfo->lexer, 0U);
+        call(scintilla, SCI_SETLEXER, lexInfo->lexer, 0U);
         for (const auto &style : lexInfo->styles)
-            editor.setStyleColor(style.first, normalize(style.second));
+            setStyleColor(scintilla, style.first, normalize(style.second));
         for (const auto &keyword : lexInfo->keywords)
-            editor.WndProc(SCI_SETKEYWORDS, keyword.first, (sptr_t) keyword.second);
+            call(scintilla, SCI_SETKEYWORDS, keyword.first, (sptr_t) keyword.second);
         for (const auto &property : lexInfo->properties)
-            editor.WndProc(SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
-        editor.WndProc(SCI_COLOURISE, 0, -1);
+            call(scintilla, SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
+        call(scintilla, SCI_COLOURISE, 0, -1);
     }
     else
         lexInfo = nullptr;
@@ -448,14 +448,14 @@ TColorAttr ThemingState::normalize(Styles index) const
     return normal;
 }
 
-void ThemingState::resetStyles(Scintilla::TScintillaEditor &editor) const
+void ThemingState::resetStyles(Scintilla &scintilla) const
 {
-    editor.setStyleColor(STYLE_DEFAULT, schema[sNormal]);
-    editor.WndProc(SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
-    editor.setSelectionColor(schema[sSelection]);
-    editor.setWhitespaceColor(schema[sWhitespace]);
-    editor.setStyleColor(STYLE_CONTROLCHAR, normalize(sCtrlChar));
-    editor.setStyleColor(STYLE_LINENUMBER, normalize(sLineNums));
+    setStyleColor(scintilla, STYLE_DEFAULT, schema[sNormal]);
+    call(scintilla, SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
+    setSelectionColor(scintilla, schema[sSelection]);
+    setWhitespaceColor(scintilla, schema[sWhitespace]);
+    setStyleColor(scintilla, STYLE_CONTROLCHAR, normalize(sCtrlChar));
+    setStyleColor(scintilla, STYLE_LINENUMBER, normalize(sLineNums));
 }
 
 TColorAttr ThemingState::braceAttr(LexerStyles styles, uchar sciStyle) const
@@ -471,30 +471,30 @@ static bool isBrace(TSpan<const char> braces, char ch)
     return memchr(braces.data(), ch, braces.size()) != nullptr;
 }
 
-void ThemingState::updateBraces(Scintilla::TScintillaEditor &editor) const
+void ThemingState::updateBraces(Scintilla &scintilla) const
 {
     if (lexInfo)
     {
-        auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
-        auto ch = editor.WndProc(SCI_GETCHARAT, pos, 0U);
+        auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
+        auto ch = call(scintilla, SCI_GETCHARAT, pos, 0U);
         bool braceFound = false;
         if (isBrace(lexInfo->braces, ch))
         {
             // We must lex any newly inserted text so that it has the right style.
-            editor.idleWork();
+            idleWork(scintilla);
             // Scintilla already makes sure that both braces have the same style.
-            auto matchPos = editor.WndProc(SCI_BRACEMATCH, pos, 0U);
+            auto matchPos = call(scintilla, SCI_BRACEMATCH, pos, 0U);
             if (matchPos != -1)
             {
-                uchar sciStyle = editor.WndProc(SCI_GETSTYLEAT, pos, 0U);
+                uchar sciStyle = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
                 auto attr = braceAttr(lexInfo->styles, sciStyle);
-                editor.setStyleColor(STYLE_BRACELIGHT, attr);
-                editor.WndProc(SCI_BRACEHIGHLIGHT, pos, matchPos);
+                setStyleColor(scintilla, STYLE_BRACELIGHT, attr);
+                call(scintilla, SCI_BRACEHIGHLIGHT, pos, matchPos);
                 braceFound = true;
             }
         }
         if (!braceFound)
-            editor.WndProc(SCI_BRACEHIGHLIGHT, -1, -1);
+            call(scintilla, SCI_BRACEHIGHLIGHT, -1, -1);
     }
 }
 

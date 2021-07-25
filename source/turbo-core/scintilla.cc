@@ -3,18 +3,15 @@
 #include <tvision/tv.h>
 
 #include <chrono>
-using std::chrono::duration_cast;
-using std::chrono::milliseconds;
-using std::chrono::steady_clock;
 
-#include <turbo/tscintilla.h>
+#include <turbo/scintilla/ScintillaTV.h>
 #include <turbo/clipboard.h>
 
-#include "surface.h"
+#include "platform/surface.h"
 
 namespace Scintilla {
 
-TScintillaEditor::TScintillaEditor(turbo::Clipboard *aClipboard) :
+ScintillaTV::ScintillaTV(turbo::Clipboard *aClipboard) :
     clipboard(aClipboard)
 {
     // Block caret for both Insertion and Overwrite mode.
@@ -71,7 +68,7 @@ TScintillaEditor::TScintillaEditor(turbo::Clipboard *aClipboard) :
     WndProc(SCI_ASSIGNCMDKEY, SCK_END | (SCI_SHIFT << 16), SCI_LINEENDWRAPEXTEND);
 }
 
-void TScintillaEditor::SetVerticalScrollPos()
+void ScintillaTV::SetVerticalScrollPos()
 {
     auto *parent = getParent();
     if (parent) {
@@ -80,14 +77,14 @@ void TScintillaEditor::SetVerticalScrollPos()
     }
 }
 
-void TScintillaEditor::SetHorizontalScrollPos()
+void ScintillaTV::SetHorizontalScrollPos()
 {
     auto *parent = getParent();
     if (parent)
         parent->setHorizontalScrollPos(xOffset, vs.wrapState == SC_WRAP_NONE ? scrollWidth : 1);
 }
 
-bool TScintillaEditor::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
+bool ScintillaTV::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 {
     SetVerticalScrollPos();
     SetHorizontalScrollPos();
@@ -96,23 +93,45 @@ bool TScintillaEditor::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 
 // Clipboard actions copied from ScinTerm.
 
-void TScintillaEditor::Copy()
+template <class Func>
+static inline void copy(turbo::Clipboard &self, Func &&fillSel) noexcept
 {
-    if (clipboard && !sel.Empty()) {
-        clipboard->copy(
-            [this] (auto &selText) {
+    auto &selText = self.selText;
+    fillSel(selText);
+    self.xSetText({selText.Data(), selText.Length()});
+}
+
+void ScintillaTV::Copy()
+{
+    if (clipboard && !sel.Empty())
+        copy(
+            *clipboard,
+            [&] (auto &selText) {
                 CopySelectionRange(&selText);
             }
         );
-    }
 }
 
-void TScintillaEditor::Paste()
+template <class Func>
+static inline void paste(turbo::Clipboard &self, Func &&fillSel) noexcept
 {
-    if (clipboard) {
-        clipboard->paste(
-            [this] (auto &selText, auto text) {
-                if (text.size()) {
+    self.xGetText([&] (bool ok, TStringView text) {
+        auto &selText = self.selText;
+        fillSel(
+            selText,
+            ok ? text : TStringView {selText.Data(), selText.Length()}
+        );
+    });
+}
+
+void ScintillaTV::Paste()
+{
+    if (clipboard)
+        paste(
+            *clipboard,
+            [&] (auto &selText, auto text) {
+                if (text.size())
+                {
                     ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
                     selText.Copy( text,
                                   pdoc->dbcsCodePage,
@@ -127,71 +146,70 @@ void TScintillaEditor::Paste()
                 }
             }
         );
-    }
 }
 
-void TScintillaEditor::ClaimSelection()
+void ScintillaTV::ClaimSelection()
 {
 }
 
-void TScintillaEditor::NotifyChange()
+void ScintillaTV::NotifyChange()
 {
 }
 
-void TScintillaEditor::NotifyParent(SCNotification scn)
+void ScintillaTV::NotifyParent(SCNotification scn)
 {
     auto *parent = getParent();
     if (parent)
         parent->handleNotification(scn);
 }
 
-void TScintillaEditor::CopyToClipboard(const SelectionText &selectedText)
+void ScintillaTV::CopyToClipboard(const SelectionText &selectedText)
 {
 }
 
-bool TScintillaEditor::FineTickerRunning(TickReason reason)
+bool ScintillaTV::FineTickerRunning(TickReason reason)
 {
     return false;
 }
 
-void TScintillaEditor::FineTickerStart(TickReason reason, int millis, int tolerance)
+void ScintillaTV::FineTickerStart(TickReason reason, int millis, int tolerance)
 {
 }
 
-void TScintillaEditor::FineTickerCancel(TickReason reason)
+void ScintillaTV::FineTickerCancel(TickReason reason)
 {
 }
 
-void TScintillaEditor::SetMouseCapture(bool on)
+void ScintillaTV::SetMouseCapture(bool on)
 {
 }
 
-bool TScintillaEditor::HaveMouseCapture()
+bool ScintillaTV::HaveMouseCapture()
 {
     return true;
 }
 
-sptr_t TScintillaEditor::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
+sptr_t ScintillaTV::DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
     return 0;
 }
 
-void TScintillaEditor::CreateCallTipWindow(PRectangle rc)
+void ScintillaTV::CreateCallTipWindow(PRectangle rc)
 {
 }
 
-void TScintillaEditor::AddToPopUp(const char *label, int cmd, bool enabled)
+void ScintillaTV::AddToPopUp(const char *label, int cmd, bool enabled)
 {
 }
 
-CaseFolder *TScintillaEditor::CaseFolderForEncoding()
+CaseFolder *ScintillaTV::CaseFolderForEncoding()
 {
     if (IsUnicodeMode())
         return new CaseFolderUnicode();
     return ScintillaBase::CaseFolderForEncoding();
 }
 
-int TScintillaEditor::KeyDefault(int key, int modifiers) {
+int ScintillaTV::KeyDefault(int key, int modifiers) {
     if (!modifiers) {
         Editor::AddChar(key);
         return 1;
@@ -199,24 +217,95 @@ int TScintillaEditor::KeyDefault(int key, int modifiers) {
     return 0;
 }
 
-int TScintillaEditor::convertModifiers(ulong controlKeyState)
+void ScintillaTV::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour)
 {
-    struct { ushort tv; int scmod; } static constexpr modifiersTable[] = {
+    auto *s = (TScintillaSurface *) surface;
+    Font f {};
+    if (isEndMarker) {
+        // Imitate the Tilde text editor.
+        s->DrawTextTransparent(rcPlace, f, rcPlace.bottom, "↵", wrapColour);
+    }
+}
+
+} // namespace Scintilla
+
+namespace turbo {
+
+::Scintilla::ScintillaTV &createScintilla(Clipboard *aClipboard) noexcept
+{
+    using namespace Scintilla;
+    return *new ScintillaTV(aClipboard);
+}
+
+void destroyScintilla(::Scintilla::ScintillaTV &self) noexcept
+{
+    delete &self;
+}
+
+sptr_t call(Scintilla &self, uint iMessage, uptr_t wParam, sptr_t lParam)
+{
+    return self.WndProc(iMessage, wParam, lParam);
+}
+
+void setParent(Scintilla &self, ScintillaParent *aParent)
+{
+    self.setParent(aParent);
+}
+
+void changeSize(Scintilla &self)
+{
+    self.ChangeSize();
+}
+
+void clearBeforeTentativeStart(Scintilla &self)
+{
+    self.ClearBeforeTentativeStart();
+}
+
+void insertPasteStream(Scintilla &self, TStringView text)
+{
+    using namespace Scintilla;
+    self.InsertPasteShape(text.data(), text.size(), ScintillaTV::pasteStream);
+}
+
+void insertCharacter(Scintilla &self, TStringView text)
+{
+    using namespace Scintilla;
+    self.InsertCharacter(text, ScintillaTV::CharacterSource::directInput);
+}
+
+void idleWork(Scintilla &self)
+{
+    self.IdleWork();
+}
+
+TPoint pointMainCaret(Scintilla &self)
+{
+    auto p = self.PointMainCaret();
+    return {(int) p.x, (int) p.y};
+}
+
+static int convertModifiers(ulong controlKeyState)
+{
+    static constexpr struct { ushort tv; int scmod; } modifiersTable[] =
+    {
         {kbShift,       SCMOD_SHIFT},
         {kbCtrlShift,   SCMOD_CTRL},
         {kbAltShift,    SCMOD_ALT}
     };
 
     int modifiers = 0;
-    for (const auto [tv, scmod] : modifiersTable)
-        if (controlKeyState & tv)
-            modifiers |= scmod;
+    for (const auto &m : modifiersTable)
+        if (controlKeyState & m.tv)
+            modifiers |= m.scmod;
     return modifiers;
 }
 
-void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *consumed)
+bool handleKeyDown(Scintilla &self, const KeyDownEvent &keyDown)
 {
-    struct { ushort tv; int sck; } static constexpr keysTable[] = {
+    using namespace Scintilla;
+    static constexpr struct { ushort tv; int sck; } keysTable[] =
+    {
         {kbDown,        SCK_DOWN},
         {kbUp,          SCK_UP},
         {kbLeft,        SCK_LEFT},
@@ -264,10 +353,12 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
     int key;
     if (keyDown.keyCode <= kbCtrlZ)
         key = keyDown.keyCode + 'A' - 1;
-    else {
+    else
+    {
         key = keyDown.charScan.charCode;
         for (const auto [tv, sck] : keysTable)
-            if (keyDown.keyCode == tv) {
+            if (keyDown.keyCode == tv)
+            {
                 key = sck;
                 specialKey = true;
                 break;
@@ -275,30 +366,42 @@ void TScintillaEditor::KeyDownWithModifiers(const KeyDownEvent &keyDown, bool *c
     }
 
     if (specialKey)
-        ScintillaBase::KeyDownWithModifiers(key, modifiers, consumed);
+    {
+        bool consumed = false;
+        self.KeyDownWithModifiers(key, modifiers, &consumed);
+        return consumed;
+    }
     else
-        ScintillaBase::InsertCharacter({keyDown.text, keyDown.textLength}, CharacterSource::directInput);
+    {
+        self.InsertCharacter({keyDown.text, keyDown.textLength}, ScintillaTV::CharacterSource::directInput);
+        return true;
+    }
 }
 
-bool TScintillaEditor::MouseEvent(const TEvent &ev) {
-    auto where = ev.mouse.where;
-    auto pt = Point::FromInts(where.x, where.y);
+bool handleMouse(Scintilla &self, ushort what, const MouseEventType &mouse)
+{
+    using namespace Scintilla;
+    using std::chrono::duration_cast;
+    using std::chrono::milliseconds;
+    using std::chrono::steady_clock;
+    auto pt = Point::FromInts(mouse.where.x, mouse.where.y);
     uint time = duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
-    int modifiers = convertModifiers(ev.mouse.controlKeyState); // This will actually be 0.
-    if (ev.mouse.buttons & mbLeftButton) {
+    int modifiers = convertModifiers(mouse.controlKeyState); // Very few environments do support this.
+    if (mouse.buttons & mbLeftButton)
+    {
         // Scintilla actually assumes these functions are invoked only for the
-        // left button mouse. Note that the original Turbo Vision does not set
-        // the 'buttons' mask for evMouseUp.
-        switch (ev.what) {
+        // left button mouse.
+        switch (what)
+        {
             case evMouseDown:
-                Editor::ButtonDownWithModifiers(pt, time, modifiers);
+                self.ButtonDownWithModifiers(pt, time, modifiers);
                 break;
             case evMouseUp:
-                Editor::ButtonUpWithModifiers(pt, time, modifiers);
+                self.ButtonUpWithModifiers(pt, time, modifiers);
                 break;
             case evMouseMove:
             case evMouseAuto:
-                Editor::ButtonMoveWithModifiers(pt, time, modifiers);
+                self.ButtonMoveWithModifiers(pt, time, modifiers);
                 break;
         }
         return true;
@@ -306,38 +409,32 @@ bool TScintillaEditor::MouseEvent(const TEvent &ev) {
     return false;
 }
 
-void TScintillaEditor::paint(TDrawSurface &d)
-// 'd.size' should equal 'parent->editorSize()'.
+void paint(Scintilla &self, TDrawSurface &d, TRect area)
 {
+    using namespace Scintilla;
     TScintillaSurface s;
     s.surface = &d;
-    s.defaultTextAttr = getStyleColor(STYLE_DEFAULT);
-    Editor::Paint(&s, PRectangle::FromInts(0, 0, d.size.x, d.size.y));
-}
-
-void TScintillaEditor::paint(TDrawSurface &d, TRect area)
-{
-    TScintillaSurface s;
-    s.surface = &d;
-    s.defaultTextAttr = getStyleColor(STYLE_DEFAULT);
-    Editor::Paint(
+    s.defaultTextAttr = getStyleColor(self, STYLE_DEFAULT);
+    self.Paint(
         &s,
         PRectangle::FromInts(area.a.x, area.a.y, area.b.x, area.b.y)
     );
 }
 
-void TScintillaEditor::setStyleColor(int style, TColorAttr attr)
+void setStyleColor(Scintilla &self, int style, TColorAttr attr)
 {
-    WndProc(SCI_STYLESETFORE, style, convertColor(::getFore(attr)).AsInteger());
-    WndProc(SCI_STYLESETBACK, style, convertColor(::getBack(attr)).AsInteger());
-    WndProc(SCI_STYLESETWEIGHT, style, ::getStyle(attr));
+    using namespace Scintilla;
+    call(self, SCI_STYLESETFORE, style, convertColor(::getFore(attr)).AsInteger());
+    call(self, SCI_STYLESETBACK, style, convertColor(::getBack(attr)).AsInteger());
+    call(self, SCI_STYLESETWEIGHT, style, ::getStyle(attr));
 }
 
-TColorAttr TScintillaEditor::getStyleColor(int style)
+TColorAttr getStyleColor(Scintilla &self, int style)
 {
-    ColourDesired fore {(int) WndProc(SCI_STYLEGETFORE, style, 0U)};
-    ColourDesired back {(int) WndProc(SCI_STYLEGETBACK, style, 0U)};
-    auto styleWeight = WndProc(SCI_STYLEGETWEIGHT, style, 0U);
+    using namespace Scintilla;
+    ColourDesired fore {(int) call(self, SCI_STYLEGETFORE, style, 0U)};
+    ColourDesired back {(int) call(self, SCI_STYLEGETBACK, style, 0U)};
+    auto styleWeight = call(self, SCI_STYLEGETWEIGHT, style, 0U);
     return {
         convertColor(fore),
         convertColor(back),
@@ -345,51 +442,43 @@ TColorAttr TScintillaEditor::getStyleColor(int style)
     };
 }
 
-void TScintillaEditor::setSelectionColor(TColorAttr attr)
+void setSelectionColor(Scintilla &self, TColorAttr attr)
 {
+    using namespace Scintilla;
     auto fg = ::getFore(attr),
          bg = ::getBack(attr);
-    WndProc(SCI_SETSELFORE, !fg.isDefault(), convertColor(fg).AsInteger());
-    WndProc(SCI_SETSELBACK, !bg.isDefault(), convertColor(bg).AsInteger());
+    call(self, SCI_SETSELFORE, !fg.isDefault(), convertColor(fg).AsInteger());
+    call(self, SCI_SETSELBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
-void TScintillaEditor::setWhitespaceColor(TColorAttr attr)
+void setWhitespaceColor(Scintilla &self, TColorAttr attr)
 {
+    using namespace Scintilla;
     auto fg = ::getFore(attr),
          bg = ::getBack(attr);
-    WndProc(SCI_SETWHITESPACEFORE, !fg.isDefault(), convertColor(fg).AsInteger());
-    WndProc(SCI_SETWHITESPACEBACK, !bg.isDefault(), convertColor(bg).AsInteger());
+    call(self, SCI_SETWHITESPACEFORE, !fg.isDefault(), convertColor(fg).AsInteger());
+    call(self, SCI_SETWHITESPACEBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
-void TScintillaEditor::drawWrapMarker(Surface *surface, PRectangle rcPlace, bool isEndMarker, ColourDesired wrapColour)
-{
-    auto *s = (TScintillaSurface *) surface;
-    Font f {};
-    if (isEndMarker) {
-        // Imitate the Tilde text editor.
-        s->DrawTextTransparent(rcPlace, f, rcPlace.bottom, "↵", wrapColour);
-    }
-}
-
-TPoint TScintillaParent::getEditorSize() noexcept
+TPoint ScintillaParent::getEditorSize() noexcept
 {
     return {0, 0};
 }
 
-void TScintillaParent::invalidate(TRect) noexcept
+void ScintillaParent::invalidate(TRect) noexcept
 {
 }
 
-void TScintillaParent::handleNotification(const SCNotification &scn)
+void ScintillaParent::handleNotification(const SCNotification &scn)
 {
 }
 
-void TScintillaParent::setVerticalScrollPos(int, int) noexcept
+void ScintillaParent::setVerticalScrollPos(int, int) noexcept
 {
 }
 
-void TScintillaParent::setHorizontalScrollPos(int, int) noexcept
+void ScintillaParent::setHorizontalScrollPos(int, int) noexcept
 {
 }
 
-} // namespace Scintilla
+} // namespace turbo

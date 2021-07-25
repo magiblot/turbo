@@ -1,95 +1,55 @@
 #ifndef TURBO_SCINTILLA_H
 #define TURBO_SCINTILLA_H
 
-// Define the standard order in which to include header files
-// All platform headers should be included before Scintilla headers
-// and each of these groups are then divided into directory groups.
-
-// C standard library
-#include <string.h>
-#include <assert.h>
-
-// C++ wrappers of C standard library
-
-// C++ standard library
-#include <stdexcept>
-#include <string>
-#include <vector>
-#include <map>
-#include <forward_list>
-#include <algorithm>
-#include <memory>
-#include <chrono>
-
-// Scintilla headers
-
-// Non-platform-specific headers
-
-// include
-#include "scintilla/include/Platform.h"
-#include "scintilla/include/Sci_Position.h"
-#include "scintilla/include/ILoader.h"
-#include "scintilla/include/ILexer.h"
 #include "scintilla/include/Scintilla.h"
-#include "scintilla/include/ScintillaWidget.h"
-#include "scintilla/include/SciLexer.h"
 
-// lexlib
-#include "scintilla/lexlib/StringCopy.h"
-#include "scintilla/lexlib/PropSetSimple.h"
-#include "scintilla/lexlib/WordList.h"
-#include "scintilla/lexlib/LexAccessor.h"
-#include "scintilla/lexlib/Accessor.h"
-#include "scintilla/lexlib/StyleContext.h"
-#include "scintilla/lexlib/CharacterSet.h"
-#include "scintilla/lexlib/CharacterCategory.h"
-#include "scintilla/lexlib/LexerModule.h"
-#include "scintilla/lexlib/CatalogueModules.h"
-#include "scintilla/lexlib/OptionSet.h"
-#include "scintilla/lexlib/SparseState.h"
-#include "scintilla/lexlib/SubStyles.h"
-#include "scintilla/lexlib/DefaultLexer.h"
-#include "scintilla/lexlib/LexerBase.h"
-#include "scintilla/lexlib/LexerSimple.h"
-#include "scintilla/lexlib/LexerNoExceptions.h"
+class TPoint;
+class TRect;
+class TDrawSurface;
+struct TColorAttr;
+struct KeyDownEvent;
+struct MouseEventType;
 
-// src
-#include "scintilla/src/Catalogue.h"
-#include "scintilla/src/Position.h"
-#include "scintilla/src/IntegerRectangle.h"
-#include "scintilla/src/UniqueString.h"
-#include "scintilla/src/SplitVector.h"
-#include "scintilla/src/Partitioning.h"
-#include "scintilla/src/RunStyles.h"
-#include "scintilla/src/SparseVector.h"
-#include "scintilla/src/ContractionState.h"
-#include "scintilla/src/CellBuffer.h"
-#include "scintilla/src/PerLine.h"
-#include "scintilla/src/CallTip.h"
-#include "scintilla/src/KeyMap.h"
-#include "scintilla/src/Indicator.h"
-#include "scintilla/src/XPM.h"
-#include "scintilla/src/LineMarker.h"
-#include "scintilla/src/Style.h"
-#include "scintilla/src/ViewStyle.h"
-#include "scintilla/src/CharClassify.h"
-#include "scintilla/src/Decoration.h"
-#include "scintilla/src/CaseFolder.h"
-#include "scintilla/src/Document.h"
-#include "scintilla/src/RESearch.h"
-#include "scintilla/src/CaseConvert.h"
-#include "scintilla/src/UniConversion.h"
-#include "scintilla/src/DBCS.h"
-#include "scintilla/src/Selection.h"
-#include "scintilla/src/PositionCache.h"
-#include "scintilla/src/FontQuality.h"
-#include "scintilla/src/EditModel.h"
-#include "scintilla/src/MarginView.h"
-#include "scintilla/src/EditView.h"
-#include "scintilla/src/Editor.h"
-#include "scintilla/src/ElapsedPeriod.h"
-#include "scintilla/src/AutoComplete.h"
-#include "scintilla/src/ScintillaBase.h"
-#include "scintilla/src/ExternalLexer.h"
+namespace Scintilla {
+class ScintillaTV;
+} // namespace Scintilla
+
+namespace turbo {
+
+class Clipboard;
+class ScintillaParent;
+using Scintilla = ::Scintilla::ScintillaTV;
+
+Scintilla &createScintilla(Clipboard *aClipboard) noexcept;
+void destroyScintilla(Scintilla &) noexcept;
+
+sptr_t call(Scintilla &, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+
+void setParent(Scintilla &, ScintillaParent *aParent);
+void changeSize(Scintilla &);
+void clearBeforeTentativeStart(Scintilla &);
+void insertPasteStream(Scintilla &, TStringView text);
+void insertCharacter(Scintilla &, TStringView mbc);
+void idleWork(Scintilla &);
+TPoint pointMainCaret(Scintilla &);
+bool handleKeyDown(Scintilla &, const KeyDownEvent &keyDown);
+bool handleMouse(Scintilla &, unsigned short what, const MouseEventType &mouse);
+void paint(Scintilla &, TDrawSurface &surface, TRect area);
+void setStyleColor(Scintilla &, int style, TColorAttr attr);
+TColorAttr getStyleColor(Scintilla &, int style);
+void setSelectionColor(Scintilla &, TColorAttr attr);
+void setWhitespaceColor(Scintilla &, TColorAttr attr);
+
+class ScintillaParent
+{
+public:
+    virtual TPoint getEditorSize() noexcept;
+    virtual void invalidate(TRect area) noexcept;
+    virtual void handleNotification(const SCNotification &scn);
+    virtual void setVerticalScrollPos(int delta, int limit) noexcept;
+    virtual void setHorizontalScrollPos(int delta, int limit) noexcept;
+};
+
+} // namespace turbo
 
 #endif // TURBO_SCINTILLA_H

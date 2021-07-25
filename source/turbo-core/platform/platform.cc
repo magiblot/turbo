@@ -1,4 +1,5 @@
 #include <turbo/scintilla.h>
+#include <turbo/scintilla/include/Platform.h>
 
 namespace Scintilla {
 

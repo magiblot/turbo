@@ -3,7 +3,6 @@
 
 #include <turbo/turbo.h>
 #include <turbo/tpath.h>
-#include <turbo/tscintilla.h>
 
 #include <fmt/core.h>
 #include <memory>
@@ -27,7 +26,7 @@ class PropertyDetector
 public:
 
     void analyze(TStringView text);
-    void apply(Editor &editor) const;
+    void apply(Scintilla &scintilla) const;
 
 };
 
@@ -60,15 +59,15 @@ void PropertyDetector::analyze(TStringView text)
     }
 }
 
-void PropertyDetector::apply(Editor &editor) const
+void PropertyDetector::apply(Scintilla &scintilla) const
 {
-    editor.WndProc(SCI_SETEOLMODE, eolType, 0U);
+    call(scintilla, SCI_SETEOLMODE, eolType, 0U);
 }
 
 static thread_local char ioBuffer alignas(4*1024) [128*1024];
 
-bool readFile(Editor &editor, const char *path, FileDialogs &dlgs) noexcept
-// Pre: 'editor' has no text in it.
+bool readFile(Scintilla &scintilla, const char *path, FileDialogs &dlgs) noexcept
+// Pre: 'scintilla' has no text in it.
 {
     using std::ios;
     std::ifstream f(path, ios::in | ios::binary);
@@ -80,7 +79,7 @@ bool readFile(Editor &editor, const char *path, FileDialogs &dlgs) noexcept
         // Allocate 1000 extra bytes, like SciTE does.
         try
         {
-            editor.WndProc(SCI_ALLOCATE, bytesLeft + 1000, 0U);
+            call(scintilla, SCI_ALLOCATE, bytesLeft + 1000, 0U);
         }
         catch (const std::bad_alloc &)
         {
@@ -93,46 +92,47 @@ bool readFile(Editor &editor, const char *path, FileDialogs &dlgs) noexcept
                 readSize > 0 && (ok = (bool) f.read(ioBuffer, readSize)) )
         {
             props.analyze({ioBuffer, readSize});
-            editor.WndProc(SCI_APPENDTEXT, readSize, (sptr_t) ioBuffer);
+            call(scintilla, SCI_APPENDTEXT, readSize, (sptr_t) ioBuffer);
             bytesLeft -= readSize;
         }
         if (!ok)
             return dlgs.readError(path, strerror(errno));
-        props.apply(editor);
+        props.apply(scintilla);
     }
     else
         return dlgs.openForReadError(path, strerror(errno));
     return true;
 }
 
-void openFile( TFuncView<Editor&()> createEditor,
-               TFuncView<void(Editor &, const char *)> accept, FileDialogs &dlgs ) noexcept
+void openFile( TFuncView<Scintilla&()> createScintilla,
+               TFuncView<void(Scintilla &, const char *)> accept, FileDialogs &dlgs ) noexcept
 {
     dlgs.getOpenPath([&] (const char *path) {
-        std::unique_ptr<Editor> editor {&createEditor()};
-        if (readFile(*editor, path, dlgs))
+        auto &scintilla = createScintilla();
+        if (readFile(scintilla, path, dlgs))
         {
-            accept(*editor.release(), path);
+            accept(scintilla, path);
             return true;
         }
+        destroyScintilla(scintilla);
         return false;
     });
 }
 
-bool writeFile(const char *path, Editor &editor, FileDialogs &dlgs) noexcept
+bool writeFile(const char *path, Scintilla &scintilla, FileDialogs &dlgs) noexcept
 {
     using std::ios;
     std::ofstream f(path, ios::out | ios::binary);
     if (f)
     {
-        size_t length = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
+        size_t length = call(scintilla, SCI_GETLENGTH, 0U, 0U);
         bool ok = true;
         size_t writeSize;
         size_t written = 0;
         do {
             writeSize = min(length - written, sizeof(ioBuffer));
-            editor.WndProc(SCI_SETTARGETRANGE, written, written + writeSize);
-            editor.WndProc(SCI_GETTARGETTEXT, 0U, (sptr_t) ioBuffer);
+            call(scintilla, SCI_SETTARGETRANGE, written, written + writeSize);
+            call(scintilla, SCI_GETTARGETTEXT, 0U, (sptr_t) ioBuffer);
             written += writeSize;
         } while (writeSize > 0 && (ok = (bool) f.write(ioBuffer, writeSize)));
         if (!ok)
@@ -143,14 +143,14 @@ bool writeFile(const char *path, Editor &editor, FileDialogs &dlgs) noexcept
     return true;
 }
 
-bool renameFile(const char *dst, const char *src, Editor &editor, FileDialogs &dlgs) noexcept
+bool renameFile(const char *dst, const char *src, Scintilla &scintilla, FileDialogs &dlgs) noexcept
 {
     // Try saving first, then renaming.
-    if (writeFile(src, editor, silFileDialogs) && ::rename(src, dst) == 0)
+    if (writeFile(src, scintilla, silFileDialogs) && ::rename(src, dst) == 0)
         return true;
     // If the above doesn't work, try saving at the new location, and then remove
     // the old file.
-    else if (writeFile(dst, editor, silFileDialogs))
+    else if (writeFile(dst, scintilla, silFileDialogs))
     {
         if (TPath::exists(src) && ::remove(src) != 0)
             dlgs.removeRenamedWarning(dst, src, strerror(errno));
@@ -164,7 +164,7 @@ bool FileEditorState::save(FileDialogs &dlgs) noexcept
     if (filePath.empty())
         return saveAs(dlgs);
     beforeSave();
-    if (writeFile(filePath.c_str(), editor, dlgs))
+    if (writeFile(filePath.c_str(), scintilla, dlgs))
     {
         notifyAfterSave();
         return true;
@@ -177,7 +177,7 @@ bool FileEditorState::saveAs(FileDialogs &dlgs) noexcept
     bool ok = false;
     dlgs.getSaveAsPath(*this, [&] (const char *path) {
         beforeSave();
-        if (writeFile(path, editor, dlgs))
+        if (writeFile(path, scintilla, dlgs))
         {
             filePath = path;
             notifyAfterSave();
@@ -195,7 +195,7 @@ bool FileEditorState::rename(FileDialogs &dlgs) noexcept
     bool ok = false;
     dlgs.getRenamePath(*this, [&] (const char *path) {
         beforeSave();
-        if (renameFile(path, filePath.c_str(), editor, dlgs))
+        if (renameFile(path, filePath.c_str(), scintilla, dlgs))
         {
             filePath = path;
             notifyAfterSave();
@@ -220,18 +220,18 @@ bool FileEditorState::close(FileDialogs &dlgs) noexcept
 
 void FileEditorState::beforeSave() noexcept
 {
-    if (!inSavePoint() && !editor.WndProc(SCI_CANREDO, 0U, 0U))
+    if (!inSavePoint() && !call(scintilla, SCI_CANREDO, 0U, 0U))
     {
-        editor.WndProc(SCI_BEGINUNDOACTION, 0U, 0U);
-        stripTrailingSpaces(editor);
-        ensureNewlineAtEnd(editor);
-        editor.WndProc(SCI_ENDUNDOACTION, 0U, 0U);
+        call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
+        stripTrailingSpaces(scintilla);
+        ensureNewlineAtEnd(scintilla);
+        call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
     }
 }
 
 void FileEditorState::afterSave() noexcept
 {
-    editor.WndProc(SCI_SETSAVEPOINT, 0U, 0U);
+    call(scintilla, SCI_SETSAVEPOINT, 0U, 0U);
     detectLanguage();
 }
 

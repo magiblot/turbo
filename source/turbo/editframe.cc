@@ -2,32 +2,33 @@
 #include <tvision/tv.h>
 
 #include "editframe.h"
-#include <turbo/tscintilla.h>
+#include <turbo/scintilla.h>
 
 EditorFrame::EditorFrame(const TRect &bounds) :
     TFrame(bounds),
-    editor(nullptr)
+    scintilla(nullptr)
 {
 }
 
 void EditorFrame::draw()
 {
     TFrame::draw();
-    if (editor)
+    if (scintilla)
         drawIndicator();
 }
 
-static TPoint cursorPos(Scintilla::TScintillaEditor &editor)
+static TPoint cursorPos(turbo::Scintilla &scintilla)
 {
-    auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
+    using namespace turbo;
+    auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
     return {
-        (int) editor.WndProc(SCI_GETCOLUMN, pos, 0U),
-        (int) editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U),
+        (int) call(scintilla, SCI_GETCOLUMN, pos, 0U),
+        (int) call(scintilla, SCI_LINEFROMPOSITION, pos, 0U),
     };
 }
 
 void EditorFrame::drawIndicator()
-// Pre: 'editor != nullptr'.
+// Pre: 'scintilla != nullptr'.
 {
     // └─ XXXXXXXXXXXXXX
     //   ^2              ^18
@@ -37,7 +38,7 @@ void EditorFrame::drawIndicator()
         TDrawBuffer b;
         char s[64];
         auto color = mapColor((state & sfDragging) ? 5 : 4);
-        TPoint pos = cursorPos(*editor);
+        TPoint pos = cursorPos(*scintilla);
         sprintf(s, " %d:%d ", pos.y + 1, pos.x + 1);
         ushort maxWidth = r.b.x - r.a.x;
         ushort width = b.moveStr(0, s, color, maxWidth);

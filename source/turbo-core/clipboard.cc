@@ -1,14 +1,25 @@
 #include <turbo/clipboard.h>
 #include <libclipboard.h>
+#include <turbo/scintilla/ScintillaInternals.h>
 
 namespace turbo {
+
+Clipboard::Clipboard() noexcept :
+    selText(*new ::Scintilla::SelectionText)
+{
+}
+
+Clipboard::~Clipboard()
+{
+    delete &selText;
+}
 
 LcbClipboard::LcbClipboard() noexcept
 {
     cb = clipboard_new(nullptr);
 }
 
-LcbClipboard::~LcbClipboard() noexcept
+LcbClipboard::~LcbClipboard()
 {
     clipboard_free(cb);
 }

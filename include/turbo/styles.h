@@ -4,11 +4,9 @@
 #include <tvision/tv.h>
 #include <utility>
 #include <string>
+#include <turbo/scintilla.h>
 
 struct TColorAttr;
-namespace Scintilla {
-struct TScintillaEditor;
-} // namespace Scintilla
 
 namespace turbo {
 
@@ -92,14 +90,14 @@ struct ThemingState
 
     ThemingState() noexcept;
 
-    void resetStyles(Scintilla::TScintillaEditor &editor) const;
-    bool detectLanguage(const char *filePath, Scintilla::TScintillaEditor &editor);
-    void updateBraces(Scintilla::TScintillaEditor &editor) const;
+    void resetStyles(Scintilla &editor) const;
+    bool detectLanguage(const char *filePath, Scintilla &editor);
+    void updateBraces(Scintilla &editor) const;
     TColorAttr normalize(Styles) const;
 
 private:
 
-    bool loadLexer(Language lang, Scintilla::TScintillaEditor &editor);
+    bool loadLexer(Language lang, Scintilla &editor);
     TColorAttr braceAttr(LexerStyles, uchar) const;
 
 };

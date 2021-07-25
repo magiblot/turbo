@@ -217,45 +217,49 @@ Boolean Searcher::isValidInput(char *s, Boolean)
 
 void Searcher::targetFromCurrent()
 {
-    auto &editor = win.editorState.editor;
+    using namespace turbo;
+    auto &scintilla = win.editorState.scintilla;
     direction = forward;
-    auto cur = editor.WndProc(SCI_GETSELECTIONSTART, 0U, 0U);
-    auto end = editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
-    editor.WndProc(SCI_SETTARGETRANGE, cur, end);
+    auto cur = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+    auto end = call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
+    call(scintilla, SCI_SETTARGETRANGE, cur, end);
 }
 
 void Searcher::targetNext()
 {
-    auto &editor = win.editorState.editor;
+    using namespace turbo;
+    auto &scintilla = win.editorState.scintilla;
     direction = forward;
-    auto end = editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
+    auto end = call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
     auto start = resultEnd != -1 ? resultEnd : 0;
-    editor.WndProc(SCI_SETTARGETRANGE, start, end);
+    call(scintilla, SCI_SETTARGETRANGE, start, end);
 }
 
 void Searcher::targetPrev()
 {
-    auto &editor = win.editorState.editor;
+    using namespace turbo;
+    auto &scintilla = win.editorState.scintilla;
     direction = backwards;
-    auto start = result != -1 ? result : editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
-    editor.WndProc(SCI_SETTARGETRANGE, start, 0);
+    auto start = result != -1 ? result : call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
+    call(scintilla, SCI_SETTARGETRANGE, start, 0);
 }
 
 void Searcher::searchText(std::string_view s, bool wrap)
 {
-    auto &editor = win.editorState.editor;
-    auto start = editor.WndProc(SCI_GETTARGETSTART, 0U, 0U);
-    auto end = editor.WndProc(SCI_GETTARGETEND, 0U, 0U);
-    result = editor.WndProc(SCI_SEARCHINTARGET, s.size(), (sptr_t) s.data());
+    using namespace turbo;
+    auto &scintilla = win.editorState.scintilla;
+    auto start = call(scintilla, SCI_GETTARGETSTART, 0U, 0U);
+    auto end = call(scintilla, SCI_GETTARGETEND, 0U, 0U);
+    result = call(scintilla, SCI_SEARCHINTARGET, s.size(), (sptr_t) s.data());
     // Restore search target as Scintilla sets it to the result text.
-    editor.WndProc(SCI_SETTARGETRANGE, start, end);
+    call(scintilla, SCI_SETTARGETRANGE, start, end);
     if (result != -1) {
         resultEnd = result + s.size();
-        editor.WndProc(SCI_SETSEL, result, resultEnd);
+        call(scintilla, SCI_SETSEL, result, resultEnd);
         // Since we cannot prevent TInputLine from doing duplicate searches,
         // at least search from the current point.
         auto newStart = direction == forward ? result : resultEnd;
-        editor.WndProc(SCI_SETTARGETSTART, newStart, 0U);
+        call(scintilla, SCI_SETTARGETSTART, newStart, 0U);
     } else if (wrap && !typing) { // Do not wrap while typing.
         resultEnd = -1;
         if (direction == forward) {
@@ -264,15 +268,15 @@ void Searcher::searchText(std::string_view s, bool wrap)
                 return searchText(s, false);
             }
         } else {
-            auto docEnd = editor.WndProc(SCI_GETTEXTLENGTH, 0U, 0U);
+            auto docEnd = call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
             if (start != docEnd) {
                 targetPrev();
                 return searchText(s, false);
             }
         }
     } else {
-        auto cur = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
-        editor.WndProc(SCI_SETEMPTYSELECTION, cur, 0U);
+        auto cur = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
+        call(scintilla, SCI_SETEMPTYSELECTION, cur, 0U);
         resultEnd = -1;
     }
     win.editorState.redraw();

@@ -3,24 +3,24 @@
 
 #include <fmt/core.h>
 #include <turbo/editstates.h>
-#include <turbo/tscintilla.h>
+#include <turbo/scintilla.h>
 
 namespace turbo {
 
 /////////////////////////////////////////////////////////////////////////
 // LineNumbersWidth
 
-int LineNumbersWidth::update(Scintilla::TScintillaEditor &editor)
+int LineNumbersWidth::update(Scintilla &scintilla)
 {
-    int newWidth = enabled ? calcWidth(editor) : 0;
-    editor.WndProc(SCI_SETMARGINWIDTHN, 0, newWidth); // Does nothing if width hasn't changed.
+    int newWidth = enabled ? calcWidth(scintilla) : 0;
+    call(scintilla, SCI_SETMARGINWIDTHN, 0, newWidth); // Does nothing if width hasn't changed.
     return newWidth;
 }
 
-int LineNumbersWidth::calcWidth(Scintilla::TScintillaEditor &editor)
+int LineNumbersWidth::calcWidth(Scintilla &scintilla)
 {
     int width = 1;
-    size_t lines = editor.WndProc(SCI_GETLINECOUNT, 0U, 0U);
+    size_t lines = call(scintilla, SCI_GETLINECOUNT, 0U, 0U);
     while (lines /= 10)
         ++width;
     if (width < minWidth)
@@ -31,28 +31,28 @@ int LineNumbersWidth::calcWidth(Scintilla::TScintillaEditor &editor)
 /////////////////////////////////////////////////////////////////////////
 // WrapState
 
-bool WrapState::toggle(Scintilla::TScintillaEditor &editor, TFuncView<bool(int)> wrapIfBig)
+bool WrapState::toggle(Scintilla &scintilla, TFuncView<bool(int)> wrapIfBig)
 {
     bool proceed = true;
     if (enabled)
     {
-        auto line = editor.getFirstVisibleDocumentLine();
-        editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
-        editor.WndProc(SCI_SETFIRSTVISIBLELINE, line, 0U);
+        auto line = call(scintilla, SCI_GETFIRSTVISIBLELINE, 0U, 0U);
+        call(scintilla, SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
+        call(scintilla, SCI_SETFIRSTVISIBLELINE, line, 0U);
         enabled = false;
     }
     else
     {
-        int size = editor.WndProc(SCI_GETLENGTH, 0U, 0U);
+        int size = call(scintilla, SCI_GETLENGTH, 0U, 0U);
         bool documentBig = size >= (1 << 19);
         if (documentBig && !confirmedOnce)
         {
-            const int width = editor.WndProc(SCI_GETSCROLLWIDTH, 0U, 0U);
+            const int width = call(scintilla, SCI_GETSCROLLWIDTH, 0U, 0U);
             proceed = confirmedOnce = wrapIfBig(width);
         }
         if (proceed)
         {
-            editor.WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, 0U);
+            call(scintilla, SCI_SETWRAPMODE, SC_WRAP_WORD, 0U);
             enabled = true;
         }
     }
@@ -68,19 +68,19 @@ bool defWrapIfBig(int width)
 /////////////////////////////////////////////////////////////////////////
 // AutoIndent
 
-void AutoIndent::applyToCurrentLine(Scintilla::TScintillaEditor &editor)
+void AutoIndent::applyToCurrentLine(Scintilla &scintilla)
 {
     if (enabled)
     {
-        auto pos = editor.WndProc(SCI_GETCURRENTPOS, 0U, 0U);
-        auto line = editor.WndProc(SCI_LINEFROMPOSITION, pos, 0U);
+        auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
+        auto line = call(scintilla, SCI_LINEFROMPOSITION, pos, 0U);
         if (line > 0)
         {
-            auto indentation = editor.WndProc(SCI_GETLINEINDENTATION, line - 1, 0U);
+            auto indentation = call(scintilla, SCI_GETLINEINDENTATION, line - 1, 0U);
             if (indentation > 0)
             {
-                editor.WndProc(SCI_SETLINEINDENTATION, line, indentation);
-                editor.WndProc(SCI_VCHOME, 0U, 0U);
+                call(scintilla, SCI_SETLINEINDENTATION, line, indentation);
+                call(scintilla, SCI_VCHOME, 0U, 0U);
             }
         }
     }
@@ -88,37 +88,37 @@ void AutoIndent::applyToCurrentLine(Scintilla::TScintillaEditor &editor)
 
 /////////////////////////////////////////////////////////////////////////
 
-void stripTrailingSpaces(Scintilla::TScintillaEditor &editor)
+void stripTrailingSpaces(Scintilla &scintilla)
 {
-    Sci::Line lineCount = editor.WndProc(SCI_GETLINECOUNT, 0U, 0U);
+    Sci::Line lineCount = call(scintilla, SCI_GETLINECOUNT, 0U, 0U);
     for (Sci::Line line = 0; line < lineCount; ++line) {
-        Sci::Position lineStart = editor.WndProc(SCI_POSITIONFROMLINE, line, 0U);
-        Sci::Position lineEnd = editor.WndProc(SCI_GETLINEENDPOSITION, line, 0U);
+        Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
+        Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
         Sci::Position i;
         for (i = lineEnd - 1; i >= lineStart; --i) {
-            char ch = editor.WndProc(SCI_GETCHARAT, i, 0U);
+            char ch = call(scintilla, SCI_GETCHARAT, i, 0U);
             if (ch != ' ' && ch != '\t')
                 break;
         }
         if (i != lineEnd - 1) { // Not first iteration, trailing whitespace.
-            editor.WndProc(SCI_SETTARGETRANGE, i + 1, lineEnd);
-            editor.WndProc(SCI_REPLACETARGET, 0, (sptr_t) "");
+            call(scintilla, SCI_SETTARGETRANGE, i + 1, lineEnd);
+            call(scintilla, SCI_REPLACETARGET, 0, (sptr_t) "");
         }
     }
 }
 
-void ensureNewlineAtEnd(Scintilla::TScintillaEditor &editor)
+void ensureNewlineAtEnd(Scintilla &scintilla)
 {
-    int EOLType = editor.WndProc(SCI_GETEOLMODE, 0U, 0U);
-    Sci::Line lineCount = editor.WndProc(SCI_GETLINECOUNT, 0U, 0U);
-    Sci::Position docEnd = editor.WndProc(SCI_POSITIONFROMLINE, lineCount, 0U);
+    int EOLType = call(scintilla, SCI_GETEOLMODE, 0U, 0U);
+    Sci::Line lineCount = call(scintilla, SCI_GETLINECOUNT, 0U, 0U);
+    Sci::Position docEnd = call(scintilla, SCI_POSITIONFROMLINE, lineCount, 0U);
     if ( lineCount == 1 || (lineCount > 1 &&
-         docEnd > editor.WndProc(SCI_POSITIONFROMLINE, lineCount - 1, 0U)) )
+         docEnd > call(scintilla, SCI_POSITIONFROMLINE, lineCount - 1, 0U)) )
     {
         std::string_view EOL = (EOLType == SC_EOL_CRLF) ? "\r\n" :
                                (EOLType == SC_EOL_CR)   ? "\r"   :
                                                           "\n";
-        editor.WndProc(SCI_APPENDTEXT, EOL.size(), (sptr_t) EOL.data());
+        call(scintilla, SCI_APPENDTEXT, EOL.size(), (sptr_t) EOL.data());
     }
 }
 

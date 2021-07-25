@@ -266,16 +266,16 @@ void TurboApp::parseArgs()
 
 void TurboApp::fileNew()
 {
-    addEditor(createEditor(), "");
+    addEditor(createScintilla(), "");
 }
 
 void TurboApp::fileOpen()
 {
     TurboFileDialogs dlgs {*this};
     turbo::openFile([&] () -> auto& {
-        return createEditor();
-    }, [&] (auto &editor, auto *path) {
-        addEditor(editor, path);
+        return createScintilla();
+    }, [&] (auto &scintilla, auto *path) {
+        addEditor(scintilla, path);
     }, dlgs);
 }
 
@@ -284,9 +284,9 @@ void TurboApp::fileOpenOrNew(const char *path)
     char abspath[MAXPATH];
     strnzcpy(abspath, path, MAXPATH);
     fexpand(abspath);
-    auto &editor = createEditor();
-    turbo::readFile(editor, abspath, turbo::silFileDialogs);
-    addEditor(editor, abspath);
+    auto &scintilla = createScintilla();
+    turbo::readFile(scintilla, abspath, turbo::silFileDialogs);
+    addEditor(scintilla, abspath);
 }
 
 void TurboApp::closeAll()
@@ -319,17 +319,17 @@ TRect TurboApp::newEditorBounds() const
     }
 }
 
-turbo::Editor &TurboApp::createEditor() noexcept
+turbo::Scintilla &TurboApp::createScintilla() noexcept
 {
-    return turbo::createEditor(&clipboard);
+    return turbo::createScintilla(&clipboard);
 }
 
-void TurboApp::addEditor(turbo::Editor &editor, const char *path)
+void TurboApp::addEditor(turbo::Scintilla &scintilla, const char *path)
 // Pre: 'path' is an absolute path.
 {
     TRect r = newEditorBounds();
     auto &counter = fileCount[TPath::basename(path)];
-    EditorWindow &w = *new EditorWindow(r, editor, path, counter, *this);
+    EditorWindow &w = *new EditorWindow(r, scintilla, path, counter, *this);
     updatePalette(w);
     if (docTree)
         docTree->tree->addEditor(&w);
