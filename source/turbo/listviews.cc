@@ -1,3 +1,5 @@
+#define Uses_TKeys
+#define Uses_TEvent
 #define Uses_TScrollBar
 #include <tvision/tv.h>
 

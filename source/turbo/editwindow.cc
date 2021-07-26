@@ -4,6 +4,7 @@
 #define __INC_EDITORS_H
 #include <tvision/tv.h>
 
+#include <turbo/tpath.h>
 #include "editwindow.h"
 #include "editframe.h"
 #include "app.h"

@@ -1,4 +1,4 @@
-#include <turbo/scintilla.h>
+#include <turbo/scintilla/internals.h>
 
 namespace Scintilla {
 

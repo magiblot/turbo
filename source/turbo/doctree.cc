@@ -3,6 +3,7 @@
 #include "app.h"
 #include <utility>
 #include <cassert>
+#include <turbo/tpath.h>
 using Node = DocumentTreeView::Node;
 
 Node::Node(Node *parent, std::string_view p) noexcept :

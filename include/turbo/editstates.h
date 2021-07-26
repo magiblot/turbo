@@ -2,6 +2,7 @@
 #define TURBO_EDITSTATES_H
 
 #include <tvision/tv.h>
+#include <turbo/funcview.h>
 #include <turbo/scintilla.h>
 
 namespace turbo {

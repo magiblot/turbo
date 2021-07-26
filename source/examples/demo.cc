@@ -6,7 +6,7 @@
 #define Uses_TScrollBar
 #define Uses_TListViewer
 #include <tvision/tv.h>
-#include <turbo/turbo.h>
+#include <turbo/fileeditor.h>
 #include <turbo/clipboard.h>
 #include <turbo/tpath.h>
 

@@ -5,7 +5,7 @@
 #define Uses_TPalette
 #include <tvision/tv.h>
 
-#include <turbo/turbo.h>
+#include <turbo/fileeditor.h>
 #include "apputils.h"
 #include "editor.h"
 

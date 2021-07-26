@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <turbo/editstates.h>
 #include <turbo/scintilla.h>
+#include <turbo/scintilla/internals.h>
 
 namespace turbo {
 

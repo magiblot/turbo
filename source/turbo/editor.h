@@ -1,7 +1,7 @@
-#ifndef TURBO_EDITOR_H
-#define TURBO_EDITOR_H
+#ifndef TURBO_APP_EDITOR_H
+#define TURBO_APP_EDITOR_H
 
-#include <turbo/turbo.h>
+#include <turbo/fileeditor.h>
 
 struct EditorWindowParent;
 
@@ -41,4 +41,4 @@ public:
     void afterSave() noexcept override;
 };
 
-#endif // TURBO_EDITOR_H
+#endif // TURBO_APP_EDITOR_H

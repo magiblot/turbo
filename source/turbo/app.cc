@@ -25,7 +25,7 @@
 #include "widgets.h"
 #include "listviews.h"
 #include "doctree.h"
-#include <turbo/turbo.h>
+#include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
 
 using namespace Scintilla;

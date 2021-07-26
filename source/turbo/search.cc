@@ -1,3 +1,4 @@
+#define Uses_TKeys
 #define Uses_TLabel
 #define Uses_TIndicator
 #define Uses_TButton

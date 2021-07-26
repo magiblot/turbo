@@ -1,7 +1,7 @@
 #define Uses_MsgBox
 #include <tvision/tv.h>
 
-#include <turbo/turbo.h>
+#include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
 
 #include <fmt/core.h>
@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
-#include <turbo/util.h>
+#include "utils.h"
 
 namespace turbo {
 

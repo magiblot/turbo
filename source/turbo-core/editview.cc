@@ -1,8 +1,9 @@
 #define Uses_TKeys
 #define Uses_TText
+#define Uses_TEvent
 #include <tvision/tv.h>
 
-#include <turbo/turbo.h>
+#include <turbo/editor.h>
 
 namespace turbo {
 

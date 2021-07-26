@@ -2,7 +2,7 @@
 #define Uses_TScrollBar
 #include <tvision/tv.h>
 
-#include <turbo/turbo.h>
+#include <turbo/editor.h>
 #include <turbo/util.h>
 #include "utils.h"
 
