@@ -29,6 +29,10 @@ struct forEach_<T, 0, Func>
 
 template <class T, size_t N, class Func>
 inline void forEach(T* const (&args)[N], Func &&func)
+// When building with optimizations, this results in an unrolled version of:
+//  for (auto *arg : args)
+//      if (arg)
+//          func(*arg);
 {
     detail::forEach_<T, N, Func>::invoke(&args[0], std::move(func));
 }

@@ -33,8 +33,6 @@ private:
 
 };
 
-bool defWrapIfBig(int width);
-
 class WrapState
 {
     bool enabled {false};
@@ -42,7 +40,8 @@ class WrapState
 
 public:
 
-    bool toggle(TScintilla &scintilla, TFuncView<bool(int)> wrapIfBig = defWrapIfBig);
+    static bool defConfirmWrap(int width);
+    bool toggle(TScintilla &scintilla, TFuncView<bool(int width)> confirmWrap = defConfirmWrap);
 };
 
 struct AutoIndent

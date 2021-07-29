@@ -32,7 +32,7 @@ int LineNumbersWidth::calcWidth(TScintilla &scintilla)
 /////////////////////////////////////////////////////////////////////////
 // WrapState
 
-bool WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int)> wrapIfBig)
+bool WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int)> confirmWrap)
 {
     bool proceed = true;
     if (enabled)
@@ -48,8 +48,8 @@ bool WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int)> wrapIfBig)
         bool documentBig = size >= (1 << 19);
         if (documentBig && !confirmedOnce)
         {
-            const int width = call(scintilla, SCI_GETSCROLLWIDTH, 0U, 0U);
-            proceed = confirmedOnce = wrapIfBig(width);
+            int width = call(scintilla, SCI_GETSCROLLWIDTH, 0U, 0U);
+            proceed = confirmedOnce = confirmWrap(width);
         }
         if (proceed)
         {
@@ -60,9 +60,9 @@ bool WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int)> wrapIfBig)
     return proceed;
 }
 
-bool defWrapIfBig(int width)
+bool WrapState::defConfirmWrap(int width)
 {
-    auto &&text = fmt::format("This document is very big and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
+    auto &&text = fmt::format("This document is quite large and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
     return messageBox(text, mfInformation | mfYesButton | mfNoButton) == cmYes;
 }
 

@@ -20,11 +20,20 @@ class Clipboard;
 using TScintilla = Scintilla::TScintilla;
 class TScintillaParent;
 
-TScintilla &createScintilla(Clipboard *aClipboard) noexcept;
-void destroyScintilla(TScintilla &) noexcept;
+// The definition of 'TScintilla' is hidden from the public headers just
+// like other Scintilla-related projects also do. Note that this saves you
+// from including >= 60K lines of code.
+// Should you need to interact with 'TScintilla' directly, the 'createScintilla',
+// 'destroyScintilla' and 'call' functions below should be enough.
 
+// Returns a heap-allocated instance of 'TScintilla'.
+TScintilla &createScintilla(Clipboard *aClipboard) noexcept;
+// Destroys a heap-allocated instance of 'TScintilla'.
+void destroyScintilla(TScintilla &) noexcept;
+// Invokes 'TScintilla::WndProc'. See 'https://www.scintilla.org/ScintillaDoc.html'.
 sptr_t call(TScintilla &, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
+// These invoke the similarly-named methods of 'TScintilla'.
 void setParent(TScintilla &, TScintillaParent *aParent);
 void changeSize(TScintilla &);
 void clearBeforeTentativeStart(TScintilla &);

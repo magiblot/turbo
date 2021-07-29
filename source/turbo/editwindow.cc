@@ -117,7 +117,6 @@ void EditorWindow::handleEvent(TEvent &ev) {
     TWindow::handleEvent(ev);
 }
 
-
 void EditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
 {
     auto lastResizeLock = editor.resizeLock;
