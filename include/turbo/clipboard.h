@@ -32,7 +32,7 @@ public:
 
 };
 
-class LcbClipboard : public Clipboard
+class SystemClipboard : public Clipboard
 {
     // This implementation of 'Clipboard' interacts with the system clipboard
     // (Win32/X11/Cocoa).
@@ -41,15 +41,11 @@ class LcbClipboard : public Clipboard
 
 public:
 
-    LcbClipboard() noexcept;
-    ~LcbClipboard();
-
-    LcbClipboard(const LcbClipboard &) = delete;
-    LcbClipboard& operator=(const LcbClipboard &) = delete;
+    SystemClipboard() noexcept;
+    ~SystemClipboard();
 
     void xSetText(TStringView) noexcept override;
     void xGetText(TFuncView<void(bool, TStringView)> accept) noexcept override;
-
 };
 
 } // namespace turbo

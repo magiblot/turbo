@@ -34,7 +34,7 @@ using EditorList = std::forward_list<FileEditor>;
 
 struct DemoApplication : public TApplication
 {
-    turbo::LcbClipboard clipboard;
+    turbo::SystemClipboard clipboard;
 
     DemoApplication() noexcept;
 };

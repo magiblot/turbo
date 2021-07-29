@@ -41,7 +41,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     bool argsParsed {false};
     int argc;
     const char **argv;
-    turbo::LcbClipboard clipboard;
+    turbo::SystemClipboard clipboard;
     std::string mostRecentDir;
 
     static TurboApp *app;

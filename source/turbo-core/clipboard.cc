@@ -5,7 +5,7 @@
 namespace turbo {
 
 Clipboard::Clipboard() noexcept :
-    selText(*new ::Scintilla::SelectionText)
+    selText(*new Scintilla::SelectionText)
 {
 }
 
@@ -14,23 +14,23 @@ Clipboard::~Clipboard()
     delete &selText;
 }
 
-LcbClipboard::LcbClipboard() noexcept
+SystemClipboard::SystemClipboard() noexcept
 {
     cb = clipboard_new(nullptr);
 }
 
-LcbClipboard::~LcbClipboard()
+SystemClipboard::~SystemClipboard()
 {
     clipboard_free(cb);
 }
 
-void LcbClipboard::xSetText(TStringView text) noexcept
+void SystemClipboard::xSetText(TStringView text) noexcept
 {
     if (cb)
         clipboard_set_text_ex(cb, text.data(), (int) text.size(), LCB_CLIPBOARD);
 }
 
-void LcbClipboard::xGetText(TFuncView<void(bool, TStringView)> accept) noexcept
+void SystemClipboard::xGetText(TFuncView<void(bool, TStringView)> accept) noexcept
 {
     char *text = cb ? clipboard_text(cb) : nullptr;
     accept(text != nullptr, text);
