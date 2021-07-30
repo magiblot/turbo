@@ -39,7 +39,7 @@ enum Language : uchar
     langMarkdown,
 };
 
-enum Styles : uchar
+enum TextStyle : uchar
 {
     sNormal,
     sSelection,
@@ -71,10 +71,10 @@ enum Styles : uchar
     sButtonDisabled,
     sButtonShortcut,
     sButtonShadow,
-    StyleCount,
+    TextStyleCount,
 };
 
-using ColorSchema = TColorAttr[StyleCount];
+using ColorSchema = TColorAttr[TextStyleCount];
 
 // Returns a color attribute such that:
 // * The foreground is taken from 'from' if it is not default, and from 'into' otherwise.
@@ -82,7 +82,7 @@ using ColorSchema = TColorAttr[StyleCount];
 // * The style is taken from 'from'.
 TColorAttr coalesce(TColorAttr from, TColorAttr into);
 
-inline TColorAttr normalize(const ColorSchema &schema, Styles index)
+inline TColorAttr normalize(const ColorSchema &schema, TextStyle index)
 {
     return coalesce(schema[index], schema[sNormal]);
 }
@@ -91,7 +91,7 @@ extern const ColorSchema schemaDefault;
 
 struct LexerInfo
 {
-    struct StyleMapping { uchar id; Styles style; };
+    struct StyleMapping { uchar id; TextStyle style; };
     struct KeywordMapping { uchar id; const char *keywords; };
     struct PropertyMapping { const char *name, *value; };
 
@@ -103,25 +103,7 @@ struct LexerInfo
 };
 
 Language detectLanguage(const char *filePath);
-const LexerInfo *findLexer(Language language);
-
-class ThemingState
-{
-public:
-
-    const LexerInfo *lexInfo {nullptr};
-    const ColorSchema *schema {nullptr};
-
-    // Modifying 'lexInfo' or 'schema' does not have any effects until this
-    // is invoked.
-    void apply(TScintilla &scintilla) const;
-    void updateBraces(TScintilla &scintilla) const;
-
-    const ColorSchema &getSchema() const
-    {
-        return schema ? *schema : schemaDefault;
-    }
-};
+const LexerInfo *findLexerInfo(Language language);
 
 } // namespace turbo
 

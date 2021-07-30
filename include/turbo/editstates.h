@@ -2,6 +2,7 @@
 #define TURBO_EDITSTATES_H
 
 #include <tvision/tv.h>
+#include <turbo/styles.h>
 #include <turbo/funcview.h>
 #include <turbo/scintilla.h>
 
@@ -54,6 +55,25 @@ struct AutoIndent
     }
 
     void applyToCurrentLine(TScintilla &scintilla);
+};
+
+class ThemingState
+{
+public:
+
+    const LexerInfo *lexerInfo {nullptr}; // Non-owning. Lifetime must exceed that of 'this'.
+    const ColorSchema *schema {nullptr}; // Non-owning. Lifetime must exceed that of 'this'.
+
+    // Updates 'scintilla' so that it makes use of the current state of
+    // 'lexerInfo' and 'schema'.
+    void apply(TScintilla &scintilla) const;
+    // Highlights matching braces if there are any.
+    void updateBraces(TScintilla &scintilla) const;
+
+    const ColorSchema &getSchema() const
+    {
+        return schema ? *schema : schemaDefault;
+    }
 };
 
 void stripTrailingSpaces(TScintilla &scintilla);

@@ -389,7 +389,7 @@ constexpr LexerInfo::KeywordMapping keywordsRuby[] =
     },
 };
 
-constexpr struct { Language language; LexerInfo lexInfo; } builtinLexers[] =
+constexpr struct { Language language; LexerInfo lexerInfo; } builtinLexers[] =
 {
     {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC, bracesC}},
     {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr, bracesC}},
@@ -412,78 +412,12 @@ TColorAttr coalesce(TColorAttr from, TColorAttr into)
     };
 }
 
-const LexerInfo *findLexer(Language language)
+const LexerInfo *findLexerInfo(Language language)
 {
     for (const auto &l : builtinLexers)
         if (l.language == language)
-            return &l.lexInfo;
+            return &l.lexerInfo;
     return nullptr;
-}
-
-void ThemingState::apply(TScintilla &scintilla) const
-{
-    auto &schema = getSchema();
-    setStyleColor(scintilla, STYLE_DEFAULT, schema[sNormal]);
-    call(scintilla, SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
-    setSelectionColor(scintilla, schema[sSelection]);
-    setWhitespaceColor(scintilla, schema[sWhitespace]);
-    setStyleColor(scintilla, STYLE_CONTROLCHAR, normalize(schema, sCtrlChar));
-    setStyleColor(scintilla, STYLE_LINENUMBER, normalize(schema, sLineNums));
-    if (lexInfo)
-    {
-        call(scintilla, SCI_SETLEXER, lexInfo->lexerId, 0U);
-        for (const auto &s : lexInfo->styles)
-            setStyleColor(scintilla, s.id, normalize(schema, s.style));
-        for (const auto &k : lexInfo->keywords)
-            call(scintilla, SCI_SETKEYWORDS, k.id, (sptr_t) k.keywords);
-        for (const auto &p : lexInfo->properties)
-            call(scintilla, SCI_SETPROPERTY, (sptr_t) p.name, (sptr_t) p.value);
-    }
-    else
-        call(scintilla, SCI_SETLEXER, SCLEX_CONTAINER, 0U);
-    call(scintilla, SCI_COLOURISE, 0, -1);
-}
-
-static TColorAttr braceAttr( const ColorSchema &schema,
-                             TSpan<const LexerInfo::StyleMapping> styles,
-                             uchar sciStyle )
-{
-    for (const auto &lexStyle : styles)
-        if (lexStyle.id == sciStyle)
-            return coalesce(schema[sBraceMatch], normalize(schema, lexStyle.style));
-    return schema[sError];
-}
-
-static bool isBrace(TStringView braces, char ch)
-{
-    return memchr(braces.data(), ch, braces.size()) != nullptr;
-}
-
-void ThemingState::updateBraces(TScintilla &scintilla) const
-{
-    if (lexInfo)
-    {
-        auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
-        auto ch = call(scintilla, SCI_GETCHARAT, pos, 0U);
-        bool braceFound = false;
-        if (isBrace(lexInfo->braces, ch))
-        {
-            // We must lex any newly inserted text so that it has the right style.
-            idleWork(scintilla);
-            // Scintilla already makes sure that both braces have the same style.
-            auto matchPos = call(scintilla, SCI_BRACEMATCH, pos, 0U);
-            if (matchPos != -1)
-            {
-                uchar sciStyle = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
-                auto attr = braceAttr(getSchema(), lexInfo->styles, sciStyle);
-                setStyleColor(scintilla, STYLE_BRACELIGHT, attr);
-                call(scintilla, SCI_BRACEHIGHLIGHT, pos, matchPos);
-                braceFound = true;
-            }
-        }
-        if (!braceFound)
-            call(scintilla, SCI_BRACEHIGHLIGHT, -1, -1);
-    }
 }
 
 } // namespace turbo

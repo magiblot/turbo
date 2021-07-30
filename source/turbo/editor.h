@@ -33,7 +33,7 @@ public:
     TurboEditor(Args&&... args) noexcept :
         super(static_cast<Args&&>(args)...)
     {
-        if (theming.lexInfo)
+        if (theming.lexerInfo)
             lineNumbers.enabled = true;
         wrapping.toggle(scintilla, [] (...) { return false; });
     }
