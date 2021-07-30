@@ -117,11 +117,6 @@ inline FileEditor::FileEditor(TScintilla &aScintilla, std::string aFilePath) noe
     detectLanguage();
 }
 
-inline void FileEditor::detectLanguage() noexcept
-{
-    theming.detectLanguage(filePath.c_str(), scintilla);
-}
-
 } // namespace turbo
 
 #endif

@@ -14,7 +14,7 @@ Editor::Editor(TScintilla &aScintilla) noexcept :
     // Editor should send notifications to this object.
     setParent(scintilla, this);
     // Set color defaults.
-    theming.resetStyles(scintilla);
+    theming.apply(scintilla);
 
     // Dynamic horizontal scroll.
     call(scintilla, SCI_SETSCROLLWIDTHTRACKING, true, 0U);

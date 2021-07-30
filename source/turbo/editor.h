@@ -33,9 +33,9 @@ public:
     TurboEditor(Args&&... args) noexcept :
         super(static_cast<Args&&>(args)...)
     {
-        if (theming.language != turbo::langNone)
+        if (theming.lexInfo)
             lineNumbers.enabled = true;
-        wrapping.toggle(scintilla, [] (int) { return false; });
+        wrapping.toggle(scintilla, [] (...) { return false; });
     }
 
     void afterSave() noexcept override;

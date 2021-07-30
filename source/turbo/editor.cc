@@ -4,9 +4,9 @@
 void TurboEditor::afterSave() noexcept
 {
     using namespace turbo;
-    auto lastLang = theming.language;
+    bool noLastLexer = !theming.lexInfo;
     super::afterSave();
-    if (lastLang == langNone && theming.language != langNone)
+    if (noLastLexer && theming.lexInfo)
         lineNumbers.enabled = true;
 }
 

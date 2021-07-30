@@ -3,10 +3,8 @@
 #include <turbo/scintilla.h>
 #include <turbo/styles.h>
 #include <turbo/tpath.h>
-#include <utility>
+#include <string_view>
 #include "utils.h"
-using namespace Scintilla;
-using std::pair;
 
 #ifdef HAVE_MAGIC
 #include <magic.h>
@@ -70,7 +68,7 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {"PKGBUILD",    langBash},
 };
 
-bool ThemingState::detectLanguage(const char *filePath, TScintilla &scintilla)
+Language detectLanguage(const char *filePath)
 {
     Language lang = langNone;
     {
@@ -104,16 +102,11 @@ bool ThemingState::detectLanguage(const char *filePath, TScintilla &scintilla)
         magic_close(magic_cookie);
     }
 #endif
-
-    if (loadLexer(lang, scintilla))
-    {
-        language = lang;
-        return true;
-    }
-    return false;
+    return lang;
 }
 
-static constexpr TColorAttr schemaDefault[StyleCount] = {
+extern constexpr ColorSchema schemaDefault =
+{
     /* sNormal           */ {{}      , {}                       },
     /* sSelection        */ {'\x1'   , '\x7'                    },
     /* sWhitespace       */ {'\x5'   , {}                       },
@@ -146,15 +139,8 @@ static constexpr TColorAttr schemaDefault[StyleCount] = {
     /* sButtonShadow     */ '\x08',
 };
 
-
-ThemingState::ThemingState() noexcept :
-    language(langNone),
-    lexInfo(nullptr),
-    schema(schemaDefault)
+constexpr LexerInfo::StyleMapping stylesC[] =
 {
-}
-
-static constexpr pair<uchar, Styles> stylesC[] = {
     {SCE_C_DEFAULT,                 sNormal},
     {SCE_C_COMMENT,                 sComment},
     {SCE_C_COMMENTLINE,             sComment},
@@ -173,7 +159,8 @@ static constexpr pair<uchar, Styles> stylesC[] = {
     {SCE_C_ESCAPESEQUENCE,          sEscapeSequence},
 };
 
-static constexpr pair<uchar, const char *> keywordsC[] = {
+constexpr LexerInfo::KeywordMapping keywordsC[] =
+{
     {0,
 "alignas alignof and and_eq asm auto bitand bitor break case catch class compl "
 "concept consteval constexpr constinit const_cast continue co_await co_return "
@@ -195,15 +182,17 @@ static constexpr pair<uchar, const char *> keywordsC[] = {
     },
 };
 
-static constexpr pair<const char *, const char *> propertiesC[] = {
+constexpr LexerInfo::PropertyMapping propertiesC[] =
+{
     {"styling.within.preprocessor",         "1"},
     {"lexer.cpp.track.preprocessor",        "0"},
     {"lexer.cpp.escape.sequence",           "1"},
 };
 
-static constexpr TSpan<const char> bracesC = "[](){}";
+constexpr const char *bracesC = "[](){}";
 
-static constexpr pair<uchar, Styles> stylesMake[] = {
+constexpr LexerInfo::StyleMapping stylesMake[] =
+{
     {SCE_MAKE_DEFAULT,              sNormal},
     {SCE_MAKE_COMMENT,              sComment},
     {SCE_MAKE_TARGET,               sKeyword1},
@@ -212,7 +201,8 @@ static constexpr pair<uchar, Styles> stylesMake[] = {
     {SCE_MAKE_OPERATOR,             sOperator},
 };
 
-static constexpr pair<uchar, Styles> stylesAsm[] = {
+constexpr LexerInfo::StyleMapping stylesAsm[] =
+{
     {SCE_ASM_DEFAULT,               sNormal},
     {SCE_ASM_COMMENT,               sComment},
     {SCE_ASM_COMMENTBLOCK,          sComment},
@@ -224,7 +214,8 @@ static constexpr pair<uchar, Styles> stylesAsm[] = {
     {SCE_ASM_DIRECTIVE,             sPreprocessor},
 };
 
-static constexpr pair<uchar, const char *> keywordsJavaScript[] = {
+constexpr LexerInfo::KeywordMapping keywordsJavaScript[] =
+{
     {0,
 "await break case catch continue default do else export false finally "
 "for get if import new null return set super switch this throw true try while "
@@ -245,7 +236,8 @@ static constexpr pair<uchar, const char *> keywordsJavaScript[] = {
     },
 };
 
-static constexpr pair<uchar, Styles> stylesRust[] = {
+constexpr LexerInfo::StyleMapping  stylesRust[] =
+{
     {SCE_RUST_DEFAULT,              sNormal},
     {SCE_RUST_COMMENTBLOCK,         sComment},
     {SCE_RUST_COMMENTLINE,          sComment},
@@ -265,7 +257,8 @@ static constexpr pair<uchar, Styles> stylesRust[] = {
     {SCE_RUST_BYTECHARACTER,        sEscapeSequence},
 };
 
-static constexpr pair<uchar, const char *> keywordsRust[] = {
+constexpr LexerInfo::KeywordMapping keywordsRust[] =
+{
     {0,
 "as break const continue crate dyn else enum extern false fn for if impl in let "
 "loop match mod move mut pub ref return self Self static struct super trait true "
@@ -277,7 +270,8 @@ static constexpr pair<uchar, const char *> keywordsRust[] = {
     },
 };
 
-static constexpr pair<uchar, Styles> stylesPython[] = {
+constexpr LexerInfo::StyleMapping  stylesPython[] =
+{
     {SCE_P_DEFAULT,                 sNormal},
     {SCE_P_COMMENTLINE,             sComment},
     {SCE_P_NUMBER,                  sNumberLiteral},
@@ -300,7 +294,8 @@ static constexpr pair<uchar, Styles> stylesPython[] = {
     {SCE_P_FTRIPLEDOUBLE,           sStringLiteral},
 };
 
-static constexpr pair<uchar, const char *> keywordsPython[] = {
+constexpr LexerInfo::KeywordMapping keywordsPython[] =
+{
     {0,
 "and as assert break class continue def del elif else except exec finally for "
 "from global if import in is lambda not or pass print raise return try while "
@@ -312,11 +307,13 @@ static constexpr pair<uchar, const char *> keywordsPython[] = {
     },
 };
 
-static constexpr pair<const char *, const char *> propertiesPython[] = {
+constexpr LexerInfo::PropertyMapping propertiesPython[] =
+{
     {"lexer.python.keywords2.no.sub.identifiers",       "1"},
 };
 
-static constexpr pair<uchar, Styles> stylesBash[] = {
+constexpr LexerInfo::StyleMapping  stylesBash[] =
+{
     {SCE_SH_DEFAULT,                sNormal},
     {SCE_SH_ERROR,                  sError},
     {SCE_SH_COMMENTLINE,            sComment},
@@ -333,7 +330,8 @@ static constexpr pair<uchar, Styles> stylesBash[] = {
     {SCE_SH_HERE_Q,                 sMisc},
 };
 
-static constexpr pair<uchar, const char *> keywordsBash[] = {
+constexpr LexerInfo::KeywordMapping keywordsBash[] =
+{
     {0,
 // Keywords
 "case do done elif else esac fi for function if in select then time until while "
@@ -346,7 +344,8 @@ static constexpr pair<uchar, const char *> keywordsBash[] = {
     },
 };
 
-static constexpr pair<uchar, Styles> stylesRuby[] = {
+constexpr LexerInfo::StyleMapping  stylesRuby[] =
+{
     {SCE_RB_DEFAULT,                sNormal},
     {SCE_RB_ERROR,                  sError},
     {SCE_RB_COMMENTLINE,            sComment},
@@ -379,7 +378,8 @@ static constexpr pair<uchar, Styles> stylesRuby[] = {
     {SCE_RB_UPPER_BOUND,            sMisc},
 };
 
-static constexpr pair<uchar, const char *> keywordsRuby[] = {
+constexpr LexerInfo::KeywordMapping keywordsRuby[] =
+{
     {0,
 "__ENCODING__ __LINE__ __FILE__ BEGIN END "
 "alias and begin break case class def defined? do else elsif end ensure false "
@@ -389,15 +389,8 @@ static constexpr pair<uchar, const char *> keywordsRuby[] = {
     },
 };
 
-struct LexerInfo {
-    const int lexer {SCLEX_NULL};
-    const LexerStyles styles;
-    const LexerKeywords keywords;
-    const LexerProperties properties;
-    const TSpan<const char> braces;
-};
-
-static const std::unordered_map<Language, LexerInfo> lexerStyles = {
+constexpr struct { Language language; LexerInfo lexInfo; } builtinLexers[] =
+{
     {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC, bracesC}},
     {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr, bracesC}},
     {langAsm, {SCLEX_ASM, stylesAsm, nullptr, nullptr, bracesC}},
@@ -408,32 +401,10 @@ static const std::unordered_map<Language, LexerInfo> lexerStyles = {
     {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
 };
 
-bool ThemingState::loadLexer(Language lang, TScintilla &scintilla)
+TColorAttr coalesce(TColorAttr from, TColorAttr into)
 {
-    auto it = lexerStyles.find(lang);
-    if (it != lexerStyles.end())
-    {
-        lexInfo = &it->second;
-        call(scintilla, SCI_SETLEXER, lexInfo->lexer, 0U);
-        for (const auto &style : lexInfo->styles)
-            setStyleColor(scintilla, style.first, normalize(style.second));
-        for (const auto &keyword : lexInfo->keywords)
-            call(scintilla, SCI_SETKEYWORDS, keyword.first, (sptr_t) keyword.second);
-        for (const auto &property : lexInfo->properties)
-            call(scintilla, SCI_SETPROPERTY, (sptr_t) property.first, (sptr_t) property.second);
-        call(scintilla, SCI_COLOURISE, 0, -1);
-    }
-    else
-        lexInfo = nullptr;
-    return lexInfo;
-}
-
-static TColorAttr merge(const TColorAttr &from, const TColorAttr &into)
-{
-    auto f_fg = ::getFore(from),
-         f_bg = ::getBack(from),
-         i_fg = ::getFore(into),
-         i_bg = ::getBack(into);
+    auto f_fg = ::getFore(from), f_bg = ::getBack(from),
+         i_fg = ::getFore(into), i_bg = ::getBack(into);
     return {
         f_fg.isDefault() ? i_fg : f_fg,
         f_bg.isDefault() ? i_bg : f_bg,
@@ -441,33 +412,49 @@ static TColorAttr merge(const TColorAttr &from, const TColorAttr &into)
     };
 }
 
-TColorAttr ThemingState::normalize(Styles index) const
+const LexerInfo *findLexer(Language language)
 {
-    auto normal = schema[sNormal];
-    if (index != sNormal)
-        return merge(schema[index], normal);
-    return normal;
+    for (const auto &l : builtinLexers)
+        if (l.language == language)
+            return &l.lexInfo;
+    return nullptr;
 }
 
-void ThemingState::resetStyles(TScintilla &scintilla) const
+void ThemingState::apply(TScintilla &scintilla) const
 {
+    auto &schema = getSchema();
     setStyleColor(scintilla, STYLE_DEFAULT, schema[sNormal]);
     call(scintilla, SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
     setSelectionColor(scintilla, schema[sSelection]);
     setWhitespaceColor(scintilla, schema[sWhitespace]);
-    setStyleColor(scintilla, STYLE_CONTROLCHAR, normalize(sCtrlChar));
-    setStyleColor(scintilla, STYLE_LINENUMBER, normalize(sLineNums));
+    setStyleColor(scintilla, STYLE_CONTROLCHAR, normalize(schema, sCtrlChar));
+    setStyleColor(scintilla, STYLE_LINENUMBER, normalize(schema, sLineNums));
+    if (lexInfo)
+    {
+        call(scintilla, SCI_SETLEXER, lexInfo->lexerId, 0U);
+        for (const auto &s : lexInfo->styles)
+            setStyleColor(scintilla, s.id, normalize(schema, s.style));
+        for (const auto &k : lexInfo->keywords)
+            call(scintilla, SCI_SETKEYWORDS, k.id, (sptr_t) k.keywords);
+        for (const auto &p : lexInfo->properties)
+            call(scintilla, SCI_SETPROPERTY, (sptr_t) p.name, (sptr_t) p.value);
+    }
+    else
+        call(scintilla, SCI_SETLEXER, SCLEX_CONTAINER, 0U);
+    call(scintilla, SCI_COLOURISE, 0, -1);
 }
 
-TColorAttr ThemingState::braceAttr(LexerStyles styles, uchar sciStyle) const
+static TColorAttr braceAttr( const ColorSchema &schema,
+                             TSpan<const LexerInfo::StyleMapping> styles,
+                             uchar sciStyle )
 {
     for (const auto &lexStyle : styles)
-        if (lexStyle.first == sciStyle)
-            return merge(schema[sBraceMatch], normalize(lexStyle.second));
+        if (lexStyle.id == sciStyle)
+            return coalesce(schema[sBraceMatch], normalize(schema, lexStyle.style));
     return schema[sError];
 }
 
-static bool isBrace(TSpan<const char> braces, char ch)
+static bool isBrace(TStringView braces, char ch)
 {
     return memchr(braces.data(), ch, braces.size()) != nullptr;
 }
@@ -488,7 +475,7 @@ void ThemingState::updateBraces(TScintilla &scintilla) const
             if (matchPos != -1)
             {
                 uchar sciStyle = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
-                auto attr = braceAttr(lexInfo->styles, sciStyle);
+                auto attr = braceAttr(getSchema(), lexInfo->styles, sciStyle);
                 setStyleColor(scintilla, STYLE_BRACELIGHT, attr);
                 call(scintilla, SCI_BRACEHIGHLIGHT, pos, matchPos);
                 braceFound = true;

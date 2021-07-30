@@ -47,7 +47,6 @@ struct Editor : TScintillaParent
     enum { minLineNumbersWidth = 5 };
 
     TScintilla &scintilla;
-    ThemingState theming;
     // Receives notifications in certain situations.
     EditorParent *parent {nullptr};
 
@@ -67,6 +66,7 @@ struct Editor : TScintillaParent
     LineNumbersWidth lineNumbers {minLineNumbersWidth};
     WrapState wrapping;
     AutoIndent autoIndent;
+    ThemingState theming;
 
     // Takes ownership over 'aScintilla'.
     Editor(TScintilla &aScintilla) noexcept;

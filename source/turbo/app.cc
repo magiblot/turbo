@@ -488,18 +488,18 @@ void TurboApp::updatePalette(EditorWindow &w) const
 {
     using namespace turbo;
     auto &pal = getPalette();
-    auto &th = w.editor.theming;
-    pal[edFramePassive  ] = th.normalize(sFramePassive  );
-    pal[edFrameActive   ] = th.normalize(sFrameActive   );
-    pal[edFrameIcon     ] = th.normalize(sFrameIcon     );
-    pal[edStaticText    ] = th.normalize(sStaticText    );
-    pal[edLabelNormal   ] = th.normalize(sLabelNormal   );
-    pal[edLabelSelected ] = th.normalize(sLabelSelected );
-    pal[edLabelShortcut ] = th.normalize(sLabelShortcut );
-    pal[edButtonNormal  ] = th.normalize(sButtonNormal  );
-    pal[edButtonDefault ] = th.normalize(sButtonDefault );
-    pal[edButtonSelected] = th.normalize(sButtonSelected);
-    pal[edButtonDisabled] = th.normalize(sButtonDisabled);
-    pal[edButtonShortcut] = th.normalize(sButtonShortcut);
-    pal[edButtonShadow  ] = th.normalize(sButtonShadow  );
+    auto &schema = w.editor.theming.getSchema();
+    pal[edFramePassive  ] = normalize(schema, sFramePassive  );
+    pal[edFrameActive   ] = normalize(schema, sFrameActive   );
+    pal[edFrameIcon     ] = normalize(schema, sFrameIcon     );
+    pal[edStaticText    ] = normalize(schema, sStaticText    );
+    pal[edLabelNormal   ] = normalize(schema, sLabelNormal   );
+    pal[edLabelSelected ] = normalize(schema, sLabelSelected );
+    pal[edLabelShortcut ] = normalize(schema, sLabelShortcut );
+    pal[edButtonNormal  ] = normalize(schema, sButtonNormal  );
+    pal[edButtonDefault ] = normalize(schema, sButtonDefault );
+    pal[edButtonSelected] = normalize(schema, sButtonSelected);
+    pal[edButtonDisabled] = normalize(schema, sButtonDisabled);
+    pal[edButtonShortcut] = normalize(schema, sButtonShortcut);
+    pal[edButtonShadow  ] = normalize(schema, sButtonShadow  );
 }

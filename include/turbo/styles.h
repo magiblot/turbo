@@ -1,18 +1,14 @@
 #ifndef TURBO_STYLES_H
 #define TURBO_STYLES_H
 
+#define Uses_TColorAttr
 #include <tvision/tv.h>
-#include <utility>
-#include <string>
 #include <turbo/scintilla.h>
-
-struct TColorAttr;
 
 namespace turbo {
 
-struct LexerInfo;
-
-enum Language : unsigned char {
+enum Language : uchar
+{
     langNone,
     langCPP,
     langMakefile,
@@ -43,7 +39,8 @@ enum Language : unsigned char {
     langMarkdown,
 };
 
-enum Styles : unsigned char {
+enum Styles : uchar
+{
     sNormal,
     sSelection,
     sWhitespace,
@@ -77,29 +74,53 @@ enum Styles : unsigned char {
     StyleCount,
 };
 
-typedef TSpan<const std::pair<uchar, Styles>> LexerStyles;
-typedef TSpan<const std::pair<uchar, const char *>> LexerKeywords;
-typedef TSpan<const std::pair<const char *, const char *>> LexerProperties;
+using ColorSchema = TColorAttr[StyleCount];
 
-struct ThemingState
+// Returns a color attribute such that:
+// * The foreground is taken from 'from' if it is not default, and from 'into' otherwise.
+// * The background is taken from 'from' if it is not default, and from 'into' otherwise.
+// * The style is taken from 'from'.
+TColorAttr coalesce(TColorAttr from, TColorAttr into);
+
+inline TColorAttr normalize(const ColorSchema &schema, Styles index)
 {
+    return coalesce(schema[index], schema[sNormal]);
+}
 
-    Language language;
-    const LexerInfo *lexInfo;
-    const TColorAttr *schema;
+extern const ColorSchema schemaDefault;
 
-    ThemingState() noexcept;
+struct LexerInfo
+{
+    struct StyleMapping { uchar id; Styles style; };
+    struct KeywordMapping { uchar id; const char *keywords; };
+    struct PropertyMapping { const char *name, *value; };
 
-    void resetStyles(TScintilla &editor) const;
-    bool detectLanguage(const char *filePath, TScintilla &editor);
-    void updateBraces(TScintilla &editor) const;
-    TColorAttr normalize(Styles) const;
+    int lexerId;
+    TSpan<const StyleMapping> styles;
+    TSpan<const KeywordMapping> keywords;
+    TSpan<const PropertyMapping> properties;
+    TStringView braces;
+};
 
-private:
+Language detectLanguage(const char *filePath);
+const LexerInfo *findLexer(Language language);
 
-    bool loadLexer(Language lang, TScintilla &editor);
-    TColorAttr braceAttr(LexerStyles, uchar) const;
+class ThemingState
+{
+public:
 
+    const LexerInfo *lexInfo {nullptr};
+    const ColorSchema *schema {nullptr};
+
+    // Modifying 'lexInfo' or 'schema' does not have any effects until this
+    // is invoked.
+    void apply(TScintilla &scintilla) const;
+    void updateBraces(TScintilla &scintilla) const;
+
+    const ColorSchema &getSchema() const
+    {
+        return schema ? *schema : schemaDefault;
+    }
 };
 
 } // namespace turbo
