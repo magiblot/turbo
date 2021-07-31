@@ -183,7 +183,7 @@ bool handleMouse(TScintilla &self, ushort what, const MouseEventType &mouse)
     return false;
 }
 
-static TColorAttr getStyleColor(TScintilla &self, int style)
+TColorAttr getStyleColor(TScintilla &self, int style)
 {
     using namespace Scintilla;
     ColourDesired fore {(int) call(self, SCI_STYLEGETFORE, style, 0U)};

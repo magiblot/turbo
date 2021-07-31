@@ -114,16 +114,6 @@ void ThemingState::apply(TScintilla &scintilla) const
     call(scintilla, SCI_COLOURISE, 0, -1);
 }
 
-static TColorAttr braceAttr( const ColorSchema &schema,
-                             TSpan<const LexerInfo::StyleMapping> styles,
-                             uchar sciStyle )
-{
-    for (const auto &lexStyle : styles)
-        if (lexStyle.id == sciStyle)
-            return coalesce(schema[sBraceMatch], normalize(schema, lexStyle.style));
-    return schema[sError];
-}
-
 static bool isBrace(TStringView braces, char ch)
 {
     return memchr(braces.data(), ch, braces.size()) != nullptr;
@@ -144,9 +134,11 @@ void ThemingState::updateBraces(TScintilla &scintilla) const
             auto matchPos = call(scintilla, SCI_BRACEMATCH, pos, 0U);
             if (matchPos != -1)
             {
-                uchar sciStyle = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
-                auto attr = braceAttr(getSchema(), lexerInfo->styles, sciStyle);
-                setStyleColor(scintilla, STYLE_BRACELIGHT, attr);
+                auto &schema = getSchema();
+                auto style = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
+                auto curAttr = getStyleColor(scintilla, style);
+                auto braceAttr = coalesce(schema[sBraceMatch], curAttr);
+                setStyleColor(scintilla, STYLE_BRACELIGHT, braceAttr);
                 call(scintilla, SCI_BRACEHIGHLIGHT, pos, matchPos);
                 braceFound = true;
             }
