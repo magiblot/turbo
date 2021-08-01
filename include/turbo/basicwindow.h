@@ -47,7 +47,7 @@ enum WindowPaletteItems : uchar
 
 struct WindowColorScheme
 {
-    const ColorSchema &editorScheme;
+    const ColorScheme &editorScheme;
     TColorAttr palette[WindowPaletteItemCount];
 };
 
@@ -82,7 +82,7 @@ public:
 
     // Sets the color scheme, but the changes won't be visible until the
     // subviews are redrawn (e.g. via 'TGroup::redraw()').
-    inline void setScheme(const WindowColorScheme *aSchema);
+    inline void setScheme(const WindowColorScheme *aScheme);
     inline const WindowColorScheme &getScheme() const;
 
 };
@@ -90,7 +90,7 @@ public:
 inline void BasicEditorWindow::setScheme(const WindowColorScheme *aScheme)
 {
     scheme = aScheme;
-    editor.theming.schema = aScheme ? &aScheme->editorScheme : nullptr;
+    editor.theming.scheme = aScheme ? &aScheme->editorScheme : nullptr;
     editor.theming.apply(editor.scintilla);
 }
 

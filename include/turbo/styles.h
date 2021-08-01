@@ -61,7 +61,7 @@ enum TextStyle : uchar
     TextStyleCount,
 };
 
-using ColorSchema = TColorAttr[TextStyleCount];
+using ColorScheme = TColorAttr[TextStyleCount];
 
 // Returns a color attribute such that:
 // * The foreground is taken from 'from' if it is not default, and from 'into' otherwise.
@@ -69,12 +69,12 @@ using ColorSchema = TColorAttr[TextStyleCount];
 // * The style is taken from 'from'.
 TColorAttr coalesce(TColorAttr from, TColorAttr into);
 
-inline TColorAttr normalize(const ColorSchema &schema, TextStyle index)
+inline TColorAttr normalize(const ColorScheme &scheme, TextStyle index)
 {
-    return coalesce(schema[index], schema[sNormal]);
+    return coalesce(scheme[index], scheme[sNormal]);
 }
 
-extern const ColorSchema schemaDefault;
+extern const ColorScheme schemeDefault;
 
 struct LexerInfo
 {

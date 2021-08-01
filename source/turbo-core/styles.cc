@@ -105,7 +105,7 @@ Language detectLanguage(const char *filePath)
     return lang;
 }
 
-extern constexpr ColorSchema schemaDefault =
+extern constexpr ColorScheme schemeDefault =
 {
     /* sNormal           */ {{}      , {}                       },
     /* sSelection        */ {'\x1'   , '\x7'                    },

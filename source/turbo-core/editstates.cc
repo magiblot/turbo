@@ -92,18 +92,18 @@ void AutoIndent::applyToCurrentLine(TScintilla &scintilla)
 
 void ThemingState::apply(TScintilla &scintilla) const
 {
-    auto &schema = getSchema();
-    setStyleColor(scintilla, STYLE_DEFAULT, schema[sNormal]);
+    auto &scheme = getScheme();
+    setStyleColor(scintilla, STYLE_DEFAULT, scheme[sNormal]);
     call(scintilla, SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
-    setSelectionColor(scintilla, schema[sSelection]);
-    setWhitespaceColor(scintilla, schema[sWhitespace]);
-    setStyleColor(scintilla, STYLE_CONTROLCHAR, normalize(schema, sCtrlChar));
-    setStyleColor(scintilla, STYLE_LINENUMBER, normalize(schema, sLineNums));
+    setSelectionColor(scintilla, scheme[sSelection]);
+    setWhitespaceColor(scintilla, scheme[sWhitespace]);
+    setStyleColor(scintilla, STYLE_CONTROLCHAR, normalize(scheme, sCtrlChar));
+    setStyleColor(scintilla, STYLE_LINENUMBER, normalize(scheme, sLineNums));
     if (lexerInfo)
     {
         call(scintilla, SCI_SETLEXER, lexerInfo->lexerId, 0U);
         for (const auto &s : lexerInfo->styles)
-            setStyleColor(scintilla, s.id, normalize(schema, s.style));
+            setStyleColor(scintilla, s.id, normalize(scheme, s.style));
         for (const auto &k : lexerInfo->keywords)
             call(scintilla, SCI_SETKEYWORDS, k.id, (sptr_t) k.keywords);
         for (const auto &p : lexerInfo->properties)
@@ -134,10 +134,10 @@ void ThemingState::updateBraces(TScintilla &scintilla) const
             auto matchPos = call(scintilla, SCI_BRACEMATCH, pos, 0U);
             if (matchPos != -1)
             {
-                auto &schema = getSchema();
+                auto &scheme = getScheme();
                 auto style = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
                 auto curAttr = getStyleColor(scintilla, style);
-                auto braceAttr = coalesce(schema[sBraceMatch], curAttr);
+                auto braceAttr = coalesce(scheme[sBraceMatch], curAttr);
                 setStyleColor(scintilla, STYLE_BRACELIGHT, braceAttr);
                 call(scintilla, SCI_BRACEHIGHLIGHT, pos, matchPos);
                 braceFound = true;

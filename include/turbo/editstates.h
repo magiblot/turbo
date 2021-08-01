@@ -62,17 +62,17 @@ class ThemingState
 public:
 
     const LexerInfo *lexerInfo {nullptr}; // Non-owning. Lifetime must exceed that of 'this'.
-    const ColorSchema *schema {nullptr}; // Non-owning. Lifetime must exceed that of 'this'.
+    const ColorScheme *scheme {nullptr}; // Non-owning. Lifetime must exceed that of 'this'.
 
     // Updates 'scintilla' so that it makes use of the current state of
-    // 'lexerInfo' and 'schema'.
+    // 'lexerInfo' and 'scheme'.
     void apply(TScintilla &scintilla) const;
     // Highlights matching braces if there are any.
     void updateBraces(TScintilla &scintilla) const;
 
-    const ColorSchema &getSchema() const
+    const ColorScheme &getScheme() const
     {
-        return schema ? *schema : schemaDefault;
+        return scheme ? *scheme : schemeDefault;
     }
 };
 

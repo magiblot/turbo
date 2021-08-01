@@ -96,7 +96,7 @@ void BasicEditorWindow::handleNotification(ushort code, Editor &editor) noexcept
 
 extern constexpr WindowColorScheme windowSchemeDefault =
 {
-    schemaDefault,
+    schemeDefault,
     {
         /* wndFramePassive             */ '\x07',
         /* wndFrameActive              */ '\x0F',
