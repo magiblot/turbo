@@ -10,29 +10,33 @@ namespace turbo {
 
 class LineNumbersWidth
 {
-
-public:
-
     int minWidth;
     bool enabled {false};
+
+    int calcWidth(TScintilla &scintilla);
+
+public:
 
     LineNumbersWidth(int min) :
         minWidth(min)
     {
     }
 
-    void toggle()
-    {
-        enabled ^= true;
-    }
+    inline void setState(bool enable);
+    inline void toggle();
 
     int update(TScintilla &scintilla);
-
-private:
-
-    int calcWidth(TScintilla &scintilla);
-
 };
+
+inline void LineNumbersWidth::setState(bool enable)
+{
+    enabled = enable;
+}
+
+inline void LineNumbersWidth::toggle()
+{
+    enabled ^= true;
+}
 
 class WrapState
 {
@@ -42,39 +46,82 @@ class WrapState
 public:
 
     static bool defConfirmWrap(int width);
-    bool toggle(TScintilla &scintilla, TFuncView<bool(int width)> confirmWrap = defConfirmWrap);
+
+    // * 'confirmWrap' shall return whether line wrapping should be activated
+    //   even if the document is quite large (>= 512 KiB).
+    void setState( bool enable, TScintilla &scintilla,
+                   TFuncView<bool(int width)> confirmWrap = defConfirmWrap );
+    inline void toggle( TScintilla &scintilla,
+                        TFuncView<bool(int width)> confirmWrap = defConfirmWrap );
 };
 
-struct AutoIndent
+inline void WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int width)> confirmWrap)
+{
+    setState(!enabled, scintilla, confirmWrap);
+}
+
+class AutoIndent
 {
     bool enabled {true};
 
-    void toggle()
-    {
-        enabled ^= true;
-    }
+public:
+
+    inline void setState(bool enable);
+    inline void toggle();
 
     void applyToCurrentLine(TScintilla &scintilla);
 };
 
+inline void AutoIndent::setState(bool enable)
+{
+    enabled = enable;
+}
+
+inline void AutoIndent::toggle()
+{
+    enabled ^= true;
+}
+
 class ThemingState
 {
+    const LexerInfo *lexerInfo {nullptr};
+    const ColorScheme *scheme {nullptr};
 public:
 
-    const LexerInfo *lexerInfo {nullptr}; // Non-owning. Lifetime must exceed that of 'this'.
-    const ColorScheme *scheme {nullptr}; // Non-owning. Lifetime must exceed that of 'this'.
+    // * 'aLexerInfo': non-owning. Lifetime must exceed that of 'this'.
+    inline void setLexerInfo(const LexerInfo *aLexerInfo);
+    // * 'aScheme': non-owning. Lifetime must exceed that of 'this'.
+    inline void setScheme(const ColorScheme *scheme);
+    // Returns the current scheme if present and 'schemeDefault' otherwise.
+    inline const ColorScheme &getScheme() const;
+    inline bool hasLexer() const;
 
     // Updates 'scintilla' so that it makes use of the current state of
     // 'lexerInfo' and 'scheme'.
     void apply(TScintilla &scintilla) const;
     // Highlights matching braces if there are any.
     void updateBraces(TScintilla &scintilla) const;
-
-    const ColorScheme &getScheme() const
-    {
-        return scheme ? *scheme : schemeDefault;
-    }
 };
+
+inline void ThemingState::setLexerInfo(const LexerInfo *aLexerInfo)
+{
+    lexerInfo = aLexerInfo;
+}
+
+inline void ThemingState::setScheme(const ColorScheme *aScheme)
+{
+    scheme = aScheme;
+}
+
+inline const ColorScheme &ThemingState::getScheme() const
+{
+    return scheme ? *scheme : schemeDefault;
+}
+
+inline bool ThemingState::hasLexer() const
+{
+    return lexerInfo;
+}
 
 void stripTrailingSpaces(TScintilla &scintilla);
 void ensureNewlineAtEnd(TScintilla &scintilla);

@@ -17,7 +17,7 @@ namespace turbo {
 class Clipboard;
 class EditorView;
 class LeftMarginView;
-struct Editor;
+class Editor;
 
 struct EditorParent
 {
@@ -26,14 +26,9 @@ struct EditorParent
     virtual void handleNotification(ushort code, Editor &) noexcept = 0;
 };
 
-struct Editor : TScintillaParent
+class Editor : TScintillaParent
 {
     // 'Editor' is a bridge between 'TScintilla' and Turbo Vision.
-
-    // Notification Codes for EditorParent::handleNotification.
-    enum : ushort {
-        ncPainted = 1, // Editor has been drawn into its associated views.
-    };
 
     struct InvalidationRectangle : TRect
     {
@@ -46,21 +41,23 @@ struct Editor : TScintillaParent
 
     enum { minLineNumbersWidth = 5 };
 
-    TScintilla &scintilla;
-    // Receives notifications in certain situations.
-    EditorParent *parent {nullptr};
-
-    // These views reflect the editor's state and feed events to it.
-    EditorView *view {nullptr};
-    LeftMarginView *leftMargin {nullptr};
-    TScrollBar *hScrollBar {nullptr};
-    TScrollBar *vScrollBar {nullptr};
-
     // Draw state.
     TDrawSurface surface;
     InvalidationRectangle invalidatedArea;
     bool drawLock {false}; // To avoid recursive draws.
-    bool resizeLock {false}; // When true, text stops flowing on resize.
+    bool reflowLock {false}; // When true, text stops flowing on resize.
+
+    void drawViews() noexcept;
+    void updateMarginWidth() noexcept;
+
+public:
+
+    // Notification Codes for EditorParent::handleNotification.
+    enum : ushort {
+        ncPainted = 1, // Editor has been drawn into its associated views.
+    };
+
+    TScintilla &scintilla;
 
     // Things related to 'TScintilla's state.
     LineNumbersWidth lineNumbers {minLineNumbersWidth};
@@ -68,12 +65,19 @@ struct Editor : TScintillaParent
     AutoIndent autoIndent;
     ThemingState theming;
 
+    // Interaction with views. Set them with 'associate'/'disassociate'.
+    EditorParent *parent {nullptr}; // Receives notifications in certain situations.
+    EditorView *view {nullptr}; // This and the ones below reflect the editor's state and feed events to it.
+    LeftMarginView *leftMargin {nullptr};
+    TScrollBar *hScrollBar {nullptr};
+    TScrollBar *vScrollBar {nullptr};
+
     // Takes ownership over 'aScintilla'.
     Editor(TScintilla &aScintilla) noexcept;
     virtual ~Editor();
 
-    // Causes the editor to be drawn in the provided views. All arguments are
-    // nullable.
+    // Causes the editor to be drawn in the provided views. All parameters are
+    // nullable and non-owning and their lifetime must exceed that of 'this'.
     void associate( EditorParent *aParent,
                     EditorView *aView, LeftMarginView *aLeftMargin,
                     TScrollBar *aHScrollBar, TScrollBar *aVScrollBar ) noexcept;
@@ -85,13 +89,9 @@ struct Editor : TScintillaParent
 
     // Paints the whole editor.
     void redraw() noexcept;
-    // Paints the editor in the area indicated by 'invalidatedArea'.
+    // Paints only the area invalidated by changes in 'scintilla'.
     void partialRedraw() noexcept;
     bool redraw(const TRect &area) noexcept;
-    void drawViews() noexcept;
-
-    // Sets the bounds of 'view' and 'leftMargin' according to 'lineNumbers'.
-    void updateMarginWidth() noexcept;
 
     // Implementation of 'TScintillaParent'.
     TPoint getEditorSize() noexcept override;
@@ -100,30 +100,20 @@ struct Editor : TScintillaParent
     void setHorizontalScrollPos(int delta, int limit) noexcept override;
     void setVerticalScrollPos(int delta, int limit) noexcept override;
 
-    // * 'confirmWrap' shall return whether line wrapping should be activated
-    //   even if the document is quite large (>= 512 KiB).
-    // Returns whether line wrapping has been enabled.
-    inline bool toggleLineWrapping(TFuncView<bool(int width)> confirmWrap = WrapState::defConfirmWrap) noexcept;
-    inline void toggleLineNumbers() noexcept;
-    inline void toggleAutoIndent() noexcept;
     bool inSavePoint();
+    template <class Func>
+    inline void lockReflow(Func &&func);
     inline sptr_t callScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
 };
 
-inline bool Editor::toggleLineWrapping(TFuncView<bool(int)> confirmWrap) noexcept
+template <class Func>
+inline void Editor::lockReflow(Func &&func)
 {
-    return wrapping.toggle(scintilla, confirmWrap);
-}
-
-inline void Editor::toggleLineNumbers() noexcept
-{
-    lineNumbers.enabled ^= true;
-}
-
-inline void Editor::toggleAutoIndent() noexcept
-{
-    autoIndent.enabled ^= true;
+    bool lastLock = reflowLock;
+    reflowLock = true;
+    func();
+    reflowLock = lastLock;
 }
 
 inline sptr_t Editor::callScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
@@ -144,7 +134,7 @@ class EditorView : public TSurfaceView
     // scrollbars...).
 public:
 
-    Editor *editor {nullptr};
+    Editor *editor {nullptr}; // Non-owning.
 
     EditorView(const TRect &bounds) noexcept;
 

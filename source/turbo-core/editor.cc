@@ -166,7 +166,7 @@ bool Editor::redraw(const TRect &area) noexcept
     {
         drawLock = true;
         updateMarginWidth();
-        if (!resizeLock)
+        if (!reflowLock)
         {
             changeSize(scintilla);
             theming.updateBraces(scintilla); // May mutate 'invalidatedArea', which may be 'area'.

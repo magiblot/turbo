@@ -9,13 +9,19 @@ namespace turbo {
 
 class BasicEditorFrame : public TFrame
 {
-public:
+    TScintilla *scintilla {nullptr};
 
-    turbo::TScintilla *scintilla {nullptr}; // Non-owning. Lifetime must exceed that of 'this'.
+public:
 
     BasicEditorFrame(const TRect &bounds);
     void draw() override;
     void drawIndicator();
+
+    // * 'aScintilla': non-owning. Lifetime must exceed that of 'this'.
+    void setScintilla(TScintilla *aScintilla)
+    {
+        scintilla = aScintilla;
+    }
 };
 
 } // namespace turbo

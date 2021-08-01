@@ -4,10 +4,10 @@
 void TurboEditor::afterSave() noexcept
 {
     using namespace turbo;
-    bool noLastLexer = !theming.lexerInfo;
+    bool noLastLexer = !theming.hasLexer();
     super::afterSave();
-    if (noLastLexer && theming.lexerInfo)
-        lineNumbers.enabled = true;
+    if (noLastLexer && theming.hasLexer())
+        lineNumbers.setState(true);
 }
 
 void TurboFileDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexcept

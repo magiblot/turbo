@@ -89,7 +89,7 @@ struct LexerInfo
     TStringView braces;
 };
 
-Language detectLanguage(const char *filePath);
+Language detectFileLanguage(const char *filePath);
 const LexerInfo *findLexerInfo(Language language);
 
 } // namespace turbo

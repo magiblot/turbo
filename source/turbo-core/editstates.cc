@@ -32,10 +32,9 @@ int LineNumbersWidth::calcWidth(TScintilla &scintilla)
 /////////////////////////////////////////////////////////////////////////
 // WrapState
 
-bool WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int)> confirmWrap)
+void WrapState::setState(bool enable, TScintilla &scintilla, TFuncView<bool(int)> confirmWrap)
 {
-    bool proceed = true;
-    if (enabled)
+    if (!enable)
     {
         auto line = call(scintilla, SCI_GETFIRSTVISIBLELINE, 0U, 0U);
         call(scintilla, SCI_SETWRAPMODE, SC_WRAP_NONE, 0U);
@@ -44,6 +43,7 @@ bool WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int)> confirmWrap)
     }
     else
     {
+        bool proceed = true;
         int size = call(scintilla, SCI_GETLENGTH, 0U, 0U);
         bool documentBig = size >= (1 << 19);
         if (documentBig && !confirmedOnce)
@@ -57,7 +57,6 @@ bool WrapState::toggle(TScintilla &scintilla, TFuncView<bool(int)> confirmWrap)
             enabled = true;
         }
     }
-    return proceed;
 }
 
 bool WrapState::defConfirmWrap(int width)

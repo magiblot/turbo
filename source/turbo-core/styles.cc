@@ -68,7 +68,7 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {"PKGBUILD",    langBash},
 };
 
-Language detectLanguage(const char *filePath)
+Language detectFileLanguage(const char *filePath)
 {
     Language lang = langNone;
     {

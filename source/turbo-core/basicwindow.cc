@@ -18,7 +18,7 @@ BasicEditorWindow::BasicEditorWindow(const TRect &bounds, Editor &aEditor) :
     TWindow(bounds, nullptr, wnNoNumber),
     editor(aEditor)
 {
-    ((BasicEditorFrame *) frame)->scintilla = &aEditor.scintilla;
+    ((BasicEditorFrame *) frame)->setScintilla(&aEditor.scintilla);
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
 
@@ -63,13 +63,12 @@ void BasicEditorWindow::setState(ushort aState, Boolean enable)
 
 void BasicEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
 {
-    auto lastResizeLock = editor.resizeLock;
     auto lastSize = size;
-    editor.resizeLock = true;
-    TWindow::dragView(event, mode, limits, minSize, maxSize);
-    editor.resizeLock = lastResizeLock;
+    editor.lockReflow([&] {
+        TWindow::dragView(event, mode, limits, minSize, maxSize);
+    });
     if (lastSize != size)
-        editor.redraw(); // Redraw without 'resizeLock = true'.
+        editor.redraw(); // Redraw without reflow lock.
 }
 
 void BasicEditorWindow::sizeLimits(TPoint &min, TPoint &max)
@@ -88,7 +87,7 @@ TColorAttr BasicEditorWindow::mapColor(uchar index) noexcept
 void BasicEditorWindow::handleNotification(ushort code, Editor &editor) noexcept
 {
     if (code == Editor::ncPainted)
-        if (!editor.resizeLock && frame) // It already gets drawn when resizing.
+        if (!(state & sfDragging) && frame) // It already gets drawn when resizing.
             frame->drawView(); // The frame is sensible to the cursor position and the save point state.
 }
 

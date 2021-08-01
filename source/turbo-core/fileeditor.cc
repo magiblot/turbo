@@ -161,13 +161,9 @@ bool renameFile(const char *dst, const char *src, TScintilla &scintilla, FileDia
 
 void FileEditor::detectLanguage() noexcept
 {
-    auto language = turbo::detectLanguage(filePath.c_str());
-    auto *lexerInfo = turbo::findLexerInfo(language);
-    if (lexerInfo != theming.lexerInfo)
-    {
-        theming.lexerInfo = lexerInfo;
-        theming.apply(scintilla);
-    }
+    auto language = detectFileLanguage(filePath.c_str());
+    theming.setLexerInfo(findLexerInfo(language));
+    theming.apply(scintilla);
 }
 
 bool FileEditor::save(FileDialogs &dlgs) noexcept

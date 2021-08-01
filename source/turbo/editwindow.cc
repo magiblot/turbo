@@ -62,15 +62,15 @@ void EditorWindow::handleEvent(TEvent &ev) {
                 editor.rename(dlgs);
                 break;
             case cmToggleWrap:
-                editor.toggleLineWrapping();
+                editor.wrapping.toggle(editor.scintilla);
                 editor.redraw();
                 break;
             case cmToggleLineNums:
-                editor.toggleLineNumbers();
+                editor.lineNumbers.toggle();
                 editor.redraw();
                 break;
             case cmToggleIndent:
-                editor.toggleAutoIndent();
+                editor.autoIndent.toggle();
                 break;
             case cmCloseEditor:
                 handled = message(this, evCommand, cmClose, nullptr); // May delete 'this'!

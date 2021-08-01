@@ -187,31 +187,32 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
 {
     if (ev.what == evCommand && edView)
     {
+        auto *editor = edView->editor;
         switch (ev.message.command)
         {
             case cmToggleLineNumbers:
-                if (edView->editor)
+                if (editor)
                 {
-                    edView->editor->toggleLineNumbers();
-                    edView->editor->redraw();
+                    editor->lineNumbers.toggle();
+                    editor->redraw();
                     clearEvent(ev);
                 }
                 break;
             case cmToggleLineWrapping:
-                if (edView->editor)
+                if (editor)
                 {
-                    edView->editor->toggleLineWrapping();
-                    edView->editor->redraw();
+                    editor->wrapping.toggle(editor->scintilla);
+                    editor->redraw();
                     clearEvent(ev);
                 }
                 break;
             case cmEditorFocused:
             {
-                auto *state = (FileEditor *) ev.message.infoPtr;
-                if (state)
+                auto *editor = (FileEditor *) ev.message.infoPtr;
+                if (editor)
                 {
-                    state->associate(this, edView, leftMargin, hScrollBar, vScrollBar);
-                    state->redraw();
+                    editor->associate(this, edView, leftMargin, hScrollBar, vScrollBar);
+                    editor->redraw();
                 }
                 else
                 {
@@ -236,23 +237,23 @@ void DemoEditorWindow::handleEvent(TEvent &ev)
                 break;
             }
             case cmSaveFile:
-                if (edView->editor)
-                    ((FileEditor *) edView->editor)->save();
+                if (editor)
+                    ((FileEditor *) editor)->save();
                 clearEvent(ev);
                 break;
             case cmSaveFileAs:
-                if (edView->editor)
-                    ((FileEditor *) edView->editor)->saveAs();
+                if (editor)
+                    ((FileEditor *) editor)->saveAs();
                 clearEvent(ev);
                 break;
             case cmRenameFile:
-                if (edView->editor)
-                    ((FileEditor *) edView->editor)->rename();
+                if (editor)
+                    ((FileEditor *) editor)->rename();
                 clearEvent(ev);
                 break;
             case cmCloseFile:
-                if (edView->editor && ((FileEditor *) edView->editor)->close())
-                    removeState(*(FileEditor *) edView->editor);
+                if (editor && ((FileEditor *) editor)->close())
+                    removeState(*(FileEditor *) editor);
                 clearEvent(ev);
                 break;
         }
@@ -278,13 +279,12 @@ void DemoEditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint
 {
     if (edView && edView->editor)
     {
-        auto lastResizeLock = edView->editor->resizeLock;
-        auto lastSize = edView->size;
-        edView->editor->resizeLock = true;
-        TDialog::dragView(event, mode, limits, minSize, maxSize);
-        edView->editor->resizeLock = lastResizeLock;
-        if (lastSize != edView->size)
-            edView->editor->redraw(); // Redraw without 'resizeLock = true'.
+        auto lastSize = size;
+        edView->editor->lockReflow([&] {
+            TDialog::dragView(event, mode, limits, minSize, maxSize);
+        });
+        if (lastSize != size)
+            edView->editor->redraw(); // Redraw without reflow lock.
     }
     else
         TDialog::dragView(event, mode, limits, minSize, maxSize);
@@ -309,17 +309,17 @@ const char *DemoEditorWindow::getTitle(short)
     return nullptr;
 }
 
-void DemoEditorWindow::handleNotification(ushort code, turbo::Editor &state) noexcept
+void DemoEditorWindow::handleNotification(ushort code, turbo::Editor &editor) noexcept
 {
     using namespace turbo;
     switch (code)
     {
         case Editor::ncPainted:
-            if (!state.resizeLock) // These already get drawn when resizing.
+            if (!(state & sfDragging) && frame) // It already gets drawn when resizing.
                 frame->drawView(); // The frame is sensible to the save point state.
             break;
         case FileEditor::ncSaved:
-            state.redraw();
+            editor.redraw();
             listView->drawView();
             break;
     }

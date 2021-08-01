@@ -33,9 +33,9 @@ public:
     TurboEditor(Args&&... args) noexcept :
         super(static_cast<Args&&>(args)...)
     {
-        if (theming.lexerInfo)
-            lineNumbers.enabled = true;
-        wrapping.toggle(scintilla, [] (...) { return false; });
+        if (theming.hasLexer())
+            lineNumbers.setState(true);
+        wrapping.setState(true, scintilla, [] (...) { return false; });
     }
 
     void afterSave() noexcept override;

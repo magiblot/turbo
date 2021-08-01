@@ -90,7 +90,7 @@ public:
 inline void BasicEditorWindow::setScheme(const WindowColorScheme *aScheme)
 {
     scheme = aScheme;
-    editor.theming.scheme = aScheme ? &aScheme->editorScheme : nullptr;
+    editor.theming.setScheme(aScheme ? &aScheme->editorScheme : nullptr);
     editor.theming.apply(editor.scintilla);
 }
 

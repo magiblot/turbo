@@ -7,7 +7,7 @@
 
 namespace turbo {
 
-struct FileEditor;
+class FileEditor;
 
 struct FileDialogs
 {
@@ -84,10 +84,14 @@ void openFile( TFuncView<TScintilla&()> createScintilla,
 bool writeFile(const char *path, TScintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
 bool renameFile(const char *dst, const char *src, TScintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
 
-struct FileEditor : Editor
+class FileEditor : public Editor
 {
     // A 'FileEditor' is an editor representing the contents of a file in the
     // filesystem.
+
+    void notifyAfterSave() noexcept;
+
+public:
 
     // Notification Codes for EditorParent::handleNotification.
     enum : ushort {
@@ -106,8 +110,6 @@ struct FileEditor : Editor
 
     void beforeSave() noexcept;
     virtual void afterSave() noexcept;
-    void notifyAfterSave() noexcept;
-
 };
 
 inline FileEditor::FileEditor(TScintilla &aScintilla, std::string aFilePath) noexcept :
