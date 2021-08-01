@@ -4,6 +4,7 @@
 #include <tvision/tv.h>
 
 #include <turbo/scintilla/tscintilla.h>
+#include <turbo/scintilla.h>
 #include "platform/surface.h"
 #include <chrono>
 

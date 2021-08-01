@@ -1,3 +1,4 @@
+#include <turbo/scintilla.h>
 #include <turbo/scintilla/tscintilla.h>
 #include <turbo/clipboard.h>
 

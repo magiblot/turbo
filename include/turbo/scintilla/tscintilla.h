@@ -8,6 +8,7 @@
 
 namespace turbo {
 class TScintillaParent;
+class Clipboard;
 } // namespace turbo
 
 namespace Scintilla {

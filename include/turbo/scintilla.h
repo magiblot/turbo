@@ -5,6 +5,7 @@
 
 class TPoint;
 class TRect;
+class TStringView;
 class TDrawSurface;
 struct TColorAttr;
 struct KeyDownEvent;
