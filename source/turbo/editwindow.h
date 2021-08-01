@@ -6,6 +6,7 @@
 #include <tvision/tv.h>
 
 #include <turbo/fileeditor.h>
+#include <turbo/basicwindow.h>
 #include "apputils.h"
 #include "editor.h"
 
@@ -42,12 +43,10 @@ struct EditorWindowParent
     virtual const char *getFileDialogDir() noexcept = 0;
 };
 
-struct EditorWindow : public TWindow, turbo::EditorParent
+struct EditorWindow : public turbo::BasicEditorWindow
 {
-    enum { leftMarginSep = 1 };
-    static constexpr TPoint minSize {24, 6};
+    using super = turbo::BasicEditorWindow;
 
-    TurboEditor editor;
     list_head<EditorWindow> listHead;
     FileNumberState fileNumber;
     EditorWindowParent &parent;
@@ -55,24 +54,19 @@ struct EditorWindow : public TWindow, turbo::EditorParent
     std::string title;
     TCommandSet enabledCmds, disabledCmds;
 
-    static TFrame* initFrame(TRect bounds);
-
-    EditorWindow( const TRect &bounds, turbo::TScintilla &scintilla,
-                  const char *filePath, active_counter &fileCounter,
-                  EditorWindowParent &aParent ) noexcept;
+    EditorWindow( const TRect &bounds, TurboEditor &aEditor,
+                  active_counter &fileCounter, EditorWindowParent &aParent ) noexcept;
 
     void shutDown() override;
     void handleEvent(TEvent &ev) override;
     void setState(ushort aState, Boolean enable) override;
     Boolean valid(ushort command) override;
-    void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     const char *getTitle(short = 0) override;
-    void sizeLimits(TPoint &min, TPoint &max) override;
     void updateCommands() noexcept;
     void handleNotification(ushort, turbo::Editor &) noexcept override;
-    TPalette& getPalette() const override;
 
-    auto &filePath() { return editor.filePath; }
+    auto &getEditor() { return (TurboEditor &) super::editor; }
+    auto &filePath() { return getEditor().filePath; }
 
 };
 

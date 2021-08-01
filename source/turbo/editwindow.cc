@@ -6,7 +6,6 @@
 
 #include <turbo/tpath.h>
 #include "editwindow.h"
-#include "editframe.h"
 #include "app.h"
 #include "apputils.h"
 #include "search.h"
@@ -14,44 +13,15 @@
 #include <iostream>
 using std::ios;
 
-TFrame *EditorWindow::initFrame(TRect bounds)
-{
-    return new EditorFrame(bounds);
-}
-
-EditorWindow::EditorWindow( const TRect &bounds, turbo::TScintilla &scintilla,
-                            const char *filePath, active_counter &fileCounter,
+EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
+                            active_counter &fileCounter,
                             EditorWindowParent &aParent ) noexcept :
     TWindowInit(&initFrame),
-    TWindow(bounds, nullptr, wnNoNumber),
-    editor(scintilla, filePath),
+    super(bounds, aEditor),
     listHead(this),
     fileNumber(fileCounter),
     parent(aParent)
 {
-    using namespace turbo;
-    ((EditorFrame *) frame)->scintilla = &editor.scintilla;
-
-    options |= ofTileable | ofFirstClick;
-    setState(sfShadow, False);
-
-    auto *editorView = new EditorView(TRect(1, 1, size.x - 1, size.y - 1));
-    insert(editorView);
-
-    auto *leftMargin = new LeftMarginView(leftMarginSep);
-    leftMargin->options |= ofFramed;
-    insert(leftMargin);
-
-    auto *hScrollBar = new TScrollBar(TRect(18, size.y - 1, size.x - 2, size.y));
-    hScrollBar->hide();
-    insert(hScrollBar);
-
-    auto *vScrollBar = new TScrollBar(TRect(size.x - 1, 1, size.x, size.y - 1));
-    vScrollBar->hide();
-    insert(vScrollBar);
-
-    editor.associate(this, editorView, leftMargin, hScrollBar, vScrollBar);
-
     insertSearchBox(*this);
 
     // Commands that always get enabled when focusing the editor.
@@ -72,12 +42,12 @@ EditorWindow::EditorWindow( const TRect &bounds, turbo::TScintilla &scintilla,
 
 void EditorWindow::shutDown()
 {
-    editor.disassociate();
-    TWindow::shutDown();
+    super::shutDown();
     parent.removeEditor(*this);
 }
 
 void EditorWindow::handleEvent(TEvent &ev) {
+    auto &editor = getEditor();
     if (ev.what == evCommand) {
         bool handled = true;
         TurboFileDialogs dlgs {parent};
@@ -114,41 +84,24 @@ void EditorWindow::handleEvent(TEvent &ev) {
             return;
         }
     }
-    TWindow::handleEvent(ev);
-}
-
-void EditorWindow::dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize)
-{
-    auto lastResizeLock = editor.resizeLock;
-    auto lastSize = size;
-    editor.resizeLock = true;
-    TWindow::dragView(event, mode, limits, minSize, maxSize);
-    editor.resizeLock = lastResizeLock;
-    if (lastSize != size)
-        editor.redraw(); // Redraw without 'resizeLock = true'.
+    super::handleEvent(ev);
 }
 
 void EditorWindow::setState(ushort aState, Boolean enable)
 {
-    TWindow::setState(aState, enable);
-    switch (aState)
+    super::setState(aState, enable);
+    if (aState == sfActive)
     {
-        case sfActive:
-            updateCommands();
-            if (editor.parent == this) // 'disassociate' not invoked yet.
-            {
-                editor.hScrollBar->setState(sfVisible, enable);
-                editor.vScrollBar->setState(sfVisible, enable);
-                if (enable)
-                    parent.handleFocus(*this);
-            }
-            break;
+        updateCommands();
+        if (enable)
+            parent.handleFocus(*this);
     }
 }
 
 Boolean EditorWindow::valid(ushort command)
 {
-    if (TWindow::valid(command))
+    auto &editor = getEditor();
+    if (super::valid(command))
     {
         if (command != cmValid)
         {
@@ -174,12 +127,6 @@ const char* EditorWindow::getTitle(short)
     return title.c_str();
 }
 
-void EditorWindow::sizeLimits( TPoint& min, TPoint& max )
-{
-    TView::sizeLimits(min, max);
-    min = minSize;
-}
-
 void EditorWindow::updateCommands() noexcept
 {
     if (!filePath().empty())
@@ -190,29 +137,14 @@ void EditorWindow::updateCommands() noexcept
         disableCommands(disabledCmds);
 }
 
-void EditorWindow::handleNotification(ushort code, turbo::Editor &) noexcept
+void EditorWindow::handleNotification(ushort code, turbo::Editor &editor) noexcept
 {
     using namespace turbo;
-    switch (code)
+    super::handleNotification(code, editor);
+    if (code == FileEditor::ncSaved)
     {
-        case Editor::ncPainted:
-            if (!editor.resizeLock && frame) // These already get drawn when resizing.
-                frame->drawView(); // The frame is sensible to the save point state.
-            break;
-        case FileEditor::ncSaved:
-            updateCommands();
-            parent.handleTitleChange(*this);
-            editor.redraw();
-            break;
+        updateCommands();
+        parent.handleTitleChange(*this);
+        editor.redraw();
     }
-}
-
-#define cpEditorWindow \
-    "\x88\x89\x8A\x8B\x8C\x8D\x8E\x8F\x90\x91\x92\x93\x94\x95\x96\x97" \
-    "\x98\x99\x9A\x9B\x9C\x9D\x9E\x9F\xA0\xA1\xA2\xA3\xA4\xA5\xA6\xA7"
-
-TPalette& EditorWindow::getPalette() const
-{
-    static TPalette palette(cpEditorWindow, sizeof(cpEditorWindow) - 1);
-    return palette;
 }

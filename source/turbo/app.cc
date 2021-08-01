@@ -329,8 +329,8 @@ void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)
 {
     TRect r = newEditorBounds();
     auto &counter = fileCount[TPath::basename(path)];
-    EditorWindow &w = *new EditorWindow(r, scintilla, path, counter, *this);
-    updatePalette(w);
+    auto &editor = *new TurboEditor(scintilla, path);
+    EditorWindow &w = *new EditorWindow(r, editor, counter, *this);
     if (docTree)
         docTree->tree->addEditor(&w);
     w.listHead.insert_after(&MRUlist);
@@ -440,66 +440,4 @@ void TurboApp::removeEditor(EditorWindow &w) noexcept
 const char *TurboApp::getFileDialogDir() noexcept
 {
     return mostRecentDir.c_str();
-}
-
-static constexpr TColorAttr cpTurboAppColor[167] =
-{
-    /* 1 = TBackground, 2-7 = TMenuView and TStatusLine */
-          0x71, 0x70, 0x78, 0x74, 0x20, 0x28, 0x24,
-    /* 8-15 = TWindow(Blue) */
-    0x17, 0x1F, 0x1A, 0x31, 0x31, 0x1E, 0x71, 0x1F,
-    /* 16-23 = TWindow(Cyan) */
-    0x37, 0x3F, 0x3A, 0x13, 0x13, 0x3E, 0x21, 0x3F,
-    /* 24-31 = TWindow(Gray) */
-    0x70, 0x7F, 0x7A, 0x13, 0x13, 0x70, 0x7F, 0x7E,
-    /* 32-63 = TDialog(Gray) */
-    0x70, 0x7F, 0x7A, 0x13, 0x13, 0x70, 0x70, 0x7F,
-    0x7E, 0x20, 0x2B, 0x2F, 0x78, 0x2E, 0x70, 0x30,
-    0x3F, 0x3E, 0x1F, 0x2F, 0x1A, 0x20, 0x72, 0x31,
-    0x31, 0x30, 0x2F, 0x3E, 0x31, 0x13, 0x38, 0x00,
-    /* 64-95 = TDialog(Blue) */
-    0x17, 0x1F, 0x1A, 0x71, 0x71, 0x1E, 0x17, 0x1F,
-    0x1E, 0x20, 0x2B, 0x2F, 0x78, 0x2E, 0x10, 0x30,
-    0x3F, 0x3E, 0x70, 0x2F, 0x7A, 0x20, 0x12, 0x31,
-    0x31, 0x30, 0x2F, 0x3E, 0x31, 0x13, 0x38, 0x00,
-    /* 96-127 = TDialog(Cyan) */
-    0x37, 0x3F, 0x3A, 0x13, 0x13, 0x3E, 0x30, 0x3F,
-    0x3E, 0x20, 0x2B, 0x2F, 0x78, 0x2E, 0x30, 0x70,
-    0x7F, 0x7E, 0x1F, 0x2F, 0x1A, 0x20, 0x32, 0x31,
-    0x71, 0x70, 0x2F, 0x7E, 0x71, 0x13, 0x38, 0x00,
-    /* 128-135 = Help Colors? */
-    0x37, 0x3F, 0x3A, 0x13, 0x13, 0x30, 0x3E, 0x1E,
-    /* 136-167 = EditorWindow */
-    0x07, 0x0F, 0x0A, 0x30, 0x30, 0x0F, 0x08, 0x0F,
-    0x06, 0x20, 0x2B, 0x2F, 0x78, 0x2E, 0x08, 0x30,
-    0x3F, 0x3E, 0x1F, 0x2F, 0x1A, 0x20, 0x72, 0x31,
-    0x31, 0x30, 0x2F, 0x3E, 0x31, 0x13, 0x38, 0x00,
-};
-
-static_assert(edReserved == 167, "");
-
-TPalette& TurboApp::getPalette() const
-{
-    static TPalette palette(cpTurboAppColor);
-    return palette;
-}
-
-void TurboApp::updatePalette(EditorWindow &w) const
-{
-    using namespace turbo;
-    auto &pal = getPalette();
-    auto &schema = w.editor.theming.getSchema();
-    pal[edFramePassive  ] = normalize(schema, sFramePassive  );
-    pal[edFrameActive   ] = normalize(schema, sFrameActive   );
-    pal[edFrameIcon     ] = normalize(schema, sFrameIcon     );
-    pal[edStaticText    ] = normalize(schema, sStaticText    );
-    pal[edLabelNormal   ] = normalize(schema, sLabelNormal   );
-    pal[edLabelSelected ] = normalize(schema, sLabelSelected );
-    pal[edLabelShortcut ] = normalize(schema, sLabelShortcut );
-    pal[edButtonNormal  ] = normalize(schema, sButtonNormal  );
-    pal[edButtonDefault ] = normalize(schema, sButtonDefault );
-    pal[edButtonSelected] = normalize(schema, sButtonSelected);
-    pal[edButtonDisabled] = normalize(schema, sButtonDisabled);
-    pal[edButtonShortcut] = normalize(schema, sButtonShortcut);
-    pal[edButtonShadow  ] = normalize(schema, sButtonShadow  );
 }

@@ -1,16 +1,16 @@
 #define Uses_TRect
 #include <tvision/tv.h>
 
-#include "editframe.h"
-#include <turbo/scintilla.h>
+#include <turbo/basicframe.h>
 
-EditorFrame::EditorFrame(const TRect &bounds) :
-    TFrame(bounds),
-    scintilla(nullptr)
+namespace turbo {
+
+BasicEditorFrame::BasicEditorFrame(const TRect &bounds) :
+    TFrame(bounds)
 {
 }
 
-void EditorFrame::draw()
+void BasicEditorFrame::draw()
 {
     TFrame::draw();
     if (scintilla)
@@ -27,7 +27,7 @@ static TPoint cursorPos(turbo::TScintilla &scintilla)
     };
 }
 
-void EditorFrame::drawIndicator()
+void BasicEditorFrame::drawIndicator()
 // Pre: 'scintilla != nullptr'.
 {
     // └─ XXXXXXXXXXXXXX
@@ -47,3 +47,5 @@ void EditorFrame::drawIndicator()
         writeLine(r.a.x + offs, r.a.y, min(width, maxWidth), 1, b);
     }
 }
+
+} // namespace turbo

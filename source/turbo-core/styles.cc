@@ -124,19 +124,6 @@ extern constexpr ColorSchema schemaDefault =
     /* sEscapeSequence   */ {'\xB'   , {}                       },
     /* sError            */ {'\x0'   , '\x3'                    },
     /* sBraceMatch       */ {'\xE'   , {}      , slBold         },
-    /* sFramePassive     */ '\x07',
-    /* sFrameActive      */ '\x0F',
-    /* sFrameIcon        */ '\x0A',
-    /* sStaticText       */ '\x0F',
-    /* sLabelNormal      */ '\x08',
-    /* sLabelSelected    */ '\x0F',
-    /* sLabelShortcut    */ '\x06',
-    /* sButtonNormal     */ '\x20',
-    /* sButtonDefault    */ '\x2B',
-    /* sButtonSelected   */ '\x2F',
-    /* sButtonDisabled   */ '\x78',
-    /* sButtonShortcut   */ '\x2E',
-    /* sButtonShadow     */ '\x08',
 };
 
 constexpr LexerInfo::StyleMapping stylesC[] =

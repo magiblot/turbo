@@ -71,45 +71,6 @@ struct TurboApp : public TApplication, EditorWindowParent
     void removeEditor(EditorWindow &w) noexcept override;
     const char *getFileDialogDir() noexcept override;
 
-    TPalette& getPalette() const override;
-    void updatePalette(EditorWindow &w) const;
-
-};
-
-enum : uchar
-{
-    edFramePassive = 136,
-    edFrameActive,
-    edFrameIcon,
-    edScrollBarPageArea,
-    edScrollBarControls,
-    edStaticText,
-    edLabelNormal,
-    edLabelSelected,
-    edLabelShortcut,
-    edButtonNormal,
-    edButtonDefault,
-    edButtonSelected,
-    edButtonDisabled,
-    edButtonShortcut,
-    edButtonShadow,
-    edClusterNormal,
-    edClusterSelected,
-    edClusterShortcut,
-    edInputLineNormal,
-    edInputLineSelected,
-    edInputLineArrows,
-    edHistoryArrow,
-    edHistorySides,
-    edHistWinScrollBarPageArea,
-    edHistWinScrollBarControls,
-    edListViewerNormal,
-    edListViewerFocused,
-    edListViewerSelected,
-    edListViewerDivider,
-    edInfoPane,
-    edClusterDisabled,
-    edReserved,
 };
 
 #endif
