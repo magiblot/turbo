@@ -111,15 +111,16 @@ target_link_libraries(${TURBO}-core PUBLIC
     clipboard
 )
 if (MAY_INSTALL_LIB)
+    install(TARGETS fmt clipboard EXPORT ${TURBO}-config)
     install(TARGETS ${TURBO}-core
-        EXPORT ${TURBO}-core-config
+        EXPORT ${TURBO}-config
         ARCHIVE DESTINATION lib
         COMPONENT library
     )
-    install(EXPORT ${TURBO}-core-config
-        DESTINATION lib/cmake/${TURBO}-core
+    install(EXPORT ${TURBO}-config
+        DESTINATION lib/cmake/${TURBO}
         NAMESPACE ${TURBO}::
-        FILE ${TURBO}-core-config.cmake
+        FILE ${TURBO}-config.cmake
         COMPONENT library
     )
     install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/turbo" DESTINATION include)

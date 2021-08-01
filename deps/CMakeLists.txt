@@ -2,30 +2,26 @@
 # So, for this to work properly, this file has to be imported with 'include'
 # rather than 'add_subdirectory'.
 
-if (TURBO_USE_SYSTEM_DEPS)
-    # fmt
-    find_package(fmt CONFIG REQUIRED)
-    add_library(fmt ALIAS fmt::fmt)
-    get_target_property(_FMT fmt LOCATION)
-    message(STATUS "Found 'fmt': ${_FMT}")
-
-    # libclipboard
-    find_library(CLIPBOARD clipboard)
-    if (NOT CLIPBOARD)
-        message(FATAL_ERROR "Library 'libclipboard' not found")
+function(turbo_find_library name header)
+    find_library(${name}_LIB ${name})
+    if (NOT ${name}_LIB)
+        message(FATAL_ERROR "Library '${name}' not found")
     else()
-        message(STATUS "Found 'libclipboard': ${CLIPBOARD}")
+        message(STATUS "Found '${name}': ${${name}_LIB}")
     endif()
-    find_path(CLIPBOARD_INCLUDE "libclipboard.h")
-    if (NOT CLIPBOARD_INCLUDE)
-        message(FATAL_ERROR "'libclipboard' development headers not found")
+    find_path(${name}_INCLUDE ${header})
+    if (NOT ${name}_INCLUDE)
+        message(FATAL_ERROR "'${name}' development headers not found")
     endif()
+    add_library(${name} INTERFACE)
+    target_link_libraries(${name} INTERFACE ${${name}_LIB})
+    target_include_directories(${name} INTERFACE ${${name}_INCLUDE})
+endfunction()
 
-    add_library(clipboard UNKNOWN IMPORTED)
-    set_target_properties(clipboard PROPERTIES
-        IMPORTED_LOCATION ${CLIPBOARD}
-        INTERFACE_INCLUDE_DIRECTORIES ${CLIPBOARD_INCLUDE}
-    )
+if (TURBO_USE_SYSTEM_DEPS)
+    turbo_find_library(fmt "fmt/core.h")
+    turbo_find_library(clipboard "libclipboard.h")
+
     if (NOT WIN32)
         foreach (lib pthread xcb)
             find_library(_${lib} ${lib})
