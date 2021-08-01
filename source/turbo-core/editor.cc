@@ -5,6 +5,7 @@
 #include <turbo/editor.h>
 #include <turbo/util.h>
 #include "utils.h"
+#include <iostream>
 
 namespace turbo {
 
@@ -181,27 +182,17 @@ bool Editor::redraw(const TRect &area) noexcept
         }
         else
             paintArea = area;
-        paint(scintilla, surface, paintArea);
-        forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
-            p.surface = &surface;
+        paint(scintilla, surface, paintArea); // Emits SCN_PAINTED.
+        forEach<TView>({vScrollBar, hScrollBar}, [&] (auto &p) {
+            p.drawView();
         });
-        drawViews();
         forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
-            p.surface = nullptr;
+            drawWithSurface(p, &surface);
         });
         drawLock = false;
         return true;
     }
     return false;
-}
-
-void Editor::drawViews() noexcept
-{
-    forEach<TView>({vScrollBar, hScrollBar, leftMargin, view}, [&] (auto &p) {
-        p.drawView();
-    });
-    if (parent)
-        parent->handleNotification(ncPainted, *this);
 }
 
 void Editor::updateMarginWidth() noexcept
@@ -246,6 +237,8 @@ void Editor::handleNotification(const SCNotification &scn)
                 autoIndent.applyToCurrentLine(scintilla);
             break;
     }
+    if (parent)
+        parent->handleNotification(scn, *this);
 }
 
 void Editor::setHorizontalScrollPos(int delta, int limit) noexcept

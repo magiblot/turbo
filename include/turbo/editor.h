@@ -21,12 +21,12 @@ class Editor;
 
 struct EditorParent
 {
-    // This gets invoked when certain situations occur in 'Editor'. See the
-    // 'notification codes' in 'Editor' and its subclasses.
-    virtual void handleNotification(ushort code, Editor &) noexcept = 0;
+    // This allows the parent of 'Editor' to handle TScintilla notifications.
+    // See 'https://www.scintilla.org/ScintillaDoc.html#Notifications'.
+    virtual void handleNotification(const SCNotification &scn, Editor &) = 0;
 };
 
-class Editor : TScintillaParent
+class Editor : protected TScintillaParent
 {
     // 'Editor' is a bridge between 'TScintilla' and Turbo Vision.
 
@@ -50,12 +50,16 @@ class Editor : TScintillaParent
     void drawViews() noexcept;
     void updateMarginWidth() noexcept;
 
-public:
+protected:
 
-    // Notification Codes for EditorParent::handleNotification.
-    enum : ushort {
-        ncPainted = 1, // Editor has been drawn into its associated views.
-    };
+    // Implementation of 'TScintillaParent'.
+    TPoint getEditorSize() noexcept override;
+    void invalidate(TRect area) noexcept override;
+    void handleNotification(const SCNotification &scn) override;
+    void setHorizontalScrollPos(int delta, int limit) noexcept override;
+    void setVerticalScrollPos(int delta, int limit) noexcept override;
+
+public:
 
     TScintilla &scintilla;
 
@@ -93,18 +97,10 @@ public:
     void partialRedraw() noexcept;
     bool redraw(const TRect &area) noexcept;
 
-    // Implementation of 'TScintillaParent'.
-    TPoint getEditorSize() noexcept override;
-    void invalidate(TRect area) noexcept override;
-    void handleNotification(const SCNotification &scn) override;
-    void setHorizontalScrollPos(int delta, int limit) noexcept override;
-    void setVerticalScrollPos(int delta, int limit) noexcept override;
-
     bool inSavePoint();
     template <class Func>
     inline void lockReflow(Func &&func);
     inline sptr_t callScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
-
 };
 
 template <class Func>
@@ -158,6 +154,14 @@ public:
 
     LeftMarginView(int aDistance) noexcept;
 };
+
+inline void drawWithSurface(TSurfaceView &view, TDrawSurface *surface)
+{
+    auto *lastSurface = view.surface;
+    view.surface = surface;
+    view.drawView();
+    view.surface = lastSurface;
+}
 
 } // namespace turbo
 

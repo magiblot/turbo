@@ -89,34 +89,40 @@ class FileEditor : public Editor
     // A 'FileEditor' is an editor representing the contents of a file in the
     // filesystem.
 
-    void notifyAfterSave() noexcept;
+    template <class Path>
+    inline void setFilePath(Path &&path);
+    void beforeSave() noexcept;
+    void afterSave() noexcept;
+    void detectLanguage() noexcept;
 
 public:
 
-    // Notification Codes for EditorParent::handleNotification.
-    enum : ushort {
-        ncSaved = 100,
-    };
+    std::string filePath; // Gets updated automatically by 'saveAs'/'rename'.
 
-    std::string filePath;
+    inline FileEditor(TScintilla &aScintilla, std::string aFilePath) noexcept;
 
-    FileEditor(TScintilla &aScintilla, std::string aFilePath) noexcept;
-
-    void detectLanguage() noexcept;
     bool save(FileDialogs & = defFileDialogs) noexcept;
     bool saveAs(FileDialogs & = defFileDialogs) noexcept;
     bool rename(FileDialogs & = defFileDialogs) noexcept;
     bool close(FileDialogs & = defFileDialogs) noexcept;
 
-    void beforeSave() noexcept;
-    virtual void afterSave() noexcept;
+    // Called when 'filePath' is set. The default implementation calls
+    // 'detectLanguage'.
+    virtual void onFilePathSet() noexcept;
 };
 
 inline FileEditor::FileEditor(TScintilla &aScintilla, std::string aFilePath) noexcept :
     Editor(aScintilla),
     filePath(std::move(aFilePath))
 {
-    detectLanguage();
+    FileEditor::onFilePathSet();
+}
+
+template <class Path>
+inline void FileEditor::setFilePath(Path &&path)
+{
+    filePath = static_cast<Path &&>(path);
+    onFilePathSet();
 }
 
 } // namespace turbo

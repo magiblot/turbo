@@ -63,7 +63,7 @@ struct EditorWindow : public turbo::BasicEditorWindow
     Boolean valid(ushort command) override;
     const char *getTitle(short = 0) override;
     void updateCommands() noexcept;
-    void handleNotification(ushort, turbo::Editor &) noexcept override;
+    void handleNotification(const SCNotification &scn, turbo::Editor &) override;
 
     auto &getEditor() { return (TurboEditor &) super::editor; }
     auto &filePath() { return getEditor().filePath; }

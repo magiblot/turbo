@@ -1,11 +1,10 @@
 #include "editor.h"
 #include "editwindow.h"
 
-void TurboEditor::afterSave() noexcept
+void TurboEditor::onFilePathSet() noexcept
 {
-    using namespace turbo;
     bool noLastLexer = !theming.hasLexer();
-    super::afterSave();
+    super::onFilePathSet();
     if (noLastLexer && theming.hasLexer())
         lineNumbers.setState(true);
 }

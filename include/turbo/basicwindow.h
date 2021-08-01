@@ -78,7 +78,7 @@ public:
     void sizeLimits(TPoint &min, TPoint &max) override;
     TColorAttr mapColor(uchar index) noexcept override;
 
-    void handleNotification(ushort, turbo::Editor &) noexcept override;
+    void handleNotification(const SCNotification &scn, turbo::Editor &) override;
 
     // Sets the color scheme, but the changes won't be visible until the
     // subviews are redrawn (e.g. via 'TGroup::redraw()').

@@ -159,13 +159,6 @@ bool renameFile(const char *dst, const char *src, TScintilla &scintilla, FileDia
     return dlgs.renameError(dst, src, strerror(errno));
 }
 
-void FileEditor::detectLanguage() noexcept
-{
-    auto language = detectFileLanguage(filePath.c_str());
-    theming.setLexerInfo(findLexerInfo(language));
-    theming.apply(scintilla);
-}
-
 bool FileEditor::save(FileDialogs &dlgs) noexcept
 {
     if (filePath.empty())
@@ -173,7 +166,7 @@ bool FileEditor::save(FileDialogs &dlgs) noexcept
     beforeSave();
     if (writeFile(filePath.c_str(), scintilla, dlgs))
     {
-        notifyAfterSave();
+        afterSave();
         return true;
     }
     return false;
@@ -186,8 +179,8 @@ bool FileEditor::saveAs(FileDialogs &dlgs) noexcept
         beforeSave();
         if (writeFile(path, scintilla, dlgs))
         {
-            filePath = path;
-            notifyAfterSave();
+            setFilePath(path);
+            afterSave();
             return (ok = true);
         }
         return false;
@@ -204,8 +197,8 @@ bool FileEditor::rename(FileDialogs &dlgs) noexcept
         beforeSave();
         if (renameFile(path, filePath.c_str(), scintilla, dlgs))
         {
-            filePath = path;
-            notifyAfterSave();
+            setFilePath(path);
+            afterSave();
             return (ok = true);
         }
         return false;
@@ -239,14 +232,18 @@ void FileEditor::beforeSave() noexcept
 void FileEditor::afterSave() noexcept
 {
     call(scintilla, SCI_SETSAVEPOINT, 0U, 0U);
-    detectLanguage();
 }
 
-void FileEditor::notifyAfterSave() noexcept
+void FileEditor::detectLanguage() noexcept
 {
-    afterSave();
-    if (parent)
-        parent->handleNotification(ncSaved, *this);
+    auto language = detectFileLanguage(filePath.c_str());
+    theming.setLexerInfo(findLexerInfo(language));
+    theming.apply(scintilla);
+}
+
+void FileEditor::onFilePathSet() noexcept
+{
+    detectLanguage();
 }
 
 DefaultFileDialogs defFileDialogs;

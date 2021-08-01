@@ -52,11 +52,11 @@ void setWhitespaceColor(TScintilla &, TColorAttr attr);
 class TScintillaParent
 {
 public:
-    virtual TPoint getEditorSize() noexcept;
-    virtual void invalidate(TRect area) noexcept;
-    virtual void handleNotification(const SCNotification &scn);
-    virtual void setVerticalScrollPos(int delta, int limit) noexcept;
-    virtual void setHorizontalScrollPos(int delta, int limit) noexcept;
+    virtual TPoint getEditorSize() noexcept = 0;
+    virtual void invalidate(TRect area) noexcept = 0;
+    virtual void handleNotification(const SCNotification &scn) = 0;
+    virtual void setVerticalScrollPos(int delta, int limit) noexcept = 0;
+    virtual void setHorizontalScrollPos(int delta, int limit) noexcept = 0;
 };
 
 } // namespace turbo

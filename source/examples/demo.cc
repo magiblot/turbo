@@ -60,7 +60,7 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
     void dragView(TEvent& event, uchar mode, TRect& limits, TPoint minSize, TPoint maxSize) override;
     const char *getTitle(short) override;
 
-    void handleNotification(ushort, turbo::Editor &) noexcept override;
+    void handleNotification(const SCNotification &, turbo::Editor &) override;
 
     turbo::TScintilla &createScintilla();
     void addEditor(turbo::TScintilla &, const char *filePath);
@@ -309,16 +309,15 @@ const char *DemoEditorWindow::getTitle(short)
     return nullptr;
 }
 
-void DemoEditorWindow::handleNotification(ushort code, turbo::Editor &editor) noexcept
+void DemoEditorWindow::handleNotification(const SCNotification &scn, turbo::Editor &editor)
 {
-    using namespace turbo;
-    switch (code)
+    switch (scn.nmhdr.code)
     {
-        case Editor::ncPainted:
+        case SCN_PAINTED:
             if (!(state & sfDragging) && frame) // It already gets drawn when resizing.
-                frame->drawView(); // The frame is sensible to the save point state.
+                frame->drawView(); // The frame is sensible to the cursor position and the save point state.
             break;
-        case FileEditor::ncSaved:
+        case SCN_SAVEPOINTREACHED:
             editor.redraw();
             listView->drawView();
             break;

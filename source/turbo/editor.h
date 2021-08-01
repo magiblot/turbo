@@ -38,7 +38,7 @@ public:
         wrapping.setState(true, scintilla, [] (...) { return false; });
     }
 
-    void afterSave() noexcept override;
+    void onFilePathSet() noexcept override;
 };
 
 #endif // TURBO_APP_EDITOR_H

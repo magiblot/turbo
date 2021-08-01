@@ -137,14 +137,16 @@ void EditorWindow::updateCommands() noexcept
         disableCommands(disabledCmds);
 }
 
-void EditorWindow::handleNotification(ushort code, turbo::Editor &editor) noexcept
+void EditorWindow::handleNotification(const SCNotification &scn, turbo::Editor &editor)
 {
     using namespace turbo;
-    super::handleNotification(code, editor);
-    if (code == FileEditor::ncSaved)
+    super::handleNotification(scn, editor);
+    switch (scn.nmhdr.code)
     {
-        updateCommands();
-        parent.handleTitleChange(*this);
-        editor.redraw();
+        case SCN_SAVEPOINTREACHED:
+            updateCommands();
+            parent.handleTitleChange(*this);
+            editor.redraw();
+            break;
     }
 }

@@ -5,6 +5,7 @@
 
 #include <turbo/basicwindow.h>
 #include <turbo/basicframe.h>
+#include <iostream>
 
 namespace turbo {
 
@@ -84,11 +85,15 @@ TColorAttr BasicEditorWindow::mapColor(uchar index) noexcept
     return errorAttr;
 }
 
-void BasicEditorWindow::handleNotification(ushort code, Editor &editor) noexcept
+void BasicEditorWindow::handleNotification(const SCNotification &scn, Editor &editor)
 {
-    if (code == Editor::ncPainted)
-        if (!(state & sfDragging) && frame) // It already gets drawn when resizing.
-            frame->drawView(); // The frame is sensible to the cursor position and the save point state.
+    switch (scn.nmhdr.code)
+    {
+        case SCN_PAINTED:
+            if (!(state & sfDragging) && frame) // It already gets drawn when resizing.
+                frame->drawView(); // The frame is sensible to the cursor position and the save point state.
+            break;
+    }
 }
 
 #define dialogColor(i) cpAppColor[(uchar) (cpDialog[i - 1] - 1)]

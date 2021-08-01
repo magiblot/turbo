@@ -234,25 +234,4 @@ void setWhitespaceColor(TScintilla &self, TColorAttr attr)
     call(self, SCI_SETWHITESPACEBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
-TPoint TScintillaParent::getEditorSize() noexcept
-{
-    return {0, 0};
-}
-
-void TScintillaParent::invalidate(TRect) noexcept
-{
-}
-
-void TScintillaParent::handleNotification(const SCNotification &scn)
-{
-}
-
-void TScintillaParent::setVerticalScrollPos(int, int) noexcept
-{
-}
-
-void TScintillaParent::setHorizontalScrollPos(int, int) noexcept
-{
-}
-
 } // namespace turbo
