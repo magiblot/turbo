@@ -1,18 +1,24 @@
 cmake_minimum_required (VERSION 3.5)
+
+option(TURBO_BUILD_APP "Build main editor application" ON)
+option(TURBO_BUILD_EXAMPLES "Build example apps" OFF)
+option(TURBO_USE_SYSTEM_DEPS "Use system-wide dependencies instead of submodules (except Turbo Vision)" OFF)
+option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
+option(TURBO_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
+option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the core library" ON)
+
+if (TURBO_USE_SYSTEM_DEPS AND TURBO_USE_SYSTEM_TVISION)
+    set(MAY_INSTALL_LIB TRUE)
+endif()
+
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
     cmake_policy(SET CMP0091 NEW)
-    option(TURBO_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
     if (TURBO_USE_STATIC_RTL)
         set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endif()
 endif()
 
 project (turbo)
-
-option(TURBO_USE_SYSTEM_DEPS "Use system-wide dependencies instead of submodules (except Turbo Vision)" OFF)
-option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
-option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the UI component" ON)
-option(TURBO_BUILD_EXAMPLES "Build example apps" OFF)
 
 # Target 'scintilla'
 
@@ -37,21 +43,26 @@ list(APPEND SCILEXERS_SRC
 add_library(scintilla OBJECT ${SCINTILLA_SRC})
 add_library(scilexers OBJECT ${SCILEXERS_SRC})
 
+function(turbo_enable_warnings t)
+    if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
+        target_compile_options(${t} PRIVATE
+            -Wall
+        )
+    endif()
+endfunction()
+
 foreach(t scintilla scilexers)
     target_compile_features(${t} PUBLIC cxx_std_17)
+    turbo_enable_warnings(${t})
     target_include_directories(${t} PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/turbo/scintilla/include"
         "${CMAKE_CURRENT_LIST_DIR}/include/turbo/scintilla/lexlib"
         "${CMAKE_CURRENT_LIST_DIR}/include/turbo/scintilla/src"
     )
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-        target_compile_options(${t} PUBLIC
+        target_compile_options(${t} PRIVATE
             /wd4514 /wd4166 /wd4068 /wd4996 /wd4250 /wd4267
             /permissive- /Zc:__cplusplus
-        )
-    else()
-        target_compile_options(${t} PUBLIC
-            -Wall
         )
     endif()
     target_compile_definitions(${t} PRIVATE
@@ -76,11 +87,17 @@ include(deps/CMakeLists.txt)
 set(TURBO turbo)
 
 file(GLOB_RECURSE TURBO_CORE_SRC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}-core/*.cc")
-add_library(${TURBO}-core ${TURBO_CORE_SRC})
+add_library(${TURBO}-core
+    ${TURBO_CORE_SRC}
+    $<TARGET_OBJECTS:scintilla>
+    $<TARGET_OBJECTS:scilexers>
+)
 
 target_compile_features(${TURBO}-core PUBLIC cxx_std_17)
+turbo_enable_warnings(${TURBO}-core)
 target_include_directories(${TURBO}-core PUBLIC
-    "${CMAKE_CURRENT_LIST_DIR}/include"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
+    "$<INSTALL_INTERFACE:include>"
 )
 target_include_directories(${TURBO}-core PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}-core"
@@ -88,15 +105,25 @@ target_include_directories(${TURBO}-core PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/deps/libclipboard/include" # libclipboard.h
     "${CMAKE_BINARY_DIR}/deps/libclipboard/include" # libclipboard-config.h
 )
-target_link_libraries(${TURBO}-core PRIVATE
-    scintilla
-    scilexers
-)
 target_link_libraries(${TURBO}-core PUBLIC
     tvision
     fmt
     clipboard
 )
+if (MAY_INSTALL_LIB)
+    install(TARGETS ${TURBO}-core
+        EXPORT ${TURBO}-core-config
+        ARCHIVE DESTINATION lib
+        COMPONENT library
+    )
+    install(EXPORT ${TURBO}-core-config
+        DESTINATION lib/cmake/${TURBO}-core
+        NAMESPACE ${TURBO}::
+        FILE ${TURBO}-core-config.cmake
+        COMPONENT library
+    )
+    install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/turbo" DESTINATION include)
+endif()
 
 # Optional dependencies
 
@@ -108,11 +135,15 @@ endif()
 
 # Target 'turbo'
 
-file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.cc")
-add_executable(${TURBO} ${TURBO_SRC})
-target_link_libraries(${TURBO} PRIVATE
-    ${TURBO}-core
-)
+if (TURBO_BUILD_APP)
+    file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.cc")
+    add_executable(${TURBO} ${TURBO_SRC})
+    turbo_enable_warnings(${TURBO})
+    target_link_libraries(${TURBO} PRIVATE
+        ${TURBO}-core
+    )
+    install(TARGETS ${TURBO} RUNTIME DESTINATION bin)
+endif()
 
 # Examples
 
@@ -122,9 +153,12 @@ add_subdirectory(source/examples)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0" AND TURBO_OPTIMIZE_BUILD)
     set_target_properties(${TURBO}-core PROPERTIES UNITY_BUILD ON)
-    set_target_properties(${TURBO} PROPERTIES UNITY_BUILD ON)
     target_precompile_headers(${TURBO}-core PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
     )
-    target_precompile_headers(${TURBO} REUSE_FROM ${TURBO}-core)
+    if (TURBO_BUILD_APP)
+        set_target_properties(${TURBO} PROPERTIES UNITY_BUILD ON)
+        target_precompile_headers(${TURBO} REUSE_FROM ${TURBO}-core)
+    endif()
+
 endif()
