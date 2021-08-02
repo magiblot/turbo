@@ -183,12 +183,12 @@ bool Editor::redraw(const TRect &area) noexcept
         else
             paintArea = area;
         paint(scintilla, surface, paintArea); // Emits SCN_PAINTED.
-        forEach<TView>({vScrollBar, hScrollBar}, [&] (auto &p) {
+        forEachNotNull([&] (TView &p) {
             p.drawView();
-        });
-        forEach<TSurfaceView>({leftMargin, view}, [&] (auto &p) {
+        }, vScrollBar, hScrollBar);
+        forEachNotNull([&] (TSurfaceView &p) {
             drawWithSurface(p, &surface);
-        });
+        }, leftMargin, view);
         drawLock = false;
         return true;
     }

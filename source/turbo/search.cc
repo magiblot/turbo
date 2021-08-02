@@ -136,12 +136,12 @@ static inline void grow(TView &v, TPoint delta)
 void SearchBox::open()
 {
     if (!visible && owner) {
-        EditorWindow &win = *(EditorWindow *) owner;
-        turbo::forEach<TView>({win.editor.view, win.editor.leftMargin}, [&] (auto &v) {
+        auto &editor = ((EditorWindow *) owner)->editor;
+        turbo::forEachNotNull([&] (TView &v) {
             grow(v, {0, -(size.y + 1)});
-        });
+        }, editor.view, editor.leftMargin);
         show();
-        win.editor.redraw();
+        editor.redraw();
         visible = true;
     } else
         focus();
@@ -150,12 +150,12 @@ void SearchBox::open()
 void SearchBox::close()
 {
     if (visible && owner) {
-        EditorWindow &win = *(EditorWindow *) owner;
-        turbo::forEach<TView>({win.editor.view, win.editor.leftMargin}, [&] (auto &v) {
+        auto &editor = ((EditorWindow *) owner)->editor;
+        turbo::forEachNotNull([&] (TView &v) {
             grow(v, {0, size.y + 1});
-        });
+        }, editor.view, editor.leftMargin);
         hide();
-        win.editor.redraw();
+        editor.redraw();
         visible = false;
     }
 }
