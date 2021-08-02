@@ -139,6 +139,7 @@ endif()
 if (TURBO_BUILD_APP)
     file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.cc")
     add_executable(${TURBO} ${TURBO_SRC})
+    target_compile_features(${TURBO} PRIVATE cxx_std_17)
     turbo_enable_warnings(${TURBO})
     target_link_libraries(${TURBO} PRIVATE
         ${TURBO}-core
