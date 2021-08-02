@@ -93,7 +93,7 @@ add_library(${TURBO}-core
     $<TARGET_OBJECTS:scilexers>
 )
 
-target_compile_features(${TURBO}-core PUBLIC cxx_std_17)
+target_compile_features(${TURBO}-core PRIVATE cxx_std_17)
 turbo_enable_warnings(${TURBO}-core)
 target_include_directories(${TURBO}-core PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
@@ -159,7 +159,6 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0" AND TURBO_OPTIMIZE_BUILD)
     )
     if (TURBO_BUILD_APP)
         set_target_properties(${TURBO} PROPERTIES UNITY_BUILD ON)
-        target_precompile_headers(${TURBO} REUSE_FROM ${TURBO}-core)
     endif()
 
 endif()
