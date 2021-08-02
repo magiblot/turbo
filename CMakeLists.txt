@@ -43,17 +43,21 @@ list(APPEND SCILEXERS_SRC
 add_library(scintilla OBJECT ${SCINTILLA_SRC})
 add_library(scilexers OBJECT ${SCILEXERS_SRC})
 
-function(turbo_enable_warnings t)
+function(turbo_set_warnings t)
     if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
         target_compile_options(${t} PRIVATE
             -Wall
+        )
+    else()
+        target_compile_options(${t} PRIVATE
+            /wd4244 # Possible data loss in type conversion
         )
     endif()
 endfunction()
 
 foreach(t scintilla scilexers)
     target_compile_features(${t} PUBLIC cxx_std_17)
-    turbo_enable_warnings(${t})
+    turbo_set_warnings(${t})
     target_include_directories(${t} PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/turbo/scintilla/include"
         "${CMAKE_CURRENT_LIST_DIR}/include/turbo/scintilla/lexlib"
@@ -94,7 +98,7 @@ add_library(${TURBO}-core
 )
 
 target_compile_features(${TURBO}-core PRIVATE cxx_std_17)
-turbo_enable_warnings(${TURBO}-core)
+turbo_set_warnings(${TURBO}-core)
 target_include_directories(${TURBO}-core PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
     "$<INSTALL_INTERFACE:include>"
@@ -140,7 +144,7 @@ if (TURBO_BUILD_APP)
     file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.cc")
     add_executable(${TURBO} ${TURBO_SRC})
     target_compile_features(${TURBO} PRIVATE cxx_std_17)
-    turbo_enable_warnings(${TURBO})
+    turbo_set_warnings(${TURBO})
     target_link_libraries(${TURBO} PRIVATE
         ${TURBO}-core
     )

@@ -89,7 +89,7 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
         // at least 82 empty columns on screen (so that an editor view is
         // at least ~80 columns by default).
         if (r.b.x > 22)
-            r.a.x = r.b.x - std::clamp(r.b.x - 82, 22, 30);
+            r.a.x = r.b.x - min(max(r.b.x - 82, 22), 30);
         docTree = new DocumentTreeWindow(r, &docTree);
         docTree->flags &= ~wfZoom;
         // The grow mode assumes it's placed on the right side of the screen.
@@ -342,8 +342,8 @@ void TurboApp::showEditorList(TEvent *ev)
 {
     EditorList list {&MRUlist};
     TRect r {0, 0, 0, 0};
-    r.b.x = std::clamp<int>(list.measureWidth() + 6, 40, deskTop->size.x - 10);
-    r.b.y = std::clamp<int>(list.size() + 2, 6, deskTop->size.y - 4);
+    r.b.x = min(max(list.measureWidth() + 6, 40), deskTop->size.x - 10);
+    r.b.y = min(max(list.size() + 2, 6), deskTop->size.y - 4);
     r.move((deskTop->size.x - r.b.x) / 2,
            (deskTop->size.y - r.b.y) / 4);
     ListWindow *lw = new ListWindow(r, "Buffer List", list, &initViewer<EditorListView>);
