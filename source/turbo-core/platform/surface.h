@@ -101,9 +101,9 @@ namespace Scintilla {
         return ColourDesired(c.bitCast());
     }
 
-    inline size_t getStyle(const Font &font)
+    inline ushort getStyle(const Font &font)
     {
-        return (size_t) font.GetID();
+        return (ushort)(size_t) font.GetID();
     }
 
 }
