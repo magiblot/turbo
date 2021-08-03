@@ -113,38 +113,36 @@ void ThemingState::apply(TScintilla &scintilla) const
     call(scintilla, SCI_COLOURISE, 0, -1);
 }
 
-static bool isBrace(TStringView braces, char ch)
+static bool isBrace(char ch)
 {
+    TStringView braces = "[](){}";
     return memchr(braces.data(), ch, braces.size()) != nullptr;
 }
 
 void ThemingState::updateBraces(TScintilla &scintilla) const
 {
-    if (lexerInfo)
+    auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
+    auto ch = call(scintilla, SCI_GETCHARAT, pos, 0U);
+    bool braceFound = false;
+    if (isBrace(ch))
     {
-        auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
-        auto ch = call(scintilla, SCI_GETCHARAT, pos, 0U);
-        bool braceFound = false;
-        if (isBrace(lexerInfo->braces, ch))
+        // We must lex any newly inserted text so that it has the right style.
+        idleWork(scintilla);
+        // Scintilla already makes sure that both braces have the same style.
+        auto matchPos = call(scintilla, SCI_BRACEMATCH, pos, 0U);
+        if (matchPos != -1)
         {
-            // We must lex any newly inserted text so that it has the right style.
-            idleWork(scintilla);
-            // Scintilla already makes sure that both braces have the same style.
-            auto matchPos = call(scintilla, SCI_BRACEMATCH, pos, 0U);
-            if (matchPos != -1)
-            {
-                auto &scheme = getScheme();
-                auto style = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
-                auto curAttr = getStyleColor(scintilla, style);
-                auto braceAttr = coalesce(scheme[sBraceMatch], curAttr);
-                setStyleColor(scintilla, STYLE_BRACELIGHT, braceAttr);
-                call(scintilla, SCI_BRACEHIGHLIGHT, pos, matchPos);
-                braceFound = true;
-            }
+            auto &scheme = getScheme();
+            auto style = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
+            auto curAttr = getStyleColor(scintilla, style);
+            auto braceAttr = coalesce(scheme[sBraceMatch], curAttr);
+            setStyleColor(scintilla, STYLE_BRACELIGHT, braceAttr);
+            call(scintilla, SCI_BRACEHIGHLIGHT, pos, matchPos);
+            braceFound = true;
         }
-        if (!braceFound)
-            call(scintilla, SCI_BRACEHIGHLIGHT, -1, -1);
     }
+    if (!braceFound)
+        call(scintilla, SCI_BRACEHIGHLIGHT, -1, -1);
 }
 
 /////////////////////////////////////////////////////////////////////////

@@ -86,7 +86,6 @@ struct LexerInfo
     TSpan<const StyleMapping> styles;
     TSpan<const KeywordMapping> keywords;
     TSpan<const PropertyMapping> properties;
-    TStringView braces;
 };
 
 Language detectFileLanguage(const char *filePath);

@@ -191,8 +191,6 @@ constexpr LexerInfo::PropertyMapping propertiesC[] =
     {"lexer.cpp.escape.sequence",           "1"},
 };
 
-constexpr const char *bracesC = "[](){}";
-
 constexpr LexerInfo::StyleMapping stylesMake[] =
 {
     {SCE_MAKE_DEFAULT,              sNormal},
@@ -445,16 +443,16 @@ constexpr LexerInfo::KeywordMapping keywordsYAML[] =
 
 constexpr struct { Language language; LexerInfo lexerInfo; } builtinLexers[] =
 {
-    {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC, bracesC}},
-    {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr, bracesC}},
-    {langAsm, {SCLEX_ASM, stylesAsm, nullptr, nullptr, bracesC}},
-    {langJavaScript, {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC, bracesC}},
-    {langRust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr, bracesC}},
-    {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython, bracesC}},
-    {langBash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr, bracesC}},
-    {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
-    {langJSON, {SCLEX_JSON, stylesJSON, keywordsJSON, propertiesJSON, bracesC}},
-    {langYAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr, bracesC}},
+    {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
+    {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr}},
+    {langAsm, {SCLEX_ASM, stylesAsm, nullptr, nullptr}},
+    {langJavaScript, {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC}},
+    {langRust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr}},
+    {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython}},
+    {langBash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr}},
+    {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr}},
+    {langJSON, {SCLEX_JSON, stylesJSON, keywordsJSON, propertiesJSON}},
+    {langYAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)
