@@ -88,59 +88,28 @@ bool TScintilla::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 
 // Clipboard actions copied from ScinTerm.
 
-template <class Func>
-static inline void copy(turbo::Clipboard &self, Func &&fillSel) noexcept
-{
-    auto &selText = self.selText;
-    fillSel(selText);
-    self.xSetText({selText.Data(), selText.Length()});
-}
-
 void TScintilla::Copy()
 {
     if (clipboard && !sel.Empty())
-        copy(
-            *clipboard,
-            [&] (auto &selText) {
-                CopySelectionRange(&selText);
-            }
-        );
-}
-
-template <class Func>
-static inline void paste(turbo::Clipboard &self, Func &&fillSel) noexcept
-{
-    self.xGetText([&] (bool ok, TStringView text) {
-        auto &selText = self.selText;
-        fillSel(
-            selText,
-            ok ? text : TStringView {selText.Data(), selText.Length()}
-        );
-    });
+        clipboard->setSelection([&] (auto &selText) {
+            CopySelectionRange(&selText);
+        });
 }
 
 void TScintilla::Paste()
 {
     if (clipboard)
-        paste(
-            *clipboard,
-            [&] (auto &selText, auto text) {
-                if (text.size())
-                {
-                    ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
-                    selText.Copy( text,
-                                  pdoc->dbcsCodePage,
-                                  vs.styles[STYLE_DEFAULT].characterSet,
-                                  false,
-                                  true );
-                    InsertPasteShape( selText.Data(),
-                                      selText.Length(),
-                                      selText.rectangular ? pasteRectangular
-                                                          : pasteStream );
-                    EnsureCaretVisible();
-                }
+        clipboard->getSelection([&] (const auto &selText) {
+            if (selText.Length())
+            {
+                ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
+                InsertPasteShape( selText.Data(),
+                                  selText.Length(),
+                                  selText.rectangular ? pasteRectangular
+                                                      : pasteStream );
+                EnsureCaretVisible();
             }
-        );
+        });
 }
 
 void TScintilla::ClaimSelection()

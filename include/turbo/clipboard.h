@@ -16,19 +16,29 @@ class Clipboard
 {
     // 'Clipboard' allows for sharing a common clipboard state between
     // 'TScintilla' instances.
-public:
 
     // This keeps a local copy of the clipboard's contents even if 'xSetText' or
     // 'xGetText' don't work. You needn't touch this; it's managed by 'TScintilla'.
     Scintilla::SelectionText &selText;
 
+public:
+
     Clipboard() noexcept;
     ~Clipboard();
 
-    // Called when the clipboard's contents change.
-    virtual void xSetText(TStringView) noexcept = 0;
+    void setText(TStringView text) noexcept;
+    void getText(TFuncView<void(TStringView text)> accept) noexcept;
+
+    // To be used by TScintilla.
+    void setSelection(TFuncView<void(Scintilla::SelectionText &)> fill) noexcept;
+    void getSelection(TFuncView<void(const Scintilla::SelectionText &)> accept) noexcept;
+
+protected:
+
+    // Called when the clipboard's contents change. Returns whether it succeeded.
+    virtual bool xSetText(TStringView) noexcept = 0;
     // Called when retrieving new clipboard contents.
-    virtual void xGetText(TFuncView<void(bool, TStringView)> accept) noexcept = 0;
+    virtual void xGetText(TFuncView<void(bool ok, TStringView text)> accept) noexcept = 0;
 
 };
 
@@ -44,7 +54,7 @@ public:
     SystemClipboard() noexcept;
     ~SystemClipboard();
 
-    void xSetText(TStringView) noexcept override;
+    bool xSetText(TStringView) noexcept override;
     void xGetText(TFuncView<void(bool, TStringView)> accept) noexcept override;
 };
 
