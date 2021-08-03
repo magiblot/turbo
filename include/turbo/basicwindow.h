@@ -45,11 +45,7 @@ enum WindowPaletteItems : uchar
     WindowPaletteItemCount,
 };
 
-struct WindowColorScheme
-{
-    const ColorScheme &editorScheme;
-    TColorAttr palette[WindowPaletteItemCount];
-};
+using WindowColorScheme = TColorAttr[WindowPaletteItemCount];
 
 extern const WindowColorScheme windowSchemeDefault;
 
@@ -82,6 +78,7 @@ public:
 
     // Sets the color scheme, but the changes won't be visible until the
     // subviews are redrawn (e.g. via 'TGroup::redraw()').
+    // * 'aScheme': non-owning. Lifetime must exceed that of 'this'.
     inline void setScheme(const WindowColorScheme *aScheme);
     inline const WindowColorScheme &getScheme() const;
 
@@ -90,8 +87,6 @@ public:
 inline void BasicEditorWindow::setScheme(const WindowColorScheme *aScheme)
 {
     scheme = aScheme;
-    editor.theming.setScheme(aScheme ? &aScheme->editorScheme : nullptr);
-    editor.theming.apply(editor.scintilla);
 }
 
 inline const WindowColorScheme &BasicEditorWindow::getScheme() const

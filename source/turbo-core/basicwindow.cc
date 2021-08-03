@@ -81,7 +81,7 @@ void BasicEditorWindow::sizeLimits(TPoint &min, TPoint &max)
 TColorAttr BasicEditorWindow::mapColor(uchar index) noexcept
 {
     if (0 < index && index - 1 < WindowPaletteItemCount)
-        return getScheme().palette[index - 1];
+        return getScheme()[index - 1];
     return errorAttr;
 }
 
@@ -96,44 +96,41 @@ void BasicEditorWindow::handleNotification(const SCNotification &scn, Editor &ed
     }
 }
 
-#define dialogColor(i) cpAppColor[(uchar) (cpDialog[i - 1] - 1)]
+#define dialogColor(i) cpAppColor[(uchar) (cpDialog[i] - 1)]
 
 extern constexpr WindowColorScheme windowSchemeDefault =
 {
-    schemeDefault,
-    {
-        /* wndFramePassive             */ '\x07',
-        /* wndFrameActive              */ '\x0F',
-        /* wndFrameIcon                */ '\x0A',
-        /* wndScrollBarPageArea        */ '\x30',
-        /* wndScrollBarControls        */ '\x30',
-        /* wndStaticText               */ '\x0F',
-        /* wndLabelNormal              */ '\x08',
-        /* wndLabelSelected            */ '\x0F',
-        /* wndLabelShortcut            */ '\x06',
-        /* wndButtonNormal             */ '\x20',
-        /* wndButtonDefault            */ '\x2B',
-        /* wndButtonSelected           */ '\x2F',
-        /* wndButtonDisabled           */ '\x78',
-        /* wndButtonShortcut           */ '\x2E',
-        /* wndButtonShadow             */ '\x08',
-        /* wndClusterNormal            */ dialogColor(16),
-        /* wndClusterSelected          */ dialogColor(17),
-        /* wndClusterShortcut          */ dialogColor(18),
-        /* wndInputLineNormal          */ dialogColor(19),
-        /* wndInputLineSelected        */ dialogColor(20),
-        /* wndInputLineArrows          */ dialogColor(21),
-        /* wndHistoryArrow             */ dialogColor(22),
-        /* wndHistorySides             */ dialogColor(23),
-        /* wndHistWinScrollBarPageArea */ dialogColor(24),
-        /* wndHistWinScrollBarControls */ dialogColor(25),
-        /* wndListViewerNormal         */ dialogColor(26),
-        /* wndListViewerFocused        */ dialogColor(27),
-        /* wndListViewerSelected       */ dialogColor(28),
-        /* wndListViewerDivider        */ dialogColor(29),
-        /* wndInfoPane                 */ dialogColor(30),
-        /* wndClusterDisabled          */ dialogColor(31),
-    }
+    /* wndFramePassive             */ '\x07',
+    /* wndFrameActive              */ '\x0F',
+    /* wndFrameIcon                */ '\x0A',
+    /* wndScrollBarPageArea        */ '\x30',
+    /* wndScrollBarControls        */ '\x30',
+    /* wndStaticText               */ '\x0F',
+    /* wndLabelNormal              */ '\x08',
+    /* wndLabelSelected            */ '\x0F',
+    /* wndLabelShortcut            */ '\x06',
+    /* wndButtonNormal             */ '\x20',
+    /* wndButtonDefault            */ '\x2B',
+    /* wndButtonSelected           */ '\x2F',
+    /* wndButtonDisabled           */ '\x78',
+    /* wndButtonShortcut           */ '\x2E',
+    /* wndButtonShadow             */ '\x08',
+    dialogColor(wndClusterNormal           ),
+    dialogColor(wndClusterSelected         ),
+    dialogColor(wndClusterShortcut         ),
+    dialogColor(wndInputLineNormal         ),
+    dialogColor(wndInputLineSelected       ),
+    dialogColor(wndInputLineArrows         ),
+    dialogColor(wndHistoryArrow            ),
+    dialogColor(wndHistorySides            ),
+    dialogColor(wndHistWinScrollBarPageArea),
+    dialogColor(wndHistWinScrollBarControls),
+    dialogColor(wndListViewerNormal        ),
+    dialogColor(wndListViewerFocused       ),
+    dialogColor(wndListViewerSelected      ),
+    dialogColor(wndListViewerDivider       ),
+    dialogColor(wndInfoPane                ),
+    dialogColor(wndClusterDisabled         ),
 };
 
 #undef dialogColor
