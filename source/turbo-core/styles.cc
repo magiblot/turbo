@@ -56,7 +56,6 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {".vbs",        langVBScript},
     {".m",          langMATLAB},
     {".css",        langCSS},
-    {".yaml",       langYAML},
     {".erl",        langErlang},
     {".hrl",        langErlang},
     {".st",         langSmalltalk},
@@ -65,6 +64,23 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {".java",       langCPP},
     {"Makefile",    langMakefile},
     {"PKGBUILD",    langBash},
+    {".json",       langJSON},
+    {"eslintrc",    langJSON},
+    {".jshintrc",   langJSON},
+    {".jsonld",     langJSON},
+    {".ipynb",      langJSON},
+    {".babelrc",    langJSON},
+    {".prettierrc", langJSON},
+    {".stylelintrc",langJSON},
+    {".jsonc",      langJSON},
+    {".jscop",      langJSON},
+    {".yml",        langYAML},
+    {".yaml",       langYAML},
+    {".clang-format",   langYAML},
+    {".clang-tidy", langYAML},
+    {".mir",        langYAML},
+    {".apinotes",   langYAML},
+    {".ifs",        langYAML},
 };
 
 Language detectFileLanguage(const char *filePath)
@@ -375,6 +391,58 @@ constexpr LexerInfo::KeywordMapping keywordsRuby[] =
     },
 };
 
+constexpr LexerInfo::StyleMapping stylesJSON[] =
+{
+    {SCE_JSON_DEFAULT,              sNormal},
+    {SCE_JSON_NUMBER,               sNumberLiteral},
+    {SCE_JSON_STRING,               sStringLiteral},
+    {SCE_JSON_STRINGEOL,            sStringLiteral},
+    {SCE_JSON_PROPERTYNAME,         sPreprocessor},
+    {SCE_JSON_ESCAPESEQUENCE,       sEscapeSequence},
+    {SCE_JSON_LINECOMMENT,          sComment},
+    {SCE_JSON_BLOCKCOMMENT,         sComment},
+    {SCE_JSON_OPERATOR,             sOperator},
+    {SCE_JSON_URI,                  sStringLiteral},
+    {SCE_JSON_COMPACTIRI,           sKeyword2},
+    {SCE_JSON_KEYWORD,              sKeyword1},
+    {SCE_JSON_LDKEYWORD,            sKeyword2},
+    {SCE_JSON_ERROR,                sError},
+};
+
+constexpr LexerInfo::KeywordMapping keywordsJSON[] =
+{
+    {0, "false true null"},
+    {1,
+"@id @context @type @value @language @container @list @set @reverse @index "
+"@base @vocab @graph "
+    },
+};
+
+constexpr LexerInfo::PropertyMapping propertiesJSON[] =
+{
+    {"lexer.json.escape.sequence", "1"},
+    {"lexer.json.allow.comments", "1"},
+};
+
+constexpr LexerInfo::StyleMapping stylesYAML[] =
+{
+    {SCE_YAML_DEFAULT,              sNormal},
+    {SCE_YAML_COMMENT,              sComment},
+    {SCE_YAML_IDENTIFIER,           sPreprocessor},
+    {SCE_YAML_KEYWORD,              sKeyword1},
+    {SCE_YAML_NUMBER,               sNumberLiteral},
+    {SCE_YAML_REFERENCE,            sKeyword2},
+    {SCE_YAML_DOCUMENT,             sMisc},
+    {SCE_YAML_TEXT,                 sStringLiteral},
+    {SCE_YAML_ERROR,                sError},
+    {SCE_YAML_OPERATOR,             sOperator},
+};
+
+constexpr LexerInfo::KeywordMapping keywordsYAML[] =
+{
+    {0, "true false yes no"},
+};
+
 constexpr struct { Language language; LexerInfo lexerInfo; } builtinLexers[] =
 {
     {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC, bracesC}},
@@ -385,6 +453,8 @@ constexpr struct { Language language; LexerInfo lexerInfo; } builtinLexers[] =
     {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython, bracesC}},
     {langBash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr, bracesC}},
     {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr, bracesC}},
+    {langJSON, {SCLEX_JSON, stylesJSON, keywordsJSON, propertiesJSON, bracesC}},
+    {langYAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr, bracesC}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)

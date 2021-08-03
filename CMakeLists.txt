@@ -30,10 +30,12 @@ list(APPEND SCILEXERS_SRC
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexAsm.cxx"
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexBash.cxx"
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexCPP.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexJSON.cxx"
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexMake.cxx"
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexPython.cxx"
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexRuby.cxx"
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexRust.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexYAML.cxx"
 )
 
 add_library(scintilla OBJECT ${SCINTILLA_SRC})
