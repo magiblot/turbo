@@ -19,7 +19,6 @@ void BasicEditorFrame::draw()
 
 static TPoint cursorPos(turbo::TScintilla &scintilla)
 {
-    using namespace turbo;
     auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
     return {
         (int) call(scintilla, SCI_GETCOLUMN, pos, 0U),
@@ -33,7 +32,8 @@ void BasicEditorFrame::drawIndicator()
     // └─ XXXXXXXXXXXXXX
     //   ^2              ^18
     TRect r(2, size.y - 1, min(size.x - 2, 18), size.y);
-    if (0 <= r.a.x && r.a.x < r.b.x && 0 <= r.a.y && r.a.y < r.b.y)
+    if ( (state & sfActive) &&
+         0 <= r.a.x && r.a.x < r.b.x && 0 <= r.a.y && r.a.y < r.b.y )
     {
         TDrawBuffer b;
         char s[64];
