@@ -2,6 +2,7 @@
 #define TURBO_SCINTILLA_H
 
 #include "scintilla/include/Scintilla.h"
+#include "scintilla/include/SciLexer.h"
 
 class TPoint;
 class TRect;

@@ -1,5 +1,4 @@
 #include <tvision/tv.h>
-#include <turbo/scintilla/include/SciLexer.h>
 #include <turbo/scintilla.h>
 #include <turbo/styles.h>
 #include <turbo/tpath.h>
