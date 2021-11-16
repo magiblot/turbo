@@ -80,13 +80,12 @@ void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
         // placed on this area.
         auto attr = defaultTextAttr;
         ::setBack(attr, convertColor(back));
-        TScreenCell cell;
-        ::setCell(cell, ' ', attr);
+        auto *cells = &surface->at(r.a.y, r.a.x);
+        size_t count = r.b.x - r.a.x;
         for (int y = r.a.y; y < r.b.y; ++y)
         {
-            auto *row = &surface->at(y, 0);
-            for (int x = r.a.x; x < r.b.x; ++x)
-                row[x] = cell;
+            TText::drawChar({cells, count}, ' ', attr);
+            cells += count;
         }
     }
 }
@@ -109,14 +108,16 @@ void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesi
     {
         auto fg = convertColor(outline),
              bg = convertColor(fill);
+        auto *cells = &surface->at(r.a.y, r.a.x);
+        size_t count = r.b.x - r.a.x;
         for (int y = r.a.y; y < r.b.y; ++y)
         {
-            auto *row = &surface->at(y, 0);
-            for (int x = r.a.x; x < r.b.x; ++x)
+            for (auto &c : TSpan<TScreenCell>(cells, count))
             {
-                ::setFore(row[x].attr, fg);
-                ::setBack(row[x].attr, bg);
+                ::setFore(c.attr, fg);
+                ::setBack(c.attr, bg);
             }
+            cells += count;
         }
     }
 }
@@ -165,15 +166,13 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
     {
         auto attr = convertColorPair(fore, back);
         ::setStyle(attr, getStyle(font_));
-        size_t textBegin = 0, overlap = 0;
-        TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
+        auto *cells = &surface->at(r.a.y, r.a.x);
+        size_t count = r.b.x - r.a.x;
+        int indent = clip.a.x - (int) rc.left;
         for (int y = r.a.y; y < r.b.y; ++y)
         {
-            auto cells = TSpan<TScreenCell>(&surface->at(y, 0), r.b.x);
-            size_t x = r.a.x;
-            while (overlap-- && (int) x < r.b.x)
-                ::setCell(cells[x++], ' ', attr);
-            TText::fill(cells.subspan(x), text.substr(textBegin), attr);
+            TText::drawStr({cells, count}, 0, text, indent, attr);
+            cells += count;
         }
     }
 }
@@ -186,25 +185,16 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
     {
         auto fg = convertColor(fore);
         auto style = getStyle(font_);
-        size_t textBegin = 0, overlap = 0;
-        TText::wseek(text, textBegin, overlap, clip.a.x - (int) rc.left);
+        TScreenCell *cells = &surface->at(r.a.y, r.a.x);
+        size_t count = r.b.x - r.a.x;
+        int indent = clip.a.x - (int) rc.left;
         for (int y = r.a.y; y < r.b.y; ++y)
         {
-            auto cells = TSpan<TScreenCell>(&surface->at(y, 0), r.b.x);
-            size_t x = r.a.x;
-            for (; overlap-- && (int) x < r.b.x; ++x)
-            {
-                auto &c = cells[x];
-                ::setFore(c.attr, fg);
-                ::setStyle(c.attr, style);
-                c.ch = ' ';
-            }
-            TText::fill(cells.subspan(x), text.substr(textBegin),
-                [fg, style] (auto &attr) {
-                    ::setFore(attr, fg);
-                    ::setStyle(attr, style);
-                }
-            );
+            TText::drawStrEx({cells, count}, 0, text, indent, [&] (auto &attr) {
+                ::setFore(attr, fg);
+                ::setStyle(attr, style);
+            });
+            cells += count;
         }
     }
 }
