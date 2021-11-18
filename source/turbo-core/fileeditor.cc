@@ -164,8 +164,11 @@ bool FileEditor::save(FileDialogs &dlgs) noexcept
     if (filePath.empty())
         return saveAs(dlgs);
     beforeSave();
+    bool existed = TPath::exists(filePath.c_str());
     if (writeFile(filePath.c_str(), scintilla, dlgs))
     {
+        if (!existed)
+            onFilePathSet();
         afterSave();
         return true;
     }
