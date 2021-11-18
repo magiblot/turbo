@@ -81,6 +81,7 @@ static const const_unordered_map<std::string_view, Language> ext2lang = {
     {".mir",        langYAML},
     {".apinotes",   langYAML},
     {".ifs",        langYAML},
+    {".sh",         langBash},
 };
 
 Language detectFileLanguage(const char *filePath)
