@@ -112,19 +112,22 @@ target_link_libraries(${TURBO}-core PUBLIC
     fmt
     clipboard
 )
-install(TARGETS fmt clipboard EXPORT ${TURBO}-config)
-install(TARGETS ${TURBO}-core
-    EXPORT ${TURBO}-config
-    ARCHIVE DESTINATION lib
-    COMPONENT library
-)
-install(EXPORT ${TURBO}-config
-    DESTINATION lib/cmake/${TURBO}
-    NAMESPACE ${TURBO}::
-    FILE ${TURBO}-config.cmake
-    COMPONENT library
-)
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/turbo" DESTINATION include)
+
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
+    install(TARGETS fmt clipboard EXPORT ${TURBO}-config)
+    install(TARGETS ${TURBO}-core
+        EXPORT ${TURBO}-config
+        ARCHIVE DESTINATION lib
+        COMPONENT library
+    )
+    install(EXPORT ${TURBO}-config
+        DESTINATION lib/cmake/${TURBO}
+        NAMESPACE ${TURBO}::
+        FILE ${TURBO}-config.cmake
+        COMPONENT library
+    )
+    install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/turbo" DESTINATION include)
+endif()
 
 # Optional dependencies
 
