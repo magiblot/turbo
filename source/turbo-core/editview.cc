@@ -40,7 +40,8 @@ void EditorView::handleEvent(TEvent &ev)
                 handleKeyDown(scintilla, ev.keyDown);
             else
                 consumeInputText(ev);
-            editor->partialRedraw();
+            // Could use partialRedraw(), but it is broken for the Redo action (Scintilla bug?).
+            editor->redraw();
             clearEvent(ev);
             break;
         case evMouseDown:
