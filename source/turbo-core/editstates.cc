@@ -126,8 +126,6 @@ void ThemingState::updateBraces(TScintilla &scintilla) const
     bool braceFound = false;
     if (isBrace(ch))
     {
-        // We must lex any newly inserted text so that it has the right style.
-        idleWork(scintilla);
         // Scintilla already makes sure that both braces have the same style.
         auto matchPos = call(scintilla, SCI_BRACEMATCH, pos, 0U);
         if (matchPos != -1)

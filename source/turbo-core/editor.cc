@@ -167,21 +167,21 @@ bool Editor::redraw(const TRect &area) noexcept
     {
         drawLock = true;
         updateMarginWidth();
+        idleWork(scintilla);
         if (!reflowLock)
         {
             changeSize(scintilla);
-            theming.updateBraces(scintilla); // May mutate 'invalidatedArea', which may be 'area'.
+            theming.updateBraces(scintilla);
         }
         auto size = getEditorSize();
         TRect paintArea;
         if (surface.size != size)
         {
             surface.resize(size);
-            // We need to redraw the whole editor because it has been resized.
             paintArea = {{0, 0}, size};
         }
         else
-            paintArea = area;
+            paintArea = area; // Read 'area' here since it may have mutated.
         paint(scintilla, surface, paintArea); // Emits SCN_PAINTED.
         forEachNotNull([&] (TView &p) {
             p.drawView();
