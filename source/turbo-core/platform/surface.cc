@@ -85,7 +85,7 @@ void TScintillaSurface::FillRectangle(PRectangle rc, ColourDesired back)
         for (int y = r.a.y; y < r.b.y; ++y)
         {
             TText::drawChar({cells, count}, ' ', attr);
-            cells += count;
+            cells += surface->size.x;
         }
     }
 }
@@ -112,12 +112,12 @@ void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesi
         size_t count = r.b.x - r.a.x;
         for (int y = r.a.y; y < r.b.y; ++y)
         {
-            for (auto &c : TSpan<TScreenCell>(cells, count))
+            for (size_t x = 0; x < count; ++x)
             {
-                ::setFore(c.attr, fg);
-                ::setBack(c.attr, bg);
+                ::setFore(cells[x].attr, fg);
+                ::setBack(cells[x].attr, bg);
             }
-            cells += count;
+            cells += surface->size.x;
         }
     }
 }
@@ -172,7 +172,7 @@ void TScintillaSurface::DrawTextClipped( PRectangle rc, Font &font_,
         for (int y = r.a.y; y < r.b.y; ++y)
         {
             TText::drawStr({cells, count}, 0, text, indent, attr);
-            cells += count;
+            cells += surface->size.x;
         }
     }
 }
@@ -194,7 +194,7 @@ void TScintillaSurface::DrawTextTransparent(PRectangle rc, Font &font_, XYPOSITI
                 ::setFore(attr, fg);
                 ::setStyle(attr, style);
             });
-            cells += count;
+            cells += surface->size.x;
         }
     }
 }
