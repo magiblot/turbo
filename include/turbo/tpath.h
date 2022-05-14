@@ -2,7 +2,7 @@
 #define TURBO_TPATH_H
 
 #include <tvision/tv.h>
-#include <tvision/compat/dir.h> // MAXPATH
+#include <tvision/compat/borland/dir.h> // MAXPATH
 
 class TPath
 {

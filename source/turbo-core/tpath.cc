@@ -1,5 +1,5 @@
 #include <turbo/tpath.h>
-#include <tvision/compat/io.h> // 'access' on Windows
+#include <tvision/compat/borland/io.h> // 'access' on Windows
 
 TStringView TPath::basename(TStringView path) noexcept
 {

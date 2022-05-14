@@ -5,7 +5,7 @@
 #include <forward_list>
 #include <string_view>
 #include <string>
-#include <tvision/compat/dir.h>
+#include <tvision/compat/borland/dir.h>
 
 template<typename T>
 struct list_head
