@@ -11,6 +11,7 @@ class TurboFileDialogs : public turbo::DefaultFileDialogs
 
     EditorWindowParent &app;
 
+    ushort confirmSaveUntitled(turbo::FileEditor &) noexcept override;
     void getOpenPath(TFuncView<bool (const char *)> accept) noexcept override;
     void getSaveAsPath(turbo::FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
     void getRenamePath(turbo::FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;

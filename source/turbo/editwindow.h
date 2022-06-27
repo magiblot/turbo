@@ -65,6 +65,13 @@ struct EditorWindow : public turbo::BasicEditorWindow
     void updateCommands() noexcept;
     void handleNotification(const SCNotification &scn, turbo::Editor &) override;
 
+    enum TitleFormatFlags
+    {
+        tfNoSavePoint = 0x0001,
+    };
+
+    const char *formatTitle(ushort flags = 0) noexcept;
+
     auto &getEditor() { return (TurboEditor &) super::editor; }
     auto &filePath() { return getEditor().filePath; }
 

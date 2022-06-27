@@ -130,16 +130,7 @@ Boolean EditorWindow::valid(ushort command)
 
 const char* EditorWindow::getTitle(short)
 {
-    TitleState titleState {fileNumber.counter, fileNumber.number, editor.inSavePoint()};
-    if (lastTitleState != titleState)
-    {
-        lastTitleState = titleState;
-        TStringView name = !filePath().empty() ? TPath::basename(filePath()) : "Untitled";
-        TStringView savePoint = editor.inSavePoint() ? "" : "*";
-        auto &&number = fileNumber.number > 1 ? fmt::format(" ({})", fileNumber.number) : std::string();
-        title = fmt::format("{}{}{}", name, savePoint, number);
-    }
-    return title.c_str();
+    return formatTitle();
 }
 
 void EditorWindow::updateCommands() noexcept
@@ -164,4 +155,19 @@ void EditorWindow::handleNotification(const SCNotification &scn, turbo::Editor &
             editor.redraw();
             break;
     }
+}
+
+const char* EditorWindow::formatTitle(ushort flags) noexcept
+{
+    bool inSavePoint = (flags & tfNoSavePoint) || editor.inSavePoint();
+    TitleState titleState {fileNumber.counter, fileNumber.number, inSavePoint};
+    if (lastTitleState != titleState)
+    {
+        lastTitleState = titleState;
+        TStringView name = !filePath().empty() ? TPath::basename(filePath()) : "Untitled";
+        auto &&number = fileNumber.number > 1 ? fmt::format(" ({})", fileNumber.number) : std::string();
+        TStringView savePoint = inSavePoint ? "" : "*";
+        title = fmt::format("{}{}{}", name, number, savePoint);
+    }
+    return title.c_str();
 }
