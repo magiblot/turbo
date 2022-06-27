@@ -176,7 +176,7 @@ CaseFolder *TScintilla::CaseFolderForEncoding()
     return super::CaseFolderForEncoding();
 }
 
-template <size_t (& next)(TStringView)>
+template <size_t (& next)(TStringView) noexcept>
 static std::string capitalize(TStringView s, const Scintilla::Document &doc)
 {
     std::string result;
@@ -203,7 +203,12 @@ static std::string capitalize(TStringView s, const Scintilla::Document &doc)
     return result;
 }
 
-static size_t nextAscii(TStringView s)
+static size_t nextUnicode(TStringView s) noexcept
+{
+    return TText::next(s);
+}
+
+static size_t nextAscii(TStringView s) noexcept
 {
     return max<size_t>(s.size(), 1);
 }
@@ -220,7 +225,7 @@ std::string TScintilla::CaseMapString(const std::string &s, int mapping)
             case turbo::caseConvLower:
                 return CaseConvertString(s, CaseConversionLower);
             case turbo::caseConvCapitalize:
-                return capitalize<TText::next>(s, *pdoc);
+                return capitalize<nextUnicode>(s, *pdoc);
         }
     switch (turbo::CaseConversion(mapping))
     {
