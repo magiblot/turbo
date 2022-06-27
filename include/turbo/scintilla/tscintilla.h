@@ -42,6 +42,7 @@ protected:
     void AddToPopUp(const char *label, int cmd=0, bool enabled=true) override;
 
     CaseFolder *CaseFolderForEncoding() override;
+    std::string CaseMapString(const std::string &, int) override;
     int KeyDefault(int key, int modifiers) override;
 
 public:
@@ -63,6 +64,7 @@ public:
     using super::Paint;
     using super::pasteStream;
     using super::CharacterSource;
+    using super::ChangeCaseOfSelection;
 
 };
 

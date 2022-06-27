@@ -235,4 +235,9 @@ void setWhitespaceColor(TScintilla &self, TColorAttr attr)
     call(self, SCI_SETWHITESPACEBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
+void changeCaseOfSelection(TScintilla &self, CaseConversion cnv)
+{
+    self.ChangeCaseOfSelection(cnv);
+}
+
 } // namespace turbo

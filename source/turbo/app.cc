@@ -63,6 +63,9 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     ts += cmSearchPrev;
     ts += cmToggleIndent;
     ts += cmCloseEditor;
+    ts += cmSelUppercase;
+    ts += cmSelLowercase;
+    ts += cmSelCapitalize;
     disableCommands(ts);
 
     // Actions that only make sense when there is at least one editor.
@@ -127,6 +130,10 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "~R~eplace...",cmReplace, kbCtrlR, hcNoContext, "Ctrl-R" ) +
             *new TMenuItem( "Find ~N~ext", cmSearchAgain, kbF3, hcNoContext, "F3" ) +
             *new TMenuItem( "Find ~P~revious", cmSearchPrev, kbShiftF3, hcNoContext, "Shift-F3" ) +
+        *new TSubMenu( "Se~l~ection", kbAltL ) +
+            *new TMenuItem( "~U~ppercase", cmSelUppercase, kbNoKey, hcNoContext ) +
+            *new TMenuItem( "~L~owercase", cmSelLowercase, kbNoKey, hcNoContext ) +
+            *new TMenuItem( "~C~apitalize", cmSelCapitalize, kbNoKey, hcNoContext ) +
         *new TSubMenu( "~W~indows", kbAltW ) +
             *new TMenuItem( "~Z~oom", cmZoom, kbF5, hcNoContext, "F5" ) +
             *new TMenuItem( "~R~esize/move",cmResize, kbCtrlF5, hcNoContext, "Ctrl-F5" ) +

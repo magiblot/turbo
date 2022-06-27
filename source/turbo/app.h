@@ -24,7 +24,10 @@ const ushort
     cmTreeNext      = 107,
     cmTreePrev      = 108,
     cmCloseEditor   = 109,
-    cmRename        = 110;
+    cmRename        = 110,
+    cmSelUppercase  = 111,
+    cmSelLowercase  = 112,
+    cmSelCapitalize = 113;
 
 // Commands that cannot be deactivated.
 const ushort

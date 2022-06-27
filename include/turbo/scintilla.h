@@ -51,6 +51,16 @@ TColorAttr getStyleColor(TScintilla &, int style);
 void setSelectionColor(TScintilla &, TColorAttr attr);
 void setWhitespaceColor(TScintilla &, TColorAttr attr);
 
+enum CaseConversion
+{
+    caseConvNone,
+    caseConvUpper,
+    caseConvLower,
+    caseConvCapitalize,
+};
+
+void changeCaseOfSelection(TScintilla &, CaseConversion);
+
 class TScintillaParent
 {
 public:

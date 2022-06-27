@@ -1,3 +1,6 @@
+#define Uses_TText
+#include <tvision/tv.h>
+
 #include <turbo/scintilla.h>
 #include <turbo/scintilla/tscintilla.h>
 #include <turbo/clipboard.h>
@@ -171,6 +174,61 @@ CaseFolder *TScintilla::CaseFolderForEncoding()
     if (IsUnicodeMode())
         return new CaseFolderUnicode();
     return super::CaseFolderForEncoding();
+}
+
+template <size_t (& next)(TStringView)>
+static std::string capitalize(TStringView s, const Scintilla::Document &doc)
+{
+    std::string result;
+    size_t i = 0;
+    while (i < s.size())
+    {
+        size_t spaceBegin = i;
+        while (i < s.size() && doc.WordCharacterClass(s[i]) != CharClassify::ccWord)
+            ++i;
+        auto space = s.substr(spaceBegin, i - spaceBegin);
+        result.append(space.data(), space.size());
+
+        size_t firstBegin = i;
+        i += next(s.substr(i));
+        auto first = s.substr(firstBegin, i - firstBegin);
+        result.append(CaseConvertString(first, CaseConversionUpper));
+
+        size_t tailBegin = i;
+        while (i < s.size() && doc.WordCharacterClass(s[i]) == CharClassify::ccWord)
+            ++i;
+        auto tail = s.substr(tailBegin, i - tailBegin);
+        result.append(CaseConvertString(tail, CaseConversionLower));
+    }
+    return result;
+}
+
+static size_t nextAscii(TStringView s)
+{
+    return max<size_t>(s.size(), 1);
+}
+
+std::string TScintilla::CaseMapString(const std::string &s, int mapping)
+{
+    if (IsUnicodeMode())
+        switch (turbo::CaseConversion(mapping))
+        {
+            case turbo::caseConvNone:
+                return s;
+            case turbo::caseConvUpper:
+                return CaseConvertString(s, CaseConversionUpper);
+            case turbo::caseConvLower:
+                return CaseConvertString(s, CaseConversionLower);
+            case turbo::caseConvCapitalize:
+                return capitalize<TText::next>(s, *pdoc);
+        }
+    switch (turbo::CaseConversion(mapping))
+    {
+        case turbo::caseConvCapitalize:
+            return capitalize<nextAscii>(s, *pdoc);
+        default:
+            return super::CaseMapString(s, mapping);
+    }
 }
 
 int TScintilla::KeyDefault(int key, int modifiers) {
