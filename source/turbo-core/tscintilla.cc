@@ -210,7 +210,7 @@ static size_t nextUnicode(TStringView s) noexcept
 
 static size_t nextAscii(TStringView s) noexcept
 {
-    return max<size_t>(s.size(), 1);
+    return min<size_t>(s.size(), 1);
 }
 
 std::string TScintilla::CaseMapString(const std::string &s, int mapping)
