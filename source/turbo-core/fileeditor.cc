@@ -239,7 +239,7 @@ void FileEditor::afterSave() noexcept
 
 void FileEditor::detectLanguage() noexcept
 {
-    auto language = detectFileLanguage(filePath.c_str());
+    language = detectFileLanguage(filePath.c_str());
     lexer = findBuiltInLexer(language);
     applyTheming(lexer, scheme, scintilla);
 }

@@ -11,82 +11,111 @@
 
 namespace turbo {
 
-static const const_unordered_map<std::string_view, Language> mime2lang = {
-    {"text/x-c++",                  langCPP},
-    {"text/x-c",                    langCPP},
-    {"text/x-script.python",        langPython},
-    {"application/json",            langJSON},
-    {"text/x-shellscript",          langBash},
-    {"text/x-makefile",             langMakefile},
-    {"text/x-diff",                 langDiff},
+extern constexpr Language
+    Language::CPP,
+    Language::Makefile,
+    Language::Asm,
+    Language::JavaScript,
+    Language::Rust,
+    Language::Python,
+    Language::Bash,
+    Language::Diff,
+    Language::JSON,
+    Language::HTML,
+    Language::XML,
+    Language::VB,
+    Language::Perl,
+    Language::Batch,
+    Language::LaTex,
+    Language::Lua,
+    Language::Ada,
+    Language::Lisp,
+    Language::Ruby,
+    Language::Tcl,
+    Language::VBScript,
+    Language::MATLAB,
+    Language::CSS,
+    Language::YAML,
+    Language::Erlang,
+    Language::Smalltalk,
+    Language::Markdown;
+
+static const const_unordered_map<std::string_view, const Language *> mime2lang = {
+    {"text/x-c++",                  &Language::CPP},
+    {"text/x-c",                    &Language::CPP},
+    {"text/x-script.python",        &Language::Python},
+    {"application/json",            &Language::JSON},
+    {"text/x-shellscript",          &Language::Bash},
+    {"text/x-makefile",             &Language::Makefile},
+    {"text/x-diff",                 &Language::Diff},
 };
 
-static const const_unordered_map<std::string_view, Language> ext2lang = {
-    {".js",         langJavaScript},
-    {".jsx",        langJavaScript},
-    {".mjs",        langJavaScript},
-    {".asm",        langAsm},
-    {".s",          langAsm},
-    {".S",          langAsm},
-    {".c",          langCPP},
-    {".cc",         langCPP},
-    {".cpp",        langCPP},
-    {".cxx",        langCPP},
-    {".h",          langCPP},
-    {".hh",         langCPP},
-    {".hpp",        langCPP},
-    {".hxx",        langCPP},
-    {".py",         langPython},
-    {".htm",        langHTML},
-    {".html",       langHTML},
-    {".mhtml",      langHTML},
-    {".xml",        langXML},
-    {".vb",         langVB},
-    {".pl",         langPerl},
-    {".pm",         langPerl},
-    {".bat",        langBatch},
-    {".tex",        langLaTex},
-    {".lua",        langLua},
-    {".diff",       langDiff},
-    {".ads",        langAda},
-    {".adb",        langAda},
-    {".lsp",        langLisp},
-    {".rb",         langRuby},
-    {".tcl",        langTcl},
-    {".vbs",        langVBScript},
-    {".m",          langMATLAB},
-    {".css",        langCSS},
-    {".erl",        langErlang},
-    {".hrl",        langErlang},
-    {".st",         langSmalltalk},
-    {".md",         langMarkdown},
-    {".rs",         langRust},
-    {".java",       langCPP},
-    {"Makefile",    langMakefile},
-    {"PKGBUILD",    langBash},
-    {".json",       langJSON},
-    {"eslintrc",    langJSON},
-    {".jshintrc",   langJSON},
-    {".jsonld",     langJSON},
-    {".ipynb",      langJSON},
-    {".babelrc",    langJSON},
-    {".prettierrc", langJSON},
-    {".stylelintrc",langJSON},
-    {".jsonc",      langJSON},
-    {".jscop",      langJSON},
-    {".yml",        langYAML},
-    {".yaml",       langYAML},
-    {".clang-format",   langYAML},
-    {".clang-tidy", langYAML},
-    {".mir",        langYAML},
-    {".apinotes",   langYAML},
-    {".ifs",        langYAML},
-    {".sh",         langBash},
+static const const_unordered_map<std::string_view, const Language *> ext2lang = {
+    {".js",                         &Language::JavaScript},
+    {".jsx",                        &Language::JavaScript},
+    {".mjs",                        &Language::JavaScript},
+    {".asm",                        &Language::Asm},
+    {".s",                          &Language::Asm},
+    {".S",                          &Language::Asm},
+    {".c",                          &Language::CPP},
+    {".cc",                         &Language::CPP},
+    {".cpp",                        &Language::CPP},
+    {".cxx",                        &Language::CPP},
+    {".h",                          &Language::CPP},
+    {".hh",                         &Language::CPP},
+    {".hpp",                        &Language::CPP},
+    {".hxx",                        &Language::CPP},
+    {".py",                         &Language::Python},
+    {".htm",                        &Language::HTML},
+    {".html",                       &Language::HTML},
+    {".mhtml",                      &Language::HTML},
+    {".xml",                        &Language::XML},
+    {".vb",                         &Language::VB},
+    {".pl",                         &Language::Perl},
+    {".pm",                         &Language::Perl},
+    {".bat",                        &Language::Batch},
+    {".tex",                        &Language::LaTex},
+    {".lua",                        &Language::Lua},
+    {".diff",                       &Language::Diff},
+    {".ads",                        &Language::Ada},
+    {".adb",                        &Language::Ada},
+    {".lsp",                        &Language::Lisp},
+    {".rb",                         &Language::Ruby},
+    {".tcl",                        &Language::Tcl},
+    {".vbs",                        &Language::VBScript},
+    {".m",                          &Language::MATLAB},
+    {".css",                        &Language::CSS},
+    {".erl",                        &Language::Erlang},
+    {".hrl",                        &Language::Erlang},
+    {".st",                         &Language::Smalltalk},
+    {".md",                         &Language::Markdown},
+    {".rs",                         &Language::Rust},
+    {".java",                       &Language::CPP},
+    {"Makefile",                    &Language::Makefile},
+    {"PKGBUILD",                    &Language::Bash},
+    {".json",                       &Language::JSON},
+    {"eslintrc",                    &Language::JSON},
+    {".jshintrc",                   &Language::JSON},
+    {".jsonld",                     &Language::JSON},
+    {".ipynb",                      &Language::JSON},
+    {".babelrc",                    &Language::JSON},
+    {".prettierrc",                 &Language::JSON},
+    {".stylelintrc",                &Language::JSON},
+    {".jsonc",                      &Language::JSON},
+    {".jscop",                      &Language::JSON},
+    {".yml",                        &Language::YAML},
+    {".yaml",                       &Language::YAML},
+    {".clang-format",               &Language::YAML},
+    {".clang-tidy",                 &Language::YAML},
+    {".mir",                        &Language::YAML},
+    {".apinotes",                   &Language::YAML},
+    {".ifs",                        &Language::YAML},
+    {".sh",                         &Language::Bash},
 };
 
-Language detectFileLanguage(const char *filePath)
+const Language *detectFileLanguage(const char *filePath)
 {
-    Language lang = langNone;
+    const Language *lang = nullptr;
     {
         auto ext = TPath::extname(filePath);
         if (!ext.empty())
@@ -98,7 +127,7 @@ Language detectFileLanguage(const char *filePath)
         }
     }
 #ifdef HAVE_MAGIC
-    if (lang == langNone) {
+    if (!lang) {
         magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
         if (magic_cookie) {
             if (magic_load(magic_cookie, nullptr) == 0)
@@ -442,18 +471,18 @@ constexpr LexerSettings::KeywordMapping keywordsYAML[] =
     {0, "true false yes no"},
 };
 
-constexpr struct { Language language; LexerSettings lexer; } builtInLexers[] =
+constexpr struct { const Language *language; LexerSettings lexer; } builtInLexers[] =
 {
-    {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
-    {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr}},
-    {langAsm, {SCLEX_ASM, stylesAsm, nullptr, nullptr}},
-    {langJavaScript, {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC}},
-    {langRust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr}},
-    {langPython, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython}},
-    {langBash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr}},
-    {langRuby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr}},
-    {langJSON, {SCLEX_JSON, stylesJSON, keywordsJSON, propertiesJSON}},
-    {langYAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr}},
+    {&Language::CPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
+    {&Language::Makefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr}},
+    {&Language::Asm, {SCLEX_ASM, stylesAsm, nullptr, nullptr}},
+    {&Language::JavaScript, {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC}},
+    {&Language::Rust, {SCLEX_RUST, stylesRust, keywordsRust, nullptr}},
+    {&Language::Python, {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython}},
+    {&Language::Bash, {SCLEX_BASH, stylesBash, keywordsBash, nullptr}},
+    {&Language::Ruby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr}},
+    {&Language::JSON, {SCLEX_JSON, stylesJSON, keywordsJSON, propertiesJSON}},
+    {&Language::YAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)
@@ -467,7 +496,7 @@ TColorAttr coalesce(TColorAttr from, TColorAttr into)
     };
 }
 
-const LexerSettings *findBuiltInLexer(Language language)
+const LexerSettings *findBuiltInLexer(const Language *language)
 {
     for (const auto &l : builtInLexers)
         if (l.language == language)

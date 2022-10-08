@@ -67,6 +67,7 @@ public:
     LineNumbersWidth lineNumbers {minLineNumbersWidth};
     WrapState wrapping;
     AutoIndent autoIndent;
+    const Language *language {nullptr};
     const LexerSettings *lexer {nullptr};
     const ColorScheme *scheme {nullptr};
 

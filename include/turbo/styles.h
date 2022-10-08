@@ -7,36 +7,42 @@
 
 namespace turbo {
 
-enum Language : uchar
+class Language
 {
-    langNone,
-    langCPP,
-    langMakefile,
-    langAsm,
-    langJavaScript,
-    langRust,
-    langPython,
-    langBash,
-    langDiff,
-    langJSON,
-    langHTML,
-    langXML,
-    langVB,
-    langPerl,
-    langBatch,
-    langLaTex,
-    langLua,
-    langAda,
-    langLisp,
-    langRuby,
-    langTcl,
-    langVBScript,
-    langMATLAB,
-    langCSS,
-    langYAML,
-    langErlang,
-    langSmalltalk,
-    langMarkdown,
+public:
+
+    static const Language
+        CPP,
+        Makefile,
+        Asm,
+        JavaScript,
+        Rust,
+        Python,
+        Bash,
+        Diff,
+        JSON,
+        HTML,
+        XML,
+        VB,
+        Perl,
+        Batch,
+        LaTex,
+        Lua,
+        Ada,
+        Lisp,
+        Ruby,
+        Tcl,
+        VBScript,
+        MATLAB,
+        CSS,
+        YAML,
+        Erlang,
+        Smalltalk,
+        Markdown;
+
+private:
+
+    Language() = default;
 };
 
 enum TextStyle : uchar
@@ -88,8 +94,8 @@ struct LexerSettings
     TSpan<const PropertyMapping> properties;
 };
 
-Language detectFileLanguage(const char *filePath);
-const LexerSettings *findBuiltInLexer(Language language);
+const Language *detectFileLanguage(const char *filePath);
+const LexerSettings *findBuiltInLexer(const Language *language);
 
 } // namespace turbo
 
