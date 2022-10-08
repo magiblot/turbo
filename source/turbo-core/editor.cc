@@ -15,7 +15,7 @@ Editor::Editor(TScintilla &aScintilla) noexcept :
     // Editor should send notifications to this object.
     setParent(scintilla, this);
     // Set color defaults.
-    theming.apply(scintilla);
+    applyTheming(nullptr, nullptr, scintilla);
 
     // Dynamic horizontal scroll.
     call(scintilla, SCI_SETSCROLLWIDTHTRACKING, true, 0U);
@@ -171,7 +171,7 @@ bool Editor::redraw(const TRect &area) noexcept
         if (!reflowLock)
         {
             changeSize(scintilla);
-            theming.updateBraces(scintilla);
+            updateBraces(scheme, scintilla);
         }
         auto size = getEditorSize();
         TRect paintArea;

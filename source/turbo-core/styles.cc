@@ -142,7 +142,7 @@ extern constexpr ColorScheme schemeDefault =
     /* sBraceMatch       */ {'\xE'   , {}      , slBold         },
 };
 
-constexpr LexerInfo::StyleMapping stylesC[] =
+constexpr LexerSettings::StyleMapping stylesC[] =
 {
     {SCE_C_DEFAULT,                 sNormal},
     {SCE_C_COMMENT,                 sComment},
@@ -162,7 +162,7 @@ constexpr LexerInfo::StyleMapping stylesC[] =
     {SCE_C_ESCAPESEQUENCE,          sEscapeSequence},
 };
 
-constexpr LexerInfo::KeywordMapping keywordsC[] =
+constexpr LexerSettings::KeywordMapping keywordsC[] =
 {
     {0,
 "alignas alignof and and_eq asm auto bitand bitor break case catch class compl "
@@ -185,14 +185,14 @@ constexpr LexerInfo::KeywordMapping keywordsC[] =
     },
 };
 
-constexpr LexerInfo::PropertyMapping propertiesC[] =
+constexpr LexerSettings::PropertyMapping propertiesC[] =
 {
     {"styling.within.preprocessor",         "1"},
     {"lexer.cpp.track.preprocessor",        "0"},
     {"lexer.cpp.escape.sequence",           "1"},
 };
 
-constexpr LexerInfo::StyleMapping stylesMake[] =
+constexpr LexerSettings::StyleMapping stylesMake[] =
 {
     {SCE_MAKE_DEFAULT,              sNormal},
     {SCE_MAKE_COMMENT,              sComment},
@@ -202,7 +202,7 @@ constexpr LexerInfo::StyleMapping stylesMake[] =
     {SCE_MAKE_OPERATOR,             sOperator},
 };
 
-constexpr LexerInfo::StyleMapping stylesAsm[] =
+constexpr LexerSettings::StyleMapping stylesAsm[] =
 {
     {SCE_ASM_DEFAULT,               sNormal},
     {SCE_ASM_COMMENT,               sComment},
@@ -215,7 +215,7 @@ constexpr LexerInfo::StyleMapping stylesAsm[] =
     {SCE_ASM_DIRECTIVE,             sPreprocessor},
 };
 
-constexpr LexerInfo::KeywordMapping keywordsJavaScript[] =
+constexpr LexerSettings::KeywordMapping keywordsJavaScript[] =
 {
     {0,
 "await break case catch continue default do else export false finally "
@@ -237,7 +237,7 @@ constexpr LexerInfo::KeywordMapping keywordsJavaScript[] =
     },
 };
 
-constexpr LexerInfo::StyleMapping  stylesRust[] =
+constexpr LexerSettings::StyleMapping  stylesRust[] =
 {
     {SCE_RUST_DEFAULT,              sNormal},
     {SCE_RUST_COMMENTBLOCK,         sComment},
@@ -258,7 +258,7 @@ constexpr LexerInfo::StyleMapping  stylesRust[] =
     {SCE_RUST_BYTECHARACTER,        sEscapeSequence},
 };
 
-constexpr LexerInfo::KeywordMapping keywordsRust[] =
+constexpr LexerSettings::KeywordMapping keywordsRust[] =
 {
     {0,
 "as break const continue crate dyn else enum extern false fn for if impl in let "
@@ -271,7 +271,7 @@ constexpr LexerInfo::KeywordMapping keywordsRust[] =
     },
 };
 
-constexpr LexerInfo::StyleMapping  stylesPython[] =
+constexpr LexerSettings::StyleMapping  stylesPython[] =
 {
     {SCE_P_DEFAULT,                 sNormal},
     {SCE_P_COMMENTLINE,             sComment},
@@ -295,7 +295,7 @@ constexpr LexerInfo::StyleMapping  stylesPython[] =
     {SCE_P_FTRIPLEDOUBLE,           sStringLiteral},
 };
 
-constexpr LexerInfo::KeywordMapping keywordsPython[] =
+constexpr LexerSettings::KeywordMapping keywordsPython[] =
 {
     {0,
 "and as assert break class continue def del elif else except exec finally for "
@@ -308,12 +308,12 @@ constexpr LexerInfo::KeywordMapping keywordsPython[] =
     },
 };
 
-constexpr LexerInfo::PropertyMapping propertiesPython[] =
+constexpr LexerSettings::PropertyMapping propertiesPython[] =
 {
     {"lexer.python.keywords2.no.sub.identifiers",       "1"},
 };
 
-constexpr LexerInfo::StyleMapping  stylesBash[] =
+constexpr LexerSettings::StyleMapping  stylesBash[] =
 {
     {SCE_SH_DEFAULT,                sNormal},
     {SCE_SH_ERROR,                  sError},
@@ -331,7 +331,7 @@ constexpr LexerInfo::StyleMapping  stylesBash[] =
     {SCE_SH_HERE_Q,                 sMisc},
 };
 
-constexpr LexerInfo::KeywordMapping keywordsBash[] =
+constexpr LexerSettings::KeywordMapping keywordsBash[] =
 {
     {0,
 // Keywords
@@ -345,7 +345,7 @@ constexpr LexerInfo::KeywordMapping keywordsBash[] =
     },
 };
 
-constexpr LexerInfo::StyleMapping  stylesRuby[] =
+constexpr LexerSettings::StyleMapping  stylesRuby[] =
 {
     {SCE_RB_DEFAULT,                sNormal},
     {SCE_RB_ERROR,                  sError},
@@ -379,7 +379,7 @@ constexpr LexerInfo::StyleMapping  stylesRuby[] =
     {SCE_RB_UPPER_BOUND,            sMisc},
 };
 
-constexpr LexerInfo::KeywordMapping keywordsRuby[] =
+constexpr LexerSettings::KeywordMapping keywordsRuby[] =
 {
     {0,
 "__ENCODING__ __LINE__ __FILE__ BEGIN END "
@@ -390,7 +390,7 @@ constexpr LexerInfo::KeywordMapping keywordsRuby[] =
     },
 };
 
-constexpr LexerInfo::StyleMapping stylesJSON[] =
+constexpr LexerSettings::StyleMapping stylesJSON[] =
 {
     {SCE_JSON_DEFAULT,              sNormal},
     {SCE_JSON_NUMBER,               sNumberLiteral},
@@ -408,7 +408,7 @@ constexpr LexerInfo::StyleMapping stylesJSON[] =
     {SCE_JSON_ERROR,                sError},
 };
 
-constexpr LexerInfo::KeywordMapping keywordsJSON[] =
+constexpr LexerSettings::KeywordMapping keywordsJSON[] =
 {
     {0, "false true null"},
     {1,
@@ -417,13 +417,13 @@ constexpr LexerInfo::KeywordMapping keywordsJSON[] =
     },
 };
 
-constexpr LexerInfo::PropertyMapping propertiesJSON[] =
+constexpr LexerSettings::PropertyMapping propertiesJSON[] =
 {
     {"lexer.json.escape.sequence", "1"},
     {"lexer.json.allow.comments", "1"},
 };
 
-constexpr LexerInfo::StyleMapping stylesYAML[] =
+constexpr LexerSettings::StyleMapping stylesYAML[] =
 {
     {SCE_YAML_DEFAULT,              sNormal},
     {SCE_YAML_COMMENT,              sComment},
@@ -437,12 +437,12 @@ constexpr LexerInfo::StyleMapping stylesYAML[] =
     {SCE_YAML_OPERATOR,             sOperator},
 };
 
-constexpr LexerInfo::KeywordMapping keywordsYAML[] =
+constexpr LexerSettings::KeywordMapping keywordsYAML[] =
 {
     {0, "true false yes no"},
 };
 
-constexpr struct { Language language; LexerInfo lexerInfo; } builtinLexers[] =
+constexpr struct { Language language; LexerSettings lexer; } builtInLexers[] =
 {
     {langCPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
     {langMakefile, {SCLEX_MAKEFILE, stylesMake, nullptr, nullptr}},
@@ -467,11 +467,11 @@ TColorAttr coalesce(TColorAttr from, TColorAttr into)
     };
 }
 
-const LexerInfo *findLexerInfo(Language language)
+const LexerSettings *findBuiltInLexer(Language language)
 {
-    for (const auto &l : builtinLexers)
+    for (const auto &l : builtInLexers)
         if (l.language == language)
-            return &l.lexerInfo;
+            return &l.lexer;
     return nullptr;
 }
 

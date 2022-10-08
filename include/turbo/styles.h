@@ -76,20 +76,20 @@ inline TColorAttr normalize(const ColorScheme &scheme, TextStyle index)
 
 extern const ColorScheme schemeDefault;
 
-struct LexerInfo
+struct LexerSettings
 {
     struct StyleMapping { uchar id; TextStyle style; };
     struct KeywordMapping { uchar id; const char *keywords; };
     struct PropertyMapping { const char *name, *value; };
 
-    int lexerId;
+    int id;
     TSpan<const StyleMapping> styles;
     TSpan<const KeywordMapping> keywords;
     TSpan<const PropertyMapping> properties;
 };
 
 Language detectFileLanguage(const char *filePath);
-const LexerInfo *findLexerInfo(Language language);
+const LexerSettings *findBuiltInLexer(Language language);
 
 } // namespace turbo
 

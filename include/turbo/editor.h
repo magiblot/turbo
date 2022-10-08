@@ -67,7 +67,8 @@ public:
     LineNumbersWidth lineNumbers {minLineNumbersWidth};
     WrapState wrapping;
     AutoIndent autoIndent;
-    ThemingState theming;
+    const LexerSettings *lexer {nullptr};
+    const ColorScheme *scheme {nullptr};
 
     // Interaction with views. Set them with 'associate'/'disassociate'.
     EditorParent *parent {nullptr}; // Receives notifications in certain situations.

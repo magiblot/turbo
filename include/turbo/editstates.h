@@ -82,46 +82,12 @@ inline void AutoIndent::toggle()
     enabled ^= true;
 }
 
-class ThemingState
-{
-    const LexerInfo *lexerInfo {nullptr};
-    const ColorScheme *scheme {nullptr};
-public:
+// Updates 'scintilla' so that it makes use of the current state of
+// 'lexer' and 'scheme'. If 'scheme' is null, 'schemeDefault' is used instead.
+void applyTheming(const LexerSettings *lexer, const ColorScheme *scheme, TScintilla &scintilla);
 
-    // * 'aLexerInfo': non-owning. Lifetime must exceed that of 'this'.
-    inline void setLexerInfo(const LexerInfo *aLexerInfo);
-    // * 'aScheme': non-owning. Lifetime must exceed that of 'this'.
-    inline void setScheme(const ColorScheme *scheme);
-    // Returns the current scheme if present and 'schemeDefault' otherwise.
-    inline const ColorScheme &getScheme() const;
-    inline bool hasLexer() const;
-
-    // Updates 'scintilla' so that it makes use of the current state of
-    // 'lexerInfo' and 'scheme'.
-    void apply(TScintilla &scintilla) const;
-    // Highlights matching braces if there are any.
-    void updateBraces(TScintilla &scintilla) const;
-};
-
-inline void ThemingState::setLexerInfo(const LexerInfo *aLexerInfo)
-{
-    lexerInfo = aLexerInfo;
-}
-
-inline void ThemingState::setScheme(const ColorScheme *aScheme)
-{
-    scheme = aScheme;
-}
-
-inline const ColorScheme &ThemingState::getScheme() const
-{
-    return scheme ? *scheme : schemeDefault;
-}
-
-inline bool ThemingState::hasLexer() const
-{
-    return lexerInfo;
-}
+// Highlights matching braces if there are any.
+void updateBraces(const ColorScheme *scheme, TScintilla &scintilla);
 
 void stripTrailingSpaces(TScintilla &scintilla);
 void ensureNewlineAtEnd(TScintilla &scintilla);

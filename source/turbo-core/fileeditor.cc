@@ -240,8 +240,8 @@ void FileEditor::afterSave() noexcept
 void FileEditor::detectLanguage() noexcept
 {
     auto language = detectFileLanguage(filePath.c_str());
-    theming.setLexerInfo(findLexerInfo(language));
-    theming.apply(scintilla);
+    lexer = findBuiltInLexer(language);
+    applyTheming(lexer, scheme, scintilla);
 }
 
 void FileEditor::onFilePathSet() noexcept

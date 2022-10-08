@@ -8,9 +8,9 @@
 
 void TurboEditor::onFilePathSet() noexcept
 {
-    bool noLastLexer = !theming.hasLexer();
+    bool noLastLexer = !lexer;
     super::onFilePathSet();
-    if (noLastLexer && theming.hasLexer())
+    if (noLastLexer && lexer)
         lineNumbers.setState(true);
 }
 

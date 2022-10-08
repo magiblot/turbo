@@ -87,25 +87,24 @@ void AutoIndent::applyToCurrentLine(TScintilla &scintilla)
 }
 
 /////////////////////////////////////////////////////////////////////////
-// ThemingState
 
-void ThemingState::apply(TScintilla &scintilla) const
+void applyTheming(const LexerSettings *lexer, const ColorScheme *aScheme, TScintilla &scintilla)
 {
-    auto &scheme = getScheme();
+    auto &scheme = aScheme ? *aScheme : schemeDefault;
     setStyleColor(scintilla, STYLE_DEFAULT, scheme[sNormal]);
     call(scintilla, SCI_STYLECLEARALL, 0U, 0U); // Must be done before setting other colors.
     setSelectionColor(scintilla, scheme[sSelection]);
     setWhitespaceColor(scintilla, scheme[sWhitespace]);
     setStyleColor(scintilla, STYLE_CONTROLCHAR, normalize(scheme, sCtrlChar));
     setStyleColor(scintilla, STYLE_LINENUMBER, normalize(scheme, sLineNums));
-    if (lexerInfo)
+    if (lexer)
     {
-        call(scintilla, SCI_SETLEXER, lexerInfo->lexerId, 0U);
-        for (const auto &s : lexerInfo->styles)
+        call(scintilla, SCI_SETLEXER, lexer->id, 0U);
+        for (const auto &s : lexer->styles)
             setStyleColor(scintilla, s.id, normalize(scheme, s.style));
-        for (const auto &k : lexerInfo->keywords)
+        for (const auto &k : lexer->keywords)
             call(scintilla, SCI_SETKEYWORDS, k.id, (sptr_t) k.keywords);
-        for (const auto &p : lexerInfo->properties)
+        for (const auto &p : lexer->properties)
             call(scintilla, SCI_SETPROPERTY, (sptr_t) p.name, (sptr_t) p.value);
     }
     else
@@ -119,7 +118,7 @@ static bool isBrace(char ch)
     return memchr(braces.data(), ch, braces.size()) != nullptr;
 }
 
-void ThemingState::updateBraces(TScintilla &scintilla) const
+void updateBraces(const ColorScheme *aScheme, TScintilla &scintilla)
 {
     auto pos = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
     auto ch = call(scintilla, SCI_GETCHARAT, pos, 0U);
@@ -130,7 +129,7 @@ void ThemingState::updateBraces(TScintilla &scintilla) const
         auto matchPos = call(scintilla, SCI_BRACEMATCH, pos, 0U);
         if (matchPos != -1)
         {
-            auto &scheme = getScheme();
+            auto &scheme = aScheme ? *aScheme : schemeDefault;
             auto style = call(scintilla, SCI_GETSTYLEAT, pos, 0U);
             auto curAttr = getStyleColor(scintilla, style);
             auto braceAttr = coalesce(scheme[sBraceMatch], curAttr);
@@ -142,8 +141,6 @@ void ThemingState::updateBraces(TScintilla &scintilla) const
     if (!braceFound)
         call(scintilla, SCI_BRACEHIGHLIGHT, -1, -1);
 }
-
-/////////////////////////////////////////////////////////////////////////
 
 void stripTrailingSpaces(TScintilla &scintilla)
 {
