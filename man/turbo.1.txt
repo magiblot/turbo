@@ -1,0 +1,44 @@
+:version: <VERSION>
+:summary: An experimental terminal text editor
+
+NAME
+====
+
+turbo - An experimental text editor based on Scintilla and Turbo Vision.
+
+SYNOPSIS
+========
+
+turbo [_FILE_]...
+
+DESCRIPTION
+===========
+
+Turbo is an experimental text editor for the terminal, based on the Scintilla code editing component by Neil Hodgson and the Turbo Vision application framework.
+
+OPTIONS
+=======
+
+Turbo accepts the following options:
+
+**[_FILE_]*::
+	Opens file in Turbo
+
+To stop Turbo press Alt-X
+
+BUGS
+====
+
+If you think you have found a bug, please check that you are using the latest
+version of Turbo <https://github.com/magiblot/turbo>.
+
+AUTHOR
+======
+
+magiblot <https://github.com/magiblot/>
+
+COPYRIGHT
+=========
+
+Copyright \(co 2022 magiblot +
+Turbo is licensed under the Apache-2.0 License.
