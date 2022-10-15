@@ -103,6 +103,10 @@ public:
     template <class Func>
     inline void lockReflow(Func &&func);
     inline sptr_t callScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+
+    inline void uppercase();
+    inline void lowercase();
+    inline void capitalize();
 };
 
 template <class Func>
@@ -117,6 +121,21 @@ inline void Editor::lockReflow(Func &&func)
 inline sptr_t Editor::callScintilla(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
     return turbo::call(scintilla, iMessage, wParam, lParam);
+}
+
+inline void Editor::uppercase()
+{
+    turbo::changeCaseOfSelection(scintilla, caseConvUpper);
+}
+
+inline void Editor::lowercase()
+{
+    turbo::changeCaseOfSelection(scintilla, caseConvLower);
+}
+
+inline void Editor::capitalize()
+{
+    turbo::changeCaseOfSelection(scintilla, caseConvCapitalize);
 }
 
 class EditorView : public TSurfaceView

@@ -79,15 +79,15 @@ void EditorWindow::handleEvent(TEvent &ev) {
                 handled = message(this, evCommand, cmClose, nullptr); // May delete 'this'!
                 break;
             case cmSelUppercase:
-                turbo::uppercase(editor.scintilla);
+                editor.uppercase();
                 editor.partialRedraw();
                 break;
             case cmSelLowercase:
-                turbo::lowercase(editor.scintilla);
+                editor.lowercase();
                 editor.partialRedraw();
                 break;
             case cmSelCapitalize:
-                turbo::capitalize(editor.scintilla);
+                editor.capitalize();
                 editor.partialRedraw();
                 break;
             default:

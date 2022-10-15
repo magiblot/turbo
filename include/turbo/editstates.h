@@ -92,21 +92,6 @@ void updateBraces(const ColorScheme *scheme, TScintilla &scintilla);
 void stripTrailingSpaces(TScintilla &scintilla);
 void ensureNewlineAtEnd(TScintilla &scintilla);
 
-inline void uppercase(TScintilla &scintilla)
-{
-    changeCaseOfSelection(scintilla, caseConvUpper);
-}
-
-inline void lowercase(TScintilla &scintilla)
-{
-    changeCaseOfSelection(scintilla, caseConvLower);
-}
-
-inline void capitalize(TScintilla &scintilla)
-{
-    changeCaseOfSelection(scintilla, caseConvCapitalize);
-}
-
 } // namespace turbo
 
 #endif
