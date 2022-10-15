@@ -27,7 +27,8 @@ const ushort
     cmRename        = 110,
     cmSelUppercase  = 111,
     cmSelLowercase  = 112,
-    cmSelCapitalize = 113;
+    cmSelCapitalize = 113,
+    cmToggleComment = 114;
 
 // Commands that cannot be deactivated.
 const ushort

@@ -107,6 +107,7 @@ public:
     inline void uppercase();
     inline void lowercase();
     inline void capitalize();
+    inline void toggleComment();
 };
 
 template <class Func>
@@ -136,6 +137,11 @@ inline void Editor::lowercase()
 inline void Editor::capitalize()
 {
     turbo::changeCaseOfSelection(scintilla, caseConvCapitalize);
+}
+
+inline void Editor::toggleComment()
+{
+    turbo::toggleComment(scintilla, language);
 }
 
 class EditorView : public TSurfaceView

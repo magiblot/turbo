@@ -87,6 +87,299 @@ void AutoIndent::applyToCurrentLine(TScintilla &scintilla)
 }
 
 /////////////////////////////////////////////////////////////////////////
+// Comment toggling
+
+static bool removeComment(TScintilla &, const Language &);
+static bool removeBlockComment(TScintilla &, const Language &);
+static Sci::Position getSelectionEndSkippingEmptyLastLine(TScintilla &, Sci::Position);
+static void getLineStartAndEnd(TScintilla &, Sci::Position &, Sci::Position &);
+static TStringView getViewIntoText(TScintilla &, Sci::Position, Sci::Position);
+static size_t findCommentAtStart(TStringView, TStringView);
+static size_t findCommentAtEnd(TStringView, TStringView);
+static bool removeLineComments(TScintilla &, const Language &);
+static bool noLinesBeginWithoutLineComment(TScintilla &, const Language &, Sci::Line, Sci::Line);
+static void removeLineCommentFromLine(TScintilla &, const Language &, Sci::Line);
+static void insertComment(TScintilla &, const Language &);
+static bool thereIsTextBeforeOrAfterSelection(TScintilla &);
+static void insertBlockComment(TScintilla &, const Language &);
+static void restoreSelectionAfterInsert(TScintilla &, Sci::Position, Sci::Position, Sci::Position, size_t);
+static void insertLineComments(TScintilla &, const Language &);
+static size_t minIndentationInLines(TScintilla &, Sci::Line, Sci::Line);
+static size_t insertLineCommentIntoLine(TScintilla &, const Language &, Sci::Line, size_t);
+
+void toggleComment(TScintilla &scintilla, const Language *language)
+{
+    if (language && (language->hasLineComments() || language->hasBlockComments()))
+    {
+        if (!removeComment(scintilla, *language))
+            insertComment(scintilla, *language);
+        call(scintilla, SCI_SCROLLCARET, 0U, 0U);
+    }
+}
+
+static bool removeComment(TScintilla &scintilla, const Language &language)
+{
+    return removeBlockComment(scintilla, language)
+        || removeLineComments(scintilla, language);
+}
+
+static bool removeBlockComment(TScintilla &scintilla, const Language &language)
+{
+    if (language.hasBlockComments())
+    {
+        Sci::Position posStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+        Sci::Position posEnd = getSelectionEndSkippingEmptyLastLine(scintilla, posStart);
+        if (posStart == posEnd)
+            getLineStartAndEnd(scintilla, posStart, posEnd);
+        TStringView text = getViewIntoText(scintilla, posStart, posEnd);
+
+        size_t openStart = findCommentAtStart(text, language.blockCommentOpen);
+        if (openStart < text.size())
+        {
+            size_t closeStart = findCommentAtEnd(text, language.blockCommentClose);
+            if (closeStart < text.size())
+            {
+                size_t openSize = language.blockCommentOpen.size();
+                size_t closeSize = language.blockCommentClose.size();
+                call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
+                call(scintilla, SCI_DELETERANGE, posStart + openStart, openSize);
+                call(scintilla, SCI_DELETERANGE, posStart + closeStart - openSize, closeSize);
+                call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+static Sci::Position getSelectionEndSkippingEmptyLastLine(TScintilla &scintilla, Sci::Position selStart)
+{
+    Sci::Position selEnd = call(scintilla, SCI_GETSELECTIONEND, 0U, 0U);
+    if (selStart < selEnd)
+    {
+        Sci::Line line = call(scintilla, SCI_LINEFROMPOSITION, selEnd, 0U);
+        Sci::Line prevPosLine = call(scintilla, SCI_LINEFROMPOSITION, selEnd - 1, 0U);
+        if (prevPosLine < line)
+            return call(scintilla, SCI_GETLINEENDPOSITION, prevPosLine, 0U);
+    }
+    return selEnd;
+}
+
+static void getLineStartAndEnd(TScintilla &scintilla, Sci::Position &posStart, Sci::Position &posEnd)
+{
+    Sci::Line line = call(scintilla, SCI_LINEFROMPOSITION, posStart, 0U);
+    posStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
+    posEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
+}
+
+static TStringView getViewIntoText(TScintilla &scintilla, Sci::Position start, Sci::Position end)
+{
+    auto length = size_t(end - start);
+    return TStringView {
+        (const char *) call(scintilla, SCI_GETRANGEPOINTER, start, length),
+        size_t(length),
+    };
+}
+
+static size_t findCommentAtStart(TStringView text, TStringView comment)
+{
+    size_t i = 0;
+    while (i < text.size() && Scintilla::IsSpaceOrTab(text[i]))
+        ++i;
+    size_t j = 0;
+    while (j < comment.size())
+        if (!(i < text.size() && text[i++] == comment[j++]))
+            return text.size();
+    return i - comment.size();
+}
+
+static size_t findCommentAtEnd(TStringView text, TStringView comment)
+{
+    size_t i = text.size();
+    while (i > 0 && Scintilla::IsSpaceOrTab(text[i - 1]))
+        --i;
+    size_t j = comment.size();
+    while (j > 0)
+        if (!(i > 0 && text[--i] == comment[--j]))
+            return text.size();
+    return i;
+}
+
+static bool removeLineComments(TScintilla &scintilla, const Language &language)
+{
+    if (language.hasLineComments())
+    {
+        Sci::Position selStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+        Sci::Position selEnd = getSelectionEndSkippingEmptyLastLine(scintilla, selStart);
+        Sci::Line firstLine = call(scintilla, SCI_LINEFROMPOSITION, selStart, 0U);
+        Sci::Line lastLine = call(scintilla, SCI_LINEFROMPOSITION, selEnd, 0U);
+
+        if (noLinesBeginWithoutLineComment(scintilla, language, firstLine, lastLine))
+        {
+            call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
+            for (Sci::Line line = firstLine; line <= lastLine; ++line)
+                removeLineCommentFromLine(scintilla, language, line);
+            call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool noLinesBeginWithoutLineComment(TScintilla &scintilla, const Language &language, Sci::Line firstLine, Sci::Line lastLine)
+{
+    bool atLeastOneIsNotEmpty = false;
+    for (Sci::Line line = firstLine; line <= lastLine; ++line)
+    {
+        Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
+        Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
+        TStringView text = getViewIntoText(scintilla, lineStart, lineEnd);
+        if (!text.empty() && text.size() == findCommentAtStart(text, language.lineComment))
+            return false;
+        else if (!text.empty())
+            atLeastOneIsNotEmpty = true;
+    }
+    return atLeastOneIsNotEmpty;
+}
+
+static void removeLineCommentFromLine(TScintilla &scintilla, const Language &language, Sci::Line line)
+// Pre: 'language.lineComment' is not empty.
+{
+    Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
+    Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
+    TStringView text = getViewIntoText(scintilla, lineStart, lineEnd);
+    TStringView comment = language.lineComment;
+    size_t commentStart = findCommentAtStart(text, comment);
+    if (commentStart < text.size())
+    {
+        size_t commentEnd = commentStart + comment.size();
+        if (comment.back() != ' ' && commentEnd < text.size() && text[commentEnd] == ' ')
+            commentEnd += 1;
+        call(scintilla, SCI_DELETERANGE, lineStart + commentStart, commentEnd - commentStart);
+    }
+}
+
+static void insertComment(TScintilla &scintilla, const Language &language)
+// Pre: language supports at least one kind of comment.
+{
+    if ( !language.hasLineComments()
+         || (language.hasBlockComments() && thereIsTextBeforeOrAfterSelection(scintilla)) )
+        insertBlockComment(scintilla, language);
+    else
+        insertLineComments(scintilla, language);
+}
+
+bool thereIsTextBeforeOrAfterSelection(TScintilla &scintilla)
+{
+    Sci::Position selStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+    Sci::Position selEnd = getSelectionEndSkippingEmptyLastLine(scintilla, selStart);
+    if (selStart < selEnd)
+    {
+        Sci::Line firstLine = call(scintilla, SCI_LINEFROMPOSITION, selStart, 0U);
+        Sci::Position firstLineStart = call(scintilla, SCI_POSITIONFROMLINE, firstLine, 0U);
+        TStringView textBefore = getViewIntoText(scintilla, firstLineStart, selStart);
+        for (char c : textBefore)
+            if (!Scintilla::IsSpaceOrTab(c))
+                return true;
+        Sci::Line lastLine = call(scintilla, SCI_LINEFROMPOSITION, selEnd, 0U);
+        Sci::Position lastLineEnd = call(scintilla, SCI_GETLINEENDPOSITION, lastLine, 0U);
+        TStringView textAfter = getViewIntoText(scintilla, selEnd, lastLineEnd);
+        for (char c : textAfter)
+            if (!Scintilla::IsSpaceOrTab(c))
+                return true;
+    }
+    return false;
+}
+
+static void insertBlockComment(TScintilla &scintilla, const Language &language)
+// Pre: language.hasBlockComments()
+{
+    Sci::Position caret = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
+    Sci::Position anchor = call(scintilla, SCI_GETANCHOR, 0U, 0U);
+    Sci::Position posStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+    Sci::Position posEnd = getSelectionEndSkippingEmptyLastLine(scintilla, posStart);
+    if (posStart == posEnd)
+        getLineStartAndEnd(scintilla, posStart, posEnd);
+
+    call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
+    call(scintilla, SCI_INSERTTEXT, posEnd, (sptr_t) std::string(language.blockCommentClose).c_str());
+    call(scintilla, SCI_INSERTTEXT, posStart, (sptr_t) std::string(language.blockCommentOpen).c_str());
+    size_t insertLength = language.blockCommentOpen.size() + language.blockCommentClose.size();
+    restoreSelectionAfterInsert(scintilla, caret, anchor, posStart, insertLength);
+    call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
+}
+
+static void restoreSelectionAfterInsert(TScintilla &scintilla, Sci::Position caret, Sci::Position anchor, Sci::Position firstInsert, size_t insertLength)
+{
+    if (caret != anchor)
+    {
+        Sci::Position &selStart = caret < anchor ? caret : anchor;
+        Sci::Position &selEnd = caret > anchor ? caret : anchor;
+        if (firstInsert < selStart)
+            selStart += insertLength;
+        selEnd += insertLength;
+        call(scintilla, SCI_SETSEL, anchor, caret);
+    }
+}
+
+static void insertLineComments(TScintilla &scintilla, const Language &language)
+// Pre: language.hasLineComments()
+{
+    Sci::Position caret = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
+    Sci::Position anchor = call(scintilla, SCI_GETANCHOR, 0U, 0U);
+    Sci::Position posStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+    Sci::Position posEnd = getSelectionEndSkippingEmptyLastLine(scintilla, posStart);
+    Sci::Line firstLine = call(scintilla, SCI_LINEFROMPOSITION, posStart, 0U);
+    Sci::Line lastLine = call(scintilla, SCI_LINEFROMPOSITION, posEnd, 0U);
+    Sci::Position firstLineStart = call(scintilla, SCI_POSITIONFROMLINE, firstLine, 0U);
+
+    size_t indentation = minIndentationInLines(scintilla, firstLine, lastLine);
+    call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
+    size_t insertLength = 0;
+    for (Sci::Line line = firstLine; line <= lastLine; ++line)
+        insertLength += insertLineCommentIntoLine(scintilla, language, line, indentation);
+    restoreSelectionAfterInsert(scintilla, caret, anchor, firstLineStart + indentation, insertLength);
+    call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
+}
+
+static size_t minIndentationInLines(TScintilla &scintilla, Sci::Line firstLine, Sci::Line lastLine)
+{
+    size_t result = (size_t) -1;
+    for (Sci::Line line = firstLine; line <= lastLine; ++line)
+    {
+        Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
+        Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
+        TStringView text = getViewIntoText(scintilla, lineStart, lineEnd);
+        if (!text.empty())
+        {
+            size_t i = 0;
+            while (i < text.size() && Scintilla::IsSpaceOrTab(text[i]))
+                ++i;
+            result = min(i, result);
+        }
+    }
+    return result == (size_t) -1 ? 0 : result;
+}
+
+static size_t insertLineCommentIntoLine(TScintilla &scintilla, const Language &language, Sci::Line line, size_t indentation)
+{
+    std::string comment {language.lineComment};
+    if (comment.back() != ' ')
+        comment.push_back(' ');
+    size_t insertLength = 0;
+    Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
+    Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
+    if (lineStart == lineEnd && indentation > 0)
+    {
+        call(scintilla, SCI_INSERTTEXT, lineStart, (sptr_t) std::string(indentation, ' ').c_str());
+        insertLength += indentation;
+    }
+    call(scintilla, SCI_INSERTTEXT, lineStart + indentation, (sptr_t) comment.c_str());
+    insertLength += comment.size();
+    return insertLength;
+}
+
+/////////////////////////////////////////////////////////////////////////
 
 void applyTheming(const LexerSettings *lexer, const ColorScheme *aScheme, TScintilla &scintilla)
 {

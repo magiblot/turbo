@@ -7,6 +7,8 @@
 !include/**/
 !source/
 !source/**/
+!test/
+!test/**/
 
 !*.*
 *~/

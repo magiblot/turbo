@@ -78,6 +78,7 @@ Some of the default keybindings are:
 * `Ctrl+X`/`Shift+Del`: cut.
 * `Ctrl+Z`, `Ctrl+Y`: undo/redo.
 * `Tab`, `Shift+Tab`: indent/unindent.
+* `Ctrl+Q`: toggle comment.
 * `Ctrl+A`: select all.
 * `Shift+Arrow`: extend selection.
 * `Ctrl+F`: find.
@@ -89,7 +90,7 @@ Some of the default keybindings are:
 * `Ctrl+S`: save document.
 * `Ctrl+W`: close focused document.
 * `F6`, `Shift+F6`: next/previous document (in MRU order).
-* `Alt+X`: exit the application (I prefer this over `Ctrl+Q`, which is too close to `Ctrl+A` and `Ctrl+W`).
+* `Alt+X`: exit the application.
 
 In environments with extended keyboard support (e.g. the Linux console, Windows or Kitty ≥ 0.20.0), the following key shortcuts may also work:
 
@@ -128,6 +129,7 @@ Below is my TO-DO list of features I would like to implement in Turbo:
 - [ ] Color scheme customization.
 - [x] Syntax highlighting for some languages (C/C++, Rust, Python, JavaScript, Make, Bash, Ruby, JSON, YAML).
 - [ ] Syntax highlighting for the rest of [languages supported by Scintilla](https://github.com/RaiKoHoff/scintilla/blob/master/include/SciLexer.h).
+- [x] Comment toggling.
 - [x] Brace match highlighting.
 - [ ] VIM input mode.
 - [ ] Localization.

@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 
 option(TURBO_BUILD_APP "Build main editor application" ON)
+option(TURBO_BUILD_TESTS "Build and run tests" OFF)
 option(TURBO_BUILD_EXAMPLES "Build example apps" OFF)
 option(TURBO_USE_SYSTEM_DEPS "Use system-wide dependencies instead of submodules (except Turbo Vision)" OFF)
 option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
@@ -150,6 +151,24 @@ if (TURBO_BUILD_APP)
     install(TARGETS ${TURBO} RUNTIME DESTINATION bin)
 endif()
 
+# Target 'tests'
+
+if (TURBO_BUILD_TESTS)
+    file(GLOB_RECURSE TEST_SRC "${CMAKE_CURRENT_LIST_DIR}/test/*.cc")
+    message(WARNING ${TEST_SRC})
+    add_executable(${TURBO}-test ${TEST_SRC})
+    target_compile_features(${TURBO}-test PRIVATE cxx_std_17)
+    turbo_set_warnings(${TURBO}-test)
+    find_library(GTEST gtest REQUIRED)
+    find_library(GTEST_MAIN gtest_main REQUIRED)
+    target_link_libraries(${TURBO}-test PRIVATE
+        ${TURBO}-core
+        ${GTEST}
+        ${GTEST_MAIN}
+    )
+    add_custom_command(TARGET ${TURBO}-test POST_BUILD COMMAND ${TURBO}-test WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+endif()
+
 # Examples
 
 add_subdirectory(source/examples)
@@ -164,5 +183,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0" AND TURBO_OPTIMIZE_BUILD)
     if (TURBO_BUILD_APP)
         set_target_properties(${TURBO} PROPERTIES UNITY_BUILD ON)
     endif()
-
+    if (TURBO_BUILD_TESTS)
+        set_target_properties(${TURBO}-test PROPERTIES UNITY_BUILD ON)
+    endif()
 endif()

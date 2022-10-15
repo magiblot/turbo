@@ -66,6 +66,7 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     ts += cmSelUppercase;
     ts += cmSelLowercase;
     ts += cmSelCapitalize;
+    ts += cmToggleComment;
     disableCommands(ts);
 
     // Actions that only make sense when there is at least one editor.
@@ -131,6 +132,8 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Find ~N~ext", cmSearchAgain, kbF3, hcNoContext, "F3" ) +
             *new TMenuItem( "Find ~P~revious", cmSearchPrev, kbShiftF3, hcNoContext, "Shift-F3" ) +
         *new TSubMenu( "Se~l~ection", kbAltL ) +
+            *new TMenuItem( "~T~oggle Comment", cmToggleComment, kbCtrlQ, hcNoContext ) +
+            newLine() +
             *new TMenuItem( "~U~ppercase", cmSelUppercase, kbNoKey, hcNoContext ) +
             *new TMenuItem( "~L~owercase", cmSelLowercase, kbNoKey, hcNoContext ) +
             *new TMenuItem( "~C~apitalize", cmSelCapitalize, kbNoKey, hcNoContext ) +

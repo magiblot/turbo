@@ -7,9 +7,21 @@
 
 namespace turbo {
 
-class Language
+struct Language
 {
-public:
+    TStringView lineComment {};
+    TStringView blockCommentOpen {};
+    TStringView blockCommentClose {};
+
+    constexpr bool hasLineComments() const
+    {
+        return !lineComment.empty();
+    }
+
+    constexpr bool hasBlockComments() const
+    {
+        return !blockCommentOpen.empty() && !blockCommentClose.empty();
+    }
 
     static const Language
         CPP,
@@ -39,10 +51,6 @@ public:
         Erlang,
         Smalltalk,
         Markdown;
-
-private:
-
-    Language() = default;
 };
 
 enum TextStyle : uchar

@@ -37,6 +37,7 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     enabledCmds += cmSelUppercase;
     enabledCmds += cmSelLowercase;
     enabledCmds += cmSelCapitalize;
+    enabledCmds += cmToggleComment;
 
     // Commands that always get disabled when unfocusing the editor.
     disabledCmds += enabledCmds;
@@ -88,6 +89,10 @@ void EditorWindow::handleEvent(TEvent &ev) {
                 break;
             case cmSelCapitalize:
                 editor.capitalize();
+                editor.partialRedraw();
+                break;
+            case cmToggleComment:
+                editor.toggleComment();
                 editor.partialRedraw();
                 break;
             default:

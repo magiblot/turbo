@@ -89,6 +89,9 @@ void applyTheming(const LexerSettings *lexer, const ColorScheme *scheme, TScinti
 // Highlights matching braces if there are any.
 void updateBraces(const ColorScheme *scheme, TScintilla &scintilla);
 
+// Toggles comment in selected text.
+void toggleComment(TScintilla &scintilla, const Language *language);
+
 void stripTrailingSpaces(TScintilla &scintilla);
 void ensureNewlineAtEnd(TScintilla &scintilla);
 
