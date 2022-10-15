@@ -132,7 +132,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Find ~N~ext", cmSearchAgain, kbF3, hcNoContext, "F3" ) +
             *new TMenuItem( "Find ~P~revious", cmSearchPrev, kbShiftF3, hcNoContext, "Shift-F3" ) +
         *new TSubMenu( "Se~l~ection", kbAltL ) +
-            *new TMenuItem( "~T~oggle Comment", cmToggleComment, kbCtrlQ, hcNoContext ) +
+            *new TMenuItem( "~T~oggle Comment", cmToggleComment, kbCtrlQ, hcNoContext, "Ctrl-Q" ) +
             newLine() +
             *new TMenuItem( "~U~ppercase", cmSelUppercase, kbNoKey, hcNoContext ) +
             *new TMenuItem( "~L~owercase", cmSelLowercase, kbNoKey, hcNoContext ) +
