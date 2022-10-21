@@ -345,7 +345,8 @@ void TurboApp::showEditorList(TEvent *ev)
         lw->putEvent(*ev);
     if (deskTop->execView(lw) == cmOK) {
         auto *head = (list_head<EditorWindow> *) lw->getSelected();
-        head->self->focus();
+        if (head->self)
+            head->self->focus();
     }
 
     destroy(lw);
