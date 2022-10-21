@@ -3,6 +3,8 @@
 # Manually include root-level directories
 !deps/
 !deps/**/
+!doc/
+!doc/**/
 !include/
 !include/**/
 !source/

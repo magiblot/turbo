@@ -128,6 +128,7 @@ if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
         COMPONENT library
     )
     install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/turbo" DESTINATION include)
+    install(FILES "${CMAKE_CURRENT_LIST_DIR}/doc/turbo.1" DESTINATION share/man/man1)
 endif()
 
 # Optional dependencies
@@ -155,7 +156,6 @@ endif()
 
 if (TURBO_BUILD_TESTS)
     file(GLOB_RECURSE TEST_SRC "${CMAKE_CURRENT_LIST_DIR}/test/*.cc")
-    message(WARNING ${TEST_SRC})
     add_executable(${TURBO}-test ${TEST_SRC})
     target_compile_features(${TURBO}-test PRIVATE cxx_std_17)
     turbo_set_warnings(${TURBO}-test)
