@@ -164,7 +164,11 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( "~Ctrl-S~ Save", kbNoKey, cmSave ) +
             *new TStatusItem( "~F6~ Next", kbF6, cmEditorNext ) +
             *new TStatusItem( "~F12~ Menu" , kbF12, cmMenu ) +
+            *new TStatusItem( 0, kbCtrlTab, cmEditorNext ) +
+            *new TStatusItem( 0, kbAltTab, cmEditorNext ) +
             *new TStatusItem( 0, kbShiftF6, cmEditorPrev ) +
+            *new TStatusItem( 0, TKey(kbCtrlTab, kbShift), cmEditorPrev ) +
+            *new TStatusItem( 0, TKey(kbAltTab, kbShift), cmEditorPrev ) +
             *new TStatusItem( 0, kbF5, cmZoom ) +
             *new TStatusItem( 0, kbCtrlF5, cmResize )
             );
@@ -191,16 +195,6 @@ void TurboApp::getEvent(TEvent &event)
         parseArgs();
     }
     TApplication::getEvent(event);
-    if (event.what == evKeyDown) {
-        // Handle key shortcuts that do not have their own keycode.
-        if (event.keyDown.keyCode == kbCtrlTab || event.keyDown.keyCode == kbAltTab)
-        {
-            static const ushort commands[] = {cmEditorNext, cmEditorPrev};
-            event.what = evCommand;
-            event.message.command = commands[!!(event.keyDown.controlKeyState & kbShift)];
-            event.message.infoPtr = 0;
-        }
-    }
 }
 
 void TurboApp::handleEvent(TEvent &event)

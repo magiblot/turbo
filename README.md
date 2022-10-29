@@ -84,7 +84,7 @@ Some of the default keybindings are:
 * `Ctrl+F`: find.
 * `Ctrl+Back`/`Alt+Back`, `Ctrl+Del`: erase one word left/right.
 * `Ctrl+Left`, `Ctrl+Right`: move one word left/right.
-* `Ctrl+Shift+Up`, `Ctrl+Shift+Down`: move selected lines up/down.
+* `Shift+Alt+Up`, `Shift+Alt+Down`: move selected lines up/down.
 * `Ctrl+N`: create new document.
 * `Ctrl+O`: "open file" dialog.
 * `Ctrl+S`: save document.

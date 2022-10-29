@@ -53,8 +53,8 @@ TScintilla::TScintilla(turbo::Clipboard *aClipboard) :
     view.customDrawWrapMarker = drawWrapMarker;
 
     // Extra key shortcuts
-    WndProc(SCI_ASSIGNCMDKEY, SCK_UP | ((SCMOD_CTRL | SCMOD_SHIFT) << 16), SCI_MOVESELECTEDLINESUP);
-    WndProc(SCI_ASSIGNCMDKEY, SCK_DOWN | ((SCMOD_CTRL | SCMOD_SHIFT) << 16), SCI_MOVESELECTEDLINESDOWN);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_UP | ((SCMOD_SHIFT | SCMOD_ALT) << 16), SCI_MOVESELECTEDLINESUP);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_DOWN | ((SCMOD_SHIFT | SCMOD_ALT) << 16), SCI_MOVESELECTEDLINESDOWN);
     // Since Ctrl+Back won't work in most terminals, allow Alt+Back, like Bash.
     WndProc(SCI_ASSIGNCMDKEY, SCK_BACK | ((SCMOD_ALT) << 16), SCI_DELWORDLEFT);
     // Ctrl+Shift+Z won't work in most terminals.
