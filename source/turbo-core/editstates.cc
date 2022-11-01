@@ -102,7 +102,7 @@ static void removeLineCommentFromLine(TScintilla &, const Language &, Sci::Line)
 static void insertComment(TScintilla &, const Language &);
 static bool thereIsTextBeforeOrAfterSelection(TScintilla &);
 static void insertBlockComment(TScintilla &, const Language &);
-static void restoreSelectionAfterInsert(TScintilla &, Sci::Position, Sci::Position, Sci::Position, size_t);
+static void restoreSelection(TScintilla &, Sci::Position, Sci::Position, Sci::Position, size_t, size_t);
 static void insertLineComments(TScintilla &, const Language &);
 static size_t minIndentationInLines(TScintilla &, Sci::Line, Sci::Line);
 static size_t insertLineCommentIntoLine(TScintilla &, const Language &, Sci::Line, size_t);
@@ -304,22 +304,26 @@ static void insertBlockComment(TScintilla &scintilla, const Language &language)
     call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
     call(scintilla, SCI_INSERTTEXT, posEnd, (sptr_t) std::string(language.blockCommentClose).c_str());
     call(scintilla, SCI_INSERTTEXT, posStart, (sptr_t) std::string(language.blockCommentOpen).c_str());
-    size_t insertLength = language.blockCommentOpen.size() + language.blockCommentClose.size();
-    restoreSelectionAfterInsert(scintilla, caret, anchor, posStart, insertLength);
+    restoreSelection(scintilla, caret, anchor, posStart, language.blockCommentOpen.size(), language.blockCommentClose.size());
     call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
 }
 
-static void restoreSelectionAfterInsert(TScintilla &scintilla, Sci::Position caret, Sci::Position anchor, Sci::Position firstInsert, size_t insertLength)
+static void restoreSelection(TScintilla &scintilla, Sci::Position caret, Sci::Position anchor, Sci::Position prefixInsertPos, size_t prefixLength, size_t suffixLength)
 {
-    if (caret != anchor)
+    Sci::Position &selStart = caret < anchor ? caret : anchor;
+    Sci::Position &selEnd = caret < anchor ? anchor : caret;
+    if (caret == anchor)
     {
-        Sci::Position &selStart = caret < anchor ? caret : anchor;
-        Sci::Position &selEnd = caret > anchor ? caret : anchor;
-        if (firstInsert < selStart)
-            selStart += insertLength;
-        selEnd += insertLength;
-        call(scintilla, SCI_SETSEL, anchor, caret);
+        selStart += prefixLength;
+        selEnd = selStart;
     }
+    else
+    {
+        if (prefixInsertPos < selStart)
+            selStart += prefixLength;
+        selEnd += prefixLength + suffixLength;
+    }
+    call(scintilla, SCI_SETSEL, anchor, caret);
 }
 
 static void insertLineComments(TScintilla &scintilla, const Language &language)
@@ -338,13 +342,13 @@ static void insertLineComments(TScintilla &scintilla, const Language &language)
     size_t insertLength = 0;
     for (Sci::Line line = firstLine; line <= lastLine; ++line)
         insertLength += insertLineCommentIntoLine(scintilla, language, line, indentation);
-    restoreSelectionAfterInsert(scintilla, caret, anchor, firstLineStart + indentation, insertLength);
+    restoreSelection(scintilla, caret, anchor, firstLineStart + indentation, insertLength, 0);
     call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
 }
 
 static size_t minIndentationInLines(TScintilla &scintilla, Sci::Line firstLine, Sci::Line lastLine)
 {
-    size_t result = (size_t) -1;
+    size_t result = SIZE_MAX;
     for (Sci::Line line = firstLine; line <= lastLine; ++line)
     {
         Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
@@ -355,10 +359,11 @@ static size_t minIndentationInLines(TScintilla &scintilla, Sci::Line firstLine, 
             size_t i = 0;
             while (i < text.size() && Scintilla::IsSpaceOrTab(text[i]))
                 ++i;
-            result = min(i, result);
+            if (i != text.size())
+                result = min(i, result);
         }
     }
-    return result == (size_t) -1 ? 0 : result;
+    return result == SIZE_MAX ? 0 : result;
 }
 
 static size_t insertLineCommentIntoLine(TScintilla &scintilla, const Language &language, Sci::Line line, size_t indentation)

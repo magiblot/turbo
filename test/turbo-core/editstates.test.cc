@@ -193,6 +193,18 @@ TEST(EditStates, ShouldInsertHtmlBlockComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
+        {   "|\n",
+
+            "<!--|-->\n",
+        },
+        {   "|<!DOCTYPE html>\n",
+
+            "<!--|<!DOCTYPE html>-->\n",
+        },
+        {   "<|!DOCTYPE html>\n",
+
+            "<!--<|!DOCTYPE html>-->\n",
+        },
         {   "^\n"
             "\n"
             "\n"
@@ -251,6 +263,18 @@ TEST(EditStates, ShouldInsertCppLineComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
+        {   "|\n",
+
+            "// |\n",
+        },
+        {   " |\n",
+
+            "//  |\n",
+        },
+        {   "|int i = 0;\n",
+
+            "// |int i = 0;\n",
+        },
         {   "int i| = 0;\n",
 
             "// int i| = 0;\n",
