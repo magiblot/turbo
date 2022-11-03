@@ -11,153 +11,105 @@
 #include "editwindow.h"
 #include <turbo/util.h>
 
-void insertSearchBox(EditorWindow &win)
+SearchBox &SearchBox::create(const TRect &editorBounds, turbo::Editor &editor) noexcept
 {
-    TRect r = win.getExtent().grow(-1, -1);
-    r.a.y = r.b.y - 2;
-    auto *box = new SearchBox(r, win);
-    box->growMode = gfGrowAll & ~gfGrowLoX;
-    box->options |= ofFramed | ofFirstClick | ofPreProcess | ofPostProcess;
-    box->hide();
-    win.insert(box);
-}
+    TRect bounds = editorBounds;
+    bounds.a.y = bounds.b.y;
+    auto &self = *new SearchBox(bounds, editor);
+    self.growMode = gfGrowAll & ~gfGrowLoX;
+    self.options |= ofFramed | ofFirstClick;
+    self.options |= ofPostProcess; // So that search commands reach the input line.
+    self.hide();
 
-SearchBox::SearchBox(const TRect &bounds, EditorWindow &win) :
-    TGroup(bounds),
-    visible(false)
-{
+    auto *bckgrnd = new TView({0, 0, self.size.x, 2});
+    bckgrnd->growMode = gfGrowHiX | gfGrowHiY;
+    bckgrnd->eventMask = 0;
+    self.insert(bckgrnd);
+
     auto *findText = "~F~ind:",
          *nextText = "~N~ext",
          *prevText = "~P~revious";
-    auto rLabelF = TRect(0, 0, 1 + cstrlen(findText), 1);
-    auto rPrev = TRect(size.x - cstrlen(prevText) - 5, 0, size.x - 1, 2);
-    auto rNext = TRect(rPrev.a.x - cstrlen(nextText) - 5, 0, rPrev.a.x, 2);
-    auto rBoxF = TRect(rLabelF.b.x + 1, 0, rNext.a.x, 1);
-    {
-        findBox = new SearchInputLine(new Searcher(win.editor), rBoxF, 256);
-        findBox->growMode = gfGrowHiX;
-        // Enable ofPostProcess so that it can receive commands even when not selected.
-        findBox->options |= ofPostProcess;
-        insert(findBox);
-    }
-    {
-        TView *v = new TLabel(rLabelF, findText, findBox);
-        v->growMode = 0;
-        insert(v);
-    }
-    {
-        TView *v = new TButton(rNext, nextText, cmSearchAgain, bfNormal);
-        v->growMode = gfGrowLoX | gfGrowHiX;
-        insert(v);
-    }
-    {
-        TView *v = new TButton(rPrev, prevText, cmSearchPrev, bfNormal);
-        v->growMode = gfGrowLoX | gfGrowHiX;
-        insert(v);
-    }
+    TRect rLabelF {0, 0, 1 + cstrlen(findText), 1};
+    TRect rPrev {self.size.x - cstrlen(prevText) - 5, 0, self.size.x - 1, 2};
+    TRect rNext {rPrev.a.x - cstrlen(nextText) - 5, 0, rPrev.a.x, 2};
+    TRect rBoxF {rLabelF.b.x + 1, 0, rNext.a.x, 1};
+
+    auto *ilFind = new SearchInputLine(*new Searcher(editor), rBoxF, 256);
+    ilFind->growMode = gfGrowHiX;
+    self.insert(ilFind);
+
+    auto *lblFind = new TLabel(rLabelF, findText, ilFind);
+    lblFind->growMode = 0;
+    self.insert(lblFind);
+
+    auto *btnNext = new TButton(rNext, nextText, cmSearchAgain, bfNormal);
+    btnNext->growMode = gfGrowLoX | gfGrowHiX;
+    self.insert(btnNext);
+
+    auto *btnPrev = new TButton(rPrev, prevText, cmSearchPrev, bfNormal);
+    btnPrev->growMode = gfGrowLoX | gfGrowHiX;
+    self.insert(btnPrev);
+
+    ilFind->select();
+
+    return self;
 }
 
 void SearchBox::handleEvent(TEvent &ev)
 {
-    if (owner->phase == phPreProcess) {
-        // kbEsc received while visible but not focused.
-        if (visible && ev.what == evKeyDown && ev.keyDown.keyCode == kbEsc) {
-            close();
-            clearEvent(ev);
-        }
-    } else {
-        bool handled = true;
-        switch (ev.what) {
-            case evKeyDown:
-                switch (ev.keyDown.keyCode) {
-                    case kbEsc:
-                        close();
-                        break;
-                    // Like TWindow:
-                    case kbTab:
-                        focusNext(False);
-                        break;
-                    case kbShiftTab:
-                        focusNext(True);
-                        break;
-                    case kbEnter:
-                        if (ev.keyDown.controlKeyState & kbShift) {
-                            // Shift+Enter, only works on the linux console.
-                            ev.what = evCommand;
-                            ev.message.command = cmSearchPrev;
-                        } else {
-                            // Like TDialog:
-                            ev.what = evBroadcast;
-                            ev.message.command = cmDefault;
-                        }
-                        ev.message.infoPtr = 0;
-                        handled = false;
-                        break;
-                    default:
-                        handled = false;
-                }
+    if (ev.what == evKeyDown)
+    {
+        switch (ev.keyDown.keyCode)
+        {
+            case kbTab:
+                focusNext(False);
+                clearEvent(ev);
                 break;
-            case evCommand:
-                switch (ev.message.command) {
-                    // cmFind and cmReplace do not perform any search.
-                    // They only enable the view.
-                    case cmFind:
-                        open();
-                        break;
-                    case cmReplace:
-                        open();
-                        break;
-                    default:
-                        handled = false;
-                }
+            case kbShiftTab:
+                focusNext(True);
+                clearEvent(ev);
                 break;
-            default:
-                handled = false;
         }
-        if (handled)
-            clearEvent(ev);
-        TGroup::handleEvent(ev);
     }
+    TGroup::handleEvent(ev);
 }
 
-void SearchBox::draw()
+static inline void fixEditorSize(SearchBox &self, turbo::Editor &editor)
 {
-    TView::draw();
-    TGroup::redraw();
-}
-
-static inline void grow(TView &v, TPoint delta)
-{
-    TRect r = v.getBounds();
-    r.b += delta;
-    v.setBounds(r);
+    turbo::forEachNotNull([&] (TView &v) {
+        TRect r = v.getBounds();
+        r.b.y = self.origin.y - (self.size.y > 0);
+        v.setBounds(r);
+    }, editor.view, editor.leftMargin);
+    editor.redraw();
 }
 
 void SearchBox::open()
 {
-    if (!visible && owner) {
-        auto &editor = ((EditorWindow *) owner)->editor;
-        turbo::forEachNotNull([&] (TView &v) {
-            grow(v, {0, -(size.y + 1)});
-        }, editor.view, editor.leftMargin);
+    if (size.y == 0)
+    {
+        TRect r = getBounds();
+        r.a.y = r.b.y - 2;
+        changeBounds(r);
         show();
-        editor.redraw();
-        visible = true;
-    } else
+        fixEditorSize(*this, editor);
+    }
+    else
         focus();
 }
 
-void SearchBox::close()
+bool SearchBox::close()
 {
-    if (visible && owner) {
-        auto &editor = ((EditorWindow *) owner)->editor;
-        turbo::forEachNotNull([&] (TView &v) {
-            grow(v, {0, size.y + 1});
-        }, editor.view, editor.leftMargin);
+    if (size.y != 0)
+    {
         hide();
-        editor.redraw();
-        visible = false;
+        TRect r = getBounds();
+        r.a.y = r.b.y;
+        changeBounds(r);
+        fixEditorSize(*this, editor);
+        return true;
     }
+    return false;
 }
 
 void SearchInputLine::setState(ushort aState, Boolean enable)
@@ -165,41 +117,41 @@ void SearchInputLine::setState(ushort aState, Boolean enable)
     TInputLine::setState(aState, enable);
     // When the input line is focused, get ready to search.
     if (aState == sfFocused && enable)
-        searcher->targetFromCurrent();
+        searcher.targetFromCurrent();
 }
 
 void SearchInputLine::handleEvent(TEvent &ev)
 {
-    if ( (ev.what == evBroadcast && ev.message.command == cmDefault && owner->phase == phFocused) ||
-         (ev.what == evCommand && ev.message.command == cmSearchAgain) )
+    if (owner->phase == phFocused || ev.what == evCommand)
     {
-        searcher->targetNext();
-        doSearch();
-        clearEvent(ev);
+        if ( (ev.what == evCommand && ev.message.command == cmSearchAgain) ||
+             (ev.what == evKeyDown && ev.keyDown == TKey(kbEnter)) )
+        {
+            searcher.targetNext();
+            doSearch();
+            clearEvent(ev);
+        }
+        else if ( (ev.what == evCommand && ev.message.command == cmSearchPrev) ||
+                  (ev.what == evKeyDown && ev.keyDown == TKey(kbEnter, kbShift)) )
+        {
+            searcher.targetPrev();
+            doSearch();
+            clearEvent(ev);
+        }
+        else
+            TInputLine::handleEvent(ev);
     }
-    else if (ev.what == evCommand && ev.message.command == cmSearchPrev)
-    {
-        searcher->targetPrev();
-        doSearch();
-        clearEvent(ev);
-    }
-    else if (owner->phase == phFocused)
-        TInputLine::handleEvent(ev);
 }
 
 void SearchInputLine::doSearch()
 {
-    searcher->onDemand = true;
-    // Anything but cmValid and cmCancel will trigger TValidator::validate.
-    valid(cmOK);
-    searcher->onDemand = false;
+    searcher.validate(data);
 }
 
 Boolean Searcher::isValid(const char *s)
 {
-    // Invoked from TValidator::validate, which in turn is invoked from
-    // TInputLine::valid.
-    if (onDemand && *s)
+    // Invoked from TValidator::validate.
+    if (*s)
         searchText(s, true);
     return True;
 }
@@ -207,7 +159,7 @@ Boolean Searcher::isValid(const char *s)
 Boolean Searcher::isValidInput(char *s, Boolean)
 {
     // Invoked from TInputLine::checkValid, while typing.
-    direction = forward;
+    targetNext();
     typing = true;
     searchText(s, true);
     typing = false;
@@ -216,7 +168,7 @@ Boolean Searcher::isValidInput(char *s, Boolean)
 
 void Searcher::targetFromCurrent()
 {
-    direction = forward;
+    direction = Forward;
     auto cur = editor.callScintilla(SCI_GETSELECTIONSTART, 0U, 0U);
     auto end = editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
     editor.callScintilla(SCI_SETTARGETRANGE, cur, end);
@@ -224,7 +176,7 @@ void Searcher::targetFromCurrent()
 
 void Searcher::targetNext()
 {
-    direction = forward;
+    direction = Forward;
     auto end = editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
     auto start = resultEnd != -1 ? resultEnd : 0;
     editor.callScintilla(SCI_SETTARGETRANGE, start, end);
@@ -232,43 +184,43 @@ void Searcher::targetNext()
 
 void Searcher::targetPrev()
 {
-    direction = backwards;
+    direction = Backwards;
     auto start = result != -1 ? result : editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
     editor.callScintilla(SCI_SETTARGETRANGE, start, 0);
 }
 
-void Searcher::searchText(std::string_view s, bool wrap)
+void Searcher::searchText(TStringView s, bool wrap)
 {
     auto start = editor.callScintilla(SCI_GETTARGETSTART, 0U, 0U);
     auto end = editor.callScintilla(SCI_GETTARGETEND, 0U, 0U);
     result = editor.callScintilla(SCI_SEARCHINTARGET, s.size(), (sptr_t) s.data());
     // Restore search target as Scintilla sets it to the result text.
     editor.callScintilla(SCI_SETTARGETRANGE, start, end);
-    if (result != -1) {
+    if (result != -1)
+    {
         resultEnd = result + s.size();
         editor.callScintilla(SCI_SETSEL, result, resultEnd);
         // Since we cannot prevent TInputLine from doing duplicate searches,
         // at least search from the current point.
-        auto newStart = direction == forward ? result : resultEnd;
+        auto newStart = direction == Forward ? result : resultEnd;
         editor.callScintilla(SCI_SETTARGETSTART, newStart, 0U);
-    } else if (wrap && !typing) { // Do not wrap while typing.
+    }
+    else if (wrap && !typing) // Must not wrap while typing.
+    {
         resultEnd = -1;
-        if (direction == forward) {
-            if (start != 0) { // Had not searched the whole document already.
-                targetNext();
-                return searchText(s, false);
-            }
-        } else {
-            auto docEnd = editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
-            if (start != docEnd) {
-                targetPrev();
-                return searchText(s, false);
-            }
+        auto docEnd = editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
+        auto searchEnd = direction == Forward ? 0 : docEnd;
+        if (start != searchEnd) // Had not yet searched the whole document.
+        {
+            direction == Forward ? targetNext() : targetPrev();
+            return searchText(s, false);
         }
-    } else {
+    }
+    else
+    {
+        resultEnd = -1;
         auto cur = editor.callScintilla(SCI_GETCURRENTPOS, 0U, 0U);
         editor.callScintilla(SCI_SETEMPTYSELECTION, cur, 0U);
-        resultEnd = -1;
     }
     editor.redraw();
 }

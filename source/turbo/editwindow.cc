@@ -1,6 +1,7 @@
 #define Uses_TScrollBar
 #define Uses_TFrame
 #define Uses_MsgBox
+#define Uses_TKeys
 #define __INC_EDITORS_H
 #include <tvision/tv.h>
 
@@ -22,7 +23,8 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     fileNumber(fileCounter),
     parent(aParent)
 {
-    insertSearchBox(*this);
+    searchBox = &SearchBox::create(getExtent().grow(-1, -1), editor);
+    insert(searchBox);
 
     // Commands that always get enabled when focusing the editor.
     enabledCmds += cmSave;
@@ -46,65 +48,86 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
 
 void EditorWindow::shutDown()
 {
-    super::shutDown();
     parent.removeEditor(*this);
+    searchBox = nullptr;
+    super::shutDown();
 }
 
-void EditorWindow::handleEvent(TEvent &ev) {
+void EditorWindow::handleEvent(TEvent &ev)
+{
     auto &editor = getEditor();
-    if (ev.what == evCommand) {
-        bool handled = true;
-        TurboFileDialogs dlgs {parent};
-        switch (ev.message.command) {
-            case cmSave:
-                editor.save(dlgs);
-                break;
-            case cmSaveAs:
-                editor.saveAs(dlgs);
-                break;
-            case cmRename:
-                editor.rename(dlgs);
-                break;
-            case cmToggleWrap:
-                editor.wrapping.toggle(editor.scintilla);
-                editor.redraw();
-                break;
-            case cmToggleLineNums:
-                editor.lineNumbers.toggle();
-                editor.redraw();
-                break;
-            case cmToggleIndent:
-                editor.autoIndent.toggle();
-                break;
-            case cmCloseEditor:
-                handled = message(this, evCommand, cmClose, nullptr); // May delete 'this'!
-                break;
-            case cmSelUppercase:
-                editor.uppercase();
-                editor.partialRedraw();
-                break;
-            case cmSelLowercase:
-                editor.lowercase();
-                editor.partialRedraw();
-                break;
-            case cmSelCapitalize:
-                editor.capitalize();
-                editor.partialRedraw();
-                break;
-            case cmToggleComment:
-                editor.toggleComment();
-                editor.partialRedraw();
-                break;
-            default:
-                handled = false;
-        }
-        if (handled)
-        {
-            clearEvent(ev);
-            return;
-        }
+    TurboFileDialogs dlgs {parent};
+    bool handled = true;
+    switch (ev.what)
+    {
+        case evKeyDown:
+            switch (ev.keyDown.keyCode)
+            {
+                case kbEsc:
+                    handled = (searchBox && searchBox->close());
+                    break;
+                default:
+                    handled = false;
+            }
+            break;
+        case evCommand:
+            switch (ev.message.command)
+            {
+                case cmSave:
+                    editor.save(dlgs);
+                    break;
+                case cmSaveAs:
+                    editor.saveAs(dlgs);
+                    break;
+                case cmRename:
+                    editor.rename(dlgs);
+                    break;
+                case cmToggleWrap:
+                    editor.wrapping.toggle(editor.scintilla);
+                    editor.redraw();
+                    break;
+                case cmToggleLineNums:
+                    editor.lineNumbers.toggle();
+                    editor.redraw();
+                    break;
+                case cmToggleIndent:
+                    editor.autoIndent.toggle();
+                    break;
+                case cmCloseEditor:
+                    ev.message.command = cmClose;
+                    handled = false;
+                    break;
+                case cmSelUppercase:
+                    editor.uppercase();
+                    editor.partialRedraw();
+                    break;
+                case cmSelLowercase:
+                    editor.lowercase();
+                    editor.partialRedraw();
+                    break;
+                case cmSelCapitalize:
+                    editor.capitalize();
+                    editor.partialRedraw();
+                    break;
+                case cmToggleComment:
+                    editor.toggleComment();
+                    editor.partialRedraw();
+                    break;
+                case cmFind:
+                case cmReplace:
+                    if (searchBox)
+                        searchBox->open();
+                    break;
+                default:
+                    handled = false;
+            }
+        default:
+            handled = false;
     }
-    super::handleEvent(ev);
+    if (handled)
+        clearEvent(ev);
+    else
+        super::handleEvent(ev);
 }
 
 void EditorWindow::setState(ushort aState, Boolean enable)

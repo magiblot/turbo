@@ -6,64 +6,74 @@
 #define Uses_TInputLine
 #define Uses_TValidator
 #include <tvision/tv.h>
-#include <string_view>
 
-struct EditorWindow;
+namespace turbo
+{
+class Editor;
+}
 
-struct SearchBox : public TGroup {
+class SearchBox : public TGroup
+{
+    turbo::Editor &editor;
 
-    SearchBox(const TRect &bounds, EditorWindow &win);
-
-    TInputLine *findBox;
-    bool visible;
+    SearchBox(const TRect &bounds, turbo::Editor &aEditor) noexcept :
+        TGroup(bounds),
+        editor(aEditor)
+    {
+    }
 
     void handleEvent(TEvent &ev) override;
-    void draw() override;
-    void open();
-    void close();
 
+public:
+
+    static SearchBox &create(const TRect &editorBounds, turbo::Editor &editor) noexcept;
+
+    void open();
+    bool close();
 };
 
-void insertSearchBox(EditorWindow &win);
-
-struct Searcher : public TValidator {
-
+class Searcher : public TValidator
+{
     turbo::Editor &editor;
-    bool onDemand {false}, typing {false};
-    sptr_t result, resultEnd;
-    enum {forward=0, backwards=1} direction;
+    bool typing {false};
+    sptr_t result {-1};
+    sptr_t resultEnd {-1};
+    enum {Forward=0, Backwards=1} direction;
+
+    Boolean isValid(const char *) override;
+    Boolean isValidInput(char *, Boolean) override;
+
+    void searchText(TStringView, bool wrap);
+
+public:
 
     Searcher(turbo::Editor &aEditor) :
         editor(aEditor)
     {
     }
 
-    Boolean isValid(const char *) override;
-    Boolean isValidInput(char *, Boolean) override;
-
     void targetFromCurrent();
     void targetNext();
     void targetPrev();
-    void searchText(std::string_view, bool wrap);
-
 };
 
-struct SearchInputLine : public TInputLine {
-
-    Searcher *searcher;
-
-    template<typename ...Args>
-    SearchInputLine(Searcher *searcher, Args&& ...args) :
-        TInputLine(args..., searcher),
-        searcher(searcher)
-    {
-        eventMask |= evBroadcast; // For cmDefault events.
-    }
+class SearchInputLine : public TInputLine
+{
+    Searcher &searcher;
 
     void setState(ushort aState, Boolean enable) override;
     void handleEvent(TEvent &ev) override;
     void doSearch();
 
+public:
+
+    template<typename ...Args>
+    SearchInputLine(Searcher &aSearcher, Args&& ...args) :
+        TInputLine(args..., &aSearcher),
+        searcher(aSearcher)
+    {
+        options |= ofPostProcess; // For search commands when not selected.
+    }
 };
 
 #endif

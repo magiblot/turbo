@@ -10,6 +10,8 @@
 #include "apputils.h"
 #include "editor.h"
 
+class SearchBox;
+
 struct FileNumberState
 {
     active_counter *counter;
@@ -53,6 +55,8 @@ struct EditorWindow : public turbo::BasicEditorWindow
     TitleState lastTitleState {};
     std::string title;
     TCommandSet enabledCmds, disabledCmds;
+
+    SearchBox *searchBox {nullptr};
 
     EditorWindow( const TRect &bounds, TurboEditor &aEditor,
                   active_counter &fileCounter, EditorWindowParent &aParent ) noexcept;
