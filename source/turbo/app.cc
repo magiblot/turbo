@@ -169,6 +169,7 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( 0, kbShiftF6, cmEditorPrev ) +
             *new TStatusItem( 0, TKey(kbCtrlTab, kbShift), cmEditorPrev ) +
             *new TStatusItem( 0, TKey(kbAltTab, kbShift), cmEditorPrev ) +
+            *new TStatusItem( 0, TKey('/', kbCtrlShift), cmToggleComment ) +
             *new TStatusItem( 0, kbF5, cmZoom ) +
             *new TStatusItem( 0, kbCtrlF5, cmResize )
             );

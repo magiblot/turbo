@@ -97,6 +97,7 @@ In environments with extended keyboard support (e.g. the Linux console, Windows 
 * `Ctrl+Shift+Z`: redo.
 * `Ctrl+Tab`/`Alt+Tab`, `Ctrl+Shift+Tab`/`Alt+Shift+Tab`: next/previous document (in MRU order).
 * `Shift+Enter`: find previous (in the "find" text box).
+* `Ctrl+/`: toggle comment.
 
 Support for these key combinations may vary among terminal applications, but any issue on this should be reported to [Turbo Vision](https://github.com/magiblot/tvision/issues) instead.
 
