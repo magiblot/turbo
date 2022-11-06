@@ -15,6 +15,7 @@ class Editor;
 class SearchBox : public TGroup
 {
     turbo::Editor &editor;
+    TInputLine *inputLine {nullptr};
 
     SearchBox(const TRect &bounds, turbo::Editor &aEditor) noexcept :
         TGroup(bounds),
@@ -23,6 +24,7 @@ class SearchBox : public TGroup
     }
 
     void handleEvent(TEvent &ev) override;
+    void shutDown() override;
 
 public:
 

@@ -50,9 +50,15 @@ SearchBox &SearchBox::create(const TRect &editorBounds, turbo::Editor &editor) n
     btnPrev->growMode = gfGrowLoX | gfGrowHiX;
     self.insert(btnPrev);
 
-    ilFind->select();
+    self.inputLine = ilFind;
 
     return self;
+}
+
+void SearchBox::shutDown()
+{
+    inputLine = nullptr;
+    TGroup::shutDown();
 }
 
 void SearchBox::handleEvent(TEvent &ev)
@@ -86,6 +92,8 @@ static inline void fixEditorSize(SearchBox &self, turbo::Editor &editor)
 
 void SearchBox::open()
 {
+    if (inputLine)
+        inputLine->select();
     if (size.y == 0)
     {
         TRect r = getBounds();
