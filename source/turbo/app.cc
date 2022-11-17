@@ -242,9 +242,7 @@ void TurboApp::parseArgs()
         w->insert(current);
         insert(w);
         for (int i = 1; i < argc; ++i) {
-            char str[256] = {0}; // TParamText is limited to this size.
-            strncpy(str, argv[i], 255);
-            current->setText(str);
+            current->setText("%s", argv[i]);
             TScreen::flushScreen();
             fileOpenOrNew(argv[i]);
         }
