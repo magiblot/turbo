@@ -50,6 +50,7 @@ void setStyleColor(TScintilla &, int style, TColorAttr attr);
 TColorAttr getStyleColor(TScintilla &, int style);
 void setSelectionColor(TScintilla &, TColorAttr attr);
 void setWhitespaceColor(TScintilla &, TColorAttr attr);
+TStringView getRangePointer(TScintilla &, Sci_Position start, Sci_Position end);
 
 enum CaseConversion
 {

@@ -37,15 +37,8 @@ public:
 class Searcher : public TValidator
 {
     turbo::Editor &editor;
-    bool typing {false};
-    sptr_t result {-1};
-    sptr_t resultEnd {-1};
-    enum {Forward=0, Backwards=1} direction;
 
-    Boolean isValid(const char *) override;
     Boolean isValidInput(char *, Boolean) override;
-
-    void searchText(TStringView, bool wrap);
 
 public:
 
@@ -54,18 +47,14 @@ public:
     {
     }
 
-    void targetFromCurrent();
-    void targetNext();
-    void targetPrev();
+    void searchText(TStringView, turbo::SearchDirection direction);
 };
 
 class SearchInputLine : public TInputLine
 {
     Searcher &searcher;
 
-    void setState(ushort aState, Boolean enable) override;
     void handleEvent(TEvent &ev) override;
-    void doSearch();
 
 public:
 

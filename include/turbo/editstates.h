@@ -82,6 +82,33 @@ inline void AutoIndent::toggle()
     enabled ^= true;
 }
 
+enum SearchDirection : uint8_t
+{
+    sdForward,
+    sdForwardIncremental,
+    sdBackwards,
+};
+
+enum SearchMode : uint8_t
+{
+    smPlainText,
+    smWholeWords,
+    smRegularExpression,
+};
+
+enum SearchFlags : uint8_t
+{
+    sfCaseSensitive = 0x01,
+};
+
+struct SearchSettings
+{
+    SearchMode mode {smPlainText};
+    uint8_t flags {0};
+};
+
+void search(TScintilla &scintilla, TStringView text, SearchDirection direction, SearchSettings settings);
+
 // Updates 'scintilla' so that it makes use of the current state of
 // 'lexer' and 'scheme'. If 'scheme' is null, 'schemeDefault' is used instead.
 void applyTheming(const LexerSettings *lexer, const ColorScheme *scheme, TScintilla &scintilla);

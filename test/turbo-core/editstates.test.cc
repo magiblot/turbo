@@ -4,6 +4,594 @@
 namespace turbo
 {
 
+/////////////////////////////////////////////////////////////////////////
+// Search
+
+struct SearchTestInput
+{
+    std::string_view body;
+    std::string_view textToSearch;
+    SearchDirection direction {sdForward};
+    SearchSettings searchSettings;
+};
+
+std::ostream &operator<<(std::ostream &os, const SearchTestInput &input)
+{
+    os << "Search '" << input.textToSearch << "' in:" << std::endl
+       << input.body;
+    return os;
+}
+
+static std::string searchOnce(const SearchTestInput &input)
+{
+    return modifyScintillaAndGetTextState(input.body, [&] (auto &scintilla) {
+        search(scintilla, input.textToSearch, input.direction, input.searchSettings);
+    });
+}
+
+static std::string searchOnceAndAgain(const SearchTestInput &input)
+{
+    return modifyScintillaAndGetTextState(input.body, [&] (auto &scintilla) {
+        for (size_t i = 0; i < 2; ++i)
+            search(scintilla, input.textToSearch, input.direction, input.searchSettings);
+    });
+}
+
+static std::string searchIncremental(const SearchTestInput &input)
+{
+    return modifyScintillaAndGetTextState(input.body, [&] (auto &scintilla) {
+        for (size_t i = 1; i <= input.textToSearch.size(); ++i)
+            search(scintilla, input.textToSearch.substr(0, i), input.direction, input.searchSettings);
+    });
+}
+
+TEST(Search, ShouldSearchForwardOnce)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|1234567890\n",
+                "",
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "i",
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "4",
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "1234|567890\n",
+                "4",
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "1234|561\n",
+                "1",
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "1234561|\n",
+                "1",
+            },
+
+            "^1|234561\n",
+        },
+        {   {   "|aBcAbC\n",
+                "AbC",
+             },
+
+            "^aBc|AbC\n",
+        },
+        {   {   "|ñÇÑç\n",
+                "Ñç",
+             },
+
+            "^ñÇ|Ñç\n",
+        },
+        // With previous selection
+        {   {   "1234^5|67890\n",
+                "",
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "i",
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "4",
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "^1|234561\n",
+                "1",
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "|1^234561\n",
+                "1",
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "^12|34561\n",
+                "1",
+            },
+
+            "123456^1|\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchOnce(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Search, ShouldSearchForwardOnceAndAgain)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|1234567890\n",
+                "",
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "i",
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "4",
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "|1234561\n",
+                "1",
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "1|234561\n",
+                "1",
+            },
+
+            "^1|234561\n",
+        },
+        // With previous selection
+        {   {   "1234^5|67890\n",
+                "",
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "i",
+            },
+
+            "1234^5|67890\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchOnceAndAgain(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Search, ShouldSearchBackwardsOnce)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|1234567890\n",
+                "",
+                sdBackwards,
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "i",
+                sdBackwards,
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "4",
+                sdBackwards,
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "1234|567890\n",
+                "4",
+                sdBackwards,
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "1234|561\n",
+                "1",
+                sdBackwards,
+            },
+
+            "^1|234561\n",
+        },
+        {   {   "1234561|\n",
+                "1",
+                sdBackwards,
+            },
+
+            "123456^1|\n",
+        },
+        // With previous selection
+        {   {   "1234^5|67890\n",
+                "",
+                sdBackwards,
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "i",
+                sdBackwards,
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "4",
+                sdBackwards,
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "^1|234561\n",
+                "1",
+                sdBackwards,
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "|1^234561\n",
+                "1",
+                sdBackwards,
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "^12|34561\n",
+                "1",
+                sdBackwards,
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "|12^34561\n",
+                "1",
+                sdBackwards,
+            },
+
+            "123456^1|\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchOnce(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Search, ShouldSearchBackwardsOnceAndAgain)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|1234567890\n",
+                "",
+                sdBackwards,
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "i",
+                sdBackwards,
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "4",
+                sdBackwards,
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "1234561|\n",
+                "1",
+                sdBackwards,
+            },
+
+            "^1|234561\n",
+        },
+        {   {   "123456|1\n",
+                "1",
+                sdBackwards,
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "|1234561\n",
+                "1",
+                sdBackwards,
+            },
+
+            "^1|234561\n",
+        },
+        // With previous selection
+        {   {   "1234^5|67890\n",
+                "",
+                sdBackwards,
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "i",
+                sdBackwards,
+            },
+
+            "1234^5|67890\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchOnceAndAgain(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Search, ShouldSearchCaseSensitive)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|aBcAbC\n",
+                "",
+                sdForward,
+                {smPlainText, sfCaseSensitive},
+            },
+
+            "|aBcAbC\n",
+        },
+        {   {   "|aBcAbC\n",
+                "AbC",
+                sdForward,
+                {smPlainText, sfCaseSensitive},
+            },
+
+            "aBc^AbC|\n",
+        },
+        {   {   "|ñÇÑç\n",
+                "Ñç",
+                sdForward,
+                {smPlainText, sfCaseSensitive},
+            },
+
+            "ñÇ^Ñç|\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchOnce(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Search, ShouldSearchWholeWords)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|aBcAbC\n",
+                "",
+                sdForward,
+                {smWholeWords},
+            },
+
+            "|aBcAbC\n",
+        },
+        {   {   "|aBcAbC\n",
+                "AbC",
+                sdForward,
+                {smWholeWords},
+            },
+
+            "|aBcAbC\n",
+        },
+        {   {   "|aBcD aBc AbCd AbC\n",
+                "AbC",
+                sdForward,
+                {smWholeWords},
+            },
+
+            "aBcD ^aBc| AbCd AbC\n",
+        },
+        {   {   "|aBcD aBc AbCd AbC\n",
+                "AbC",
+                sdForward,
+                {smWholeWords, sfCaseSensitive},
+            },
+
+            "aBcD aBc AbCd ^AbC|\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchOnce(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Search, ShouldSearchWithRegex)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "z|zxayyzz\n",
+                ".*(a|xayy)",
+                sdForward,
+                {smRegularExpression},
+            },
+
+            "z^zxa|yyzz\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchOnce(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Search, ShouldSearchWithRegexOnceAndAgain)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "z|zxayyzz\n",
+                ".*(a|xayy)",
+                sdForward,
+                {smRegularExpression},
+            },
+
+            "^zzxa|yyzz\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchOnceAndAgain(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Search, ShouldSearchIncremental)
+{
+    static constexpr TestCase<SearchTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|1234567890\n",
+                "",
+                sdForwardIncremental,
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "i",
+                sdForwardIncremental,
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "4",
+                sdForwardIncremental,
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "|1234561\n",
+                "1",
+                sdForwardIncremental,
+            },
+
+            "^1|234561\n",
+        },
+        {   {   "1|234561\n",
+                "1",
+                sdForwardIncremental,
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "|1234561\n",
+                "124",
+                sdForwardIncremental,
+            },
+
+            "12|34561\n",
+        },
+        {   {   "|1234561\n",
+                "1245",
+                sdForwardIncremental,
+            },
+
+            "12|34561\n",
+        },
+        {   {   "|1231241\n",
+                "124",
+                sdForwardIncremental,
+            },
+
+            "123^124|1\n",
+        },
+        {   {   "|123abc123\n",
+                "123",
+                sdForwardIncremental,
+            },
+
+            "^123|abc123\n",
+        },
+        // With previous selection
+        {   {   "1234^5|67890\n",
+                "",
+                sdForwardIncremental,
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "i",
+                sdForwardIncremental,
+            },
+
+            "12345|67890\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = searchIncremental(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Comment toggling
+
 static std::string toggleComment(const Language &language, std::string_view input)
 {
     auto &&inputState = TextState::decode(input);
@@ -14,7 +602,7 @@ static std::string toggleComment(const Language &language, std::string_view inpu
     return TextState::encode(std::move(outputState));
 }
 
-TEST(EditStates, ShouldRemoveHtmlBlockComments)
+TEST(ToggleComment, ShouldRemoveHtmlBlockComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
@@ -69,7 +657,7 @@ TEST(EditStates, ShouldRemoveHtmlBlockComments)
     }
 }
 
-TEST(EditStates, ShouldRemoveCppBlockComments)
+TEST(ToggleComment, ShouldRemoveCppBlockComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
@@ -100,7 +688,7 @@ TEST(EditStates, ShouldRemoveCppBlockComments)
     }
 }
 
-TEST(EditStates, ShouldRemoveBashLineComments)
+TEST(ToggleComment, ShouldRemoveBashLineComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
@@ -137,7 +725,7 @@ TEST(EditStates, ShouldRemoveBashLineComments)
     }
 }
 
-TEST(EditStates, ShouldRemoveBatchLineComments)
+TEST(ToggleComment, ShouldRemoveBatchLineComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
@@ -158,7 +746,7 @@ TEST(EditStates, ShouldRemoveBatchLineComments)
     }
 }
 
-TEST(EditStates, ShouldRemoveCppLineComments)
+TEST(ToggleComment, ShouldRemoveCppLineComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
@@ -189,7 +777,7 @@ TEST(EditStates, ShouldRemoveCppLineComments)
     }
 }
 
-TEST(EditStates, ShouldInsertHtmlBlockComments)
+TEST(ToggleComment, ShouldInsertHtmlBlockComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
@@ -224,7 +812,7 @@ TEST(EditStates, ShouldInsertHtmlBlockComments)
     }
 }
 
-TEST(EditStates, ShouldInsertCppBlockComments)
+TEST(ToggleComment, ShouldInsertCppBlockComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
@@ -259,7 +847,7 @@ TEST(EditStates, ShouldInsertCppBlockComments)
     }
 }
 
-TEST(EditStates, ShouldInsertCppLineComments)
+TEST(ToggleComment, ShouldInsertCppLineComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {
@@ -334,7 +922,7 @@ TEST(EditStates, ShouldInsertCppLineComments)
     }
 }
 
-TEST(EditStates, ShouldInsertBatchLineComments)
+TEST(ToggleComment, ShouldInsertBatchLineComments)
 {
     static constexpr TestCase<std::string_view> testCases[] =
     {

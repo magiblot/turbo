@@ -9,6 +9,7 @@
 #include "app.h"
 #include "search.h"
 #include "editwindow.h"
+#include <turbo/editstates.h>
 #include <turbo/util.h>
 
 SearchBox &SearchBox::create(const TRect &editorBounds, turbo::Editor &editor) noexcept
@@ -120,30 +121,21 @@ bool SearchBox::close()
     return false;
 }
 
-void SearchInputLine::setState(ushort aState, Boolean enable)
-{
-    TInputLine::setState(aState, enable);
-    // When the input line is focused, get ready to search.
-    if (aState == sfFocused && enable)
-        searcher.targetFromCurrent();
-}
-
 void SearchInputLine::handleEvent(TEvent &ev)
 {
+    using namespace turbo;
     if (owner->phase == phFocused || ev.what == evCommand)
     {
         if ( (ev.what == evCommand && ev.message.command == cmSearchAgain) ||
              (ev.what == evKeyDown && ev.keyDown == TKey(kbEnter)) )
         {
-            searcher.targetNext();
-            doSearch();
+            searcher.searchText(data, sdForward);
             clearEvent(ev);
         }
         else if ( (ev.what == evCommand && ev.message.command == cmSearchPrev) ||
                   (ev.what == evKeyDown && ev.keyDown == TKey(kbEnter, kbShift)) )
         {
-            searcher.targetPrev();
-            doSearch();
+            searcher.searchText(data, sdBackwards);
             clearEvent(ev);
         }
         else
@@ -151,84 +143,17 @@ void SearchInputLine::handleEvent(TEvent &ev)
     }
 }
 
-void SearchInputLine::doSearch()
-{
-    searcher.validate(data);
-}
-
-Boolean Searcher::isValid(const char *s)
-{
-    // Invoked from TValidator::validate.
-    if (*s)
-        searchText(s, true);
-    return True;
-}
-
 Boolean Searcher::isValidInput(char *s, Boolean)
 {
-    // Invoked from TInputLine::checkValid, while typing.
-    targetNext();
-    typing = true;
-    searchText(s, true);
-    typing = false;
+    // Invoked while typing.
+    using namespace turbo;
+    searchText(s, sdForwardIncremental);
     return True;
 }
 
-void Searcher::targetFromCurrent()
+void Searcher::searchText(TStringView s, turbo::SearchDirection direction)
 {
-    direction = Forward;
-    auto cur = editor.callScintilla(SCI_GETSELECTIONSTART, 0U, 0U);
-    auto end = editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
-    editor.callScintilla(SCI_SETTARGETRANGE, cur, end);
-}
-
-void Searcher::targetNext()
-{
-    direction = Forward;
-    auto end = editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
-    auto start = resultEnd != -1 ? resultEnd : 0;
-    editor.callScintilla(SCI_SETTARGETRANGE, start, end);
-}
-
-void Searcher::targetPrev()
-{
-    direction = Backwards;
-    auto start = result != -1 ? result : editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
-    editor.callScintilla(SCI_SETTARGETRANGE, start, 0);
-}
-
-void Searcher::searchText(TStringView s, bool wrap)
-{
-    auto start = editor.callScintilla(SCI_GETTARGETSTART, 0U, 0U);
-    auto end = editor.callScintilla(SCI_GETTARGETEND, 0U, 0U);
-    result = editor.callScintilla(SCI_SEARCHINTARGET, s.size(), (sptr_t) s.data());
-    // Restore search target as Scintilla sets it to the result text.
-    editor.callScintilla(SCI_SETTARGETRANGE, start, end);
-    if (result != -1)
-    {
-        resultEnd = result + s.size();
-        editor.callScintilla(SCI_SETSEL, result, resultEnd);
-        // Since we cannot prevent TInputLine from doing duplicate searches,
-        // at least search from the current point.
-        auto newStart = direction == Forward ? result : resultEnd;
-        editor.callScintilla(SCI_SETTARGETSTART, newStart, 0U);
-    }
-    else if (wrap && !typing) // Must not wrap while typing.
-    {
-        resultEnd = -1;
-        auto docEnd = editor.callScintilla(SCI_GETTEXTLENGTH, 0U, 0U);
-        auto searchEnd = direction == Forward ? 0 : docEnd;
-        if (start != searchEnd) // Had not yet searched the whole document.
-        {
-            direction == Forward ? targetNext() : targetPrev();
-            return searchText(s, false);
-        }
-    }
-    else
-    {
-        resultEnd = -1;
-        auto cur = editor.callScintilla(SCI_GETCURRENTPOS, 0U, 0U);
-        editor.callScintilla(SCI_SETEMPTYSELECTION, cur, 0U);
-    }
-    editor.redraw();
+    using namespace turbo;
+    search(editor.scintilla, s, direction, SearchSettings {});
+    editor.partialRedraw();
 }

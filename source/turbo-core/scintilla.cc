@@ -235,6 +235,17 @@ void setWhitespaceColor(TScintilla &self, TColorAttr attr)
     call(self, SCI_SETWHITESPACEBACK, !bg.isDefault(), convertColor(bg).AsInteger());
 }
 
+TStringView getRangePointer(TScintilla &self, Sci_Position start, Sci_Position end)
+{
+    auto length = end - start;
+    if (length <= 0)
+        return TStringView();
+    return TStringView {
+        (const char *) self.WndProc(SCI_GETRANGEPOINTER, (uptr_t) start, (sptr_t) length),
+        size_t(length),
+    };
+}
+
 void changeCaseOfSelection(TScintilla &self, CaseConversion cnv)
 {
     self.ChangeCaseOfSelection(cnv);

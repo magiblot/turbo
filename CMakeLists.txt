@@ -163,10 +163,18 @@ if (TURBO_BUILD_TESTS)
     find_library(GTEST_MAIN gtest_main REQUIRED)
     target_link_libraries(${TURBO}-test PRIVATE
         ${TURBO}-core
+        fmt
         ${GTEST}
         ${GTEST_MAIN}
     )
-    add_custom_command(TARGET ${TURBO}-test POST_BUILD COMMAND ${TURBO}-test WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    add_custom_command(
+        OUTPUT ${TURBO}-test-passed
+        COMMAND ${TURBO}-test
+        COMMAND ${CMAKE_COMMAND} -E touch ${TURBO}-test-passed
+        DEPENDS ${TURBO}-test
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+    add_custom_target(${TURBO}-run-test ALL DEPENDS ${TURBO}-test-passed)
 endif()
 
 # Examples

@@ -87,13 +87,80 @@ void AutoIndent::applyToCurrentLine(TScintilla &scintilla)
 }
 
 /////////////////////////////////////////////////////////////////////////
+// Search
+
+static void initSearchFlags(TScintilla &scintilla, SearchSettings settings)
+{
+    int searchFlags =
+          (-(settings.mode == smWholeWords) & SCFIND_WHOLEWORD)
+        | (-(settings.mode == smRegularExpression) & (SCFIND_REGEXP | SCFIND_CXX11REGEX))
+        | (-!!(settings.flags & sfCaseSensitive) & SCFIND_MATCHCASE)
+        ;
+    call(scintilla, SCI_SETSEARCHFLAGS, searchFlags, 0U);
+}
+
+static void initSearchTarget(TScintilla &scintilla, SearchDirection direction)
+{
+    sptr_t selStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+    sptr_t selEnd = call(scintilla, SCI_GETSELECTIONEND, 0U, 0U);
+    sptr_t targetStart, targetEnd;
+    if (direction == sdForward)
+        targetStart = selEnd;
+    else
+        targetStart = selStart;
+    if (direction == sdBackwards)
+        targetEnd = 0;
+    else
+        targetEnd = call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
+    call(scintilla, SCI_SETTARGETRANGE, targetStart, targetEnd);
+}
+
+static void wrapSearchTarget(TScintilla &scintilla)
+{
+    sptr_t docEnd = call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
+    sptr_t targetStart = call(scintilla, SCI_GETTARGETSTART, 0U, 0U);
+    sptr_t targetEnd = call(scintilla, SCI_GETTARGETEND, 0U, 0U);
+    call(scintilla, SCI_SETTARGETRANGE, docEnd - targetEnd, targetStart);
+}
+
+static bool searchInTarget(TScintilla &scintilla, TStringView s, SearchDirection direction)
+{
+    sptr_t result = call(scintilla, SCI_SEARCHINTARGET, s.size(), (sptr_t) s.data());
+    if (result != -1)
+    {
+        sptr_t resultEnd = call(scintilla, SCI_GETTARGETEND, 0U, 0U);
+        call(scintilla, SCI_SETSEL, result, resultEnd);
+        return true;
+    }
+    else if (direction == sdForwardIncremental)
+    {
+        sptr_t cur = call(scintilla, SCI_GETCURRENTPOS, 0U, 0U);
+        call(scintilla, SCI_SETEMPTYSELECTION, cur, 0U);
+    }
+    return false;
+}
+
+void search(TScintilla &scintilla, TStringView text, SearchDirection direction, SearchSettings settings)
+{
+    if (!text.empty())
+    {
+        initSearchFlags(scintilla, settings);
+        initSearchTarget(scintilla, direction);
+        if (!searchInTarget(scintilla, text, direction) && direction != sdForwardIncremental)
+        {
+            wrapSearchTarget(scintilla);
+            searchInTarget(scintilla, text, direction);
+        }
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////
 // Comment toggling
 
 static bool removeComment(TScintilla &, const Language &);
 static bool removeBlockComment(TScintilla &, const Language &);
 static Sci::Position getSelectionEndSkippingEmptyLastLine(TScintilla &, Sci::Position);
 static void getLineStartAndEnd(TScintilla &, Sci::Position &, Sci::Position &);
-static TStringView getViewIntoText(TScintilla &, Sci::Position, Sci::Position);
 static size_t findCommentAtStart(TStringView, TStringView);
 static size_t findCommentAtEnd(TStringView, TStringView);
 static bool removeLineComments(TScintilla &, const Language &);
@@ -131,7 +198,7 @@ static bool removeBlockComment(TScintilla &scintilla, const Language &language)
         Sci::Position posEnd = getSelectionEndSkippingEmptyLastLine(scintilla, posStart);
         if (posStart == posEnd)
             getLineStartAndEnd(scintilla, posStart, posEnd);
-        TStringView text = getViewIntoText(scintilla, posStart, posEnd);
+        TStringView text = getRangePointer(scintilla, posStart, posEnd);
 
         size_t openStart = findCommentAtStart(text, language.blockCommentOpen);
         if (openStart < text.size())
@@ -170,15 +237,6 @@ static void getLineStartAndEnd(TScintilla &scintilla, Sci::Position &posStart, S
     Sci::Line line = call(scintilla, SCI_LINEFROMPOSITION, posStart, 0U);
     posStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
     posEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
-}
-
-static TStringView getViewIntoText(TScintilla &scintilla, Sci::Position start, Sci::Position end)
-{
-    auto length = size_t(end - start);
-    return TStringView {
-        (const char *) call(scintilla, SCI_GETRANGEPOINTER, start, length),
-        size_t(length),
-    };
 }
 
 static size_t findCommentAtStart(TStringView text, TStringView comment)
@@ -233,7 +291,7 @@ static bool noLinesBeginWithoutLineComment(TScintilla &scintilla, const Language
     {
         Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
         Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
-        TStringView text = getViewIntoText(scintilla, lineStart, lineEnd);
+        TStringView text = getRangePointer(scintilla, lineStart, lineEnd);
         if (!text.empty() && text.size() == findCommentAtStart(text, language.lineComment))
             return false;
         else if (!text.empty())
@@ -247,7 +305,7 @@ static void removeLineCommentFromLine(TScintilla &scintilla, const Language &lan
 {
     Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
     Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
-    TStringView text = getViewIntoText(scintilla, lineStart, lineEnd);
+    TStringView text = getRangePointer(scintilla, lineStart, lineEnd);
     TStringView comment = language.lineComment;
     size_t commentStart = findCommentAtStart(text, comment);
     if (commentStart < text.size())
@@ -277,13 +335,13 @@ bool thereIsTextBeforeOrAfterSelection(TScintilla &scintilla)
     {
         Sci::Line firstLine = call(scintilla, SCI_LINEFROMPOSITION, selStart, 0U);
         Sci::Position firstLineStart = call(scintilla, SCI_POSITIONFROMLINE, firstLine, 0U);
-        TStringView textBefore = getViewIntoText(scintilla, firstLineStart, selStart);
+        TStringView textBefore = getRangePointer(scintilla, firstLineStart, selStart);
         for (char c : textBefore)
             if (!Scintilla::IsSpaceOrTab(c))
                 return true;
         Sci::Line lastLine = call(scintilla, SCI_LINEFROMPOSITION, selEnd, 0U);
         Sci::Position lastLineEnd = call(scintilla, SCI_GETLINEENDPOSITION, lastLine, 0U);
-        TStringView textAfter = getViewIntoText(scintilla, selEnd, lastLineEnd);
+        TStringView textAfter = getRangePointer(scintilla, selEnd, lastLineEnd);
         for (char c : textAfter)
             if (!Scintilla::IsSpaceOrTab(c))
                 return true;
@@ -353,7 +411,7 @@ static size_t minIndentationInLines(TScintilla &scintilla, Sci::Line firstLine, 
     {
         Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
         Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
-        TStringView text = getViewIntoText(scintilla, lineStart, lineEnd);
+        TStringView text = getRangePointer(scintilla, lineStart, lineEnd);
         if (!text.empty())
         {
             size_t i = 0;
