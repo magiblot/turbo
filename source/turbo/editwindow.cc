@@ -23,7 +23,7 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     fileNumber(fileCounter),
     parent(aParent)
 {
-    searchBox = &SearchBox::create(getExtent().grow(-1, -1), editor);
+    searchBox = &SearchBox::create(getExtent().grow(-1, -1), editor, searchSettings);
     insert(searchBox);
 
     // Commands that always get enabled when focusing the editor.

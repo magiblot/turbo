@@ -56,6 +56,7 @@ struct EditorWindow : public turbo::BasicEditorWindow
     std::string title;
     TCommandSet enabledCmds, disabledCmds;
 
+    turbo::SearchSettings searchSettings;
     SearchBox *searchBox {nullptr};
 
     EditorWindow( const TRect &bounds, TurboEditor &aEditor,

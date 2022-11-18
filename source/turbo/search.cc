@@ -4,38 +4,43 @@
 #define Uses_TButton
 #define Uses_TFrame
 #define Uses_TDrawSurface
+#define Uses_TCheckBoxes
+#define Uses_TSItem
 #include <tvision/tv.h>
 
-#include "app.h"
+#include "cmds.h"
 #include "search.h"
-#include "editwindow.h"
+#include "checkbox.h"
 #include <turbo/editstates.h>
 #include <turbo/util.h>
 
-SearchBox &SearchBox::create(const TRect &editorBounds, turbo::Editor &editor) noexcept
+SearchBox &SearchBox::create( const TRect &editorBounds, turbo::Editor &editor,
+                              turbo::SearchSettings &settings ) noexcept
 {
     TRect bounds = editorBounds;
     bounds.a.y = bounds.b.y;
-    auto &self = *new SearchBox(bounds, editor);
+    auto &self = *new SearchBox(bounds, editor, settings);
     self.growMode = gfGrowAll & ~gfGrowLoX;
     self.options |= ofFramed | ofFirstClick;
     self.options |= ofPostProcess; // So that search commands reach the input line.
     self.hide();
 
-    auto *bckgrnd = new TView({0, 0, self.size.x, 2});
+    auto *bckgrnd = new TView({0, 0, self.size.x, 3});
     bckgrnd->growMode = gfGrowHiX | gfGrowHiY;
     bckgrnd->eventMask = 0;
     self.insert(bckgrnd);
 
     auto *findText = "~F~ind:",
          *nextText = "~N~ext",
-         *prevText = "~P~revious";
+         *prevText = "~P~revious",
+         *caseText = "~C~ase sensitive";
     TRect rLabelF {0, 0, 1 + cstrlen(findText), 1};
     TRect rPrev {self.size.x - cstrlen(prevText) - 5, 0, self.size.x - 1, 2};
     TRect rNext {rPrev.a.x - cstrlen(nextText) - 5, 0, rPrev.a.x, 2};
     TRect rBoxF {rLabelF.b.x + 1, 0, rNext.a.x, 1};
+    TRect rCase {self.size.x - cstrlen(caseText) - 6, 2, self.size.x, 3};
 
-    auto *ilFind = new SearchInputLine(*new Searcher(editor), rBoxF, 256);
+    auto *ilFind = new SearchInputLine(*new Searcher(editor, settings), rBoxF, 256);
     ilFind->growMode = gfGrowHiX;
     self.insert(ilFind);
 
@@ -51,7 +56,14 @@ SearchBox &SearchBox::create(const TRect &editorBounds, turbo::Editor &editor) n
     btnPrev->growMode = gfGrowLoX | gfGrowHiX;
     self.insert(btnPrev);
 
+    auto *chkCase = new CheckBox(rCase, caseText);
+    chkCase->growMode = gfGrowLoX | gfGrowHiX;
+    self.insert(chkCase);
+
     self.inputLine = ilFind;
+    self.cbCaseSensitive = chkCase;
+
+    self.readSettings();
 
     return self;
 }
@@ -59,11 +71,13 @@ SearchBox &SearchBox::create(const TRect &editorBounds, turbo::Editor &editor) n
 void SearchBox::shutDown()
 {
     inputLine = nullptr;
+    cbCaseSensitive = nullptr;
     TGroup::shutDown();
 }
 
 void SearchBox::handleEvent(TEvent &ev)
 {
+    TGroup::handleEvent(ev);
     if (ev.what == evKeyDown)
     {
         switch (ev.keyDown.keyCode)
@@ -78,10 +92,28 @@ void SearchBox::handleEvent(TEvent &ev)
                 break;
         }
     }
-    TGroup::handleEvent(ev);
+    else if (ev.what == evCommand && ev.message.command == cmStateChanged)
+    {
+        writeSettings();
+        clearEvent(ev);
+    }
 }
 
-static inline void fixEditorSize(SearchBox &self, turbo::Editor &editor)
+void SearchBox::readSettings()
+{
+    using namespace turbo;
+    if (cbCaseSensitive)
+        cbCaseSensitive->setChecked(settings.flags & sfCaseSensitive);
+}
+
+void SearchBox::writeSettings()
+{
+    using namespace turbo;
+    if (cbCaseSensitive)
+        settings.flags = -cbCaseSensitive->isChecked() & sfCaseSensitive;
+}
+
+static void fixEditorSize(SearchBox &self, turbo::Editor &editor)
 {
     turbo::forEachNotNull([&] (TView &v) {
         TRect r = v.getBounds();
@@ -98,7 +130,7 @@ void SearchBox::open()
     if (size.y == 0)
     {
         TRect r = getBounds();
-        r.a.y = r.b.y - 2;
+        r.a.y = r.b.y - 3;
         changeBounds(r);
         show();
         fixEditorSize(*this, editor);
@@ -154,6 +186,6 @@ Boolean Searcher::isValidInput(char *s, Boolean)
 void Searcher::searchText(TStringView s, turbo::SearchDirection direction)
 {
     using namespace turbo;
-    search(editor.scintilla, s, direction, SearchSettings {});
+    search(editor.scintilla, s, direction, settings);
     editor.partialRedraw();
 }

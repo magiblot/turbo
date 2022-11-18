@@ -12,23 +12,31 @@ namespace turbo
 class Editor;
 }
 
+class CheckBox;
+
 class SearchBox : public TGroup
 {
     turbo::Editor &editor;
+    turbo::SearchSettings &settings;
     TInputLine *inputLine {nullptr};
+    CheckBox *cbCaseSensitive {nullptr};
 
-    SearchBox(const TRect &bounds, turbo::Editor &aEditor) noexcept :
+    SearchBox(const TRect &bounds, turbo::Editor &aEditor, turbo::SearchSettings &aSettings) noexcept :
         TGroup(bounds),
-        editor(aEditor)
+        editor(aEditor),
+        settings(aSettings)
     {
     }
 
     void handleEvent(TEvent &ev) override;
     void shutDown() override;
 
+    void readSettings();
+    void writeSettings();
+
 public:
 
-    static SearchBox &create(const TRect &editorBounds, turbo::Editor &editor) noexcept;
+    static SearchBox &create(const TRect &editorBounds, turbo::Editor &editor, turbo::SearchSettings &aSettings) noexcept;
 
     void open();
     bool close();
@@ -37,13 +45,15 @@ public:
 class Searcher : public TValidator
 {
     turbo::Editor &editor;
+    turbo::SearchSettings &settings;
 
     Boolean isValidInput(char *, Boolean) override;
 
 public:
 
-    Searcher(turbo::Editor &aEditor) :
-        editor(aEditor)
+    Searcher(turbo::Editor &aEditor, turbo::SearchSettings &aSettings) :
+        editor(aEditor),
+        settings(aSettings)
     {
     }
 
