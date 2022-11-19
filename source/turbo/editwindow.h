@@ -9,8 +9,7 @@
 #include <turbo/basicwindow.h>
 #include "apputils.h"
 #include "editor.h"
-
-class SearchBox;
+#include "search.h"
 
 struct FileNumberState
 {
@@ -56,8 +55,8 @@ struct EditorWindow : public turbo::BasicEditorWindow
     std::string title;
     TCommandSet enabledCmds, disabledCmds;
 
-    turbo::SearchSettings searchSettings;
-    SearchBox *searchBox {nullptr};
+    TView *bottomView {nullptr};
+    SearchState searchState;
 
     EditorWindow( const TRect &bounds, TurboEditor &aEditor,
                   active_counter &fileCounter, EditorWindowParent &aParent ) noexcept;
@@ -69,6 +68,11 @@ struct EditorWindow : public turbo::BasicEditorWindow
     const char *getTitle(short = 0) override;
     void updateCommands() noexcept;
     void handleNotification(const SCNotification &scn, turbo::Editor &) override;
+
+    bool closeBottomView();
+    void setBottomView(TView *view);
+    template <class T, class ...Args>
+    void openBottomView(Args&& ...args);
 
     enum TitleFormatFlags
     {

@@ -7,6 +7,9 @@
 #define Uses_TValidator
 #include <tvision/tv.h>
 
+#include <turbo/editstates.h>
+#include "cmds.h"
+
 namespace turbo
 {
 class Editor;
@@ -14,67 +17,73 @@ class Editor;
 
 class CheckBox;
 
-class SearchBox : public TGroup
+struct SearchState
+{
+    char findText[256] {0};
+    turbo::SearchSettings settings;
+};
+
+class Searcher
 {
     turbo::Editor &editor;
     turbo::SearchSettings &settings;
-    TInputLine *inputLine {nullptr};
-    CheckBox *cbCaseSensitive {nullptr};
 
-    SearchBox(const TRect &bounds, turbo::Editor &aEditor, turbo::SearchSettings &aSettings) noexcept :
-        TGroup(bounds),
+public:
+
+    Searcher(turbo::Editor &aEditor, turbo::SearchSettings &aSettings) noexcept :
         editor(aEditor),
         settings(aSettings)
     {
     }
 
+    void search(TStringView text, turbo::SearchDirection direction);
+};
+
+class SearchBox : public TGroup
+{
+    SearchState &searchState;
+    Searcher searcher;
+    CheckBox *cbCaseSensitive;
+
     void handleEvent(TEvent &ev) override;
     void shutDown() override;
 
-    void readSettings();
-    void writeSettings();
+    void loadSettings();
+    void storeSettings();
 
 public:
 
-    static SearchBox &create(const TRect &editorBounds, turbo::Editor &editor, turbo::SearchSettings &aSettings) noexcept;
+    enum { findCommand = cmFindSearchBox };
+    enum { height = 3 };
 
-    void open();
-    bool close();
+    SearchBox(const TRect &bounds, turbo::Editor &editor, SearchState &searchState) noexcept;
 };
 
-class Searcher : public TValidator
+class SearchValidator : public TValidator
 {
-    turbo::Editor &editor;
-    turbo::SearchSettings &settings;
+    Searcher &searcher;
 
     Boolean isValidInput(char *, Boolean) override;
 
 public:
 
-    Searcher(turbo::Editor &aEditor, turbo::SearchSettings &aSettings) :
-        editor(aEditor),
-        settings(aSettings)
+    SearchValidator(Searcher &aSearcher) :
+        searcher(aSearcher)
     {
     }
-
-    void searchText(TStringView, turbo::SearchDirection direction);
 };
 
 class SearchInputLine : public TInputLine
 {
     Searcher &searcher;
+    char *backupData;
 
     void handleEvent(TEvent &ev) override;
+    void shutDown() override;
 
 public:
 
-    template<typename ...Args>
-    SearchInputLine(Searcher &aSearcher, Args&& ...args) :
-        TInputLine(args..., &aSearcher),
-        searcher(aSearcher)
-    {
-        options |= ofPostProcess; // For search commands when not selected.
-    }
+    SearchInputLine(const TRect &bounds, char (&aData)[256], Searcher &aSearcher) noexcept;
 };
 
 #endif

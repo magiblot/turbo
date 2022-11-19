@@ -21,6 +21,7 @@ const ushort
 // Commands that cannot be deactivated.
 const ushort
     cmToggleTree    = 1000,
-    cmStateChanged  = 1001;
+    cmStateChanged  = 1001,
+    cmFindSearchBox = 1002;
 
 #endif // TURBO_CMDS_H

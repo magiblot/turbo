@@ -6,6 +6,7 @@
 #include <tvision/tv.h>
 
 #include <turbo/tpath.h>
+#include <turbo/util.h>
 #include "editwindow.h"
 #include "app.h"
 #include "apputils.h"
@@ -23,9 +24,6 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     fileNumber(fileCounter),
     parent(aParent)
 {
-    searchBox = &SearchBox::create(getExtent().grow(-1, -1), editor, searchSettings);
-    insert(searchBox);
-
     // Commands that always get enabled when focusing the editor.
     enabledCmds += cmSave;
     enabledCmds += cmSaveAs;
@@ -49,12 +47,13 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
 void EditorWindow::shutDown()
 {
     parent.removeEditor(*this);
-    searchBox = nullptr;
+    bottomView = nullptr;
     super::shutDown();
 }
 
 void EditorWindow::handleEvent(TEvent &ev)
 {
+    using namespace turbo;
     auto &editor = getEditor();
     TurboFileDialogs dlgs {parent};
     bool handled = true;
@@ -64,7 +63,8 @@ void EditorWindow::handleEvent(TEvent &ev)
             switch (ev.keyDown.keyCode)
             {
                 case kbEsc:
-                    handled = (searchBox && searchBox->close());
+                    if ((handled = closeBottomView()))
+                        editor.redraw();
                     break;
                 default:
                     handled = false;
@@ -115,8 +115,16 @@ void EditorWindow::handleEvent(TEvent &ev)
                     break;
                 case cmFind:
                 case cmReplace:
-                    if (searchBox)
-                        searchBox->open();
+                    openBottomView<SearchBox>(editor, searchState);
+                    editor.redraw();
+                    break;
+                case cmSearchAgain:
+                    editor.search(searchState.findText, sdForward, searchState.settings);
+                    editor.partialRedraw();
+                    break;
+                case cmSearchPrev:
+                    editor.search(searchState.findText, sdBackwards, searchState.settings);
+                    editor.partialRedraw();
                     break;
                 default:
                     handled = false;
@@ -183,6 +191,54 @@ void EditorWindow::handleNotification(const SCNotification &scn, turbo::Editor &
             editor.redraw();
             break;
     }
+}
+
+static void growEditor(turbo::Editor &editor, int dy)
+{
+    turbo::forEachNotNull([&] (TView &v) {
+        TRect r = v.getBounds();
+        r.b.y += dy;
+        v.setBounds(r);
+    }, editor.view, editor.leftMargin);
+}
+
+bool EditorWindow::closeBottomView()
+{
+    if (bottomView)
+    {
+        int dy = bottomView->size.y + !!(bottomView->options & ofFramed);
+        growEditor(editor, dy);
+        destroy(bottomView);
+        bottomView = nullptr;
+        return true;
+    }
+    return false;
+}
+
+void EditorWindow::setBottomView(TView *view)
+{
+    closeBottomView();
+    insert(view);
+    bottomView = view;
+    int dy = -(bottomView->size.y + !!(bottomView->options & ofFramed));
+    growEditor(editor, dy);
+}
+
+template <class T, class ...Args>
+void EditorWindow::openBottomView(Args&& ...args)
+{
+    auto *view = (T *) message(bottomView, evCommand, T::findCommand, nullptr);
+    if (!view)
+    {
+        TRect r = getExtent().grow(-1, -1);
+        r.a.y = r.b.y - T::height;
+        view = new T(r, static_cast<Args &&>(args)...);
+        view->growMode = gfGrowAll & ~gfGrowLoX;
+        view->setState(sfActive, state & sfActive);
+        setBottomView(view);
+    }
+    view->select();
+    view->resetCurrent();
 }
 
 const char* EditorWindow::formatTitle(ushort flags) noexcept
