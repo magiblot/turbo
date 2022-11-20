@@ -5,39 +5,54 @@
 
 #include "listviews.h"
 
-#define cpListWindow "\x32\x32\x34\x37\x36\x32\x33"
-
-ListWindow::ListWindow(const TRect &bounds, const char *aTitle, List &aList) :
-    ListWindow(bounds, aTitle, aList, &initViewer<ListView>)
+size_t maxWidth(const ListModel &model) noexcept
 {
+    size_t width = 0, elems = model.size();
+    for (size_t i = 0; i < elems; ++i)
+    {
+        size_t w = cstrlen(model.getText(model.at(i)));
+        if (w > width)
+            width = w;
+    }
+    return width;
 }
 
-ListWindow::ListWindow( const TRect &bounds, const char *aTitle, List &aList,
-                        std::function<ListView *(TRect, TWindow *, List &)> &&cListViewer ) :
+#define cpListWindow "\x32\x32\x34\x37\x36\x32\x33"
+
+ListWindow::ListWindow( const TRect &bounds, const char *aTitle, const ListModel &aModel,
+                        TFuncView<ListView *(TRect, TWindow *, const ListModel &)> createListViewer ) :
     TWindowInit(&initFrame),
-    TWindow(bounds, aTitle, wnNoNumber),
-    list(aList)
+    TWindow(bounds, aTitle, wnNoNumber)
 {
     flags = wfClose | wfMove;
-    viewer = cListViewer(getExtent(), this, aList);
+    viewer = createListViewer(getExtent(), this, aModel);
     insert(viewer);
 }
 
-TPalette& ListWindow::getPalette() const
+void ListWindow::shutDown()
+{
+    viewer = nullptr;
+    TWindow::shutDown();
+}
+
+TPalette &ListWindow::getPalette() const
 {
     static TPalette palette(cpListWindow, sizeof(cpListWindow) - 1);
     return palette;
 }
 
-void* ListWindow::getSelected()
+void* ListWindow::getCurrent()
 {
-    return viewer->getSelected();
+    if (viewer)
+        return viewer->getCurrent();
+    return nullptr;
 }
 
 void ListWindow::handleEvent(TEvent& event)
 {
     TWindow::handleEvent(event);
-    if (event.what == evMouseDown && !mouseInView(event.mouse.where)) {
+    if (event.what == evMouseDown && !mouseInView(event.mouse.where))
+    {
         endModal(cmCancel);
         clearEvent(event);
     }
@@ -48,18 +63,19 @@ void ListWindow::handleEvent(TEvent& event)
 ListView::ListView( const TRect& bounds,
                     TScrollBar *aHScrollBar,
                     TScrollBar *aVScrollBar,
-                    ListWindow::List &aList ) :
+                    const ListModel &aModel ) :
     TListViewer(bounds, 1, aHScrollBar, aVScrollBar),
-    list(aList)
+    model(aModel)
 {
     growMode = gfGrowHiX | gfGrowHiY;
-    setRange(list.size());
+    setRange(model.size());
     if (range > 1)
         focusItem(1);
-    hScrollBar->setRange(0, list.measureWidth() - size.x + 3);
+    if (hScrollBar)
+        hScrollBar->setRange(0, maxWidth(model) - size.x + 3);
 }
 
-TPalette& ListView::getPalette() const
+TPalette &ListView::getPalette() const
 {
     static TPalette palette(cpListViewer, sizeof(cpListViewer) - 1);
     return palette;
@@ -67,24 +83,26 @@ TPalette& ListView::getPalette() const
 
 void ListView::getText(char *dest, short item, short maxChars)
 {
-    std::string_view text = list.getText(list.at(item));
-    size_t count = std::min<size_t>(maxChars, text.size());
-    strnzcpy(dest, text.data(), count+1);
+    TStringView text = model.getText(model.at(item));
+    strnzcpy(dest, text, maxChars + 1);
 }
 
-void* ListView::getSelected()
+void *ListView::getCurrent()
 {
-    return list.at(focused);
+    return model.at(focused);
 }
 
 void ListView::handleEvent(TEvent& event)
 {
     if ( (event.what == evMouseDown && (event.mouse.eventFlags & meDoubleClick)) ||
-         (event.what == evKeyDown && event.keyDown.keyCode == kbEnter) ) {
+         (event.what == evKeyDown && event.keyDown.keyCode == kbEnter) )
+    {
         endModal(cmOK);
         clearEvent(event);
-    } else if ( (event.what == evKeyDown && event.keyDown.keyCode == kbEsc) ||
-                (event.what == evCommand && event.message.command == cmCancel) ) {
+    }
+    else if ( (event.what == evKeyDown && event.keyDown.keyCode == kbEsc) ||
+              (event.what == evCommand && event.message.command == cmCancel) )
+    {
         endModal(cmCancel);
         clearEvent(event);
     }
@@ -92,40 +110,29 @@ void ListView::handleEvent(TEvent& event)
         TListViewer::handleEvent(event);
 }
 
-#include "app.h"
+#include "cmds.h"
 
-void EditorListView::focusItemNum(short item)
+static int mod(int a, int b)
 {
-    if (!disableWrap) {
-        if (range > 0) {
-            if (item < 0)
-                return focusItemNum(range + item);
-            else if (item >= range)
-                return focusItemNum(item - range);
-            focusItem(item);
-        }
-    } else
-        return ListView::focusItemNum(item);
+    int m = a % b;
+    if (m < 0)
+        return b < 0 ? m - b : m + b;
+    return m;
 }
 
 void EditorListView::handleEvent(TEvent &ev)
 {
-    if (ev.what == evCommand)
-        switch (ev.message.command) {
-            case cmEditorNext:
-                focusItemNum(focused + 1);
-                clearEvent(ev);
-                break;
-            case cmEditorPrev:
-                focusItemNum(focused - 1);
-                clearEvent(ev);
-                break;
-        }
-    else if (ev.what & evMouse) {
-        ++disableWrap;
-        ListView::handleEvent(ev);
-        --disableWrap;
-        return;
+    if (ev.what == evCommand && ev.message.command == cmEditorNext)
+    {
+        focusItemNum(mod(focused + 1, range));
+        clearEvent(ev);
     }
-    ListView::handleEvent(ev);
+    else if (ev.what == evCommand && ev.message.command == cmEditorPrev)
+    {
+        focusItemNum(mod(focused - 1, range));
+        clearEvent(ev);
+    }
+    else
+        ListView::handleEvent(ev);
+
 }

@@ -102,7 +102,7 @@ public:
         return listSize;
     }
 
-    void* at(intptr_t i)
+    list_head<T>* at(intptr_t i)
     {
         if (i > it) {
             if (i - it <= intptr_t(listSize) - i)
@@ -125,7 +125,7 @@ public:
 
 private:
 
-    void* seekF(intptr_t i)
+    list_head<T>* seekF(intptr_t i)
     {
         while (it < i) {
             itItem = itItem->next;
@@ -134,7 +134,7 @@ private:
         return itItem;
     }
 
-    void* seekB(intptr_t i)
+    list_head<T>* seekB(intptr_t i)
     {
         while (it > i) {
             itItem = itItem->prev;

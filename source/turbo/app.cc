@@ -327,20 +327,18 @@ void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)
 
 void TurboApp::showEditorList(TEvent *ev)
 {
-    EditorList list {&MRUlist};
+    EditorListModel model {MRUlist};
     TRect r {0, 0, 0, 0};
-    r.b.x = min(max(list.measureWidth() + 6, 40), deskTop->size.x - 10);
-    r.b.y = min(max(list.size() + 2, 6), deskTop->size.y - 4);
+    r.b.x = min(max(maxWidth(model) + 6, 40), deskTop->size.x - 10);
+    r.b.y = min(max(model.size() + 2, 6), deskTop->size.y - 4);
     r.move((deskTop->size.x - r.b.x) / 2,
            (deskTop->size.y - r.b.y) / 4);
-    ListWindow *lw = new ListWindow(r, "Buffer List", list, &initViewer<EditorListView>);
+    ListWindow *lw = new ListWindow(r, "Buffer List", model, &defListViewCreator<EditorListView>);
     if (ev)
         lw->putEvent(*ev);
-    if (deskTop->execView(lw) == cmOK) {
-        auto *head = (list_head<EditorWindow> *) lw->getSelected();
-        if (head->self)
-            head->self->focus();
-    }
+    if (deskTop->execView(lw) == cmOK)
+        if (auto *wnd = (EditorWindow *) lw->getCurrent())
+            wnd->focus();
 
     destroy(lw);
 }

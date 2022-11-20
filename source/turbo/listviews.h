@@ -6,123 +6,104 @@
 #define Uses_TListViewer
 #include <tvision/tv.h>
 
-#include <string_view>
-#include <functional>
+class ListModel
+{
+public:
+    virtual size_t size() const noexcept = 0;
+    virtual void *at(size_t i) const noexcept = 0;
+    virtual TStringView getText(void *) const noexcept = 0;
+};
+
+size_t maxWidth(const ListModel &model) noexcept;
 
 class ListView;
+using ListViewCreator = TFuncView<ListView *(TRect, TWindow *, const ListModel &)>;
+
+template <class Viewer>
+ListView *defListViewCreator(TRect, TWindow *, const ListModel &);
 
 class ListWindow : public TWindow
 {
+    ListView *viewer;
 
 public:
 
-    class List {
-    public:
+    // The lifetime of 'aList' must exceed that of 'this'.
+    ListWindow( const TRect &bounds, const char *title, const ListModel &model,
+                ListViewCreator createListViewer = defListViewCreator<ListView> );
 
-        virtual size_t size() = 0;
-        virtual void* at(size_t i) = 0;
-        virtual std::string_view getText(void *) = 0;
-
-        virtual size_t measureWidth()
-        {
-            size_t width = 0, elems = size();
-            for (size_t i = 0; i < elems; ++i) {
-                size_t w = cstrlen(getText(at(i)));
-                if (w > width)
-                    width = w;
-            }
-            return width;
-        }
-
-    };
-
-    ListWindow( const TRect &bounds, const char *aTitle, ListWindow::List &aList );
-    ListWindow( const TRect &bounds, const char *aTitle, ListWindow::List &aList,
-                std::function<ListView *(TRect, TWindow *, List &)> &&cListViewer );
-
-    void* getSelected();
+    void shutDown() override;
     void handleEvent(TEvent& event) override;
-    virtual TPalette& getPalette() const override;
+    TPalette &getPalette() const override;
 
-protected:
-
-    ListView *viewer;
-    List &list;
-
+    void *getCurrent();
 };
 
 class ListView : public TListViewer
 {
+    const ListModel &model;
 
 public:
 
-    ListView( const TRect& bounds,
-              TScrollBar *aHScrollBar,
-              TScrollBar *aVScrollBar,
-              ListWindow::List &aList );
+    // The lifetime of 'aList' must exceed that of 'this'.
+    ListView( const TRect& bounds, TScrollBar *hScrollBar, TScrollBar *vScrollBar,
+              const ListModel &model );
 
-    virtual void* getSelected();
+    void *getCurrent();
     virtual void getText(char *dest, short item, short maxLen) override;
     virtual void handleEvent(TEvent& ev) override;
 
-    virtual TPalette& getPalette() const override;
-
-protected:
-
-    ListWindow::List &list;
-
+    virtual TPalette &getPalette() const override;
 };
 
 template <class Viewer>
-ListView* initViewer(TRect r, TWindow *win, ListWindow::List &list)
+inline ListView *defListViewCreator(TRect r, TWindow *win, const ListModel &model)
 {
     r.grow(-1, -1);
     return new Viewer( r,
                        win->standardScrollBar(sbHorizontal | sbHandleKeyboard),
                        win->standardScrollBar(sbVertical | sbHandleKeyboard),
-                       list );
+                       model );
 }
 
 class EditorListView : public ListView
 {
-
 public:
-
     using ListView::ListView;
 
-    int disableWrap {0};
-
-    void focusItemNum(short item) override;
     void handleEvent(TEvent &ev) override;
-
 };
 
 #include "apputils.h"
 #include "editwindow.h"
 
-class EditorList : public ListWindow::List, public list_head_iterator<EditorWindow>
+class EditorListModel : public ListModel
 {
+    mutable list_head_iterator<EditorWindow> list;
 
 public:
 
-    using list_head_iterator::list_head_iterator;
-
-    size_t size() override
+    EditorListModel(list_head<EditorWindow> &aList) :
+        list(&aList)
     {
-        return list_head_iterator::size();
     }
 
-    void* at(size_t i) override
+    size_t size() const noexcept override
     {
-        return list_head_iterator::at(i);
+        return list.size();
     }
 
-    std::string_view getText(void *head_) override
+    void *at(size_t i) const noexcept override
     {
-        auto *head = (list_head<EditorWindow> *) head_;
-        return head->self->title;
+        return list.at(i)->self;
     }
 
+    TStringView getText(void *item) const noexcept override
+    {
+        if (auto *wnd = (EditorWindow *) item)
+            return wnd->title;
+        return "";
+    }
 };
 
-#endif
+#endif // TURBO_LISTVIEWS_H
