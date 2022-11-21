@@ -106,7 +106,7 @@ extern constexpr WindowColorScheme windowSchemeDefault =
     /* wndScrollBarPageArea        */ '\x30',
     /* wndScrollBarControls        */ '\x30',
     /* wndStaticText               */ '\x0F',
-    /* wndLabelNormal              */ '\x08',
+    /* wndLabelNormal              */ '\x07',
     /* wndLabelSelected            */ '\x0F',
     /* wndLabelShortcut            */ '\x06',
     /* wndButtonNormal             */ '\x20',
@@ -115,7 +115,7 @@ extern constexpr WindowColorScheme windowSchemeDefault =
     /* wndButtonDisabled           */ '\x78',
     /* wndButtonShortcut           */ '\x2E',
     /* wndButtonShadow             */ '\x08',
-    /* wndClusterNormal            */ '\x08',
+    /* wndClusterNormal            */ '\x07',
     /* wndClusterSelected          */ '\x0F',
     /* wndClusterShortcut          */ '\x06',
     dialogColor(wndInputLineNormal         ),
@@ -130,7 +130,7 @@ extern constexpr WindowColorScheme windowSchemeDefault =
     dialogColor(wndListViewerSelected      ),
     dialogColor(wndListViewerDivider       ),
     dialogColor(wndInfoPane                ),
-    dialogColor(wndClusterDisabled         ),
+    /* wndClusterDisabled          */ '\x08',
 };
 
 #undef dialogColor
