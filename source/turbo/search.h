@@ -16,6 +16,7 @@ class Editor;
 }
 
 class CheckBox;
+class ComboBox;
 
 struct SearchState
 {
@@ -43,6 +44,7 @@ class SearchBox : public TGroup
 {
     SearchState &searchState;
     Searcher searcher;
+    ComboBox *cmbMode;
     CheckBox *cbCaseSensitive;
 
     void handleEvent(TEvent &ev) override;

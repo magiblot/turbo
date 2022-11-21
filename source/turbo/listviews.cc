@@ -19,6 +19,8 @@ size_t maxWidth(const ListModel &model) noexcept
 
 #define cpListWindow "\x32\x32\x34\x37\x36\x32\x33"
 
+const TPoint ListWindow::minSize = {5, 3};
+
 ListWindow::ListWindow( const TRect &bounds, const char *aTitle, const ListModel &aModel,
                         TFuncView<ListView *(TRect, TWindow *, const ListModel &)> createListViewer ) :
     TWindowInit(&initFrame),
@@ -26,6 +28,7 @@ ListWindow::ListWindow( const TRect &bounds, const char *aTitle, const ListModel
 {
     flags = wfClose | wfMove;
     viewer = createListViewer(getExtent(), this, aModel);
+    viewer->growMode = gfGrowHiX | gfGrowHiY;
     insert(viewer);
 }
 
@@ -41,11 +44,24 @@ TPalette &ListWindow::getPalette() const
     return palette;
 }
 
-void* ListWindow::getCurrent()
+void* ListWindow::getCurrent() const noexcept
 {
     if (viewer)
         return viewer->getCurrent();
     return nullptr;
+}
+
+short ListWindow::getCurrentIndex() const noexcept
+{
+    if (viewer)
+        return viewer->focused;
+    return 0;
+}
+
+void ListWindow::setCurrentIndex(short i) noexcept
+{
+    if (viewer)
+        viewer->focusItemNum(i);
 }
 
 void ListWindow::handleEvent(TEvent& event)
@@ -58,16 +74,21 @@ void ListWindow::handleEvent(TEvent& event)
     }
 }
 
+void ListWindow::sizeLimits(TPoint &min, TPoint &max)
+{
+    TView::sizeLimits(min, max);
+    min = minSize;
+}
+
 #define cpListViewer "\x06\x06\x07\x06\x06"
 
-ListView::ListView( const TRect& bounds,
-                    TScrollBar *aHScrollBar,
-                    TScrollBar *aVScrollBar,
-                    const ListModel &aModel ) :
+ListView::ListView( const TRect& bounds, TScrollBar *aHScrollBar,
+                    TScrollBar *aVScrollBar, const ListModel &aModel,
+                    ushort aFlags ) :
     TListViewer(bounds, 1, aHScrollBar, aVScrollBar),
-    model(aModel)
+    model(aModel),
+    flags(aFlags)
 {
-    growMode = gfGrowHiX | gfGrowHiY;
     setRange(model.size());
     if (range > 1)
         focusItem(1);
@@ -87,15 +108,55 @@ void ListView::getText(char *dest, short item, short maxChars)
     strnzcpy(dest, text, maxChars + 1);
 }
 
-void *ListView::getCurrent()
+void *ListView::getCurrent() noexcept
 {
     return model.at(focused);
 }
 
-void ListView::handleEvent(TEvent& event)
+void ListView::handleEvent(TEvent &event)
 {
-    if ( (event.what == evMouseDown && (event.mouse.eventFlags & meDoubleClick)) ||
-         (event.what == evKeyDown && event.keyDown.keyCode == kbEnter) )
+    if (event.what == evMouseDown)
+    {
+        int mouseAutosToSkip = 4;
+        int newItem = focused;
+        int oldItem = focused;
+        int count = 0;
+        do
+        {
+            TPoint mouse = makeLocal(event.mouse.where);
+            if (range <= size.y || (0 <= mouse.y && mouse.y < size.y))
+                newItem = mouse.y + topItem;
+            else
+            {
+                if (event.what == evMouseAuto)
+                    count++;
+                if (count == mouseAutosToSkip)
+                {
+                    count = 0;
+                    if (mouse.y < 0)
+                        newItem = focused - 1;
+                    else if (mouse.y >= size.y)
+                        newItem = focused + 1;
+                }
+            }
+            if (newItem != oldItem)
+            {
+                focusItemNum(newItem);
+                drawView();
+            }
+            oldItem = newItem;
+            if (event.mouse.eventFlags & meDoubleClick)
+                break;
+        }
+        while (mouseEvent(event, evMouseMove | evMouseAuto));
+        focusItemNum(newItem);
+        drawView();
+        if ( ((event.mouse.eventFlags & meDoubleClick) || (flags & lvSelectSingleClick)) &&
+             0 <= newItem && newItem < range )
+            endModal(cmOK);
+        clearEvent(event);
+    }
+    else if (event.what == evKeyDown && event.keyDown.keyCode == kbEnter)
     {
         endModal(cmOK);
         clearEvent(event);

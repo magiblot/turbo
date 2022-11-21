@@ -6,7 +6,7 @@
 void CheckBox::press(int)
 {
     TCheckBoxes::press(0);
-    message(owner, evCommand, cmStateChanged, nullptr);
+    message(owner, evBroadcast, cmStateChanged, nullptr);
 }
 
 bool CheckBox::isChecked()

@@ -1,4 +1,5 @@
 #define Uses_TKeys
+#define Uses_TEvent
 #define Uses_TLabel
 #define Uses_TIndicator
 #define Uses_TButton
@@ -10,8 +11,18 @@
 
 #include "search.h"
 #include "checkbox.h"
+#include "combobox.h"
 #include <turbo/editstates.h>
 #include <turbo/util.h>
+
+static constexpr SpanListModelEntry<turbo::SearchMode> searchModes[] =
+{
+    {turbo::smPlainText, "Plain text"},
+    {turbo::smWholeWords, "Whole words"},
+    {turbo::smRegularExpression, "Regular expression"},
+};
+
+static constexpr SpanListModel<turbo::SearchMode> searchModeListModel {searchModes};
 
 SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
                       SearchState &aSearchState ) noexcept :
@@ -26,15 +37,18 @@ SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
     bckgrnd->eventMask = 0;
     insert(bckgrnd);
 
-    auto *findText = "~F~ind:",
-         *nextText = "~N~ext",
-         *prevText = "~P~revious",
-         *caseText = "~C~ase sensitive";
+    auto *findText = "~F~ind:";
+    auto *nextText = "~N~ext";
+    auto *prevText = "~P~revious";
+    auto *modeText = "~M~ode:";
+    auto *caseText = "~C~ase sensitive";
     TRect rLabelF {0, 0, 1 + cstrlen(findText), 1};
     TRect rPrev {size.x - cstrlen(prevText) - 5, 0, size.x - 1, 2};
     TRect rNext {rPrev.a.x - cstrlen(nextText) - 5, 0, rPrev.a.x, 2};
     TRect rBoxF {rLabelF.b.x + 1, 0, rNext.a.x, 1};
     TRect rCase {size.x - cstrlen(caseText) - 6, 2, size.x, 3};
+    TRect rLabelM {0, 2, 1 + cstrlen(modeText), 3};
+    TRect rBoxM {rLabelM.b.x + 1, 2, rCase.a.x, 3};
 
     auto *ilFind = new SearchInputLine(rBoxF, searchState.findText, searcher);
     ilFind->growMode = gfGrowHiX;
@@ -52,6 +66,14 @@ SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
     btnPrev->growMode = gfGrowLoX | gfGrowHiX;
     insert(btnPrev);
 
+    cmbMode = new ComboBox(rBoxM, searchModeListModel);
+    cmbMode->growMode = gfGrowHiX;
+    insert(cmbMode);
+
+    auto *lblMode = new TLabel(rLabelM, modeText, cmbMode);
+    lblMode->growMode = 0;
+    insert(lblMode);
+
     cbCaseSensitive = new CheckBox(rCase, caseText);
     cbCaseSensitive->growMode = gfGrowLoX | gfGrowHiX;
     insert(cbCaseSensitive);
@@ -64,6 +86,7 @@ SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
 
 void SearchBox::shutDown()
 {
+    cmbMode = nullptr;
     cbCaseSensitive = nullptr;
     TGroup::shutDown();
 }
@@ -85,32 +108,33 @@ void SearchBox::handleEvent(TEvent &ev)
                 break;
         }
     }
-    else if (ev.what == evCommand)
-    {
-        if (ev.message.command == cmStateChanged)
-        {
-            storeSettings();
-            clearEvent(ev);
-        }
-        else if (ev.message.command == cmFindSearchBox)
-            clearEvent(ev);
-    }
+    else if (ev.what == evCommand && ev.message.command == cmFindSearchBox)
+        clearEvent(ev);
+    else if (ev.what == evBroadcast && ev.message.command == cmStateChanged)
+        storeSettings();
 }
 
 void SearchBox::loadSettings()
 {
     using namespace turbo;
     auto &settings = searchState.settings;
-    if (cbCaseSensitive)
+    if (cmbMode)
+    {
+        cmbMode->setCurrentIndex(settings.mode);
         cbCaseSensitive->setChecked(settings.flags & sfCaseSensitive);
+    }
 }
 
 void SearchBox::storeSettings()
 {
     using namespace turbo;
     auto &settings = searchState.settings;
-    if (cbCaseSensitive)
+    if (cmbMode)
+    {
+        if (auto *entry = (const SpanListModelEntry<turbo::SearchMode> *) cmbMode->getCurrent())
+            settings.mode = entry->data;
         settings.flags = -cbCaseSensitive->isChecked() & sfCaseSensitive;
+    }
 }
 
 SearchInputLine::SearchInputLine(const TRect &bounds, char (&aData)[256], Searcher &aSearcher) noexcept :
@@ -154,6 +178,10 @@ Boolean SearchValidator::isValidInput(char *text, Boolean)
 
 void Searcher::search(TStringView text, turbo::SearchDirection direction)
 {
-    editor.search(text, direction, settings);
-    editor.partialRedraw();
+    using namespace turbo;
+    if (direction != sdForwardIncremental || settings.mode == smPlainText)
+    {
+        editor.search(text, direction, settings);
+        editor.partialRedraw();
+    }
 }
