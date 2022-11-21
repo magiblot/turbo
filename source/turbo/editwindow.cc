@@ -17,12 +17,14 @@ using std::ios;
 
 EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
                             active_counter &fileCounter,
+                            turbo::SearchSettings &searchSettings,
                             EditorWindowParent &aParent ) noexcept :
     TWindowInit(&initFrame),
     super(bounds, aEditor),
     listHead(this),
     fileNumber(fileCounter),
-    parent(aParent)
+    parent(aParent),
+    searchState {searchSettings}
 {
     // Commands that always get enabled when focusing the editor.
     enabledCmds += cmSave;
@@ -119,11 +121,11 @@ void EditorWindow::handleEvent(TEvent &ev)
                     editor.redraw();
                     break;
                 case cmSearchAgain:
-                    editor.search(searchState.findText, sdForward, searchState.settings);
+                    editor.search(searchState.findText, sdForward, searchState.settingsPreset.get());
                     editor.partialRedraw();
                     break;
                 case cmSearchPrev:
-                    editor.search(searchState.findText, sdBackwards, searchState.settings);
+                    editor.search(searchState.findText, sdBackwards, searchState.settingsPreset.get());
                     editor.partialRedraw();
                     break;
                 default:

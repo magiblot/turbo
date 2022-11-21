@@ -58,8 +58,8 @@ struct EditorWindow : public turbo::BasicEditorWindow
     TView *bottomView {nullptr};
     SearchState searchState;
 
-    EditorWindow( const TRect &bounds, TurboEditor &aEditor,
-                  active_counter &fileCounter, EditorWindowParent &aParent ) noexcept;
+    EditorWindow( const TRect &bounds, TurboEditor &aEditor, active_counter &fileCounter,
+                  turbo::SearchSettings &searchSettings, EditorWindowParent &aParent ) noexcept;
 
     void shutDown() override;
     void handleEvent(TEvent &ev) override;

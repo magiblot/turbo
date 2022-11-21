@@ -197,4 +197,37 @@ public:
     active_counter &operator[](std::string_view) noexcept;
 };
 
+
+template <class T>
+class Preset
+{
+    T &globalValue;
+    T localValue;
+    bool initialized {false};
+
+public:
+
+    Preset(T &aGlobalValue) noexcept :
+        globalValue(aGlobalValue)
+    {
+    }
+
+    T get()
+    {
+        if (!initialized)
+        {
+            localValue = globalValue;
+            initialized = true;
+        }
+        return localValue;
+    }
+
+    void set(T aLocalValue)
+    {
+        localValue = aLocalValue;
+        globalValue = localValue;
+        initialized = true;
+    }
+};
+
 #endif // TURBO_APP_UTIL_H

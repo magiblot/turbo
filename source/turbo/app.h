@@ -6,6 +6,7 @@
 #include <tvision/tv.h>
 
 #include <turbo/clipboard.h>
+#include <turbo/editstates.h>
 #include "doctree.h"
 #include "apputils.h"
 #include "editwindow.h"
@@ -26,6 +27,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     int argc;
     const char **argv;
     turbo::SystemClipboard clipboard;
+    turbo::SearchSettings searchSettings;
     std::string mostRecentDir;
 
     static TurboApp *app;

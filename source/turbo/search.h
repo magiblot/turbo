@@ -9,6 +9,7 @@
 
 #include <turbo/editstates.h>
 #include "cmds.h"
+#include "apputils.h"
 
 namespace turbo
 {
@@ -20,20 +21,20 @@ class ComboBox;
 
 struct SearchState
 {
+    Preset<turbo::SearchSettings> settingsPreset;
     char findText[256] {0};
-    turbo::SearchSettings settings;
 };
 
 class Searcher
 {
     turbo::Editor &editor;
-    turbo::SearchSettings &settings;
+    Preset<turbo::SearchSettings> &settingsPreset;
 
 public:
 
-    Searcher(turbo::Editor &aEditor, turbo::SearchSettings &aSettings) noexcept :
+    Searcher(turbo::Editor &aEditor, Preset<turbo::SearchSettings> &aSettingsPreset) noexcept :
         editor(aEditor),
-        settings(aSettings)
+        settingsPreset(aSettingsPreset)
     {
     }
 

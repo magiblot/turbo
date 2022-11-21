@@ -28,7 +28,7 @@ SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
                       SearchState &aSearchState ) noexcept :
     TGroup(bounds),
     searchState(aSearchState),
-    searcher(editor, searchState.settings)
+    searcher(editor, searchState.settingsPreset)
 {
     options |= ofFramed | ofFirstClick;
 
@@ -117,9 +117,10 @@ void SearchBox::handleEvent(TEvent &ev)
 void SearchBox::loadSettings()
 {
     using namespace turbo;
-    auto &settings = searchState.settings;
     if (cmbMode)
     {
+        auto settings = searchState.settingsPreset.get();
+
         cmbMode->setCurrentIndex(settings.mode);
         cbCaseSensitive->setChecked(settings.flags & sfCaseSensitive);
     }
@@ -128,12 +129,15 @@ void SearchBox::loadSettings()
 void SearchBox::storeSettings()
 {
     using namespace turbo;
-    auto &settings = searchState.settings;
     if (cmbMode)
     {
+        auto settings = searchState.settingsPreset.get();
+
         if (auto *entry = (const SpanListModelEntry<turbo::SearchMode> *) cmbMode->getCurrent())
             settings.mode = entry->data;
         settings.flags = -cbCaseSensitive->isChecked() & sfCaseSensitive;
+
+        searchState.settingsPreset.set(settings);
     }
 }
 
@@ -179,6 +183,7 @@ Boolean SearchValidator::isValidInput(char *text, Boolean)
 void Searcher::search(TStringView text, turbo::SearchDirection direction)
 {
     using namespace turbo;
+    auto settings = settingsPreset.get();
     if (direction != sdForwardIncremental || settings.mode == smPlainText)
     {
         editor.search(text, direction, settings);

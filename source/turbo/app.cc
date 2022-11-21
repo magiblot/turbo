@@ -317,7 +317,7 @@ void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)
     TRect r = newEditorBounds();
     auto &counter = fileCount[TPath::basename(path)];
     auto &editor = *new TurboEditor(scintilla, path);
-    EditorWindow &w = *new EditorWindow(r, editor, counter, *this);
+    EditorWindow &w = *new EditorWindow(r, editor, counter, searchSettings, *this);
     if (docTree)
         docTree->tree->addEditor(&w);
     w.listHead.insert_after(&MRUlist);
