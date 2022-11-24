@@ -57,14 +57,18 @@ SystemClipboard::~SystemClipboard()
 
 bool SystemClipboard::xSetText(TStringView text) noexcept
 {
-    #if !defined( _WIN32 )
-    // Try to set clipboard via OSC 52 escape sequence on *nix platforms
-    std::string encoded = turbo::to_base64(text.data());
-    printf("\e]52;;%s\a", encoded.c_str());
-    fflush(stdout);
-    #endif
+    bool cb_set_result = clipboard_set_text_ex(cb, text.data(), (int) text.size(), LCB_CLIPBOARD);
 
-    return cb && clipboard_set_text_ex(cb, text.data(), (int) text.size(), LCB_CLIPBOARD);
+#if !defined( _WIN32 )
+    if (!cb_set_result) {
+        // Try to set clipboard via OSC 52 escape sequence on *nix platforms
+        std::string encoded = turbo::to_base64(text.data());
+        printf("\e]52;;%s\a", encoded.c_str());
+        fflush(stdout);
+    }
+#endif
+
+    return cb && cb_set_result;
 }
 
 void SystemClipboard::xGetText(TFuncView<void(bool, TStringView)> accept) noexcept
