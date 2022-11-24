@@ -60,6 +60,7 @@ bool SystemClipboard::xSetText(TStringView text) noexcept
     bool cb_set_result = clipboard_set_text_ex(cb, text.data(), (int) text.size(), LCB_CLIPBOARD);
 
 #if !defined( _WIN32 )
+#if !defined( __BORLANDC__ )
     if (!cb_set_result) {
         // Try to set clipboard via OSC 52 escape sequence on *nix platforms
         std::string encoded = turbo::to_base64(text.data());
@@ -67,7 +68,8 @@ bool SystemClipboard::xSetText(TStringView text) noexcept
         fflush(stdout);
     }
 #endif
-
+#endif
+    
     return cb && cb_set_result;
 }
 
