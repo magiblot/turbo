@@ -1,6 +1,7 @@
 #include <turbo/clipboard.h>
 #include <libclipboard.h>
 #include <turbo/scintilla/internals.h>
+#include <turbo/base64.h>
 
 namespace turbo {
 
@@ -56,6 +57,13 @@ SystemClipboard::~SystemClipboard()
 
 bool SystemClipboard::xSetText(TStringView text) noexcept
 {
+    #if !defined( _WIN32 )
+    // Try to set clipboard via OSC 52 escape sequence on *nix platforms
+    std::string encoded = turbo::to_base64(text.data());
+    printf("\e]52;;%s\a", encoded.c_str());
+    fflush(stdout);
+    #endif
+
     return cb && clipboard_set_text_ex(cb, text.data(), (int) text.size(), LCB_CLIPBOARD);
 }
 
