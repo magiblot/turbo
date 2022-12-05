@@ -3,6 +3,7 @@
 
 #include <tvision/tv.h>
 #include <turbo/funcview.h>
+#include <stdio.h>
 
 struct clipboard_c;
 
@@ -35,8 +36,8 @@ public:
 
 protected:
 
-    // Called when the clipboard's contents change. Returns whether it succeeded.
-    virtual bool xSetText(TStringView) noexcept = 0;
+    // Called when the clipboard's contents change.
+    virtual void xSetText(TStringView) noexcept = 0;
     // Called when retrieving new clipboard contents.
     virtual void xGetText(TFuncView<void(bool ok, TStringView text)> accept) noexcept = 0;
 
@@ -48,13 +49,16 @@ class SystemClipboard : public Clipboard
     // (Win32/X11/Cocoa).
 
     struct clipboard_c *cb;
+#ifndef _WIN32
+    FILE *ttyout;
+#endif
 
 public:
 
     SystemClipboard() noexcept;
     ~SystemClipboard();
 
-    bool xSetText(TStringView) noexcept override;
+    void xSetText(TStringView) noexcept override;
     void xGetText(TFuncView<void(bool, TStringView)> accept) noexcept override;
 };
 
