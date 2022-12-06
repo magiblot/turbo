@@ -82,8 +82,9 @@ void GoToLineBox::goToLine(const char *input)
     if (sscanf(input, "%lu", &line) == 1)
         editor.callScintilla(SCI_GOTOLINE, line - 1, 0U);
     TEvent ev;
-    ev.what = evKeyDown;
-    ev.keyDown = {{kbEsc}};
+    ev.what = evCommand;
+    ev.message.command = cmCloseView;
+    ev.message.infoPtr = this;
     putEvent(ev);
 }
 

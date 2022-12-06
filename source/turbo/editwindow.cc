@@ -67,8 +67,8 @@ void EditorWindow::handleEvent(TEvent &ev)
             switch (ev.keyDown.keyCode)
             {
                 case kbEsc:
-                    if ((handled = closeBottomView()))
-                        editor.redraw();
+                    if ((handled = bottomView))
+                        closeBottomView();
                     break;
                 default:
                     handled = false;
@@ -132,6 +132,9 @@ void EditorWindow::handleEvent(TEvent &ev)
                 case cmGoToLine:
                     openBottomView<GoToLineBox>(editor);
                     break;
+                case cmCloseView:
+                    if ((handled = bottomView && ev.message.infoPtr == bottomView))
+                        closeBottomView();
                 default:
                     handled = false;
             }
@@ -208,22 +211,20 @@ static void growEditor(turbo::Editor &editor, int dy)
     }, editor.view, editor.leftMargin);
 }
 
-bool EditorWindow::closeBottomView()
+void EditorWindow::closeBottomView()
+// Pre: 'bottomView' is not null.
 {
-    if (bottomView)
-    {
-        int dy = bottomView->size.y + !!(bottomView->options & ofFramed);
-        growEditor(editor, dy);
-        destroy(bottomView);
-        bottomView = nullptr;
-        return true;
-    }
-    return false;
+    int dy = bottomView->size.y + !!(bottomView->options & ofFramed);
+    growEditor(editor, dy);
+    destroy(bottomView);
+    bottomView = nullptr;
+    editor.redraw();
 }
 
 void EditorWindow::setBottomView(TView *view)
 {
-    closeBottomView();
+    if (bottomView)
+        closeBottomView();
     insert(view);
     bottomView = view;
     int dy = -(bottomView->size.y + !!(bottomView->options & ofFramed));

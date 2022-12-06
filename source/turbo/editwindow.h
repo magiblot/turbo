@@ -69,7 +69,7 @@ struct EditorWindow : public turbo::BasicEditorWindow
     void updateCommands() noexcept;
     void handleNotification(const SCNotification &scn, turbo::Editor &) override;
 
-    bool closeBottomView();
+    void closeBottomView();
     void setBottomView(TView *view);
     template <class T, class ...Args>
     void openBottomView(Args&& ...args);
