@@ -1,7 +1,8 @@
 #ifndef TURBO_CMDS_H
 #define TURBO_CMDS_H
 
-const ushort
+enum : ushort
+{
     cmOpenRecent    = 100,
     cmEditorNext    = 101,
     cmEditorPrev    = 102,
@@ -16,12 +17,18 @@ const ushort
     cmSelUppercase  = 111,
     cmSelLowercase  = 112,
     cmSelCapitalize = 113,
-    cmToggleComment = 114;
+    cmToggleComment = 114,
+    cmGoToLine      = 115,
+};
 
 // Commands that cannot be deactivated.
-const ushort
+
+enum : ushort
+{
     cmToggleTree    = 1000,
     cmStateChanged  = 1001,
-    cmFindSearchBox = 1002;
+    cmFindSearchBox = 1002,
+    cmFindGoToLineBox   = 1003,
+};
 
 #endif // TURBO_CMDS_H

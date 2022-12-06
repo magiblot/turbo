@@ -1,8 +1,7 @@
-#ifndef TURBO_SEARCHBOX_H
-#define TURBO_SEARCHBOX_H
+#ifndef TURBO_SEARCH_H
+#define TURBO_SEARCH_H
 
 #define Uses_TGroup
-#define Uses_TPalette
 #define Uses_TInputLine
 #define Uses_TValidator
 #include <tvision/tv.h>
@@ -89,4 +88,4 @@ public:
     SearchInputLine(const TRect &bounds, char (&aData)[256], Searcher &aSearcher) noexcept;
 };
 
-#endif
+#endif // TURBO_SEARCH_H

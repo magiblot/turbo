@@ -59,6 +59,7 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     ts += cmToggleLineNums;
     ts += cmFind;
     ts += cmReplace;
+    ts += cmGoToLine;
     ts += cmSearchAgain;
     ts += cmSearchPrev;
     ts += cmToggleIndent;
@@ -129,6 +130,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
         *new TSubMenu( "~E~dit", kbAltE ) +
             *new TMenuItem( "~F~ind...", cmFind, kbCtrlF, hcNoContext, "Ctrl-F" ) +
             *new TMenuItem( "~R~eplace...",cmReplace, kbCtrlR, hcNoContext, "Ctrl-R" ) +
+            *new TMenuItem( "~G~o to Line...",cmGoToLine, kbCtrlG, hcNoContext, "Ctrl-G" ) +
             *new TMenuItem( "Find ~N~ext", cmSearchAgain, kbF3, hcNoContext, "F3" ) +
             *new TMenuItem( "Find ~P~revious", cmSearchPrev, kbShiftF3, hcNoContext, "Shift-F3" ) +
         *new TSubMenu( "Se~l~ection", kbAltL ) +

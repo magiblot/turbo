@@ -11,6 +11,7 @@
 #include "app.h"
 #include "apputils.h"
 #include "search.h"
+#include "gotoline.h"
 #include <fmt/core.h>
 #include <iostream>
 using std::ios;
@@ -32,6 +33,7 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     enabledCmds += cmToggleWrap;
     enabledCmds += cmToggleLineNums;
     enabledCmds += cmFind;
+    enabledCmds += cmGoToLine;
     enabledCmds += cmSearchAgain;
     enabledCmds += cmSearchPrev;
     enabledCmds += cmToggleIndent;
@@ -118,7 +120,6 @@ void EditorWindow::handleEvent(TEvent &ev)
                 case cmFind:
                 case cmReplace:
                     openBottomView<SearchBox>(editor, searchState);
-                    editor.redraw();
                     break;
                 case cmSearchAgain:
                     editor.search(searchState.findText, sdForward, searchState.settingsPreset.get());
@@ -127,6 +128,9 @@ void EditorWindow::handleEvent(TEvent &ev)
                 case cmSearchPrev:
                     editor.search(searchState.findText, sdBackwards, searchState.settingsPreset.get());
                     editor.partialRedraw();
+                    break;
+                case cmGoToLine:
+                    openBottomView<GoToLineBox>(editor);
                     break;
                 default:
                     handled = false;
@@ -238,6 +242,7 @@ void EditorWindow::openBottomView(Args&& ...args)
         view->growMode = gfGrowAll & ~gfGrowLoX;
         view->setState(sfActive, state & sfActive);
         setBottomView(view);
+        editor.redraw();
     }
     view->select();
     view->resetCurrent();

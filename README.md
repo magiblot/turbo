@@ -120,7 +120,7 @@ Below is my TO-DO list of features I would like to implement in Turbo:
 - [x] Case-insensitive search.
 - [x] Find as you type.
 - [ ] Replace.
-- [ ] Go to line.
+- [x] Go to line.
 - [ ] List of recently opened files.
 - [x] Remove trailing whitespaces on save.
 - [x] Ensure newline at end of file.
