@@ -1,6 +1,8 @@
 #ifndef TURBO_APPUTILS_H
 #define TURBO_APPUTILS_H
 
+#include <tvision/tv.h>
+
 #include <unordered_map>
 #include <forward_list>
 #include <string_view>
