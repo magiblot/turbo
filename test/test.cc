@@ -44,7 +44,7 @@ std::string TextState::encode(TextState self)
 
 TScintilla &createScintilla(TextState state)
 {
-    auto &scintilla = createScintilla((Clipboard *) nullptr);
+    auto &scintilla = createScintilla();
     call(scintilla, SCI_SETTEXT, 0U, (sptr_t) state.text.c_str());
     call(scintilla, SCI_SETSEL, state.anchor, state.caret);
     return scintilla;

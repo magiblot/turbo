@@ -18,7 +18,6 @@ class TScintilla;
 
 namespace turbo {
 
-class Clipboard;
 using TScintilla = Scintilla::TScintilla;
 class TScintillaParent;
 
@@ -29,7 +28,7 @@ class TScintillaParent;
 // 'destroyScintilla' and 'call' functions below should be enough.
 
 // Returns a heap-allocated instance of 'TScintilla'.
-TScintilla &createScintilla(Clipboard *aClipboard) noexcept;
+TScintilla &createScintilla() noexcept;
 // Destroys a heap-allocated instance of 'TScintilla'.
 void destroyScintilla(TScintilla &) noexcept;
 // Invokes 'TScintilla::WndProc'. See 'https://www.scintilla.org/ScintillaDoc.html'.

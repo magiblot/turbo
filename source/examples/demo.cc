@@ -32,8 +32,6 @@ using EditorList = std::forward_list<FileEditor>;
 
 struct DemoApplication : public TApplication
 {
-    turbo::SystemClipboard clipboard;
-
     DemoApplication() noexcept;
 };
 
@@ -48,9 +46,8 @@ struct DemoEditorWindow : public TDialog, public turbo::EditorParent
     TScrollBar *hScrollBar, *vScrollBar;
     DemoEditorListView *listView;
     std::vector<char> title;
-    turbo::Clipboard *clipboard;
 
-    DemoEditorWindow(const TRect &bounds, turbo::Clipboard *aClipboard) noexcept;
+    DemoEditorWindow(const TRect &bounds) noexcept;
 
     void shutDown() override;
     void handleEvent(TEvent &ev) override;
@@ -90,16 +87,14 @@ DemoApplication::DemoApplication() noexcept :
 {
     insertWindow(
         new DemoEditorWindow(
-            deskTop->getExtent().grow(-2, -2),
-            &clipboard
+            deskTop->getExtent().grow(-2, -2)
         )
     );
 }
 
-DemoEditorWindow::DemoEditorWindow(const TRect &bounds, turbo::Clipboard *aClipboard) noexcept :
+DemoEditorWindow::DemoEditorWindow(const TRect &bounds) noexcept :
     TWindowInit(&initFrame),
-    TDialog(bounds, nullptr),
-    clipboard(aClipboard)
+    TDialog(bounds, nullptr)
 {
     using namespace turbo;
     flags |= wfGrow;
@@ -324,7 +319,7 @@ void DemoEditorWindow::handleNotification(const SCNotification &scn, turbo::Edit
 
 turbo::TScintilla &DemoEditorWindow::createScintilla()
 {
-    return turbo::createScintilla(clipboard);
+    return turbo::createScintilla();
 }
 
 void DemoEditorWindow::addEditor(turbo::TScintilla &scintilla, const char *filePath)

@@ -5,7 +5,6 @@
 #define Uses_TFileDialog
 #include <tvision/tv.h>
 
-#include <turbo/clipboard.h>
 #include <turbo/editstates.h>
 #include "doctree.h"
 #include "apputils.h"
@@ -26,7 +25,6 @@ struct TurboApp : public TApplication, EditorWindowParent
     bool argsParsed {false};
     int argc;
     const char **argv;
-    turbo::SystemClipboard clipboard;
     turbo::SearchSettings searchSettings;
     std::string mostRecentDir;
 

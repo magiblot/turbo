@@ -10,9 +10,9 @@
 
 namespace turbo {
 
-TScintilla &createScintilla(Clipboard *aClipboard) noexcept
+TScintilla &createScintilla() noexcept
 {
-    return *new TScintilla(aClipboard);
+    return *new TScintilla;
 }
 
 void destroyScintilla(TScintilla &self) noexcept

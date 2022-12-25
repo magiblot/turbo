@@ -310,7 +310,7 @@ TRect TurboApp::newEditorBounds() const
 
 turbo::TScintilla &TurboApp::createScintilla() noexcept
 {
-    return turbo::createScintilla(&clipboard);
+    return turbo::createScintilla();
 }
 
 void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)

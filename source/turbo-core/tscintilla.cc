@@ -1,16 +1,15 @@
 #define Uses_TText
+#define Uses_TClipboard
 #include <tvision/tv.h>
 
 #include <turbo/scintilla.h>
 #include <turbo/scintilla/tscintilla.h>
-#include <turbo/clipboard.h>
 
 #include "platform/surface.h"
 
 namespace Scintilla {
 
-TScintilla::TScintilla(turbo::Clipboard *aClipboard) :
-    clipboard(aClipboard)
+TScintilla::TScintilla()
 {
     // Block caret for both Insertion and Overwrite mode.
     WndProc(SCI_SETCARETSTYLE, CARETSTYLE_BLOCK | CARETSTYLE_OVERSTRIKE_BLOCK, 0U);
@@ -89,30 +88,19 @@ bool TScintilla::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
     return false;
 }
 
-// Clipboard actions copied from ScinTerm.
-
 void TScintilla::Copy()
 {
-    if (clipboard && !sel.Empty())
-        clipboard->setSelection([&] (auto &selText) {
-            CopySelectionRange(&selText);
-        });
+    if (!sel.Empty())
+    {
+        SelectionText selText;
+        CopySelectionRange(&selText);
+        TClipboard::setText({selText.Data(), selText.Length()});
+    }
 }
 
 void TScintilla::Paste()
 {
-    if (clipboard)
-        clipboard->getSelection([&] (const auto &selText) {
-            if (selText.Length())
-            {
-                ClearSelection(multiPasteMode == SC_MULTIPASTE_EACH);
-                InsertPasteShape( selText.Data(),
-                                  selText.Length(),
-                                  selText.rectangular ? pasteRectangular
-                                                      : pasteStream );
-                EnsureCaretVisible();
-            }
-        });
+    TClipboard::requestText();
 }
 
 void TScintilla::ClaimSelection()

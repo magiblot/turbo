@@ -14,7 +14,6 @@ class TScrollBar;
 
 namespace turbo {
 
-class Clipboard;
 class EditorView;
 class LeftMarginView;
 class Editor;

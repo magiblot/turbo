@@ -105,17 +105,14 @@ target_include_directories(${TURBO}-core PUBLIC
 target_include_directories(${TURBO}-core PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}-core"
     "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}-core/platform"
-    "${CMAKE_CURRENT_LIST_DIR}/deps/libclipboard/include" # libclipboard.h
-    "${CMAKE_BINARY_DIR}/deps/libclipboard/include" # libclipboard-config.h
 )
 target_link_libraries(${TURBO}-core PUBLIC
     tvision
     fmt
-    clipboard
 )
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
-    install(TARGETS fmt clipboard EXPORT ${TURBO}-config)
+    install(TARGETS fmt EXPORT ${TURBO}-config)
     install(TARGETS ${TURBO}-core
         EXPORT ${TURBO}-config
         ARCHIVE DESTINATION lib

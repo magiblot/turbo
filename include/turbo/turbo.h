@@ -3,7 +3,6 @@
 
 #include "basicframe.h"
 #include "basicwindow.h"
-#include "clipboard.h"
 #include "editor.h"
 #include "editstates.h"
 #include "fileeditor.h"

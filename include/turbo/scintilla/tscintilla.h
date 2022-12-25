@@ -8,7 +8,6 @@
 
 namespace turbo {
 class TScintillaParent;
-class Clipboard;
 } // namespace turbo
 
 namespace Scintilla {
@@ -20,8 +19,6 @@ class TScintilla : public ScintillaBase
     static void drawWrapMarker(Surface *, PRectangle, bool, ColourDesired);
 
 protected:
-
-    turbo::Clipboard *clipboard;
 
     void SetVerticalScrollPos() override;
     void SetHorizontalScrollPos() override;
@@ -47,7 +44,7 @@ protected:
 
 public:
 
-    TScintilla(turbo::Clipboard *aClipboard);
+    TScintilla();
 
     void setParent(turbo::TScintillaParent *aParent);
     turbo::TScintillaParent *getParent() const;
