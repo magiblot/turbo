@@ -172,7 +172,7 @@ public:
 
 private:
 
-    void consumeInputText(TEvent &ev);
+    void handlePaste(TEvent &ev);
 
 };
 

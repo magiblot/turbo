@@ -34,12 +34,10 @@ void EditorView::handleEvent(TEvent &ev)
         case evKeyDown:
             if (ev.keyDown.keyCode == kbIns)
                 setState(sfCursorIns, !getState(sfCursorIns));
-            // If we always began reading events in consumeInputText,
-            // we would never autoindent newlines.
-            if (!ev.keyDown.textLength)
-                handleKeyDown(scintilla, ev.keyDown);
+            if (ev.keyDown.controlKeyState & kbPaste)
+                handlePaste(ev);
             else
-                consumeInputText(ev);
+                handleKeyDown(scintilla, ev.keyDown);
             // Could use partialRedraw(), but it is broken for the Redo action (Scintilla bug?).
             editor->redraw();
             clearEvent(ev);
@@ -99,52 +97,23 @@ void EditorView::handleEvent(TEvent &ev)
     }
 }
 
-static bool isPastedText(std::string_view text)
-{
-    size_t i = 0, n = 0;
-    while (TText::next(text, i))
-        if (++n > 2)
-            return true;
-    return false;
-}
-
-static void insertOneByOne(TScintilla &scintilla, std::string_view text)
-{
-    size_t i = 0, j = 0;
-    while (TText::next(text, j))
-    {
-        // Allow overwrite on Ins.
-        insertCharacter(scintilla, text.substr(i, j));
-        i = j;
-    }
-}
-
-void EditorView::consumeInputText(TEvent &ev)
+void EditorView::handlePaste(TEvent &ev)
 // Pre: 'editor' is non-null.
 {
     auto &scintilla = editor->scintilla;
     clearBeforeTentativeStart(scintilla);
+    call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
 
     char buf[4096];
     size_t length;
-    bool undogroup = false;
     while (textEvent(ev, buf, length))
     {
-        std::string_view text {buf, length};
-        if (!undogroup && isPastedText(text))
-        {
-            undogroup = true;
-            call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
-        }
-        if (!undogroup) // Individual typing.
-            insertOneByOne(scintilla, text);
-        else
-            insertPasteStream(scintilla, text);
+        TStringView text(buf, length);
+        insertPasteStream(scintilla, text);
     }
 
     call(scintilla, SCI_SCROLLCARET, 0U, 0U);
-    if (undogroup)
-        call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
+    call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
 }
 
 void EditorView::draw()
