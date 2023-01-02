@@ -177,6 +177,9 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( 0, kbCtrlX, cmCut ) +
             *new TStatusItem( 0, kbCtrlC, cmCopy ) +
             *new TStatusItem( 0, kbCtrlV, cmPaste ) +
+            *new TStatusItem( 0, kbShiftDel, cmCut ) +
+            *new TStatusItem( 0, kbCtrlIns, cmCopy ) +
+            *new TStatusItem( 0, kbShiftIns, cmPaste ) +
             *new TStatusItem( 0, kbCtrlTab, cmEditorNext ) +
             *new TStatusItem( 0, kbAltTab, cmEditorNext ) +
             *new TStatusItem( 0, kbShiftF6, cmEditorPrev ) +
