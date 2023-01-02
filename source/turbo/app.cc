@@ -128,6 +128,10 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
             *new TMenuItem( "E~x~it", cmQuit, kbAltX, hcNoContext, "Alt-X" ) +
         *new TSubMenu( "~E~dit", kbAltE ) +
+            *new TMenuItem( "Cu~t~", cmCut, kbCtrlX, hcNoContext, "Ctrl-X" ) +
+            *new TMenuItem( "~C~opy", cmCopy, kbCtrlC, hcNoContext, "Ctrl-C" ) +
+            *new TMenuItem( "~P~aste", cmPaste, kbCtrlV, hcNoContext, "Ctrl-V" ) +
+            newLine() +
             *new TMenuItem( "~F~ind...", cmFind, kbCtrlF, hcNoContext, "Ctrl-F" ) +
             *new TMenuItem( "~R~eplace...",cmReplace, kbCtrlR, hcNoContext, "Ctrl-R" ) +
             *new TMenuItem( "~G~o to Line...",cmGoToLine, kbCtrlG, hcNoContext, "Ctrl-G" ) +
@@ -166,6 +170,9 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( "~Ctrl-S~ Save", kbNoKey, cmSave ) +
             *new TStatusItem( "~F6~ Next", kbF6, cmEditorNext ) +
             *new TStatusItem( "~F12~ Menu" , kbF12, cmMenu ) +
+            *new TStatusItem( 0, kbCtrlX, cmCut ) +
+            *new TStatusItem( 0, kbCtrlC, cmCopy ) +
+            *new TStatusItem( 0, kbCtrlV, cmPaste ) +
             *new TStatusItem( 0, kbCtrlTab, cmEditorNext ) +
             *new TStatusItem( 0, kbAltTab, cmEditorNext ) +
             *new TStatusItem( 0, kbShiftF6, cmEditorPrev ) +

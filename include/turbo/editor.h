@@ -153,13 +153,16 @@ class EditorView : public TSurfaceView
 {
     // 'EditorView' is used to display an 'Editor's contents and feed input
     // events (keboard, mouse) to it.
-
+    //
     // During an invocation to 'editor->redraw()', the 'TSurfaceView::surface'
     // member is temporally set to 'editor->surface'. If 'this->draw()' is invoked
     // and 'TSurfaceView::surface' is null, 'editor->redraw()' also gets called.
     // To avoid issues during window resize, make sure the 'EditorView' is
     // inserted before the other views associated to 'editor' (left margin,
     // scrollbars...).
+    //
+    // It handles and enables the following commands:
+    // cmCut, cmCopy, cmPaste.
 public:
 
     Editor *editor {nullptr}; // Non-owning.
@@ -168,11 +171,14 @@ public:
 
     void handleEvent(TEvent &ev) override;
     void draw() override;
+    void setState(ushort command, bool enable) override;
 
 private:
 
     void handlePaste(TEvent &ev);
-
+    bool canUpdateCommands();
+    void setCmdState(ushort, bool);
+    void updateCommands();
 };
 
 class LeftMarginView : public TSurfaceView

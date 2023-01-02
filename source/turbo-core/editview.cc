@@ -86,6 +86,25 @@ void EditorView::handleEvent(TEvent &ev)
             }
             clearEvent(ev);
             break;
+        case evCommand:
+            switch (ev.message.command)
+            {
+                case cmCut:
+                    call(scintilla, SCI_CUT, 0U, 0U);
+                    editor->partialRedraw();
+                    clearEvent(ev);
+                    break;
+                case cmCopy:
+                    call(scintilla, SCI_COPY, 0U, 0U);
+                    clearEvent(ev);
+                    break;
+                case cmPaste:
+                    call(scintilla, SCI_PASTE, 0U, 0U);
+                    editor->partialRedraw();
+                    clearEvent(ev);
+                    break;
+            }
+            break;
         case evBroadcast:
             if ( ev.message.command == cmScrollBarChanged &&
                  editor->handleScrollBarChanged((TScrollBar *) ev.message.infoPtr) )
@@ -95,6 +114,8 @@ void EditorView::handleEvent(TEvent &ev)
             }
             break;
     }
+    if (ev.what == evNothing && canUpdateCommands())
+        updateCommands();
 }
 
 void EditorView::handlePaste(TEvent &ev)
@@ -129,6 +150,41 @@ void EditorView::draw()
         cursor = p - delta;
         TSurfaceView::draw();
     }
+}
+
+bool EditorView::canUpdateCommands()
+{
+    return (~state & (sfActive | sfSelected)) == 0;
+}
+
+void EditorView::setState(ushort aState, bool enable)
+{
+    bool updateBefore = canUpdateCommands();
+    TSurfaceView::setState(aState, enable);
+    bool updateAfter = canUpdateCommands();
+    if (updateBefore != updateAfter)
+        updateCommands();
+}
+
+void EditorView::setCmdState(ushort command, bool enable)
+{
+    TCommandSet s;
+    s += command;
+    if (enable && canUpdateCommands())
+        enableCommands(s);
+    else
+        disableCommands(s);
+}
+
+void EditorView::updateCommands()
+{
+    bool hasSelection = editor && (
+        editor->callScintilla(SCI_GETCURRENTPOS, 0U, 0U) !=
+        editor->callScintilla(SCI_GETANCHOR, 0U, 0U)
+    );
+    setCmdState(cmCut, hasSelection);
+    setCmdState(cmCopy, hasSelection);
+    setCmdState(cmPaste, editor != nullptr);
 }
 
 } // namespace turbo
