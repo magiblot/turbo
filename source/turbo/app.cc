@@ -128,6 +128,9 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
             *new TMenuItem( "E~x~it", cmQuit, kbAltX, hcNoContext, "Alt-X" ) +
         *new TSubMenu( "~E~dit", kbAltE ) +
+            *new TMenuItem( "~U~ndo", cmUndo, kbCtrlZ, hcNoContext, "Ctrl-Z" ) +
+            *new TMenuItem( "Re~d~o", cmRedo, kbCtrlY, hcNoContext, "Ctrl-Y" ) +
+            newLine() +
             *new TMenuItem( "Cu~t~", cmCut, kbCtrlX, hcNoContext, "Ctrl-X" ) +
             *new TMenuItem( "~C~opy", cmCopy, kbCtrlC, hcNoContext, "Ctrl-C" ) +
             *new TMenuItem( "~P~aste", cmPaste, kbCtrlV, hcNoContext, "Ctrl-V" ) +
@@ -170,6 +173,7 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( "~Ctrl-S~ Save", kbNoKey, cmSave ) +
             *new TStatusItem( "~F6~ Next", kbF6, cmEditorNext ) +
             *new TStatusItem( "~F12~ Menu" , kbF12, cmMenu ) +
+            *new TStatusItem( 0, TKey(kbCtrlZ, kbShift), cmRedo ) +
             *new TStatusItem( 0, kbCtrlX, cmCut ) +
             *new TStatusItem( 0, kbCtrlC, cmCopy ) +
             *new TStatusItem( 0, kbCtrlV, cmPaste ) +

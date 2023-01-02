@@ -38,8 +38,7 @@ void EditorView::handleEvent(TEvent &ev)
                 handlePaste(ev);
             else
                 handleKeyDown(scintilla, ev.keyDown);
-            // Could use partialRedraw(), but it is broken for the Redo action (Scintilla bug?).
-            editor->redraw();
+            editor->partialRedraw();
             clearEvent(ev);
             break;
         case evMouseDown:
@@ -89,6 +88,16 @@ void EditorView::handleEvent(TEvent &ev)
         case evCommand:
             switch (ev.message.command)
             {
+                case cmUndo:
+                    call(scintilla, SCI_UNDO, 0U, 0U);
+                    editor->partialRedraw();
+                    clearEvent(ev);
+                    break;
+                case cmRedo:
+                    call(scintilla, SCI_REDO, 0U, 0U);
+                    editor->redraw(); // partialRedraw() is broken for the Redo action (Scintilla bug).
+                    clearEvent(ev);
+                    break;
                 case cmCut:
                     call(scintilla, SCI_CUT, 0U, 0U);
                     editor->partialRedraw();
@@ -178,10 +187,14 @@ void EditorView::setCmdState(ushort command, bool enable)
 
 void EditorView::updateCommands()
 {
+    bool canUndo = editor && editor->callScintilla(SCI_CANUNDO, 0U, 0U);
+    bool canRedo = editor && editor->callScintilla(SCI_CANREDO, 0U, 0U);
     bool hasSelection = editor && (
         editor->callScintilla(SCI_GETCURRENTPOS, 0U, 0U) !=
         editor->callScintilla(SCI_GETANCHOR, 0U, 0U)
     );
+    setCmdState(cmUndo, canUndo);
+    setCmdState(cmRedo, canRedo);
     setCmdState(cmCut, hasSelection);
     setCmdState(cmCopy, hasSelection);
     setCmdState(cmPaste, editor != nullptr);
