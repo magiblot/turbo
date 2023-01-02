@@ -6,6 +6,8 @@ It was created to demonstrate new features in Turbo Vision. In particular, it ha
 
 As a text editor, Turbo aims at being intuitive and easy to use. Usability and productivity are its two other major objectives, although it has not got that far yet. And only for being a Turbo Vision application, it offers a vintage look and feel.
 
+The original location of this project is https://github.com/magiblot/turbo.
+
 ![Turbo](https://user-images.githubusercontent.com/20713561/89552632-b7053380-d80c-11ea-92e0-a8c30f80cd49.png)
 
 ## Downloads
@@ -24,12 +26,12 @@ Then, make sure the following dependencies are installed:
 * CMake.
 * A compiler supporting C++17.
 * `libncursesw` (note the 'w') (Unix only).
-* `pkg-config`, `libxcb` (Unix only).
 
 Additionally, you may also want to install these optional dependencies:
 
 * `libmagic` for better recognition of file types (Unix only).
 * `libgpm` for mouse support on the linux console (Linux only).
+* `xsel`, `xclip` and/or `wl-clipboard` for system clipboard integration (Unix only, except macOS).
 
 Turbo can be built with the following commands:
 
@@ -45,7 +47,7 @@ The above will generate the `turbo` binary.
 
 ```sh
 sudo apt update && sudo apt upgrade
-sudo apt install build-essential cmake gettext-base git libgpm-dev libmagic-dev libncursesw5-dev libxcb1-dev pkg-config
+sudo apt install build-essential cmake gettext-base git libgpm-dev libmagic-dev libncursesw5-dev xsel
 git clone --recursive https://github.com/magiblot/turbo.git
 cd turbo
 cmake . -DCMAKE_BUILD_TYPE=Release
@@ -58,7 +60,7 @@ sudo cp turbo /usr/local/bin/ # Install (optional).
 
 ```sh
 sudo apt update && sudo apt upgrade
-sudo apt install build-essential cmake g++-8 gettext-base git libgpm-dev libmagic-dev libncursesw5-dev libxcb1-dev pkg-config
+sudo apt install build-essential cmake g++-8 gettext-base git libgpm-dev libmagic-dev libncursesw5-dev xsel
 git clone --recursive https://github.com/magiblot/turbo.git
 cd turbo
 CXX=g++-8 cmake . -DCMAKE_BUILD_TYPE=Release
@@ -105,7 +107,7 @@ Support for these key combinations may vary among terminal applications, but any
 
 Scintilla has [lots of features](https://www.scintilla.org/ScintillaDoc.html), of which Turbo only offers a few. Making more of them available is just a matter of time, so contributions are welcome.
 
-Below is my TO-DO list of features I would like to implement in Turbo:
+Below is a TO-DO list of features I would like to implement in Turbo:
 
 - [x] Several files open at the same time.
 - [x] Line numbers.
@@ -134,5 +136,6 @@ Below is my TO-DO list of features I would like to implement in Turbo:
 - [x] Brace match highlighting.
 - [ ] VIM input mode.
 - [ ] Localization.
+- [x] Integration with the system clipboard.
 - [x] Unicode in dialog text boxes (this depends on Turbo Vision).
 - [ ] True Color support (this depends on Turbo Vision).
