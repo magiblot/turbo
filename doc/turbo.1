@@ -1,11 +1,11 @@
-.TH TURBO 1 "20 October 2022"
+.TH TURBO 1 "4 January 2023"
 .SH NAME
 turbo \- An experimental text editor based on Scintilla and Turbo Vision.
 .SH SYNOPSIS
 \fBturbo\fR [\fIfile\fR...]
 .SH DESCRIPTION
 .PP
-Turbo is an experimental text editor for the terminal, based on the Scintilla code editing component by Neil Hodgson and the Turbo Vision application framework.
+Turbo is an experimental text editor for the terminal, based on the Scintilla code editing component and the Turbo Vision application framework.
 .PP
 It was created to demonstrate new features in Turbo Vision.
 In particular, it has served as testing ground for Turbo Vision's Unicode capabilities.
@@ -57,8 +57,11 @@ Duplicate selection or current line.
 \fBCtrl+F\fR
 Find text.
 .TP
+\fBCtrl+G\fR
+Go to line.
+.TP
 \fBCtrl+L\fR
-Cut current line.
+Delete current line.
 .TP
 \fBCtrl+Q\fR
 Toggle comment.
@@ -75,10 +78,10 @@ Redo.
 \fBCtrl+Z\fR
 Undo.
 .TP
-\fBCtrl+Left\fR
+\fBCtrl+Left\fR, \fBAlt+Left\fR
 Move cursor one word left.
 .TP
-\fBCtrl+Right\fR
+\fBCtrl+Right\fR, \fBAlt+Right\fR
 Move cursor one word left.
 .TP
 \fBCtrl+Back\fR, \fBAlt+Back\fR
@@ -90,10 +93,10 @@ Delete one word right.
 \fBShift\fR
 Extend selection while cursor moves.
 .TP
-\fBShift+Alt+Down\fR
+\fBCtrl+Shift+Down\fR, \fBAlt+Shift+Down\fR
 Move selected lines down.
 .TP
-\fBShift+Alt+Up\fR
+\fBCtrl+Shift+Up\fR, \fBAlt+Shift+Up\fR
 Move selected lines up.
 .TP
 \fBF3\fR
@@ -105,16 +108,17 @@ Find previous match.
 .PP
 The following environment variables affect the behaviour of Turbo:
 .TP
-\fBCOLUMNS\fR
-Overrides the system-supplied number of terminal columns.
+\fBCOLUMNS\fR, \fBLINES\fR
+Overrides the system-supplied number of terminal columns and columns.
+.TP
+\fBDISPLAY\fR, \fBWAYLAND_DISPLAY\fR
+Turbo will interact with the X11 or Wayland clipboard if available.
+This requires \fIwl-clipboard\fR and \fIxsel\fR or \fIxclip\fR to be installed.
 .TP
 \fBLANG\fR, \fBLC_ALL\fR, \fBLC_CTYPE\fR
 UTF-8 support is only enabled if a UTF-8 locale is in use.
-.TP
-\fBLINES\fR
-Overrides the system-supplied number of terminal lines.
 .SH NOTES
 Not all keyboard shortcuts are supported by all terminals.
-For this reason, some commands can be triggered by different shortcuts.
+For this reason, some commands can be triggered by more than one shortcut.
 .SH BUGS
 You can report bugs in Turbo's issue tracker (https://github.com/magiblot/turbo/issues).

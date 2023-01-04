@@ -51,16 +51,28 @@ TScintilla::TScintilla()
     // Set our custom function to draw wrap markers.
     view.customDrawWrapMarker = drawWrapMarker;
 
-    // Extra key shortcuts
+    // Extra key shortcuts.
+
+    // Some Ctrl+key combinations are not supported by many terminals,
+    // so allow using Alt instead.
+    WndProc(SCI_ASSIGNCMDKEY, SCK_LEFT | (SCMOD_ALT << 16), SCI_WORDLEFT);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_LEFT | ((SCMOD_SHIFT | SCMOD_ALT) << 16), SCI_WORDLEFTEXTEND);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_RIGHT | (SCMOD_ALT << 16), SCI_WORDRIGHT);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_RIGHT | ((SCMOD_SHIFT | SCMOD_ALT) << 16), SCI_WORDRIGHTEXTEND);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_UP | ((SCMOD_SHIFT | SCMOD_CTRL) << 16), SCI_MOVESELECTEDLINESUP);
     WndProc(SCI_ASSIGNCMDKEY, SCK_UP | ((SCMOD_SHIFT | SCMOD_ALT) << 16), SCI_MOVESELECTEDLINESUP);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_DOWN | ((SCMOD_SHIFT | SCMOD_CTRL) << 16), SCI_MOVESELECTEDLINESDOWN);
     WndProc(SCI_ASSIGNCMDKEY, SCK_DOWN | ((SCMOD_SHIFT | SCMOD_ALT) << 16), SCI_MOVESELECTEDLINESDOWN);
-    // Since Ctrl+Back won't work in most terminals, allow Alt+Back, like Bash.
     WndProc(SCI_ASSIGNCMDKEY, SCK_BACK | ((SCMOD_ALT) << 16), SCI_DELWORDLEFT);
+
     // Home/End keys should respect line wrapping.
     WndProc(SCI_ASSIGNCMDKEY, SCK_HOME | (SCI_NORM << 16), SCI_VCHOMEWRAP);
     WndProc(SCI_ASSIGNCMDKEY, SCK_HOME | (SCI_SHIFT << 16), SCI_VCHOMEWRAPEXTEND);
     WndProc(SCI_ASSIGNCMDKEY, SCK_END | (SCI_NORM << 16), SCI_LINEENDWRAP);
     WndProc(SCI_ASSIGNCMDKEY, SCK_END | (SCI_SHIFT << 16), SCI_LINEENDWRAPEXTEND);
+
+    // Delete current line without altering the clipboard.
+    WndProc(SCI_ASSIGNCMDKEY, 'L' | (SCMOD_CTRL << 16), SCI_LINEDELETE);
 }
 
 void TScintilla::SetVerticalScrollPos()
