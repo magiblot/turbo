@@ -68,6 +68,11 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     ts += cmSelLowercase;
     ts += cmSelCapitalize;
     ts += cmToggleComment;
+    ts += cmUndo;
+    ts += cmRedo;
+    ts += cmCut;
+    ts += cmCopy;
+    ts += cmPaste;
     disableCommands(ts);
 
     // Actions that only make sense when there is at least one editor.
