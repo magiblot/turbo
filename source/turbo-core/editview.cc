@@ -35,10 +35,15 @@ void EditorView::handleEvent(TEvent &ev)
             if (ev.keyDown.keyCode == kbIns)
                 setState(sfCursorIns, !getState(sfCursorIns));
             if (ev.keyDown.controlKeyState & kbPaste)
+            {
                 handlePaste(ev);
+                editor->redraw(); // partialRedraw() is broken for the Paste action (Scintilla bug).
+            }
             else
+            {
                 handleKeyDown(scintilla, ev.keyDown);
-            editor->partialRedraw();
+                editor->partialRedraw();
+            }
             clearEvent(ev);
             break;
         case evMouseDown:
@@ -109,7 +114,6 @@ void EditorView::handleEvent(TEvent &ev)
                     break;
                 case cmPaste:
                     call(scintilla, SCI_PASTE, 0U, 0U);
-                    editor->partialRedraw();
                     clearEvent(ev);
                     break;
             }
