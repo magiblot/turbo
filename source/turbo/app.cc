@@ -125,7 +125,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             newLine() +
             *new TMenuItem( "~S~ave", cmSave, kbCtrlS, hcNoContext, "Ctrl-S" ) +
             *new TMenuItem( "S~a~ve As...", cmSaveAs, kbNoKey, hcNoContext ) +
-            *new TMenuItem( "~R~ename...", cmRename, kbNoKey, hcNoContext ) +
+            *new TMenuItem( "~R~ename...", cmRename, kbF2, hcNoContext, "F2" ) +
             newLine() +
             *new TMenuItem( "~C~lose", cmCloseEditor, kbCtrlW, hcNoContext, "Ctrl-W" ) +
             *new TMenuItem( "Close All", cmCloseAll, kbNoKey, hcNoContext ) +
