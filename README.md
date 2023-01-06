@@ -104,6 +104,10 @@ In environments with extended keyboard support (e.g. the Linux console, Windows 
 
 Support for these key combinations may vary among terminal applications, but any issue on this should be reported to [Turbo Vision](https://github.com/magiblot/tvision/issues) instead.
 
+### Clipboard support
+
+See the Turbo Vision [documentation](https://github.com/magiblot/tvision#clipboard).
+
 ## Features
 
 Scintilla has [lots of features](https://www.scintilla.org/ScintillaDoc.html), of which Turbo only offers a few. Making more of them available is just a matter of time, so contributions are welcome.
