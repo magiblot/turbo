@@ -27,8 +27,7 @@ static constexpr SpanListModel<turbo::SearchMode> searchModeListModel {searchMod
 SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
                       SearchState &aSearchState ) noexcept :
     TGroup(bounds),
-    searchState(aSearchState),
-    searcher(editor, searchState.settingsPreset)
+    searchState(aSearchState)
 {
     options |= ofFramed | ofFirstClick;
 
@@ -50,7 +49,7 @@ SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
     TRect rLabelM {0, 2, 1 + cstrlen(modeText), 3};
     TRect rBoxM {rLabelM.b.x + 1, 2, rCase.a.x, 3};
 
-    auto *ilFind = new SearchInputLine(rBoxF, searchState.findText, searcher);
+    auto *ilFind = new SearchInputLine(rBoxF, searchState.findText);
     ilFind->growMode = gfGrowHiX;
     ilFind->selectAll(true);
 
@@ -141,9 +140,8 @@ void SearchBox::storeSettings()
     }
 }
 
-SearchInputLine::SearchInputLine(const TRect &bounds, char (&aData)[256], Searcher &aSearcher) noexcept :
-    TInputLine(bounds, 256, new SearchValidator(aSearcher)),
-    searcher(aSearcher),
+SearchInputLine::SearchInputLine(const TRect &bounds, char (&aData)[256]) noexcept :
+    TInputLine(bounds, 256, new SearchValidator(*this)),
     backupData(data)
 {
     data = aData;
@@ -157,15 +155,13 @@ void SearchInputLine::shutDown()
 
 void SearchInputLine::handleEvent(TEvent &ev)
 {
-    using namespace turbo;
-    if (ev.what == evKeyDown && ev.keyDown == TKey(kbEnter))
+    if (ev.what == evKeyDown && ev.keyDown.keyCode == kbEnter)
     {
-        searcher.search(data, sdForward);
-        clearEvent(ev);
-    }
-    else if (ev.what == evKeyDown && ev.keyDown == TKey(kbEnter, kbShift))
-    {
-        searcher.search(data, sdBackwards);
+        bool shift = (ev.keyDown.controlKeyState & kbShift);
+        ev.what = evCommand;
+        ev.message.command = shift ? cmSearchPrev : cmSearchAgain;
+        ev.message.infoPtr = nullptr;
+        putEvent(ev);
         clearEvent(ev);
     }
     else
@@ -175,18 +171,11 @@ void SearchInputLine::handleEvent(TEvent &ev)
 Boolean SearchValidator::isValidInput(char *text, Boolean)
 {
     // Invoked while typing.
-    using namespace turbo;
-    searcher.search(text, sdForwardIncremental);
+    TEvent ev;
+    ev.what = evCommand;
+    ev.message.command = cmSearchIncr;
+    ev.message.infoPtr = nullptr;
+    inputLine.putEvent(ev);
     return True;
 }
 
-void Searcher::search(TStringView text, turbo::SearchDirection direction)
-{
-    using namespace turbo;
-    auto settings = settingsPreset.get();
-    if (direction != sdForwardIncremental || settings.mode == smPlainText)
-    {
-        editor.search(text, direction, settings);
-        editor.partialRedraw();
-    }
-}

@@ -22,28 +22,12 @@ struct SearchState
 {
     Preset<turbo::SearchSettings> settingsPreset;
     char findText[256] {0};
-};
-
-class Searcher
-{
-    turbo::Editor &editor;
-    Preset<turbo::SearchSettings> &settingsPreset;
-
-public:
-
-    Searcher(turbo::Editor &aEditor, Preset<turbo::SearchSettings> &aSettingsPreset) noexcept :
-        editor(aEditor),
-        settingsPreset(aSettingsPreset)
-    {
-    }
-
-    void search(TStringView text, turbo::SearchDirection direction);
+    char replaceText[256] {0};
 };
 
 class SearchBox : public TGroup
 {
     SearchState &searchState;
-    Searcher searcher;
     ComboBox *cmbMode;
     CheckBox *cbCaseSensitive;
 
@@ -61,23 +45,8 @@ public:
     SearchBox(const TRect &bounds, turbo::Editor &editor, SearchState &searchState) noexcept;
 };
 
-class SearchValidator : public TValidator
-{
-    Searcher &searcher;
-
-    Boolean isValidInput(char *, Boolean) override;
-
-public:
-
-    SearchValidator(Searcher &aSearcher) :
-        searcher(aSearcher)
-    {
-    }
-};
-
 class SearchInputLine : public TInputLine
 {
-    Searcher &searcher;
     char *backupData;
 
     void handleEvent(TEvent &ev) override;
@@ -85,7 +54,21 @@ class SearchInputLine : public TInputLine
 
 public:
 
-    SearchInputLine(const TRect &bounds, char (&aData)[256], Searcher &aSearcher) noexcept;
+    SearchInputLine(const TRect &bounds, char (&aData)[256]) noexcept;
+};
+
+class SearchValidator : public TValidator
+{
+    SearchInputLine &inputLine;
+
+    Boolean isValidInput(char *, Boolean) override;
+
+public:
+
+    SearchValidator(SearchInputLine &aInputLine) noexcept :
+        inputLine(aInputLine)
+    {
+    }
 };
 
 #endif // TURBO_SEARCH_H

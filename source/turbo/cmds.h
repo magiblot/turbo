@@ -30,6 +30,7 @@ enum : ushort
     cmFindSearchBox = 1002,
     cmFindGoToLineBox   = 1003,
     cmCloseView     = 1004,
+    cmSearchIncr    = 1005,
 };
 
 #endif // TURBO_CMDS_H

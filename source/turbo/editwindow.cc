@@ -129,6 +129,10 @@ void EditorWindow::handleEvent(TEvent &ev)
                     editor.search(searchState.findText, sdBackwards, searchState.settingsPreset.get());
                     editor.partialRedraw();
                     break;
+                case cmSearchIncr:
+                    editor.search(searchState.findText, sdForwardIncremental, searchState.settingsPreset.get());
+                    editor.partialRedraw();
+                    break;
                 case cmGoToLine:
                     openBottomView<GoToLineBox>(editor);
                     break;
