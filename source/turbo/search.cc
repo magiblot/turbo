@@ -42,8 +42,8 @@ SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
     auto *modeText = "~M~ode:";
     auto *caseText = "~C~ase sensitive";
     TRect rLabelF {0, 0, 1 + cstrlen(findText), 1};
-    TRect rPrev {size.x - cstrlen(prevText) - 5, 0, size.x - 1, 2};
-    TRect rNext {rPrev.a.x - cstrlen(nextText) - 5, 0, rPrev.a.x, 2};
+    TRect rPrev {size.x - 1 - cstrlen(prevText) - 4, 0, size.x - 1, 2};
+    TRect rNext {rPrev.a.x - cstrlen(nextText) - 4, 0, rPrev.a.x, 2};
     TRect rBoxF {rLabelF.b.x + 1, 0, rNext.a.x, 1};
     TRect rCase {size.x - cstrlen(caseText) - 6, 2, size.x, 3};
     TRect rLabelM {0, 2, 1 + cstrlen(modeText), 3};
