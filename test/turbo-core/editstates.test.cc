@@ -590,6 +590,129 @@ TEST(Search, ShouldSearchIncremental)
 }
 
 /////////////////////////////////////////////////////////////////////////
+// Replace
+
+struct ReplaceTestInput
+{
+    std::string_view body;
+    std::string_view textToSearch;
+    std::string_view textToReplaceWith;
+    SearchSettings searchSettings;
+};
+
+std::ostream &operator<<(std::ostream &os, const ReplaceTestInput &input)
+{
+    os << "Replace '" << input.textToSearch << "' with '" << input.textToReplaceWith
+       << "' in:" << std::endl
+       << input.body;
+    return os;
+}
+
+static std::string replaceOne(const ReplaceTestInput &input)
+{
+    return modifyScintillaAndGetTextState(input.body, [&] (auto &scintilla) {
+        replace(scintilla, input.textToSearch, input.textToReplaceWith, rmReplaceOne, input.searchSettings);
+    });
+}
+
+TEST(Replace, ShouldReplaceOne)
+{
+    static constexpr TestCase<ReplaceTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|1234567890\n",
+                "",
+                "",
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "i",
+                "j",
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "4",
+                "aa",
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "1234|567890\n",
+                "4",
+                "aa",
+            },
+
+            "123^4|567890\n",
+        },
+        {   {   "123|4^567890\n",
+                "4",
+                "aa",
+            },
+
+            "123aa|567890\n",
+        },
+        {   {   "1234|561\n",
+                "1",
+                "aa",
+            },
+
+            "123456^1|\n",
+        },
+        {   {   "1234561|\n",
+                "1",
+                "aa",
+            },
+
+            "^1|234561\n",
+        },
+        {   {   "^1|234561\n",
+                "1",
+                "aa",
+            },
+
+            "aa23456^1|\n",
+        },
+        {   {   "^12|34561\n",
+                "1",
+                "aa",
+            },
+
+            "^1|234561\n",
+        },
+        {   {   "1234^5|67890\n",
+                "",
+                "aa",
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "i",
+                "aa",
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "4",
+                "aa",
+            },
+
+            "123^4|567890\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = replaceOne(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////
 // Comment toggling
 
 static std::string toggleComment(const Language &language, std::string_view input)

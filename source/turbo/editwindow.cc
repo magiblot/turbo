@@ -137,7 +137,12 @@ void EditorWindow::handleEvent(TEvent &ev)
                     editor.partialRedraw();
                     break;
                 case cmReplaceOne:
+                    editor.replace(searchState.findText, searchState.replaceText, rmReplaceOne, searchState.settingsPreset.get());
+                    editor.partialRedraw();
+                    break;
                 case cmReplaceAll:
+                    editor.replace(searchState.findText, searchState.replaceText, rmReplaceAll, searchState.settingsPreset.get());
+                    editor.partialRedraw();
                     break;
                 case cmGoToLine:
                     openBottomView<GoToLineBox>(editor);

@@ -101,9 +101,9 @@ static void initSearchFlags(TScintilla &scintilla, SearchSettings settings)
 
 static void initSearchTarget(TScintilla &scintilla, SearchDirection direction)
 {
-    sptr_t selStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
-    sptr_t selEnd = call(scintilla, SCI_GETSELECTIONEND, 0U, 0U);
-    sptr_t targetStart, targetEnd;
+    Sci::Position selStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+    Sci::Position selEnd = call(scintilla, SCI_GETSELECTIONEND, 0U, 0U);
+    Sci::Position targetStart, targetEnd;
     if (direction == sdForward)
         targetStart = selEnd;
     else
@@ -140,17 +140,65 @@ static bool searchInTarget(TScintilla &scintilla, TStringView s, SearchDirection
     return false;
 }
 
+static void searchInTargetOrWrap(TScintilla &scintilla, TStringView s, SearchDirection direction)
+{
+    if (!searchInTarget(scintilla, s, direction) && direction != sdForwardIncremental)
+    {
+        wrapSearchTarget(scintilla);
+        searchInTarget(scintilla, s, direction);
+    }
+}
+
 void search(TScintilla &scintilla, TStringView text, SearchDirection direction, SearchSettings settings)
 {
     if (!text.empty())
     {
         initSearchFlags(scintilla, settings);
         initSearchTarget(scintilla, direction);
-        if (!searchInTarget(scintilla, text, direction) && direction != sdForwardIncremental)
+        searchInTargetOrWrap(scintilla, text, direction);
+    }
+}
+
+static bool selectionMatches(TScintilla &scintilla, TStringView text)
+{
+    Sci::Position selStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+    Sci::Position selEnd = call(scintilla, SCI_GETSELECTIONEND, 0U, 0U);
+    call(scintilla, SCI_TARGETFROMSELECTION, 0U, 0U);
+    Sci::Position targetStart = call(scintilla, SCI_SEARCHINTARGET, text.size(), (sptr_t) text.data());
+    return selStart == targetStart &&
+           selEnd == call(scintilla, SCI_GETTARGETEND, 0U, 0U);
+}
+
+static void replaceSelection(TScintilla &scintilla, TStringView withText)
+{
+    call(scintilla, SCI_TARGETFROMSELECTION, 0U, 0U);
+    call(scintilla, SCI_REPLACETARGET, withText.size(), (sptr_t) withText.data());
+    Sci::Position resultEnd = call(scintilla, SCI_GETTARGETEND, 0U, 0U);
+    call(scintilla, SCI_GOTOPOS, resultEnd, 0U);
+}
+
+static void initReplaceSearchTarget(TScintilla &scintilla)
+{
+    Sci::Position targetStart = call(scintilla, SCI_GETSELECTIONSTART, 0U, 0U);
+    Sci::Position targetEnd = call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U);
+    call(scintilla, SCI_SETTARGETRANGE, targetStart, targetEnd);
+}
+
+void replace(TScintilla &scintilla, TStringView text, TStringView withText, ReplaceMethod method, SearchSettings settings)
+{
+    if (!text.empty())
+    {
+        call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
+        initSearchFlags(scintilla, settings);
+
+        if (method == rmReplaceOne)
         {
-            wrapSearchTarget(scintilla);
-            searchInTarget(scintilla, text, direction);
+            if (selectionMatches(scintilla, text))
+                replaceSelection(scintilla, withText);
+            initReplaceSearchTarget(scintilla);
+            searchInTargetOrWrap(scintilla, text, sdForward);
         }
+        call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
     }
 }
 

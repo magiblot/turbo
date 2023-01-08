@@ -108,6 +108,7 @@ public:
     inline void capitalize();
     inline void toggleComment();
     inline void search(TStringView text, SearchDirection direction, SearchSettings settings);
+    inline void replace(TStringView text, TStringView withText, ReplaceMethod method, SearchSettings settings);
 };
 
 template <class Func>
@@ -147,6 +148,11 @@ inline void Editor::toggleComment()
 inline void Editor::search(TStringView text, SearchDirection direction, SearchSettings settings)
 {
     turbo::search(scintilla, text, direction, settings);
+}
+
+inline void Editor::replace(TStringView text, TStringView withText, ReplaceMethod method, SearchSettings settings)
+{
+    turbo::replace(scintilla, text, withText, method, settings);
 }
 
 class EditorView : public TSurfaceView

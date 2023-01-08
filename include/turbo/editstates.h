@@ -109,6 +109,14 @@ struct SearchSettings
 
 void search(TScintilla &scintilla, TStringView text, SearchDirection direction, SearchSettings settings);
 
+enum ReplaceMethod : uint8_t
+{
+    rmReplaceOne,
+    rmReplaceAll,
+};
+
+void replace(TScintilla &scintilla, TStringView text, TStringView withText, ReplaceMethod method, SearchSettings settings);
+
 // Updates 'scintilla' so that it makes use of the current state of
 // 'lexer' and 'scheme'. If 'scheme' is null, 'schemeDefault' is used instead.
 void applyTheming(const LexerSettings *lexer, const ColorScheme *scheme, TScintilla &scintilla);
