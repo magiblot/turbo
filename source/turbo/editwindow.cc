@@ -33,6 +33,7 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     enabledCmds += cmToggleWrap;
     enabledCmds += cmToggleLineNums;
     enabledCmds += cmFind;
+    enabledCmds += cmReplace;
     enabledCmds += cmGoToLine;
     enabledCmds += cmSearchAgain;
     enabledCmds += cmSearchPrev;
@@ -118,8 +119,10 @@ void EditorWindow::handleEvent(TEvent &ev)
                     editor.partialRedraw();
                     break;
                 case cmFind:
+                    openBottomView<FindBox>(searchState);
+                    break;
                 case cmReplace:
-                    openBottomView<SearchBox>(editor, searchState);
+                    openBottomView<ReplaceBox>(searchState);
                     break;
                 case cmSearchAgain:
                     editor.search(searchState.findText, sdForward, searchState.settingsPreset.get());
@@ -132,6 +135,9 @@ void EditorWindow::handleEvent(TEvent &ev)
                 case cmSearchIncr:
                     editor.search(searchState.findText, sdForwardIncremental, searchState.settingsPreset.get());
                     editor.partialRedraw();
+                    break;
+                case cmReplaceOne:
+                case cmReplaceAll:
                     break;
                 case cmGoToLine:
                     openBottomView<GoToLineBox>(editor);

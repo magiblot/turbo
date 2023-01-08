@@ -27,7 +27,10 @@ struct SearchState
 
 class SearchBox : public TGroup
 {
+protected:
+
     SearchState &searchState;
+    ushort findCommand;
     ComboBox *cmbMode;
     CheckBox *cbCaseSensitive;
 
@@ -37,12 +40,33 @@ class SearchBox : public TGroup
     void loadSettings();
     void storeSettings();
 
+    SearchBox(const TRect &bounds, SearchState &searchState, ushort findCommand) noexcept;
+};
+
+class FindBox : public SearchBox
+{
 public:
 
-    enum { findCommand = cmFindSearchBox };
+    enum { findCommand = cmFindFindBox };
     enum { height = 3 };
 
-    SearchBox(const TRect &bounds, turbo::Editor &editor, SearchState &searchState) noexcept;
+    FindBox(const TRect &bounds, SearchState &searchState) noexcept;
+};
+
+class ReplaceBox : public SearchBox
+{
+public:
+
+    enum { findCommand = cmFindReplaceBox };
+    enum { height = 5 };
+
+    ReplaceBox(const TRect &bounds, SearchState &searchState) noexcept;
+};
+
+enum SearchInputLineMode
+{
+    imFind,
+    imReplace,
 };
 
 class SearchInputLine : public TInputLine
@@ -54,7 +78,10 @@ class SearchInputLine : public TInputLine
 
 public:
 
-    SearchInputLine(const TRect &bounds, char (&aData)[256]) noexcept;
+    SearchInputLineMode mode;
+
+    SearchInputLine( const TRect &bounds, char (&data)[256],
+                     SearchInputLineMode mode ) noexcept;
 };
 
 class SearchValidator : public TValidator

@@ -27,10 +27,13 @@ enum : ushort
 {
     cmToggleTree    = 1000,
     cmStateChanged  = 1001,
-    cmFindSearchBox = 1002,
+    cmFindFindBox   = 1002,
     cmFindGoToLineBox   = 1003,
     cmCloseView     = 1004,
     cmSearchIncr    = 1005,
+    cmFindReplaceBox= 1006,
+    cmReplaceOne    = 1007,
+    cmReplaceAll    = 1008,
 };
 
 #endif // TURBO_CMDS_H

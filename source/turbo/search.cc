@@ -24,18 +24,75 @@ static constexpr SpanListModelEntry<turbo::SearchMode> searchModes[] =
 
 static constexpr SpanListModel<turbo::SearchMode> searchModeListModel {searchModes};
 
-SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
-                      SearchState &aSearchState ) noexcept :
+SearchBox::SearchBox( const TRect &bounds, SearchState &aSearchState,
+                      ushort aFindCommand ) noexcept :
     TGroup(bounds),
-    searchState(aSearchState)
+    searchState(aSearchState),
+    findCommand(aFindCommand)
 {
     options |= ofFramed | ofFirstClick;
 
-    auto *bckgrnd = new TView({0, 0, size.x, height});
+    auto *bckgrnd = new TView(getExtent());
     bckgrnd->growMode = gfGrowHiX | gfGrowHiY;
     bckgrnd->eventMask = 0;
     insert(bckgrnd);
+}
 
+void SearchBox::shutDown()
+{
+    cmbMode = nullptr;
+    cbCaseSensitive = nullptr;
+    TGroup::shutDown();
+}
+
+void SearchBox::handleEvent(TEvent &ev)
+{
+    TGroup::handleEvent(ev);
+    if (ev.what == evKeyDown)
+    {
+        switch (ev.keyDown.keyCode)
+        {
+            case kbTab:
+                focusNext(False);
+                clearEvent(ev);
+                break;
+            case kbShiftTab:
+                focusNext(True);
+                clearEvent(ev);
+                break;
+        }
+    }
+    else if (ev.what == evCommand && ev.message.command == findCommand)
+        clearEvent(ev);
+    else if (ev.what == evBroadcast && ev.message.command == cmStateChanged)
+        storeSettings();
+}
+
+void SearchBox::loadSettings()
+{
+    using namespace turbo;
+    auto settings = searchState.settingsPreset.get();
+    if (cmbMode)
+        cmbMode->setCurrentIndex(settings.mode);
+    if (cbCaseSensitive)
+        cbCaseSensitive->setChecked(settings.flags & sfCaseSensitive);
+}
+
+void SearchBox::storeSettings()
+{
+    using namespace turbo;
+    auto settings = searchState.settingsPreset.get();
+    if (cmbMode)
+        if (auto *entry = (const SpanListModelEntry<turbo::SearchMode> *) cmbMode->getCurrent())
+            settings.mode = entry->data;
+    if (cbCaseSensitive)
+        settings.flags = -cbCaseSensitive->isChecked() & sfCaseSensitive;
+    searchState.settingsPreset.set(settings);
+}
+
+FindBox::FindBox(const TRect &bounds, SearchState &aSearchState) noexcept :
+    SearchBox(bounds, aSearchState, cmFindFindBox)
+{
     auto *findText = "~F~ind:";
     auto *nextText = "~N~ext";
     auto *prevText = "~P~revious";
@@ -49,7 +106,7 @@ SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
     TRect rLabelM {0, 2, 1 + cstrlen(modeText), 3};
     TRect rBoxM {rLabelM.b.x + 1, 2, rCase.a.x, 3};
 
-    auto *ilFind = new SearchInputLine(rBoxF, searchState.findText);
+    auto *ilFind = new SearchInputLine(rBoxF, searchState.findText, imFind);
     ilFind->growMode = gfGrowHiX;
     ilFind->selectAll(true);
 
@@ -83,66 +140,87 @@ SearchBox::SearchBox( const TRect &bounds, turbo::Editor &editor,
     loadSettings();
 }
 
-void SearchBox::shutDown()
+ReplaceBox::ReplaceBox(const TRect &bounds, SearchState &aSearchState) noexcept :
+    SearchBox(bounds, aSearchState, cmFindReplaceBox)
 {
-    cmbMode = nullptr;
-    cbCaseSensitive = nullptr;
-    TGroup::shutDown();
+    auto *findText = "~F~ind:";
+    auto *nextText = "~N~ext";
+    auto *prevText = "~P~revious";
+    auto *replText = "~R~eplace:";
+    auto *oneText = "~O~ne";
+    auto *allText = "~A~ll";
+    auto *modeText = "~M~ode:";
+    auto *caseText = "~C~ase sensitive";
+    int findReplLen = max(max(cstrlen(findText), cstrlen(replText)), cstrlen(modeText));
+    int nextOneLen = max(cstrlen(nextText), cstrlen(oneText));
+    int prevAllLen = max(cstrlen(prevText), cstrlen(allText));
+    TRect rLabelF {0, 0, 1 + findReplLen, 1};
+    TRect rPrev {size.x - 1 - prevAllLen - 4, 0, size.x - 1, 2};
+    TRect rNext {rPrev.a.x - nextOneLen - 4, 0, rPrev.a.x, 2};
+    TRect rBoxF {rLabelF.b.x + 1, 0, rNext.a.x, 1};
+    TRect rLabelR {0, 2, 1 + findReplLen, 3};
+    TRect rAll {size.x - 1 - prevAllLen - 4, 2, size.x - 1, 4};
+    TRect rOne {rAll.a.x - nextOneLen - 4, 2, rAll.a.x, 4};
+    TRect rBoxR {rLabelR.b.x + 1, 2, rOne.a.x, 3};
+    TRect rCase {size.x - cstrlen(caseText) - 6, 4, size.x, 5};
+    TRect rLabelM {0, 4, 1 + findReplLen, 5};
+    TRect rBoxM {rLabelM.b.x + 1, 4, rCase.a.x, 5};
+
+    auto *ilFind = new SearchInputLine(rBoxF, searchState.findText, imFind);
+    ilFind->growMode = gfGrowHiX;
+    ilFind->selectAll(true);
+
+    auto *lblFind = new TLabel(rLabelF, findText, ilFind);
+    lblFind->growMode = 0;
+    insert(lblFind);
+
+    auto *btnNext = new TButton(rNext, nextText, cmSearchAgain, bfNormal);
+    btnNext->growMode = gfGrowLoX | gfGrowHiX;
+    insert(btnNext);
+
+    auto *btnPrev = new TButton(rPrev, prevText, cmSearchPrev, bfNormal);
+    btnPrev->growMode = gfGrowLoX | gfGrowHiX;
+    insert(btnPrev);
+
+    auto *ilRepl = new SearchInputLine(rBoxR, searchState.replaceText, imReplace);
+    ilRepl->growMode = gfGrowHiX;
+    insert(ilRepl);
+
+    auto *lblRepl = new TLabel(rLabelR, replText, ilRepl);
+    lblRepl->growMode = 0;
+    insert(lblRepl);
+
+    auto *btnOne = new TButton(rOne, oneText, cmReplaceOne, bfNormal);
+    btnOne->growMode = gfGrowLoX | gfGrowHiX;
+    insert(btnOne);
+
+    auto *btnAll = new TButton(rAll, allText, cmReplaceAll, bfNormal);
+    btnAll->growMode = gfGrowLoX | gfGrowHiX;
+    insert(btnAll);
+
+    cmbMode = new ComboBox(rBoxM, searchModeListModel);
+    cmbMode->growMode = gfGrowHiX;
+    insert(cmbMode);
+
+    auto *lblMode = new TLabel(rLabelM, modeText, cmbMode);
+    lblMode->growMode = 0;
+    insert(lblMode);
+
+    cbCaseSensitive = new CheckBox(rCase, caseText);
+    cbCaseSensitive->growMode = gfGrowLoX | gfGrowHiX;
+    insert(cbCaseSensitive);
+
+    // This must be the first selectable view.
+    insert(ilFind);
+
+    loadSettings();
 }
 
-void SearchBox::handleEvent(TEvent &ev)
-{
-    TGroup::handleEvent(ev);
-    if (ev.what == evKeyDown)
-    {
-        switch (ev.keyDown.keyCode)
-        {
-            case kbTab:
-                focusNext(False);
-                clearEvent(ev);
-                break;
-            case kbShiftTab:
-                focusNext(True);
-                clearEvent(ev);
-                break;
-        }
-    }
-    else if (ev.what == evCommand && ev.message.command == cmFindSearchBox)
-        clearEvent(ev);
-    else if (ev.what == evBroadcast && ev.message.command == cmStateChanged)
-        storeSettings();
-}
-
-void SearchBox::loadSettings()
-{
-    using namespace turbo;
-    if (cmbMode)
-    {
-        auto settings = searchState.settingsPreset.get();
-
-        cmbMode->setCurrentIndex(settings.mode);
-        cbCaseSensitive->setChecked(settings.flags & sfCaseSensitive);
-    }
-}
-
-void SearchBox::storeSettings()
-{
-    using namespace turbo;
-    if (cmbMode)
-    {
-        auto settings = searchState.settingsPreset.get();
-
-        if (auto *entry = (const SpanListModelEntry<turbo::SearchMode> *) cmbMode->getCurrent())
-            settings.mode = entry->data;
-        settings.flags = -cbCaseSensitive->isChecked() & sfCaseSensitive;
-
-        searchState.settingsPreset.set(settings);
-    }
-}
-
-SearchInputLine::SearchInputLine(const TRect &bounds, char (&aData)[256]) noexcept :
+SearchInputLine::SearchInputLine( const TRect &bounds, char (&aData)[256],
+                                  SearchInputLineMode aMode ) noexcept :
     TInputLine(bounds, 256, new SearchValidator(*this)),
-    backupData(data)
+    backupData(data),
+    mode(aMode)
 {
     data = aData;
 }
@@ -159,7 +237,10 @@ void SearchInputLine::handleEvent(TEvent &ev)
     {
         bool shift = (ev.keyDown.controlKeyState & kbShift);
         ev.what = evCommand;
-        ev.message.command = shift ? cmSearchPrev : cmSearchAgain;
+        if (mode == imFind)
+            ev.message.command = shift ? cmSearchPrev : cmSearchAgain;
+        else
+            ev.message.command = cmReplaceOne;
         ev.message.infoPtr = nullptr;
         putEvent(ev);
         clearEvent(ev);
@@ -171,11 +252,13 @@ void SearchInputLine::handleEvent(TEvent &ev)
 Boolean SearchValidator::isValidInput(char *text, Boolean)
 {
     // Invoked while typing.
-    TEvent ev;
-    ev.what = evCommand;
-    ev.message.command = cmSearchIncr;
-    ev.message.infoPtr = nullptr;
-    inputLine.putEvent(ev);
+    if (inputLine.mode == imFind)
+    {
+        TEvent ev;
+        ev.what = evCommand;
+        ev.message.command = cmSearchIncr;
+        ev.message.infoPtr = nullptr;
+        inputLine.putEvent(ev);
+    }
     return True;
 }
-
