@@ -169,6 +169,7 @@ extern constexpr ColorScheme schemeDefault =
     /* sEscapeSequence   */ {'\xB'   , {}                       },
     /* sError            */ {'\x0'   , '\x3'                    },
     /* sBraceMatch       */ {'\xE'   , {}      , slBold         },
+    /* sReplaceHighlight */ {'\x0'   , '\xA'                    },
 };
 
 constexpr LexerSettings::StyleMapping stylesC[] =

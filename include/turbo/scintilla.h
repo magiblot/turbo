@@ -61,6 +61,13 @@ enum CaseConversion
 
 void changeCaseOfSelection(TScintilla &, CaseConversion);
 
+enum Indicator
+{
+    idtrReplaceHighlight = INDICATOR_CONTAINER,
+};
+
+void setIndicatorColor(TScintilla &, Indicator indicator, TColorAttr attr);
+
 class TScintillaParent
 {
 public:

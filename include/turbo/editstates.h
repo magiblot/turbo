@@ -116,6 +116,7 @@ enum ReplaceMethod : uint8_t
 };
 
 void replace(TScintilla &scintilla, TStringView text, TStringView withText, ReplaceMethod method, SearchSettings settings);
+void clearIndicator(TScintilla &scintilla, Indicator indicator);
 
 // Updates 'scintilla' so that it makes use of the current state of
 // 'lexer' and 'scheme'. If 'scheme' is null, 'schemeDefault' is used instead.

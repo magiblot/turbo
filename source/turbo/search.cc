@@ -216,6 +216,16 @@ ReplaceBox::ReplaceBox(const TRect &bounds, SearchState &aSearchState) noexcept 
     loadSettings();
 }
 
+void ReplaceBox::shutDown()
+{
+    TEvent ev;
+    ev.what = evCommand;
+    ev.message.command = cmClearReplace;
+    ev.message.infoPtr = nullptr;
+    putEvent(ev);
+    SearchBox::shutDown();
+}
+
 SearchInputLine::SearchInputLine( const TRect &bounds, char (&aData)[256],
                                   SearchInputLineMode aMode ) noexcept :
     TInputLine(bounds, 256, new SearchValidator(*this)),

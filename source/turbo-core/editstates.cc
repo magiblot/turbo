@@ -171,6 +171,20 @@ static bool selectionMatches(TScintilla &scintilla, TStringView text)
            selEnd == call(scintilla, SCI_GETTARGETEND, 0U, 0U);
 }
 
+void clearIndicator(TScintilla &scintilla, Indicator indicator)
+{
+    call(scintilla, SCI_SETINDICATORCURRENT, indicator, 0U);
+    call(scintilla, SCI_INDICATORCLEARRANGE, 0, call(scintilla, SCI_GETTEXTLENGTH, 0U, 0U));
+}
+
+static void fillTargetWithIndicator(TScintilla &scintilla, Indicator indicator)
+{
+    Sci::Position targetStart = call(scintilla, SCI_GETTARGETSTART, 0U, 0U);
+    Sci::Position targetEnd = call(scintilla, SCI_GETTARGETEND, 0U, 0U);
+    call(scintilla, SCI_SETINDICATORCURRENT, indicator, 0U);
+    call(scintilla, SCI_INDICATORFILLRANGE, targetStart, targetEnd - targetStart);
+}
+
 static void replaceSelectionAndMoveCaret(TScintilla &scintilla, TStringView withText)
 {
     call(scintilla, SCI_TARGETFROMSELECTION, 0U, 0U);
@@ -208,11 +222,15 @@ void replace(TScintilla &scintilla, TStringView text, TStringView withText, Repl
     if (!text.empty())
     {
         call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
+        clearIndicator(scintilla, idtrReplaceHighlight);
         initSearchFlags(scintilla, settings);
         if (method == rmReplaceOne)
         {
             if (selectionMatches(scintilla, text))
+            {
                 replaceSelectionAndMoveCaret(scintilla, withText);
+                fillTargetWithIndicator(scintilla, idtrReplaceHighlight);
+            }
             initReplaceOneSearchTarget(scintilla);
             searchInTargetOrWrap(scintilla, text, sdForward);
         }
@@ -222,6 +240,7 @@ void replace(TScintilla &scintilla, TStringView text, TStringView withText, Repl
             while (searchInTarget(scintilla, text, sdForward, false))
             {
                 replaceTarget(scintilla, withText);
+                fillTargetWithIndicator(scintilla, idtrReplaceHighlight);
                 targetUntilEnd(scintilla);
             }
         }
@@ -528,6 +547,7 @@ void applyTheming(const LexerSettings *lexer, const ColorScheme *aScheme, TScint
     setWhitespaceColor(scintilla, scheme[sWhitespace]);
     setStyleColor(scintilla, STYLE_CONTROLCHAR, normalize(scheme, sCtrlChar));
     setStyleColor(scintilla, STYLE_LINENUMBER, normalize(scheme, sLineNums));
+    setIndicatorColor(scintilla, idtrReplaceHighlight, scheme[sReplaceHighlight]);
     if (lexer)
     {
         call(scintilla, SCI_SETLEXER, lexer->id, 0U);

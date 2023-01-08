@@ -251,4 +251,14 @@ void changeCaseOfSelection(TScintilla &self, CaseConversion cnv)
     self.ChangeCaseOfSelection(cnv);
 }
 
+void setIndicatorColor(TScintilla &self, Indicator indicator, TColorAttr attr)
+{
+    using namespace Scintilla;
+    auto fg = ::getFore(attr),
+         bg = ::getBack(attr);
+    call(self, SCI_INDICSETSTYLE, indicator, INDIC_FULLBOX);
+    call(self, SCI_INDICSETFORE, indicator, convertColor(bg).AsInteger());
+    call(self, SCI_INDICSETOUTLINEALPHA, indicator, convertColor(fg).AsInteger());
+}
+
 } // namespace turbo

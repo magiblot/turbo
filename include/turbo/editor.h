@@ -109,6 +109,7 @@ public:
     inline void toggleComment();
     inline void search(TStringView text, SearchDirection direction, SearchSettings settings);
     inline void replace(TStringView text, TStringView withText, ReplaceMethod method, SearchSettings settings);
+    inline void clearReplaceIndicator();
 };
 
 template <class Func>
@@ -153,6 +154,11 @@ inline void Editor::search(TStringView text, SearchDirection direction, SearchSe
 inline void Editor::replace(TStringView text, TStringView withText, ReplaceMethod method, SearchSettings settings)
 {
     turbo::replace(scintilla, text, withText, method, settings);
+}
+
+inline void Editor::clearReplaceIndicator()
+{
+    turbo::clearIndicator(scintilla, idtrReplaceHighlight);
 }
 
 class EditorView : public TSurfaceView

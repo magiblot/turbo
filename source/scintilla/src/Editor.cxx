@@ -7459,7 +7459,9 @@ sptr_t Editor::WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
 		return (wParam <= INDICATOR_MAX) ? vs.indicators[wParam].fillAlpha : 0;
 
 	case SCI_INDICSETOUTLINEALPHA:
-		if (wParam <= INDICATOR_MAX && lParam >=0 && lParam <= 255) {
+		// HACK: Allow providing extra data through outine alpha
+		// (right way would be to have a separate outline color).
+		if (wParam <= INDICATOR_MAX /*&& lParam >=0 && lParam <= 255*/) {
 			vs.indicators[wParam].outlineAlpha = static_cast<int>(lParam);
 			InvalidateStyleRedraw();
 		}

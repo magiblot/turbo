@@ -144,6 +144,10 @@ void EditorWindow::handleEvent(TEvent &ev)
                     editor.replace(searchState.findText, searchState.replaceText, rmReplaceAll, searchState.settingsPreset.get());
                     editor.partialRedraw();
                     break;
+                case cmClearReplace:
+                    editor.clearReplaceIndicator();
+                    editor.partialRedraw();
+                    break;
                 case cmGoToLine:
                     openBottomView<GoToLineBox>(editor);
                     break;

@@ -34,6 +34,7 @@ enum : ushort
     cmFindReplaceBox= 1006,
     cmReplaceOne    = 1007,
     cmReplaceAll    = 1008,
+    cmClearReplace  = 1009,
 };
 
 #endif // TURBO_CMDS_H

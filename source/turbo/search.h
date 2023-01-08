@@ -61,6 +61,8 @@ public:
     enum { height = 5 };
 
     ReplaceBox(const TRect &bounds, SearchState &searchState) noexcept;
+
+    void shutDown() override;
 };
 
 enum SearchInputLineMode

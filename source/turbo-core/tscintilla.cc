@@ -22,9 +22,8 @@ TScintilla::TScintilla()
     WndProc(SCI_SETBUFFEREDDRAW, 0, 0U);
     // Disable space between lines
     WndProc(SCI_SETEXTRADESCENT, -1, 0U);
-    // Stay in Unicode mode (experimental).
-//     WndProc(SCI_SETCODEPAGE, SC_CHARSET_ANSI, 0U);
-//     WndProc(SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, SC_CHARSET_ANSI);
+    vs.maxAscent = 0;
+    vs.maxDescent = 0;
     // Set our custom representations.
     reprs.Clear();
     {

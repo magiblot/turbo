@@ -99,14 +99,14 @@ void TScintillaSurface::RoundedRectangle(PRectangle rc, ColourDesired fore, Colo
 {
 }
 
-void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
-        ColourDesired outline, int alphaOutline, int flags)
+void TScintillaSurface::AlphaRectangle( PRectangle rc, int cornerSize, ColourDesired fill, int alphaFill,
+                                        ColourDesired outline, int alphaOutline, int flags )
 {
     auto r = clipRect(rc);
     if ( surface && 0 <= r.a.x && r.a.x < r.b.x
                  && 0 <= r.a.y && r.a.y < r.b.y )
     {
-        auto fg = convertColor(outline),
+        auto fg = convertColor(ColourDesired(alphaOutline)),
              bg = convertColor(fill);
         auto *cells = &surface->at(r.a.y, r.a.x);
         size_t count = r.b.x - r.a.x;
@@ -114,8 +114,10 @@ void TScintillaSurface::AlphaRectangle(PRectangle rc, int cornerSize, ColourDesi
         {
             for (size_t x = 0; x < count; ++x)
             {
-                ::setFore(cells[x].attr, fg);
-                ::setBack(cells[x].attr, bg);
+                if (!fg.isDefault())
+                    ::setFore(cells[x].attr, fg);
+                if (!bg.isDefault())
+                    ::setBack(cells[x].attr, bg);
             }
             cells += surface->size.x;
         }

@@ -72,6 +72,7 @@ enum TextStyle : uchar
     sEscapeSequence,
     sError,
     sBraceMatch,
+    sReplaceHighlight,
     TextStyleCount,
 };
 
