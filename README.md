@@ -84,6 +84,7 @@ Some of the default keybindings are:
 * `Ctrl+A`: select all.
 * `Shift+Arrow`: extend selection.
 * `Ctrl+F`: find.
+* `Ctrl+R`: replace.
 * `Ctrl+G`: go to line.
 * `Ctrl+Back`/`Alt+Back`, `Ctrl+Del`: erase one word left/right.
 * `Ctrl+Left`/`Alt+Left`, `Ctrl+Right`/`Alt+Right`: move one word left/right.
@@ -126,7 +127,7 @@ Below is a TO-DO list of features I would like to implement in Turbo:
 - [x] Tree view sorted alphabetically.
 - [x] Case-insensitive search.
 - [x] Find as you type.
-- [ ] Replace.
+- [x] Replace.
 - [x] Go to line.
 - [ ] List of recently opened files.
 - [x] Remove trailing whitespaces on save.
