@@ -114,6 +114,10 @@ FindBox::FindBox(const TRect &bounds, SearchState &aSearchState) noexcept :
     lblFind->growMode = 0;
     insert(lblFind);
 
+    cmbMode = new ComboBox(rBoxM, searchModeListModel);
+    cmbMode->growMode = gfGrowHiX;
+    insert(cmbMode);
+
     auto *btnNext = new TButton(rNext, nextText, cmSearchAgain, bfNormal);
     btnNext->growMode = gfGrowLoX | gfGrowHiX;
     insert(btnNext);
@@ -121,10 +125,6 @@ FindBox::FindBox(const TRect &bounds, SearchState &aSearchState) noexcept :
     auto *btnPrev = new TButton(rPrev, prevText, cmSearchPrev, bfNormal);
     btnPrev->growMode = gfGrowLoX | gfGrowHiX;
     insert(btnPrev);
-
-    cmbMode = new ComboBox(rBoxM, searchModeListModel);
-    cmbMode->growMode = gfGrowHiX;
-    insert(cmbMode);
 
     auto *lblMode = new TLabel(rLabelM, modeText, cmbMode);
     lblMode->growMode = 0;
@@ -174,6 +174,14 @@ ReplaceBox::ReplaceBox(const TRect &bounds, SearchState &aSearchState) noexcept 
     lblFind->growMode = 0;
     insert(lblFind);
 
+    auto *ilRepl = new SearchInputLine(rBoxR, searchState.replaceText, imReplace);
+    ilRepl->growMode = gfGrowHiX;
+    insert(ilRepl);
+
+    cmbMode = new ComboBox(rBoxM, searchModeListModel);
+    cmbMode->growMode = gfGrowHiX;
+    insert(cmbMode);
+
     auto *btnNext = new TButton(rNext, nextText, cmSearchAgain, bfNormal);
     btnNext->growMode = gfGrowLoX | gfGrowHiX;
     insert(btnNext);
@@ -181,10 +189,6 @@ ReplaceBox::ReplaceBox(const TRect &bounds, SearchState &aSearchState) noexcept 
     auto *btnPrev = new TButton(rPrev, prevText, cmSearchPrev, bfNormal);
     btnPrev->growMode = gfGrowLoX | gfGrowHiX;
     insert(btnPrev);
-
-    auto *ilRepl = new SearchInputLine(rBoxR, searchState.replaceText, imReplace);
-    ilRepl->growMode = gfGrowHiX;
-    insert(ilRepl);
 
     auto *lblRepl = new TLabel(rLabelR, replText, ilRepl);
     lblRepl->growMode = 0;
@@ -197,10 +201,6 @@ ReplaceBox::ReplaceBox(const TRect &bounds, SearchState &aSearchState) noexcept 
     auto *btnAll = new TButton(rAll, allText, cmReplaceAll, bfNormal);
     btnAll->growMode = gfGrowLoX | gfGrowHiX;
     insert(btnAll);
-
-    cmbMode = new ComboBox(rBoxM, searchModeListModel);
-    cmbMode->growMode = gfGrowHiX;
-    insert(cmbMode);
 
     auto *lblMode = new TLabel(rLabelM, modeText, cmbMode);
     lblMode->growMode = 0;
