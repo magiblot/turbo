@@ -43,6 +43,8 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     enabledCmds += cmSelLowercase;
     enabledCmds += cmSelCapitalize;
     enabledCmds += cmToggleComment;
+    enabledCmds += cmReplaceOne;
+    enabledCmds += cmReplaceAll;
 
     // Commands that always get disabled when unfocusing the editor.
     disabledCmds += enabledCmds;
