@@ -156,9 +156,11 @@ void EditorWindow::handleEvent(TEvent &ev)
                 case cmCloseView:
                     if ((handled = bottomView && ev.message.infoPtr == bottomView))
                         closeBottomView();
+                    break;
                 default:
                     handled = false;
             }
+            break;
         default:
             handled = false;
     }
