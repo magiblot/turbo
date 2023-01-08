@@ -615,6 +615,13 @@ static std::string replaceOne(const ReplaceTestInput &input)
     });
 }
 
+static std::string replaceAll(const ReplaceTestInput &input)
+{
+    return modifyScintillaAndGetTextState(input.body, [&] (auto &scintilla) {
+        replace(scintilla, input.textToSearch, input.textToReplaceWith, rmReplaceAll, input.searchSettings);
+    });
+}
+
 TEST(Replace, ShouldReplaceOne)
 {
     static constexpr TestCase<ReplaceTestInput, std::string_view> testCases[] =
@@ -708,6 +715,82 @@ TEST(Replace, ShouldReplaceOne)
     for (auto &testCase : testCases)
     {
         auto &&actual = replaceOne(testCase.input);
+        expectMatchingResult(actual, testCase);
+    }
+}
+
+TEST(Replace, ShouldReplaceAll)
+{
+    static constexpr TestCase<ReplaceTestInput, std::string_view> testCases[] =
+    {
+        {   {   "|1234567890\n",
+                "",
+                "",
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|1234567890\n",
+                "i",
+                "j",
+            },
+
+            "|1234567890\n",
+        },
+        {   {   "|12345647890\n",
+                "4",
+                "aa",
+            },
+
+            "|123aa56aa7890\n",
+        },
+        {   {   "1234|5647890\n",
+                "4",
+                "aa",
+            },
+
+            "123|aa56aa7890\n",
+        },
+        {   {   "123|4^5678490\n",
+                "4",
+                "aa",
+            },
+
+            "123|aa5678aa90\n",
+        },
+        {   {   "1234|561\n",
+                "1",
+                "aa",
+            },
+
+            "aa234|56aa\n",
+        },
+        {   {   "1234^5|67890\n",
+                "",
+                "aa",
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "i",
+                "aa",
+            },
+
+            "1234^5|67890\n",
+        },
+        {   {   "1234^5|67890\n",
+                "4",
+                "aa",
+            },
+
+            "123aa^5|67890\n",
+        },
+    };
+
+    for (auto &testCase : testCases)
+    {
+        auto &&actual = replaceAll(testCase.input);
         expectMatchingResult(actual, testCase);
     }
 }
