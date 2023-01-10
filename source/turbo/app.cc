@@ -17,7 +17,6 @@
 #include <tvision/tv.h>
 
 #include <fmt/core.h>
-#include <csignal>
 
 #include "app.h"
 #include "apputils.h"
