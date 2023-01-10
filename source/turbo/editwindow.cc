@@ -286,3 +286,10 @@ const char* EditorWindow::formatTitle(ushort flags) noexcept
     }
     return title.c_str();
 }
+
+void EditorWindow::sizeLimits(TPoint &min, TPoint &max)
+{
+    super::sizeLimits(min, max);
+    if (bottomView)
+        min.y = ::max(min.y, bottomView->size.y + !!(bottomView->options & ofFramed) + 3);
+}

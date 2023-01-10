@@ -66,6 +66,7 @@ struct EditorWindow : public turbo::BasicEditorWindow
     void setState(ushort aState, Boolean enable) override;
     Boolean valid(ushort command) override;
     const char *getTitle(short = 0) override;
+    void sizeLimits(TPoint &min, TPoint &max) override;
     void updateCommands() noexcept;
     void handleNotification(const SCNotification &scn, turbo::Editor &) override;
 
