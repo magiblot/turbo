@@ -94,11 +94,11 @@ public:
 		if (newSize > static_cast<ptrdiff_t>(body.size())) {
 			// Move the gap to the end
 			GapTo(lengthBody);
-			gapLength += newSize - static_cast<ptrdiff_t>(body.size());
 			// RoomFor implements a growth strategy but so does vector::resize so
 			// ensure vector::resize allocates exactly the amount wanted by
 			// calling reserve first.
 			body.reserve(newSize);
+			gapLength += newSize - static_cast<ptrdiff_t>(body.size());
 			body.resize(newSize);
 		}
 	}

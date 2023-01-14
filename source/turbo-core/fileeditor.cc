@@ -76,28 +76,31 @@ bool readFile(TScintilla &scintilla, const char *path, FileDialogs &dlgs) noexce
         f.seekg(0, ios::end);
         size_t bytesLeft = f.tellg();
         f.seekg(0);
-        // Allocate 1000 extra bytes, like SciTE does.
         try
         {
-            call(scintilla, SCI_ALLOCATE, bytesLeft + 1000, 0U);
+            // Allocate 1000 extra bytes, like SciTE does.
+            size_t allocBytes = 1000 + min<size_t>(bytesLeft, ((size_t) -1)/2 - 1000);
+            call(scintilla, SCI_ALLOCATE, allocBytes, 0U);
+
+            PropertyDetector props;
+            bool ok = true;
+            size_t readSize;
+            while ( readSize = min(bytesLeft, sizeof(ioBuffer)),
+                    readSize > 0 && (ok = (bool) f.read(ioBuffer, readSize)) )
+            {
+                props.analyze({ioBuffer, readSize});
+                call(scintilla, SCI_APPENDTEXT, readSize, (sptr_t) ioBuffer);
+                bytesLeft -= readSize;
+            }
+            if (!ok)
+                return dlgs.readError(path, strerror(errno));
+            props.apply(scintilla);
         }
         catch (const std::bad_alloc &)
         {
+            call(scintilla, SCI_CLEARALL, 0U, 0U);
             return dlgs.fileTooBigError(path, bytesLeft);
         }
-        PropertyDetector props;
-        bool ok = true;
-        size_t readSize;
-        while ( readSize = min(bytesLeft, sizeof(ioBuffer)),
-                readSize > 0 && (ok = (bool) f.read(ioBuffer, readSize)) )
-        {
-            props.analyze({ioBuffer, readSize});
-            call(scintilla, SCI_APPENDTEXT, readSize, (sptr_t) ioBuffer);
-            bytesLeft -= readSize;
-        }
-        if (!ok)
-            return dlgs.readError(path, strerror(errno));
-        props.apply(scintilla);
     }
     else
         return dlgs.openForReadError(path, strerror(errno));
