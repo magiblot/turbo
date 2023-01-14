@@ -74,13 +74,6 @@ foreach(t scintilla scilexers)
     )
 endforeach()
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
-    set_target_properties(scintilla PROPERTIES UNITY_BUILD ON)
-    target_precompile_headers(scilexers PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/include/ScilexersPCH.h"
-    )
-endif()
-
 # Dependencies
 
 include(deps/CMakeLists.txt)
@@ -184,6 +177,10 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0" AND TURBO_OPTIMIZE_BUILD)
     set_target_properties(${TURBO}-core PROPERTIES UNITY_BUILD ON)
     target_precompile_headers(${TURBO}-core PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/TurboPCH.h"
+    )
+    set_target_properties(scintilla PROPERTIES UNITY_BUILD ON)
+    target_precompile_headers(scilexers PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/include/ScilexersPCH.h"
     )
     if (TURBO_BUILD_APP)
         set_target_properties(${TURBO} PROPERTIES UNITY_BUILD ON)
