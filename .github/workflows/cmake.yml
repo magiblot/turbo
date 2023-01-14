@@ -7,21 +7,26 @@ env:
 
 jobs:
   build-linux-gcc:
-    name: Linux (GCC 8)
-    runs-on: ubuntu-18.04
+    name: Linux (GCC 7)
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
 
     - name: Install Dependencies
-      run: sudo apt -y install libncursesw5-dev g++-8
+      run: |
+        sudo tee --append /etc/apt/sources.list << EOF
+          deb http://us.archive.ubuntu.com/ubuntu/ bionic universe
+        EOF
+        sudo apt -y update
+        sudo apt -y install libncursesw5-dev g++-7
 
     - name: Configure CMake
       shell: bash
       env:
-        CC: gcc-8
-        CXX: g++-8
+        CC: gcc-7
+        CXX: g++-7
       run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTURBO_OPTIMIZE_BUILD=OFF
 
     - name: Build
@@ -32,7 +37,7 @@ jobs:
     name: Windows (MSVC) (Win32)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
 
@@ -55,7 +60,7 @@ jobs:
     name: Windows (MSVC) (x64)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
 
@@ -76,15 +81,15 @@ jobs:
 
   build-windows-mingw:
     name: Windows (MinGW)
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
 
     - name: Configure CMake
       shell: bash
-      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake . -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_CXX_FLAGS="-static" -DTURBO_OPTIMIZE_BUILD=OFF
 
     - name: Build
       shell: bash
@@ -94,7 +99,7 @@ jobs:
     name: MacOS (Clang)
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
 
