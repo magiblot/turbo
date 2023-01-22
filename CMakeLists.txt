@@ -140,6 +140,22 @@ if (TURBO_BUILD_APP)
         ${TURBO}-core
     )
     install(TARGETS ${TURBO} RUNTIME DESTINATION bin)
+
+    if (WIN32)
+        file(GLOB_RECURSE TURBO_RC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.rc")
+        target_sources(${TURBO} PRIVATE ${TURBO_RC})
+    elseif (APPLE)
+        add_custom_command(TARGET ${TURBO} POST_BUILD COMMAND
+            # Script from https://github.com/mklement0/fileicon
+            osascript
+                -e "use framework \\\"Cocoa\\\""
+                -e "set sourcePath to \\\"${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/icon.icns\\\""
+                -e "set destPath to \\\"$<TARGET_FILE:${TURBO}>\\\""
+                -e "set imageData to \\(current application\\'s NSImage\\'s alloc\\(\\)\\'s initWithContentsOfFile:sourcePath\\)"
+                -e "\\(current application\\'s NSWorkspace\\'s sharedWorkspace\\(\\)\\'s setIcon:imageData forFile:destPath options:0\\)"
+            ">/dev/null" "||" echo "Warning: failed to set application icon"
+        )
+    endif()
 endif()
 
 # Target 'tests'
