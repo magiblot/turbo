@@ -192,24 +192,31 @@ constexpr LexerSettings::PropertyMapping propertiesH[] =
 
 constexpr LexerSettings::KeywordMapping keywordsH[] =
 {
-    {0,
-"html body div span a table th tr td ul li "
+    {0, // HTML
+"DOCTYPE a abbr address area article aside audio b base bdi bdo blockquote "
+"body br button canvas caption cite code col colgroup data datalist dd del "
+"details dfn dialog div dl dt em embed fieldset figure footer form h1 h2 h3 "
+"h4 h5 h6 head header hgroup hr html i iframe img input ins kbd keygen label "
+"legend li link main map mark menu menuitem meta meter nav noscript object "
+"ol optgroup option output p param pre progress q rb rp rt rtc ruby s samp "
+"script section select small source span strong style sub summary sup table "
+"tbody td template textarea tfoot th thead time title tr track u ul var video wbr "
     },
     /*
-    {1,
-"< > html body div span a table th tr td ul li "
+    {1, // JS
+" "
     },
-    {2,
-"< > html body div span a table th tr td ul li "
+    {2, // VBS
+" "
     },
-    {3,
-"< > html body div span a table th tr td ul li "
+    {3, // Python
+" "
     },
-    {4,
-"< > html body div span a table th tr td ul li "
+    {4, // PHP
+" "
     },
-    {5,
-"< > html body div span a table th tr td ul li "
+    {5, // SGML, DTD
+" "
     },*/
 };
 
@@ -217,9 +224,9 @@ constexpr LexerSettings::StyleMapping stylesH[] =
 {
     { SCE_H_DEFAULT, sNormal},
     { SCE_H_TAG, sKeyword2},
-    { SCE_H_TAGUNKNOWN, sKeyword2},
-    { SCE_H_ATTRIBUTE, sKeyword2},
-    { SCE_H_ATTRIBUTEUNKNOWN, sKeyword2},
+    { SCE_H_TAGUNKNOWN, sError},
+    { SCE_H_ATTRIBUTE, sKeyword1},
+    { SCE_H_ATTRIBUTEUNKNOWN, sKeyword1},
     { SCE_H_NUMBER, sNumberLiteral},
     { SCE_H_DOUBLESTRING, sStringLiteral},
     { SCE_H_SINGLESTRING, sStringLiteral},
@@ -237,7 +244,7 @@ constexpr LexerSettings::StyleMapping stylesH[] =
     { SCE_H_VALUE, sCharLiteral},
     { SCE_H_XCCOMMENT, sComment},
     { SCE_H_SGML_DEFAULT, sNormal},
-    { SCE_H_SGML_COMMAND, sBraceMatch},
+    { SCE_H_SGML_COMMAND, sKeyword2},
     { SCE_H_SGML_1ST_PARAM, sNormal},
     { SCE_H_SGML_DOUBLESTRING, sStringLiteral},
     { SCE_H_SGML_SIMPLESTRING, sStringLiteral},
