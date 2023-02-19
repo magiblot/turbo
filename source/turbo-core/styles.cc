@@ -173,89 +173,6 @@ extern constexpr ColorScheme schemeDefault =
     /* sReplaceHighlight */ {'\x0'   , '\xA'                    },
 };
 
-constexpr LexerSettings::PropertyMapping propertiesH[] =
-{
-    {"asp.default.language",                "1"},
-    {"html.tags.case.sensitive",            "0"},
-    {"lexer.xml.allow.scripts",             "1"},
-    {"lexer.html.mako",                     "0"},
-    {"lexer.html.django",                   "0"},
-    {"fold",                                "0"},
-    {"fold.html",                           "0"},
-    {"fold.html.preprocessor",              "0"},
-    {"fold.compact",                        "0"},
-    {"fold.hypertext.comment",              "0"},
-    {"fold.hypertext.heredoc",              "0"},
-    {"fold.xml.at.tag.open",                "0"},
-
-};
-
-constexpr LexerSettings::KeywordMapping keywordsH[] =
-{
-    {0, // HTML
-"DOCTYPE a abbr address area article aside audio b base bdi bdo blockquote "
-"body br button canvas caption cite code col colgroup data datalist dd del "
-"details dfn dialog div dl dt em embed fieldset figure footer form h1 h2 h3 "
-"h4 h5 h6 head header hgroup hr html i iframe img input ins kbd keygen label "
-"legend li link main map mark menu menuitem meta meter nav noscript object "
-"ol optgroup option output p param pre progress q rb rp rt rtc ruby s samp "
-"script section select small source span strong style sub summary sup table "
-"tbody td template textarea tfoot th thead time title tr track u ul var video wbr "
-    },
-    /*
-    {1, // JS
-" "
-    },
-    {2, // VBS
-" "
-    },
-    {3, // Python
-" "
-    },
-    {4, // PHP
-" "
-    },
-    {5, // SGML, DTD
-" "
-    },*/
-};
-
-constexpr LexerSettings::StyleMapping stylesH[] =
-{
-    { SCE_H_DEFAULT, sNormal},
-    { SCE_H_TAG, sKeyword2},
-    { SCE_H_TAGUNKNOWN, sError},
-    { SCE_H_ATTRIBUTE, sKeyword1},
-    { SCE_H_ATTRIBUTEUNKNOWN, sKeyword1},
-    { SCE_H_NUMBER, sNumberLiteral},
-    { SCE_H_DOUBLESTRING, sStringLiteral},
-    { SCE_H_SINGLESTRING, sStringLiteral},
-    { SCE_H_OTHER, sNormal},
-    { SCE_H_COMMENT, sComment},
-    { SCE_H_ENTITY, sNormal},
-    { SCE_H_TAGEND, sKeyword2},
-    { SCE_H_XMLSTART, sKeyword2},
-    { SCE_H_XMLEND,  sKeyword2},
-    { SCE_H_SCRIPT, sStringLiteral},
-    { SCE_H_ASP, sStringLiteral},
-    { SCE_H_ASPAT, sStringLiteral},
-    { SCE_H_CDATA, sStringLiteral},
-    { SCE_H_QUESTION, sNormal},
-    { SCE_H_VALUE, sCharLiteral},
-    { SCE_H_XCCOMMENT, sComment},
-    { SCE_H_SGML_DEFAULT, sNormal},
-    { SCE_H_SGML_COMMAND, sKeyword2},
-    { SCE_H_SGML_1ST_PARAM, sNormal},
-    { SCE_H_SGML_DOUBLESTRING, sStringLiteral},
-    { SCE_H_SGML_SIMPLESTRING, sStringLiteral},
-    { SCE_H_SGML_ERROR, sError},
-    { SCE_H_SGML_SPECIAL, sKeyword1},
-    { SCE_H_SGML_ENTITY, sNormal},
-    { SCE_H_SGML_COMMENT, sComment},
-    { SCE_H_SGML_1ST_PARAM_COMMENT, sComment},
-    { SCE_H_SGML_BLOCK_DEFAULT, sNormal}
-};
-
 constexpr LexerSettings::StyleMapping stylesC[] =
 {
     {SCE_C_DEFAULT,                 sNormal},
@@ -350,6 +267,126 @@ constexpr LexerSettings::KeywordMapping keywordsJavaScript[] =
 "undefined WeakMap WeakSet WebAssembly"
     },
 };
+
+
+constexpr LexerSettings::PropertyMapping propertiesH[] =
+{
+    {"asp.default.language",                "1"},
+    {"html.tags.case.sensitive",            "0"},
+    {"lexer.xml.allow.scripts",             "1"},
+    {"lexer.html.mako",                     "0"},
+    {"lexer.html.django",                   "0"},
+    {"fold",                                "0"},
+    {"fold.html",                           "0"},
+    {"fold.html.preprocessor",              "0"},
+    {"fold.compact",                        "0"},
+    {"fold.hypertext.comment",              "0"},
+    {"fold.hypertext.heredoc",              "0"},
+    {"fold.xml.at.tag.open",                "0"},
+
+};
+
+constexpr LexerSettings::KeywordMapping keywordsH[] =
+{
+    {0, // HTML
+"!DOCTYPE a abbr address area article aside audio b base bdi bdo blockquote "
+"body br button canvas caption cite code col colgroup data datalist dd del "
+"details dfn dialog div dl dt em embed fieldset figure footer form h1 h2 h3 "
+"h4 h5 h6 head header hgroup hr html i iframe img input ins kbd keygen label "
+"legend li link main map mark menu menuitem meta meter nav noscript object "
+"ol optgroup option output p param pre progress q rb rp rt rtc ruby s samp "
+"script section select small source span strong style sub summary sup table "
+"tbody td template textarea tfoot th thead time title tr track u ul var video "
+"wbr strike tt acronym applet basefont big center dir font frame frameset noframes "
+// SVG
+"svg animate animateMotion animateTransform circle clipPath defs desc discard "
+"ellipse feBlend feColorMatrix feComponentTrasfer feComposite feConvolveMatrix "
+"feDiffuseLighting feDisplacementMap feDistantLight feDropShadow feFlood feFuncA "
+"feFuncB feFuncG feFuncR feGaussianBlur feImage feMerge feMergeNode feMorphology "
+"feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence filter "
+"foreignObject g hatch hatchpath image line linearGradient marker mask metadata "
+"mpath path pattern polygon polyline radialGradient rect set stop style switch "
+"symbol text textPath title tspan use view "
+    },
+    {1, // JS
+"of await break case catch continue default do else export false finally "
+"for get if import new null return set super switch this throw true try while "
+"with yield"
+"async class const debugger delete enum eval extends function in instanceof let "
+"static typeof var void"
+"arguments Array ArrayBuffer AsyncFunction Atomics BigInt BigInt64Array "
+"BigUint64Array Boolean DataView Date Error EvalError Float32Array Float64Array "
+"Function Generator GeneratorFunction globalThis Infinity Int8Array Int16Array "
+"Int32Array InternalError Intl JSON Map Math NaN Number Object Promise Proxy "
+"RangeError ReferenceError Reflect RegExp Set String SyntaxError TypeError URIError "
+"SharedArrayBuffer Symbol Uint8Array Uint8ClampedArray Uint16Array Uint32Array "
+"undefined WeakMap WeakSet WebAssembly"
+    }
+    /*
+    {2, // VBS
+" "
+    },
+    {3, // Python
+" "
+    },
+    {4, // PHP
+" "
+    }*/,
+    {5, // SGML, DTD
+"DOCTYPE ELEMENT ATTLIST ENTITY PCDATA CDATA EMPTY SHORTREF USEMAP NOTATION IMPLIED "
+"NDATA SYSTEM SGML HTML PUBLIC "
+    },
+};
+
+constexpr LexerSettings::StyleMapping stylesH[] =
+{
+    { SCE_H_DEFAULT, sNormal},
+    { SCE_H_TAG, sKeyword1},
+    { SCE_H_TAGUNKNOWN, sError},
+    { SCE_H_ATTRIBUTE, sKeyword2},
+    { SCE_H_ATTRIBUTEUNKNOWN, sKeyword2},
+    { SCE_H_NUMBER, sNumberLiteral},
+    { SCE_H_DOUBLESTRING, sStringLiteral},
+    { SCE_H_SINGLESTRING, sStringLiteral},
+    { SCE_H_OTHER, sNormal},
+    { SCE_H_COMMENT, sComment},
+    { SCE_H_ENTITY, sNormal},
+    { SCE_H_TAGEND, sKeyword1},
+    { SCE_H_XMLSTART, sKeyword1},
+    { SCE_H_XMLEND,  sKeyword1},
+    { SCE_H_SCRIPT, sStringLiteral},
+    { SCE_H_ASP, sStringLiteral},
+    { SCE_H_ASPAT, sStringLiteral},
+    { SCE_H_CDATA, sStringLiteral},
+    { SCE_H_QUESTION, sNormal},
+    { SCE_H_VALUE, sCharLiteral},
+    { SCE_H_XCCOMMENT, sComment},
+
+    { SCE_H_SGML_DEFAULT, sNormal},
+    { SCE_H_SGML_COMMAND, sKeyword2},
+    { SCE_H_SGML_1ST_PARAM, sNormal},
+    { SCE_H_SGML_DOUBLESTRING, sStringLiteral},
+    { SCE_H_SGML_SIMPLESTRING, sStringLiteral},
+    { SCE_H_SGML_ERROR, sError},
+    { SCE_H_SGML_SPECIAL, sKeyword1},
+    { SCE_H_SGML_ENTITY, sNormal},
+    { SCE_H_SGML_COMMENT, sComment},
+    { SCE_H_SGML_1ST_PARAM_COMMENT, sComment},
+    { SCE_H_SGML_BLOCK_DEFAULT, sNormal},
+
+    { SCE_HJ_DEFAULT, sNormal },
+    { SCE_HJ_COMMENT, sComment },
+    { SCE_HJ_COMMENTLINE, sComment },
+    { SCE_HJ_COMMENTDOC, sComment },
+    { SCE_HJ_NUMBER, sNumberLiteral },
+    { SCE_HJ_WORD, sKeyword2 },
+    { SCE_HJ_KEYWORD, sKeyword1 },
+    { SCE_HJ_DOUBLESTRING, sStringLiteral },
+    { SCE_HJ_SINGLESTRING, sCharLiteral },
+    { SCE_HJ_SYMBOLS, sCtrlChar },
+    { SCE_HJ_REGEX, sMisc }
+};
+
 
 constexpr LexerSettings::StyleMapping  stylesRust[] =
 {
