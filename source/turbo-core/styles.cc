@@ -48,6 +48,7 @@ static const const_unordered_map<std::string_view, const Language *> mime2lang =
     {"text/x-shellscript",          &Language::Bash},
     {"text/x-makefile",             &Language::Makefile},
     {"text/x-diff",                 &Language::Diff},
+    {"text/html",                   &Language::HTML},
 };
 
 static const const_unordered_map<std::string_view, const Language *> ext2lang = {
@@ -170,6 +171,82 @@ extern constexpr ColorScheme schemeDefault =
     /* sError            */ {'\x0'   , '\x3'                    },
     /* sBraceMatch       */ {'\xE'   , {}      , slBold         },
     /* sReplaceHighlight */ {'\x0'   , '\xA'                    },
+};
+
+constexpr LexerSettings::PropertyMapping propertiesH[] =
+{
+    {"asp.default.language",                "1"},
+    {"html.tags.case.sensitive",            "0"},
+    {"lexer.xml.allow.scripts",             "1"},
+    {"lexer.html.mako",                     "0"},
+    {"lexer.html.django",                   "0"},
+    {"fold",                                "0"},
+    {"fold.html",                           "0"},
+    {"fold.html.preprocessor",              "0"},
+    {"fold.compact",                        "0"},
+    {"fold.hypertext.comment",              "0"},
+    {"fold.hypertext.heredoc",              "0"},
+    {"fold.xml.at.tag.open",                "0"},
+
+};
+
+constexpr LexerSettings::KeywordMapping keywordsH[] =
+{
+    {0,
+"html body div span a table th tr td ul li "
+    },
+    /*
+    {1,
+"< > html body div span a table th tr td ul li "
+    },
+    {2,
+"< > html body div span a table th tr td ul li "
+    },
+    {3,
+"< > html body div span a table th tr td ul li "
+    },
+    {4,
+"< > html body div span a table th tr td ul li "
+    },
+    {5,
+"< > html body div span a table th tr td ul li "
+    },*/
+};
+
+constexpr LexerSettings::StyleMapping stylesH[] =
+{
+    { SCE_H_DEFAULT, sNormal},
+    { SCE_H_TAG, sKeyword2},
+    { SCE_H_TAGUNKNOWN, sKeyword2},
+    { SCE_H_ATTRIBUTE, sKeyword2},
+    { SCE_H_ATTRIBUTEUNKNOWN, sKeyword2},
+    { SCE_H_NUMBER, sNumberLiteral},
+    { SCE_H_DOUBLESTRING, sStringLiteral},
+    { SCE_H_SINGLESTRING, sStringLiteral},
+    { SCE_H_OTHER, sNormal},
+    { SCE_H_COMMENT, sComment},
+    { SCE_H_ENTITY, sNormal},
+    { SCE_H_TAGEND, sKeyword2},
+    { SCE_H_XMLSTART, sKeyword2},
+    { SCE_H_XMLEND,  sKeyword2},
+    { SCE_H_SCRIPT, sStringLiteral},
+    { SCE_H_ASP, sStringLiteral},
+    { SCE_H_ASPAT, sStringLiteral},
+    { SCE_H_CDATA, sStringLiteral},
+    { SCE_H_QUESTION, sNormal},
+    { SCE_H_VALUE, sCharLiteral},
+    { SCE_H_XCCOMMENT, sComment},
+    { SCE_H_SGML_DEFAULT, sNormal},
+    { SCE_H_SGML_COMMAND, sBraceMatch},
+    { SCE_H_SGML_1ST_PARAM, sNormal},
+    { SCE_H_SGML_DOUBLESTRING, sStringLiteral},
+    { SCE_H_SGML_SIMPLESTRING, sStringLiteral},
+    { SCE_H_SGML_ERROR, sError},
+    { SCE_H_SGML_SPECIAL, sKeyword1},
+    { SCE_H_SGML_ENTITY, sNormal},
+    { SCE_H_SGML_COMMENT, sComment},
+    { SCE_H_SGML_1ST_PARAM_COMMENT, sComment},
+    { SCE_H_SGML_BLOCK_DEFAULT, sNormal}
 };
 
 constexpr LexerSettings::StyleMapping stylesC[] =
@@ -484,6 +561,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::Ruby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr}},
     {&Language::JSON, {SCLEX_JSON, stylesJSON, keywordsJSON, propertiesJSON}},
     {&Language::YAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr}},
+    {&Language::HTML, {SCLEX_HTML, stylesH, keywordsH, propertiesH}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)
