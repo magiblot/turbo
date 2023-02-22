@@ -50,7 +50,8 @@ struct Language
         YAML,
         Erlang,
         Smalltalk,
-        Markdown;
+        Markdown,
+        Properties;
 };
 
 enum TextStyle : uchar

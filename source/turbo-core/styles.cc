@@ -38,7 +38,8 @@ constexpr Language
     Language::YAML {"#"},
     Language::Erlang {"%"},
     Language::Smalltalk {{}, "\"", "\""},
-    Language::Markdown;
+    Language::Markdown,
+    Language::Properties {"#"};
 
 static const const_unordered_map<std::string_view, const Language *> mime2lang = {
     {"text/x-c++",                  &Language::CPP},
@@ -112,6 +113,8 @@ static const const_unordered_map<std::string_view, const Language *> ext2lang = 
     {".apinotes",                   &Language::YAML},
     {".ifs",                        &Language::YAML},
     {".sh",                         &Language::Bash},
+    {".ini",                        &Language::Properties},
+    {".properties",                 &Language::Properties},
 };
 
 const Language *detectFileLanguage(const char *filePath)
@@ -582,6 +585,16 @@ constexpr LexerSettings::KeywordMapping keywordsYAML[] =
     {0, "true false yes no"},
 };
 
+constexpr LexerSettings::StyleMapping stylesProperties[] =
+{
+    {SCE_PROPS_DEFAULT,             sNormal},
+    {SCE_PROPS_COMMENT,             sComment},
+    {SCE_PROPS_SECTION,             sKeyword2},
+    {SCE_PROPS_ASSIGNMENT,          sOperator},
+    {SCE_PROPS_DEFVAL,              sMisc},
+    {SCE_PROPS_KEY,                 sKeyword1},
+};
+
 constexpr struct { const Language *language; LexerSettings lexer; } builtInLexers[] =
 {
     {&Language::CPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
@@ -595,6 +608,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::JSON, {SCLEX_JSON, stylesJSON, keywordsJSON, propertiesJSON}},
     {&Language::YAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr}},
     {&Language::HTML, {SCLEX_HTML, stylesHTML, keywordsHTML, propertiesHTML}},
+    {&Language::Properties, {SCLEX_PROPERTIES, stylesProperties, nullptr, nullptr}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)

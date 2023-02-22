@@ -152,7 +152,7 @@ int Scintilla_LinkLexers() {
 	LINK_LEXER(lmPowerPro);
 	LINK_LEXER(lmPowerShell);
 	LINK_LEXER(lmProgress);
-	LINK_LEXER(lmProps);
+	*/ LINK_LEXER(lmProps); /*
 	LINK_LEXER(lmPS);
 	LINK_LEXER(lmPureBasic);
 	*/ LINK_LEXER(lmPython); /*
