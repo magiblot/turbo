@@ -268,78 +268,9 @@ constexpr LexerSettings::KeywordMapping keywordsJavaScript[] =
     },
 };
 
-
-constexpr LexerSettings::PropertyMapping propertiesH[] =
+constexpr LexerSettings::StyleMapping stylesHTML[] =
 {
-    {"asp.default.language",                "1"},
-    {"html.tags.case.sensitive",            "0"},
-    {"lexer.xml.allow.scripts",             "1"},
-    {"lexer.html.mako",                     "0"},
-    {"lexer.html.django",                   "0"},
-    {"fold",                                "0"},
-    {"fold.html",                           "0"},
-    {"fold.html.preprocessor",              "0"},
-    {"fold.compact",                        "0"},
-    {"fold.hypertext.comment",              "0"},
-    {"fold.hypertext.heredoc",              "0"},
-    {"fold.xml.at.tag.open",                "0"},
-
-};
-
-constexpr LexerSettings::KeywordMapping keywordsH[] =
-{
-    {0, // HTML
-"!DOCTYPE a abbr address area article aside audio b base bdi bdo blockquote "
-"body br button canvas caption cite code col colgroup data datalist dd del "
-"details dfn dialog div dl dt em embed fieldset figure footer form h1 h2 h3 "
-"h4 h5 h6 head header hgroup hr html i iframe img input ins kbd keygen label "
-"legend li link main map mark menu menuitem meta meter nav noscript object "
-"ol optgroup option output p param pre progress q rb rp rt rtc ruby s samp "
-"script section select small source span strong style sub summary sup table "
-"tbody td template textarea tfoot th thead time title tr track u ul var video "
-"wbr strike tt acronym applet basefont big center dir font frame frameset noframes "
-// SVG
-"svg animate animateMotion animateTransform circle clipPath defs desc discard "
-"ellipse feBlend feColorMatrix feComponentTrasfer feComposite feConvolveMatrix "
-"feDiffuseLighting feDisplacementMap feDistantLight feDropShadow feFlood feFuncA "
-"feFuncB feFuncG feFuncR feGaussianBlur feImage feMerge feMergeNode feMorphology "
-"feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence filter "
-"foreignObject g hatch hatchpath image line linearGradient marker mask metadata "
-"mpath path pattern polygon polyline radialGradient rect set stop style switch "
-"symbol text textPath title tspan use view "
-    },
-    {1, // JS
-"of await break case catch continue default do else export false finally "
-"for get if import new null return set super switch this throw true try while "
-"with yield"
-"async class const debugger delete enum eval extends function in instanceof let "
-"static typeof var void"
-"arguments Array ArrayBuffer AsyncFunction Atomics BigInt BigInt64Array "
-"BigUint64Array Boolean DataView Date Error EvalError Float32Array Float64Array "
-"Function Generator GeneratorFunction globalThis Infinity Int8Array Int16Array "
-"Int32Array InternalError Intl JSON Map Math NaN Number Object Promise Proxy "
-"RangeError ReferenceError Reflect RegExp Set String SyntaxError TypeError URIError "
-"SharedArrayBuffer Symbol Uint8Array Uint8ClampedArray Uint16Array Uint32Array "
-"undefined WeakMap WeakSet WebAssembly"
-    }
-    /*
-    {2, // VBS
-" "
-    },
-    {3, // Python
-" "
-    },
-    {4, // PHP
-" "
-    }*/,
-    {5, // SGML, DTD
-"DOCTYPE ELEMENT ATTLIST ENTITY PCDATA CDATA EMPTY SHORTREF USEMAP NOTATION IMPLIED "
-"NDATA SYSTEM SGML HTML PUBLIC "
-    },
-};
-
-constexpr LexerSettings::StyleMapping stylesH[] =
-{
+    // HTML
     { SCE_H_DEFAULT, sNormal},
     { SCE_H_TAG, sKeyword1},
     { SCE_H_TAGUNKNOWN, sError},
@@ -361,7 +292,7 @@ constexpr LexerSettings::StyleMapping stylesH[] =
     { SCE_H_QUESTION, sNormal},
     { SCE_H_VALUE, sCharLiteral},
     { SCE_H_XCCOMMENT, sComment},
-
+    // SGML (DTD)
     { SCE_H_SGML_DEFAULT, sNormal},
     { SCE_H_SGML_COMMAND, sKeyword2},
     { SCE_H_SGML_1ST_PARAM, sNormal},
@@ -373,13 +304,13 @@ constexpr LexerSettings::StyleMapping stylesH[] =
     { SCE_H_SGML_COMMENT, sComment},
     { SCE_H_SGML_1ST_PARAM_COMMENT, sComment},
     { SCE_H_SGML_BLOCK_DEFAULT, sNormal},
-
+    // JavaScript
     { SCE_HJ_DEFAULT, sNormal },
     { SCE_HJ_COMMENT, sComment },
     { SCE_HJ_COMMENTLINE, sComment },
     { SCE_HJ_COMMENTDOC, sComment },
     { SCE_HJ_NUMBER, sNumberLiteral },
-    { SCE_HJ_WORD, sKeyword2 },
+    { SCE_HJ_WORD, sNormal },
     { SCE_HJ_KEYWORD, sKeyword1 },
     { SCE_HJ_DOUBLESTRING, sStringLiteral },
     { SCE_HJ_SINGLESTRING, sCharLiteral },
@@ -387,6 +318,64 @@ constexpr LexerSettings::StyleMapping stylesH[] =
     { SCE_HJ_REGEX, sMisc }
 };
 
+constexpr LexerSettings::KeywordMapping keywordsHTML[] =
+{
+    {0, // HTML
+"a abbr address area article aside audio b base bdi bdo blockquote "
+"body br button canvas caption cite code col colgroup data datalist dd del "
+"details dfn dialog div dl dt em embed fieldset figure footer form h1 h2 h3 "
+"h4 h5 h6 head header hgroup hr html i iframe img input ins kbd keygen label "
+"legend li link main map mark menu menuitem meta meter nav noscript object "
+"ol optgroup option output p param pre progress q rb rp rt rtc ruby s samp "
+"script section select small source span strong style sub summary sup table "
+"tbody td template textarea tfoot th thead time title tr track u ul var video "
+"wbr strike tt acronym applet basefont big center dir font frame frameset noframes "
+    // SVG
+"svg animate animateMotion animateTransform circle clipPath defs desc discard "
+"ellipse feBlend feColorMatrix feComponentTrasfer feComposite feConvolveMatrix "
+"feDiffuseLighting feDisplacementMap feDistantLight feDropShadow feFlood feFuncA "
+"feFuncB feFuncG feFuncR feGaussianBlur feImage feMerge feMergeNode feMorphology "
+"feOffset fePointLight feSpecularLighting feSpotLight feTile feTurbulence filter "
+"foreignObject g hatch hatchpath image line linearGradient marker mask metadata "
+"mpath path pattern polygon polyline radialGradient rect set stop style switch "
+"symbol text textPath title tspan use view "
+    },
+    {1, // JavaScript
+"of await break case catch continue default do else export false finally for "
+"get if import new null return set super switch this throw true try while with "
+"yield async class const debugger delete enum eval extends function in instanceof "
+"let static typeof var void undefined "
+    },
+    {2, // VBScript
+" "
+    },
+    {3, // Python
+" "
+    },
+    {4, // PHP
+" "
+    },
+    {5, // SGML (DTD)
+"DOCTYPE ELEMENT ATTLIST ENTITY PCDATA CDATA EMPTY SHORTREF USEMAP NOTATION IMPLIED "
+"NDATA SYSTEM SGML HTML PUBLIC "
+    },
+};
+
+constexpr LexerSettings::PropertyMapping propertiesHTML[] =
+{
+    {"asp.default.language",                "1"},
+    {"html.tags.case.sensitive",            "0"},
+    {"lexer.xml.allow.scripts",             "1"},
+    {"lexer.html.mako",                     "0"},
+    {"lexer.html.django",                   "0"},
+    {"fold",                                "0"},
+    {"fold.html",                           "0"},
+    {"fold.html.preprocessor",              "0"},
+    {"fold.compact",                        "0"},
+    {"fold.hypertext.comment",              "0"},
+    {"fold.hypertext.heredoc",              "0"},
+    {"fold.xml.at.tag.open",                "0"},
+};
 
 constexpr LexerSettings::StyleMapping  stylesRust[] =
 {
@@ -605,7 +594,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::Ruby, {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr}},
     {&Language::JSON, {SCLEX_JSON, stylesJSON, keywordsJSON, propertiesJSON}},
     {&Language::YAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr}},
-    {&Language::HTML, {SCLEX_HTML, stylesH, keywordsH, propertiesH}},
+    {&Language::HTML, {SCLEX_HTML, stylesHTML, keywordsHTML, propertiesHTML}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)
