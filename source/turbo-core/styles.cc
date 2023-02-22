@@ -567,10 +567,10 @@ constexpr LexerSettings::StyleMapping stylesYAML[] =
 {
     {SCE_YAML_DEFAULT,              sNormal},
     {SCE_YAML_COMMENT,              sComment},
-    {SCE_YAML_IDENTIFIER,           sPreprocessor},
-    {SCE_YAML_KEYWORD,              sKeyword1},
+    {SCE_YAML_IDENTIFIER,           sKeyword1},
+    {SCE_YAML_KEYWORD,              sKeyword2},
     {SCE_YAML_NUMBER,               sNumberLiteral},
-    {SCE_YAML_REFERENCE,            sKeyword2},
+    {SCE_YAML_REFERENCE,            sMisc},
     {SCE_YAML_DOCUMENT,             sMisc},
     {SCE_YAML_TEXT,                 sStringLiteral},
     {SCE_YAML_ERROR,                sError},
