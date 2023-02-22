@@ -160,7 +160,7 @@ extern constexpr ColorScheme schemeDefault =
     /* sLineNums         */ {'\x6'   , {}                       },
     /* sKeyword1         */ {'\xE'   , {}                       },
     /* sKeyword2         */ {'\xA'   , {}                       },
-    /* sMisc             */ {'\x9'   , {}                       },
+    /* sMisc             */ {'\x9'   , {}      , slBold         },
     /* sPreprocessor     */ {'\x2'   , {}                       },
     /* sOperator         */ {'\xD'   , {}                       },
     /* sComment          */ {'\x6'   , {}                       },
@@ -168,7 +168,7 @@ extern constexpr ColorScheme schemeDefault =
     /* sCharLiteral      */ {'\xC'   , {}                       },
     /* sNumberLiteral    */ {'\x3'   , {}                       },
     /* sEscapeSequence   */ {'\xB'   , {}                       },
-    /* sError            */ {'\x0'   , '\x3'                    },
+    /* sError            */ {'\xF'   , '\xC'                    },
     /* sBraceMatch       */ {'\xE'   , {}      , slBold         },
     /* sReplaceHighlight */ {'\x0'   , '\xA'                    },
 };
