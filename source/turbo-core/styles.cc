@@ -39,7 +39,8 @@ constexpr Language
     Language::Erlang {"%"},
     Language::Smalltalk {{}, "\"", "\""},
     Language::Markdown,
-    Language::Properties {"#"};
+    Language::Properties {"#"},
+    Language::CSharp {"//", "/*", "*/"};
 
 static const const_unordered_map<std::string_view, const Language *> mime2lang = {
     {"text/x-c++",                  &Language::CPP},
@@ -50,6 +51,7 @@ static const const_unordered_map<std::string_view, const Language *> mime2lang =
     {"text/x-makefile",             &Language::Makefile},
     {"text/x-diff",                 &Language::Diff},
     {"text/html",                   &Language::HTML},
+    {"text/x-csharp",               &Language::CSharp}
 };
 
 static const const_unordered_map<std::string_view, const Language *> ext2lang = {
@@ -115,6 +117,9 @@ static const const_unordered_map<std::string_view, const Language *> ext2lang = 
     {".sh",                         &Language::Bash},
     {".ini",                        &Language::Properties},
     {".properties",                 &Language::Properties},
+    {".cs",                         &Language::CSharp},
+    {".bashrc",                     &Language::Bash},
+    {".zshrc",                      &Language::Bash},
 };
 
 const Language *detectFileLanguage(const char *filePath)
@@ -585,6 +590,29 @@ constexpr LexerSettings::KeywordMapping keywordsYAML[] =
     {0, "true false yes no"},
 };
 
+constexpr LexerSettings::KeywordMapping keywordsCSharp[] =
+{
+    {0,
+"abstract as base bool break case catch checked class const continue default "
+"delegate do else enum event explicit extern false finally fixed for foreach "
+"goto if implicit in interface internal is lock namespace new null object operator "
+"out override params private protected public readonly ref return sealed sizeof "
+"stackalloc static struct switch this throw true try typeof unchecked unsafe "
+"using virtual void volatile while "
+"add and alias ascending args async await by descending dynamic equals file from "
+"get global group init into join let managed nameof not notnull on or orderby "
+"partial record remove required scoped select set unmanaged value var when where "
+"with yield "
+    },
+    {1,
+"bool byte sbyte char decimal double float in uint nint nuint long ulong short ushort "
+"object string dynamic "
+    },
+    {3,
+"System"
+    },
+};
+
 constexpr LexerSettings::StyleMapping stylesProperties[] =
 {
     {SCE_PROPS_DEFAULT,             sNormal},
@@ -609,6 +637,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::YAML, {SCLEX_YAML, stylesYAML, keywordsYAML, nullptr}},
     {&Language::HTML, {SCLEX_HTML, stylesHTML, keywordsHTML, propertiesHTML}},
     {&Language::Properties, {SCLEX_PROPERTIES, stylesProperties, nullptr, nullptr}},
+    {&Language::CSharp, {SCLEX_CPP, stylesC, keywordsCSharp, propertiesC}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)

@@ -51,7 +51,8 @@ struct Language
         Erlang,
         Smalltalk,
         Markdown,
-        Properties;
+        Properties,
+        CSharp;
 };
 
 enum TextStyle : uchar
