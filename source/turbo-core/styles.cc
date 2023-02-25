@@ -40,7 +40,8 @@ constexpr Language
     Language::Smalltalk {{}, "\"", "\""},
     Language::Markdown,
     Language::Properties {"#"},
-    Language::CSharp {"//", "/*", "*/"};
+    Language::CSharp {"//", "/*", "*/"},
+    Language::Basic {"rem"};
 
 static const const_unordered_map<std::string_view, const Language *> mime2lang = {
     {"text/x-c++",                  &Language::CPP},
@@ -50,8 +51,7 @@ static const const_unordered_map<std::string_view, const Language *> mime2lang =
     {"text/x-shellscript",          &Language::Bash},
     {"text/x-makefile",             &Language::Makefile},
     {"text/x-diff",                 &Language::Diff},
-    {"text/html",                   &Language::HTML},
-    {"text/x-csharp",               &Language::CSharp}
+    {"text/html",                   &Language::HTML}
 };
 
 static const const_unordered_map<std::string_view, const Language *> ext2lang = {
@@ -115,11 +115,14 @@ static const const_unordered_map<std::string_view, const Language *> ext2lang = 
     {".apinotes",                   &Language::YAML},
     {".ifs",                        &Language::YAML},
     {".sh",                         &Language::Bash},
+    {".bashrc",                     &Language::Bash},
+    {".zshrc",                      &Language::Bash},
     {".ini",                        &Language::Properties},
     {".properties",                 &Language::Properties},
     {".cs",                         &Language::CSharp},
-    {".bashrc",                     &Language::Bash},
-    {".zshrc",                      &Language::Bash},
+    {".bas",                        &Language::Basic},
+    {".frm",                        &Language::Basic},
+    {".cls",                        &Language::Basic},
 };
 
 const Language *detectFileLanguage(const char *filePath)
@@ -623,6 +626,108 @@ constexpr LexerSettings::StyleMapping stylesProperties[] =
     {SCE_PROPS_KEY,                 sKeyword1},
 };
 
+constexpr LexerSettings::StyleMapping  stylesBasic[] =
+{
+    {SCE_B_DEFAULT,                 sNormal},
+    {SCE_B_COMMENT,                 sComment},
+    {SCE_B_NUMBER,                  sNumberLiteral},
+    {SCE_B_KEYWORD,                 sKeyword1},
+    {SCE_B_STRING,                  sStringLiteral},
+    {SCE_B_PREPROCESSOR,            sPreprocessor},
+    {SCE_B_OPERATOR,                sOperator},
+    {SCE_B_IDENTIFIER,              sNormal},
+    {SCE_B_DATE,                    sCharLiteral},
+    {SCE_B_STRINGEOL,               sNormal},
+    {SCE_B_KEYWORD2,                sKeyword2},
+    {SCE_B_KEYWORD3,                sKeyword2},
+    {SCE_B_KEYWORD4,                sKeyword2},
+    {SCE_B_CONSTANT,                sNormal},
+    {SCE_B_ASM,                     sMisc},
+    {SCE_B_LABEL,                   sSelection},
+    {SCE_B_ERROR,                   sError},
+    {SCE_B_HEXNUMBER,               sNumberLiteral},
+    {SCE_B_BINNUMBER,               sNumberLiteral},
+    {SCE_B_COMMENTBLOCK,            sComment},
+    {SCE_B_DOCLINE,                 sMisc},
+    {SCE_B_DOCBLOCK,                sMisc},
+    {SCE_B_DOCKEYWORD,              sMisc},
+};
+
+constexpr LexerSettings::KeywordMapping keywordsBasic[] =
+{
+    {0,
+// QBasic
+"abs absolute access alias and append as asc atn beep binary bload bsave byval call "
+"case cdbl chain chdir chr cint circle clear clng close cls color command common "
+"const cos csng csrlin cvd cvdmbf cvi cvl cvs cvsmbf data date declare library "
+"def seg defdbl defint deflng defsng defstr dim do loop double draw if then else elseif "
+"end environ eof eqv erase erl err error exit exp field files fix for next free freefile "
+"function get gosub goto hex imp inkey inp input instr int integer interrupt "
+"interruptx key kill lbound lcase left len line list loc locate lock lof log "
+"long lprint using lset ltrim mid mkd mkdir mkdmbf mki mkl mks mksmbf mod name "
+"not oct off on strig open com or out output paint palette pcopy peek "
+"play pmap point poke pos preset print pset put random randomize read redim reset restore "
+"resume return right rmdir rnd rset rtrim run sadd screen seek select sgn shared shell "
+"sin single sleep sound space spc sqr step stick stop str string sub swap system "
+"tab tan time timer to type ubound ucase unlock until val varptr varseg view "
+"wait wend while width window write xor option explicit base "
+    },
+    {1,
+// VB6
+"addressof attribute appactivate begin beginproperty boolean byref chdrive class "
+"collection defbool defbyte defdate defdec defcur defobj defvar deletesetting "
+"each endproperty enum event false filecopy friend global implements in is load lib "
+"like me new  nothing null object local optional compare module paramarray private "
+"property public raiseevent savepicture savesetting sendkeys set setattr text true "
+"typeof unload variant version with withevents "
+// QB64
+"_acceptfiledrop _acos _acosh _allowfullscreen _alpha _alpha32 _arrcot _arccsc _arcsec _asin _asinh "
+"_assert _atan2 _atanh _autodisplay _axis _backgroundcolor _bit _bin _bin _blend _blink "
+"_blue _blue32 _button _buttonchange _byte _capslock _ceil _cinp _clearcolor _clip _clipboard "
+"_clipboardimage _colorchoosedialog _commandcount _connected _connectionaddress "
+"_consoleinput _consoletitle _continue _controlchr _copyimage _copypalette _cot _coth _cosh "
+"_csc _csch _cw _cwd _d2g _d2r _defaultcolor _define _deflate _delay _depthbuffer _desktopheight "
+"_desktopwidth _dest _device _deviceinput _devices _dir _direxists _display _displayorder _dontblend "
+"_dontwait _droppedfile _environcount _errorline _errormessage "
+"_fileexists _finishdrop _float _font _fontheight _fontwidth _freefont _freeimage "
+"_freetimer _fullscreen _g2d _g2r _glrender _green _green32 _height _hide _hypot _icon _inclerrofile "
+"_inclerroline _inflate _inputbox _instrrev _integer64 _keyclear _keyhit _keydown _lastaxis "
+"_lastbutton _lastwheel _limit _loadfont _loadimage _maptriangle _mapunicode _mem _memcopy _memelement "
+"_memexists _memfill _memfree _memget _memimage _memnew _memput _memsound _messagebox _middle "
+"_mk _mousebutton _mousehide _mouseinput _mousemove _mousemovementx _mousemovementy _mouseshow _mousewheel "
+"_mousex _mousey _newimage _notifypopup _numlock _offset _openclient _openconnection "
+"_openfiledialog _openhost _os _palettecolor _pi _pixelsize _preserve "
+"_printimage _printmode _printstring _printwidth _putimage _r2d _r2g _red _red32 _readbit _resetbit "
+"_resize _resizeheight _resizewidth _rgb _rgb32 _rgba _rgba32 _rol _ror _round _savefiledialog "
+"_sec _sech _selectfolderdialog _screenclick _screenexists _screenhide _screenicon "
+"_screenimage _screenmove _screenprint _screenshow _screenx _screeny _scrollock _setalpha "
+"_setbit _shellhide _shl _shr _sinh _smooth _sndbal _sndclose _sndcopy _sndgetpos _sndlen _sndlimit _sndloop "
+"_sndnew _sndopen _sndopenraw _sndpause _sndpaused _sndplay _sndplaycopy _sndplayfile _sndplaying "
+"_sndrate _sndraw _sndrawdone _sndrawlen _sndsetpos _sndstop _sndvol _source _startdir _statuscode "
+"_strcmp _stricmp _tanh _title _title _togglebit _totaldroppedfiles _trim _unsigned "
+"_wheel _windowhandle _windowhasfocus _echo _exeicon _asserts _checking _console _debug _let "
+"_midisoundfont _noprefix _unstable _versioninfo _virtualkeyboard _dynamic _include _static _explicitarray "
+    },
+};
+
+constexpr LexerSettings::KeywordMapping keywordsVbNet[] =
+{
+    {0,
+"addhandler addressof alias and andalso as boolean byref byte byval call case catch cbool "
+"cbyte cchar cdate cdbl cdec char cint class constraint clng cobj const continue csbyte "
+"cshort csng cstr ctype cuint culng cushort date decimal declare default delegate dim "
+"directcast do double each else elseif end endif enum erase error event exit false finally "
+"for friend function get gettype getxmlnamespace global gosub goto handles if implements "
+"statement imports in inherits integer interface is isnot let lib like long loop me mod "
+"module mustinherit mustoverride mybase myclass nameof namespace narrowing new operator "
+"next not nothing notinheritable notoverridable object of on option optional or orelse "
+"out overloads overridable overrides paramarray partial private property protected public "
+"raiseevent readonly redim removehandler resume return sbyte select set shadows shared "
+"short single static step stop string structure sub synclock then throw to true try trycast "
+"typeof uinteger ulong ushort using variant wend when while widening with withevents writeonly xor public "
+    }
+};
+
 constexpr struct { const Language *language; LexerSettings lexer; } builtInLexers[] =
 {
     {&Language::CPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
@@ -638,6 +743,8 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::HTML, {SCLEX_HTML, stylesHTML, keywordsHTML, propertiesHTML}},
     {&Language::Properties, {SCLEX_PROPERTIES, stylesProperties, nullptr, nullptr}},
     {&Language::CSharp, {SCLEX_CPP, stylesC, keywordsCSharp, propertiesC}},
+    {&Language::VB, {SCLEX_VB, stylesBasic, keywordsVbNet, nullptr}},
+    {&Language::Basic, {SCLEX_VB, stylesBasic, keywordsBasic, nullptr}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)

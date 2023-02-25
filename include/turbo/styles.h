@@ -52,7 +52,8 @@ struct Language
         Smalltalk,
         Markdown,
         Properties,
-        CSharp;
+        CSharp,
+        Basic;
 };
 
 enum TextStyle : uchar

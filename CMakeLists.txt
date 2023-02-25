@@ -39,6 +39,7 @@ list(APPEND SCILEXERS_SRC
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexYAML.cxx"
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexHTML.cxx"
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexProps.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/LexVB.cxx"
 )
 
 add_library(scintilla OBJECT ${SCINTILLA_SRC})
