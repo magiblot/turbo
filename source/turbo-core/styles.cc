@@ -41,7 +41,8 @@ constexpr Language
     Language::Markdown,
     Language::Properties {"#"},
     Language::CSharp {"//", "/*", "*/"},
-    Language::Basic {"rem"};
+    Language::Basic {"rem"},
+    Language::Pascal {"//", "{", "}"};
 
 static const const_unordered_map<std::string_view, const Language *> mime2lang = {
     {"text/x-c++",                  &Language::CPP},
@@ -123,6 +124,7 @@ static const const_unordered_map<std::string_view, const Language *> ext2lang = 
     {".bas",                        &Language::Basic},
     {".frm",                        &Language::Basic},
     {".cls",                        &Language::Basic},
+    {".pas",                        &Language::Pascal},
 };
 
 const Language *detectFileLanguage(const char *filePath)
@@ -728,6 +730,50 @@ constexpr LexerSettings::KeywordMapping keywordsVbNet[] =
     }
 };
 
+constexpr LexerSettings::StyleMapping  stylesPascal[] =
+{
+    {SCE_PAS_DEFAULT,               sNormal},
+    {SCE_PAS_IDENTIFIER,            sNormal},
+    {SCE_PAS_COMMENT,               sComment},
+    {SCE_PAS_COMMENT2,              sComment},
+    {SCE_PAS_COMMENTLINE,           sComment},
+    {SCE_PAS_PREPROCESSOR,          sPreprocessor},
+    {SCE_PAS_PREPROCESSOR2,         sPreprocessor},
+    {SCE_PAS_NUMBER,                sNumberLiteral},
+    {SCE_PAS_HEXNUMBER,             sNumberLiteral},
+    {SCE_PAS_WORD,                  sKeyword1},
+    {SCE_PAS_STRING,                sStringLiteral},
+    {SCE_PAS_STRINGEOL,             sStringLiteral},
+    {SCE_PAS_CHARACTER,             sCharLiteral},
+    {SCE_PAS_OPERATOR,              sOperator},
+    {SCE_PAS_ASM,                   sMisc}
+};
+
+constexpr LexerSettings::KeywordMapping keywordsPascal[] =
+{
+    {0,
+// Pascal
+"and array asm begin break case const constructor continue destructor div do "
+"downto else end false file for function goto if implementation in inline interface "
+"label mod nil not object of on operator or packed procedure program record "
+"repeat set shl shr string then to true type unit until uses var while with xor "
+
+"as class constref dispose except exit exports finalization finally inherited "
+"initialization is library new on out property raise self threadvar try far near "
+
+"absolute abstract alias assembler cdecl Cppdecl default export external forward "
+"generic index local name nostackframe oldfpccall override pascal private protected "
+"public published read register reintroduce safecall softfloat specialize stdcall "
+"virtual write "
+
+// Delphi
+"resourcestring dispinterface strict nodefault stored automated final readonly "
+"unsafe reference varargs contains helper overload implements winapi delayed package "
+"requires deprecated resident writeonly dispid platform dynamic sealed experimental "
+"message static "
+    }
+};
+
 constexpr struct { const Language *language; LexerSettings lexer; } builtInLexers[] =
 {
     {&Language::CPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
@@ -745,6 +791,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::CSharp, {SCLEX_CPP, stylesC, keywordsCSharp, propertiesC}},
     {&Language::VB, {SCLEX_VB, stylesBasic, keywordsVbNet, nullptr}},
     {&Language::Basic, {SCLEX_VB, stylesBasic, keywordsBasic, nullptr}},
+    {&Language::Pascal, {SCLEX_PASCAL, stylesPascal, keywordsPascal, nullptr}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)

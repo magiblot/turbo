@@ -53,7 +53,8 @@ struct Language
         Markdown,
         Properties,
         CSharp,
-        Basic;
+        Basic,
+        Pascal;
 };
 
 enum TextStyle : uchar
