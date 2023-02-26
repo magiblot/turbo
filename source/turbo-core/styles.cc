@@ -52,7 +52,7 @@ static const const_unordered_map<std::string_view, const Language *> mime2lang =
     {"text/x-shellscript",          &Language::Bash},
     {"text/x-makefile",             &Language::Makefile},
     {"text/x-diff",                 &Language::Diff},
-    {"text/html",                   &Language::HTML}
+    {"text/html",                   &Language::HTML},
 };
 
 static const const_unordered_map<std::string_view, const Language *> ext2lang = {
@@ -673,8 +673,6 @@ constexpr LexerSettings::KeywordMapping keywordsBasic[] =
 "sin single sleep sound space spc sqr step stick stop str string sub swap system "
 "tab tan time timer to type ubound ucase unlock until val varptr varseg view "
 "wait wend while width window write xor option explicit base "
-    },
-    {1,
 // VB6
 "addressof attribute appactivate begin beginproperty boolean byref chdrive class "
 "collection defbool defbyte defdate defdec defcur defobj defvar deletesetting "
@@ -682,6 +680,8 @@ constexpr LexerSettings::KeywordMapping keywordsBasic[] =
 "like me new  nothing null object local optional compare module paramarray private "
 "property public raiseevent savepicture savesetting sendkeys set setattr text true "
 "typeof unload variant version with withevents "
+    },
+    {1,
 // QB64
 "_acceptfiledrop _acos _acosh _allowfullscreen _alpha _alpha32 _arrcot _arccsc _arcsec _asin _asinh "
 "_assert _atan2 _atanh _autodisplay _axis _backgroundcolor _bit _bin _bin _blend _blink "
