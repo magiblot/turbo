@@ -774,6 +774,23 @@ constexpr LexerSettings::KeywordMapping keywordsPascal[] =
     }
 };
 
+constexpr LexerSettings::StyleMapping  stylesTeX[] =
+{
+    {SCE_L_DEFAULT,                 sNormal},
+    {SCE_L_COMMAND,                 sKeyword1},
+    {SCE_L_TAG,                     sKeyword2},
+    {SCE_L_MATH,                    sCharLiteral},
+    {SCE_L_COMMENT,                 sComment},
+    {SCE_L_TAG2,                    sKeyword2},
+    {SCE_L_MATH2,                   sCharLiteral},
+    {SCE_L_COMMENT2,                sComment},
+    {SCE_L_VERBATIM,                sStringLiteral},
+    {SCE_L_SHORTCMD,                sKeyword1},
+    {SCE_L_SPECIAL,                 sCtrlChar},
+    {SCE_L_CMDOPT,                  sOperator},
+    {SCE_L_ERROR,                   sError},
+};
+
 constexpr struct { const Language *language; LexerSettings lexer; } builtInLexers[] =
 {
     {&Language::CPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
@@ -792,6 +809,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::VB, {SCLEX_VB, stylesBasic, keywordsVbNet, nullptr}},
     {&Language::Basic, {SCLEX_VB, stylesBasic, keywordsBasic, nullptr}},
     {&Language::Pascal, {SCLEX_PASCAL, stylesPascal, keywordsPascal, nullptr}},
+    {&Language::LaTex, {SCLEX_LATEX, stylesTeX, nullptr, nullptr}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)
