@@ -54,7 +54,8 @@ struct Language
         Properties,
         CSharp,
         Basic,
-        Pascal;
+        Pascal,
+        SQL;
 };
 
 enum TextStyle : uchar
