@@ -41,7 +41,7 @@ constexpr Language
     Language::Markdown,
     Language::Properties {"#"},
     Language::CSharp {"//", "/*", "*/"},
-    Language::Basic {"rem "},
+    Language::Basic {"'"},
     Language::Pascal {"//", "{", "}"},
     Language::SQL {"--", "/*", "*/"};
 
