@@ -661,9 +661,10 @@ constexpr LexerSettings::KeywordMapping keywordsBasic[] =
 {
     {0,
     // QBasic
-"and as call case do loop if then else elseif end exit for next function gosub goto not on or return select sub to type until wend while "
+"and as call case do loop if then else elseif end exit for next function gosub "
+"goto not on or return select sub to type until wend while xor "
     // VB6
-"false true "
+"false new true "
     },
     {1,
     // QBasic
@@ -680,12 +681,12 @@ constexpr LexerSettings::KeywordMapping keywordsBasic[] =
 "resume right rmdir rnd rset rtrim run sadd screen seek sgn shared shell "
 "sin single sleep sound space spc sqr step stick stop str string swap system "
 "tab tan time timer ubound ucase unlock val varptr varseg view "
-"wait width window write xor option explicit base "
+"wait width window write option explicit base "
     // VB6
 "addressof attribute appactivate begin beginproperty boolean byref chdrive class "
 "collection defbool defbyte defdate defdec defcur defobj defvar deletesetting "
 "each endproperty enum event filecopy friend global implements in is load lib "
-"like me new  nothing null object local optional compare module paramarray private "
+"like me nothing null object local optional compare module paramarray private "
 "property public raiseevent savepicture savesetting sendkeys set setattr text "
 "typeof unload variant version with withevents "
     // QB64
@@ -721,18 +722,24 @@ constexpr LexerSettings::KeywordMapping keywordsBasic[] =
 constexpr LexerSettings::KeywordMapping keywordsVbNet[] =
 {
     {0,
-"addhandler addressof alias and andalso as boolean byref byte byval call case catch cbool "
-"cbyte cchar cdate cdbl cdec char cint class constraint clng cobj const continue csbyte "
+"and andalso as call case catch class continue do each else elseif end endif "
+"enum exit false finally for function gosub goto if in loop new operator next "
+"not or orelse return structure sub then throw to true try using wend when "
+"while with xor "
+    },
+    {1,
+"addhandler addressof alias boolean byref byte byval cbool "
+"cbyte cchar cdate cdbl cdec char cint constraint clng cobj const csbyte "
 "cshort csng cstr ctype cuint culng cushort date decimal declare default delegate dim "
-"directcast do double each else elseif end endif enum erase error event exit false finally "
-"for friend function get gettype getxmlnamespace global gosub goto handles if implements "
-"statement imports in inherits integer interface is isnot let lib like long loop me mod "
-"module mustinherit mustoverride mybase myclass nameof namespace narrowing new operator "
-"next not nothing notinheritable notoverridable object of on option optional or orelse "
+"directcast double erase error event "
+"friend get gettype getxmlnamespace global handles implements "
+"statement imports inherits integer interface is isnot let lib like long me mod "
+"module mustinherit mustoverride mybase myclass nameof namespace narrowing "
+"nothing notinheritable notoverridable object of on option optional "
 "out overloads overridable overrides paramarray partial private property protected public "
-"raiseevent readonly redim removehandler resume return sbyte select set shadows shared "
-"short single static step stop string structure sub synclock then throw to true try trycast "
-"typeof uinteger ulong ushort using variant wend when while widening with withevents writeonly xor public "
+"raiseevent readonly redim removehandler resume sbyte select set shadows shared "
+"short single static step stop string synclock trycast "
+"typeof uinteger ulong ushort variant widening withevents writeonly "
     }
 };
 
