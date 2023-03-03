@@ -630,7 +630,7 @@ constexpr LexerSettings::StyleMapping stylesProperties[] =
     {SCE_PROPS_KEY,                 sKeyword1},
 };
 
-constexpr LexerSettings::StyleMapping  stylesBasic[] =
+constexpr LexerSettings::StyleMapping stylesBasic[] =
 {
     {SCE_B_DEFAULT,                 sNormal},
     {SCE_B_COMMENT,                 sComment},
@@ -660,31 +660,35 @@ constexpr LexerSettings::StyleMapping  stylesBasic[] =
 constexpr LexerSettings::KeywordMapping keywordsBasic[] =
 {
     {0,
-// QBasic
-"abs absolute access alias and append as asc atn beep binary bload bsave byval call "
-"case cdbl chain chdir chr cint circle clear clng close cls color command common "
-"const cos csng csrlin cvd cvdmbf cvi cvl cvs cvsmbf data date declare library "
-"def seg defdbl defint deflng defsng defstr dim do loop double draw if then else elseif "
-"end environ eof eqv erase erl err error exit exp field files fix for next free freefile "
-"function get gosub goto hex imp inkey inp input instr int integer interrupt "
-"interruptx key kill lbound lcase left len line list loc locate lock lof log "
-"long lprint using lset ltrim mid mkd mkdir mkdmbf mki mkl mks mksmbf mod name "
-"not oct off on strig open com or out output paint palette pcopy peek "
-"play pmap point poke pos preset print pset put random randomize read redim reset restore "
-"resume return right rmdir rnd rset rtrim run sadd screen seek select sgn shared shell "
-"sin single sleep sound space spc sqr step stick stop str string sub swap system "
-"tab tan time timer to type ubound ucase unlock until val varptr varseg view "
-"wait wend while width window write xor option explicit base "
-// VB6
-"addressof attribute appactivate begin beginproperty boolean byref chdrive class "
-"collection defbool defbyte defdate defdec defcur defobj defvar deletesetting "
-"each endproperty enum event false filecopy friend global implements in is load lib "
-"like me new  nothing null object local optional compare module paramarray private "
-"property public raiseevent savepicture savesetting sendkeys set setattr text true "
-"typeof unload variant version with withevents "
+    // QBasic
+"and as call case do loop if then else elseif end exit for next function gosub goto not on or return select sub to type until wend while "
+    // VB6
+"false true "
     },
     {1,
-// QB64
+    // QBasic
+"abs absolute access alias append asc atn beep binary bload bsave byval "
+"cdbl chain chdir chr cint circle clear clng close cls color command common "
+"const cos csng csrlin cvd cvdmbf cvi cvl cvs cvsmbf data date declare library "
+"def seg defdbl defint deflng defsng defstr dim double draw "
+"environ eof eqv erase erl err error exp field files fix free freefile "
+"get hex imp inkey inp input instr int integer interrupt "
+"interruptx key kill lbound lcase left len line list loc locate lock lof log "
+"long lprint using lset ltrim mid mkd mkdir mkdmbf mki mkl mks mksmbf mod name "
+"oct off strig open com out output paint palette pcopy peek "
+"play pmap point poke pos preset print pset put random randomize read redim reset restore "
+"resume right rmdir rnd rset rtrim run sadd screen seek sgn shared shell "
+"sin single sleep sound space spc sqr step stick stop str string swap system "
+"tab tan time timer ubound ucase unlock val varptr varseg view "
+"wait width window write xor option explicit base "
+    // VB6
+"addressof attribute appactivate begin beginproperty boolean byref chdrive class "
+"collection defbool defbyte defdate defdec defcur defobj defvar deletesetting "
+"each endproperty enum event filecopy friend global implements in is load lib "
+"like me new  nothing null object local optional compare module paramarray private "
+"property public raiseevent savepicture savesetting sendkeys set setattr text "
+"typeof unload variant version with withevents "
+    // QB64
 "_acceptfiledrop _acos _acosh _allowfullscreen _alpha _alpha32 _arrcot _arccsc _arcsec _asin _asinh "
 "_assert _atan2 _atanh _autodisplay _axis _backgroundcolor _bit _bin _bin _blend _blink "
 "_blue _blue32 _button _buttonchange _byte _capslock _ceil _cinp _clearcolor _clip _clipboard "
