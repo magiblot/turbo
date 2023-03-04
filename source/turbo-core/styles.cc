@@ -819,7 +819,7 @@ constexpr LexerSettings::StyleMapping  stylesSQL[] =
     {SCE_SQL_OPERATOR,               sOperator},
     {SCE_SQL_IDENTIFIER,             sNormal},
     {SCE_SQL_SQLPLUS_COMMENT,        sComment},
-    {SCE_SQL_COMMENTLINEDOC,         sNormal},
+    {SCE_SQL_COMMENTLINEDOC,         sComment},
     {SCE_SQL_WORD2,                  sKeyword2},
     {SCE_SQL_COMMENTDOCKEYWORD,      sKeyword2},
     {SCE_SQL_COMMENTDOCKEYWORDERROR, sError},
@@ -901,6 +901,11 @@ constexpr LexerSettings::KeywordMapping keywordsSQL[] =
     }
 };
 
+constexpr LexerSettings::PropertyMapping propertiesSQL[] =
+{
+    {"lexer.sql.backticks.identifier", "1"},
+    {"lexer.sql.numbersign.comment", "1"},
+};
 
 constexpr struct { const Language *language; LexerSettings lexer; } builtInLexers[] =
 {
@@ -921,7 +926,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::Basic, {SCLEX_VB, stylesBasic, keywordsBasic, nullptr}},
     {&Language::Pascal, {SCLEX_PASCAL, stylesPascal, keywordsPascal, nullptr}},
     {&Language::LaTex, {SCLEX_LATEX, stylesTeX, nullptr, nullptr}},
-    {&Language::SQL, {SCLEX_SQL, stylesSQL, keywordsSQL, nullptr}},
+    {&Language::SQL, {SCLEX_SQL, stylesSQL, keywordsSQL, propertiesSQL}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)
