@@ -37,7 +37,7 @@ void EditorView::handleEvent(TEvent &ev)
             if (ev.keyDown.controlKeyState & kbPaste)
             {
                 handlePaste(ev);
-                editor->redraw(); // partialRedraw() is broken for the Paste action (Scintilla bug).
+                editor->redraw(); // partialRedraw() is broken for this action.
             }
             else
             {
@@ -95,12 +95,12 @@ void EditorView::handleEvent(TEvent &ev)
             {
                 case cmUndo:
                     call(scintilla, SCI_UNDO, 0U, 0U);
-                    editor->partialRedraw();
+                    editor->redraw(); // partialRedraw() is broken for this action.
                     clearEvent(ev);
                     break;
                 case cmRedo:
                     call(scintilla, SCI_REDO, 0U, 0U);
-                    editor->redraw(); // partialRedraw() is broken for the Redo action (Scintilla bug).
+                    editor->redraw(); // partialRedraw() is broken for this action.
                     clearEvent(ev);
                     break;
                 case cmCut:
