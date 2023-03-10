@@ -130,7 +130,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Close All", cmCloseAll, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "S~u~spend", cmDosShell, kbNoKey, hcNoContext ) +
-            *new TMenuItem( "E~x~it", cmQuit, kbAltX, hcNoContext, "Alt-X" ) +
+            *new TMenuItem( "E~x~it", cmQuit, kbCtrlQ, hcNoContext, "Ctrl-Q" ) +
         *new TSubMenu( "~E~dit", kbAltE ) +
             *new TMenuItem( "~U~ndo", cmUndo, kbCtrlZ, hcNoContext, "Ctrl-Z" ) +
             *new TMenuItem( "Re~d~o", cmRedo, kbCtrlY, hcNoContext, "Ctrl-Y" ) +
@@ -145,7 +145,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Find ~N~ext", cmSearchAgain, kbF3, hcNoContext, "F3" ) +
             *new TMenuItem( "Find ~P~revious", cmSearchPrev, kbShiftF3, hcNoContext, "Shift-F3" ) +
         *new TSubMenu( "Se~l~ection", kbAltL ) +
-            *new TMenuItem( "~T~oggle Comment", cmToggleComment, kbCtrlQ, hcNoContext, "Ctrl-Q" ) +
+            *new TMenuItem( "~T~oggle Comment", cmToggleComment, kbCtrlE, hcNoContext, "Ctrl-E" ) +
             newLine() +
             *new TMenuItem( "~U~ppercase", cmSelUppercase, kbNoKey, hcNoContext ) +
             *new TMenuItem( "~L~owercase", cmSelLowercase, kbNoKey, hcNoContext ) +
@@ -172,11 +172,12 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
     r.a.y = r.b.y-1;
     return new TStatusLine( r,
         *new TStatusDef( 0, 0xFFFF ) +
+            *new TStatusItem( 0, kbAltX, cmQuit ) +
             *new TStatusItem( "~Ctrl-N~ New", kbNoKey, cmNew ) +
             *new TStatusItem( "~Ctrl-O~ Open", kbNoKey, cmOpen ) +
             *new TStatusItem( "~Ctrl-S~ Save", kbNoKey, cmSave ) +
             *new TStatusItem( "~F6~ Next", kbF6, cmEditorNext ) +
-            *new TStatusItem( "~F12~ Menu" , kbF12, cmMenu ) +
+            *new TStatusItem( "~F12~ Menu", kbF12, cmMenu ) +
             *new TStatusItem( 0, TKey(kbCtrlZ, kbShift), cmRedo ) +
             *new TStatusItem( 0, kbCtrlX, cmCut ) +
             *new TStatusItem( 0, kbCtrlC, cmCopy ) +
@@ -190,6 +191,7 @@ TStatusLine *TurboApp::initStatusLine( TRect r )
             *new TStatusItem( 0, TKey(kbCtrlTab, kbShift), cmEditorPrev ) +
             *new TStatusItem( 0, TKey(kbAltTab, kbShift), cmEditorPrev ) +
             *new TStatusItem( 0, TKey('/', kbCtrlShift), cmToggleComment ) +
+            *new TStatusItem( 0, TKey('_', kbCtrlShift), cmToggleComment ) +
             *new TStatusItem( 0, kbF5, cmZoom ) +
             *new TStatusItem( 0, kbCtrlF5, cmResize )
             );

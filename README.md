@@ -80,7 +80,7 @@ Some of the default keybindings are:
 * `Ctrl+X`/`Shift+Del`: cut.
 * `Ctrl+Z`, `Ctrl+Y`: undo/redo.
 * `Tab`, `Shift+Tab`: indent/unindent.
-* `Ctrl+Q`: toggle comment.
+* `Ctrl+E`: toggle comment.
 * `Ctrl+A`: select all.
 * `Shift+Arrow`: extend selection.
 * `Ctrl+F`: find.
@@ -94,14 +94,14 @@ Some of the default keybindings are:
 * `Ctrl+S`: save document.
 * `Ctrl+W`: close focused document.
 * `F6`, `Shift+F6`: next/previous document (in MRU order).
-* `Alt+X`: exit the application.
+* `Ctrl+Q`/`Alt+X`: exit the application.
 
 In environments with extended keyboard support (e.g. the Linux console, Windows or Kitty ≥ 0.20.0), the following key shortcuts may also work:
 
 * `Ctrl+Shift+Z`: redo.
 * `Ctrl+Tab`/`Alt+Tab`, `Ctrl+Shift+Tab`/`Alt+Shift+Tab`: next/previous document (in MRU order).
 * `Shift+Enter`: find previous (in the "find" text box).
-* `Ctrl+/`: toggle comment.
+* `Ctrl+/`/`Ctrl+_`: toggle comment.
 
 Support for these key combinations may vary among terminal applications, but any issue on this should be reported to [Turbo Vision](https://github.com/magiblot/tvision/issues) instead.
 
