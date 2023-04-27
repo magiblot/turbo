@@ -266,7 +266,9 @@ void TurboApp::parseArgs()
         w->insert(current);
         insert(w);
 
-        if (argc == 2 && std::string(argv[1]) == ".")
+        const std::string pathString = std::string(argv[1]);
+        const path path(pathString);
+        if (argc == 2 && is_directory(path))
         {
             for (const auto& dirEntry : recursive_directory_iterator(argv[1])) {
                 current->setText("%s", dirEntry.path().string().c_str());
