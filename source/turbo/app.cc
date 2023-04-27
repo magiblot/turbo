@@ -26,9 +26,11 @@
 #include "doctree.h"
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
+#include <filesystem>
 
 using namespace Scintilla;
 using namespace std::literals;
+using namespace std::filesystem;
 
 TurboApp* TurboApp::app = 0;
 
@@ -263,11 +265,22 @@ void TurboApp::parseArgs()
         auto *current = new TParamText(TRect(2, 3, 48, 9));
         w->insert(current);
         insert(w);
-        for (int i = 1; i < argc; ++i) {
-            current->setText("%s", argv[i]);
-            TScreen::flushScreen();
-            fileOpenOrNew(argv[i]);
+
+        if (argc == 2 && std::string(argv[1]) == ".")
+        {
+            for (const auto& dirEntry : recursive_directory_iterator(argv[1])) {
+                current->setText("%s", dirEntry.path().string().c_str());
+                TScreen::flushScreen();
+                fileOpenOrNew(dirEntry.path().string().c_str());
+            }
+        } else {
+            for (int i = 1; i < argc; ++i) {
+                current->setText("%s", argv[i]);
+                TScreen::flushScreen();
+                fileOpenOrNew(argv[i]);
+            }
         }
+
         remove(w);
         TObject::destroy(w);
     }
