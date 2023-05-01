@@ -5,9 +5,9 @@
 
 struct EditorWindowParent;
 
-class TurboFileDialogs : public turbo::DefaultFileDialogs
+class TurboFileDialogs : public turbo::ShowAllDialogs
 {
-    using super = turbo::DefaultFileDialogs;
+    using super = turbo::ShowAllDialogs;
 
     EditorWindowParent &app;
 

@@ -35,7 +35,7 @@ struct FileDialogs
     virtual void getRenamePath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept = 0;
 };
 
-struct DefaultFileDialogs : FileDialogs
+struct ShowAllDialogs : FileDialogs
 {
     ushort confirmSaveUntitled(FileEditor &) noexcept override;
     ushort confirmSaveModified(FileEditor &) noexcept override;
@@ -52,11 +52,8 @@ struct DefaultFileDialogs : FileDialogs
     void getRenamePath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
 };
 
-extern DefaultFileDialogs defFileDialogs;
-
-struct SilentFileDialogs : FileDialogs
+struct ShowNoDialogs : FileDialogs
 {
-    // No-op implementation of FileDialogs.
     ushort confirmSaveUntitled(FileEditor &) noexcept override;
     ushort confirmSaveModified(FileEditor &) noexcept override;
     ushort confirmOverwrite(const char *path) noexcept override;
@@ -72,17 +69,23 @@ struct SilentFileDialogs : FileDialogs
     void getRenamePath(FileEditor &, TFuncView<bool (const char *)> accept) noexcept override;
 };
 
-extern SilentFileDialogs silFileDialogs;
+struct AcceptMissingFilesOnOpen : ShowAllDialogs
+{
+    bool openForReadError(const char *path, const char *cause) noexcept override;
+};
 
-bool readFile(TScintilla &scintilla, const char *path, FileDialogs & = defFileDialogs) noexcept;
+extern ShowAllDialogs showAllDialogs;
+extern ShowNoDialogs showNoDialogs;
+extern AcceptMissingFilesOnOpen acceptMissingFilesOnOpen;
+
+bool readFile(TScintilla &scintilla, const char *path, FileDialogs & = showAllDialogs) noexcept;
 // * 'createScintilla' shall return a heap-allocated instance of 'TScintilla'.
-// * 'accept' shall take ownership over its 'TScintilla &' argument only
-//   if it succeeds (returns 'true').
+// * 'accept' shall take ownership over its 'TScintilla &' argument.
 void openFile( TFuncView<TScintilla&()> createScintilla,
                TFuncView<void(TScintilla &, const char *)> accept,
-               FileDialogs & = defFileDialogs ) noexcept;
-bool writeFile(const char *path, TScintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
-bool renameFile(const char *dst, const char *src, TScintilla &scintilla, FileDialogs & = defFileDialogs) noexcept;
+               FileDialogs & = showAllDialogs ) noexcept;
+bool writeFile(const char *path, TScintilla &scintilla, FileDialogs & = showAllDialogs) noexcept;
+bool renameFile(const char *dst, const char *src, TScintilla &scintilla, FileDialogs & = showAllDialogs) noexcept;
 
 class FileEditor : public Editor
 {
@@ -101,10 +104,10 @@ public:
 
     inline FileEditor(TScintilla &aScintilla, std::string aFilePath) noexcept;
 
-    bool save(FileDialogs & = defFileDialogs) noexcept;
-    bool saveAs(FileDialogs & = defFileDialogs) noexcept;
-    bool rename(FileDialogs & = defFileDialogs) noexcept;
-    bool close(FileDialogs & = defFileDialogs) noexcept;
+    bool save(FileDialogs & = showAllDialogs) noexcept;
+    bool saveAs(FileDialogs & = showAllDialogs) noexcept;
+    bool rename(FileDialogs & = showAllDialogs) noexcept;
+    bool close(FileDialogs & = showAllDialogs) noexcept;
 
     // Called when 'filePath' is set. The default implementation calls
     // 'detectLanguage'.

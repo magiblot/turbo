@@ -294,8 +294,8 @@ void TurboApp::fileOpenOrNew(const char *path)
     strnzcpy(abspath, path, MAXPATH);
     fexpand(abspath);
     auto &scintilla = createScintilla();
-    turbo::readFile(scintilla, abspath, turbo::silFileDialogs);
-    addEditor(scintilla, abspath);
+    if (turbo::readFile(scintilla, abspath, turbo::acceptMissingFilesOnOpen))
+        addEditor(scintilla, abspath);
 }
 
 void TurboApp::closeAll()

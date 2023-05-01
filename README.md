@@ -71,9 +71,24 @@ sudo cp turbo /usr/local/bin/ # Install (optional).
 
 ## Usage
 
+### From the command line
+
+* **turbo** [*file*...]
+
+In order to open several files in a directory tree you should use wildcards or subcommands, if they are supported by your command shell. For example, in Unix:
+
+```sh
+# Open all .c and .h files in the current directory and its subdirectories
+turbo `find . -type f -name '*.c' -o -name '*.h'`
+# Open all files in the current directory and its subdirectories, excluding executables and hidden files or directories
+turbo `find . -type f \! -executable \! -path '*/.*'`
+```
+
+### In-app
+
 As said earlier, Turbo has been designed to be intuitive. So you probably already know how to use it!
 
-Some of the default keybindings are:
+Some keybindings are:
 
 * `Ctrl+C`/`Ctrl+Ins`: copy.
 * `Ctrl+V`/`Shift+Ins`: paste.
