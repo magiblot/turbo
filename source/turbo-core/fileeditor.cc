@@ -266,56 +266,62 @@ ushort ShowAllDialogs::confirmSaveUntitled(FileEditor &) noexcept
 
 ushort ShowAllDialogs::confirmSaveModified(FileEditor &editor) noexcept
 {
-    return messageBox( fmt::format("'{}' has been modified. Save?", editor.filePath),
-                       mfConfirmation | mfYesNoCancel );
+    return messageBox( mfConfirmation | mfYesNoCancel,
+                       "'%s' has been modified. Save?", editor.filePath.c_str() );
 }
 
 ushort ShowAllDialogs::confirmOverwrite(const char *path) noexcept
 {
-    return messageBox( fmt::format("'{}' already exists. Overwrite?", path),
-                       mfConfirmation | mfYesButton | mfNoButton );
+    return messageBox( mfConfirmation | mfYesButton | mfNoButton,
+                       "'%s' already exists. Overwrite?", path );
 }
 
 void ShowAllDialogs::removeRenamedWarning(const char *dst, const char *src, const char *cause) noexcept
 {
-    messageBox( fmt::format("'{}' was created successfully, but '{}' could not be removed: {}.", dst, src, cause),
-                mfWarning | mfOKButton );
+    messageBox( mfWarning | mfOKButton,
+                "'%s' was created successfully, but '%s' could not be removed: %s.", dst, src, cause );
 }
 
 bool ShowAllDialogs::renameError(const char *dst, const char *src, const char *cause) noexcept
 {
-    return messageBox( fmt::format("Unable to rename '{}' into '{}': {}.", src, dst, cause),
-                       mfError | mfOKButton ), false;
+    messageBox( mfError | mfOKButton,
+                "Unable to rename '%s' into '%s': %s.", src, dst, cause );
+    return false;
 }
 
 bool ShowAllDialogs::fileTooBigError(const char *path, size_t size) noexcept
 {
-    return messageBox( fmt::format("Unable to open file '{}': file too big ({} bytes).", path, size),
-                       mfError | mfOKButton ), false;
+    messageBox( mfError | mfOKButton,
+                "Unable to open file '%s': file too big (%zu bytes).", path, size );
+    return false;
 }
 
 bool ShowAllDialogs::readError(const char *path, const char *cause) noexcept
 {
-    return messageBox( fmt::format("Cannot read from file '{}': {}.", path, cause),
-                       mfError | mfOKButton ), false;
+    messageBox( mfError | mfOKButton,
+                "Cannot read from file '%s': %s.", path, cause );
+    return false;
 }
 
 bool ShowAllDialogs::writeError(const char *path, const char *cause) noexcept
 {
-    return messageBox( fmt::format("Cannot write into file '{}': {}.", path, cause),
-                       mfError | mfOKButton ), false;
+    messageBox( mfError | mfOKButton,
+                "Cannot write into file '%s': %s.", path, cause );
+    return false;
 }
 
 bool ShowAllDialogs::openForReadError(const char *path, const char *cause) noexcept
 {
-    return messageBox( fmt::format("Unable to open file '{}' for read: {}.", path, cause),
-                       mfError | mfOKButton ), false;
+    messageBox( mfError | mfOKButton,
+                "Unable to open file '%s' for read: %s.", path, cause );
+    return false;
 }
 
 bool ShowAllDialogs::openForWriteError(const char *path, const char *cause) noexcept
 {
-    return messageBox( fmt::format("Unable to create or open file '{}' for write: {}. Make sure that the parent directory exists, that you have write access to this file and that enough disk space is available. Otherwise, try saving to a different location.", path, cause),
-                       mfError | mfOKButton ), false;
+    messageBox( mfError | mfOKButton,
+                "Unable to create or open file '%s' for write: %s. Make sure that the parent directory exists, that you have write access to this file and that enough disk space is available. Otherwise, try saving to a different location.", path, cause );
+    return false;
 }
 
 void ShowAllDialogs::getOpenPath(TFuncView<bool (const char *)> accept) noexcept
