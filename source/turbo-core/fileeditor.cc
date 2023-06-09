@@ -314,7 +314,7 @@ bool ShowAllDialogs::openForReadError(const char *path, const char *cause) noexc
 
 bool ShowAllDialogs::openForWriteError(const char *path, const char *cause) noexcept
 {
-    return messageBox( fmt::format("Unable to create or open file '{}' for write: {}. Make sure that the parent directory exists, that you have write access to this file and that enough disk space is available.", path, cause),
+    return messageBox( fmt::format("Unable to create or open file '{}' for write: {}. Make sure that the parent directory exists, that you have write access to this file and that enough disk space is available. Otherwise, try saving to a different location.", path, cause),
                        mfError | mfOKButton ), false;
 }
 
