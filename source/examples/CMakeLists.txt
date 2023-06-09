@@ -22,5 +22,5 @@ if (TURBO_BUILD_EXAMPLES OR MASTER_PROJECT)
         target_link_libraries(${app} PRIVATE turbo-core)
     endfunction()
 
-    add_example_generic(demo)
+    add_example_generic(demo-with-custom-editor-window)
 endif()
