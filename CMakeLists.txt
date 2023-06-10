@@ -3,7 +3,6 @@ cmake_minimum_required (VERSION 3.5)
 option(TURBO_BUILD_APP "Build main editor application" ON)
 option(TURBO_BUILD_TESTS "Build and run tests" OFF)
 option(TURBO_BUILD_EXAMPLES "Build example apps" OFF)
-option(TURBO_USE_SYSTEM_DEPS "Use system-wide dependencies instead of submodules (except Turbo Vision)" OFF)
 option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
 option(TURBO_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
 option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the core library" ON)
@@ -107,11 +106,9 @@ target_include_directories(${TURBO}-core PRIVATE
 )
 target_link_libraries(${TURBO}-core PUBLIC
     tvision
-    fmt
 )
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
-    install(TARGETS fmt EXPORT ${TURBO}-config)
     install(TARGETS ${TURBO}-core
         EXPORT ${TURBO}-config
         ARCHIVE DESTINATION lib
@@ -175,7 +172,6 @@ if (TURBO_BUILD_TESTS)
     find_library(GTEST_MAIN gtest_main REQUIRED)
     target_link_libraries(${TURBO}-test PRIVATE
         ${TURBO}-core
-        fmt
         ${GTEST}
         ${GTEST_MAIN}
     )

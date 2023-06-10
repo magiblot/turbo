@@ -16,8 +16,6 @@
 #define Uses_TScreen
 #include <tvision/tv.h>
 
-#include <fmt/core.h>
-
 #include "app.h"
 #include "apputils.h"
 #include "editwindow.h"

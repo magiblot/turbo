@@ -12,8 +12,8 @@
 #include "apputils.h"
 #include "search.h"
 #include "gotoline.h"
-#include <fmt/core.h>
 #include <iostream>
+#include <sstream>
 using std::ios;
 
 EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
@@ -279,10 +279,14 @@ const char* EditorWindow::formatTitle(ushort flags) noexcept
     if (lastTitleState != titleState)
     {
         lastTitleState = titleState;
-        TStringView name = !filePath().empty() ? TPath::basename(filePath()) : "Untitled";
-        auto &&number = fileNumber.number > 1 ? fmt::format(" ({})", fileNumber.number) : std::string();
-        TStringView savePoint = inSavePoint ? "" : "*";
-        title = fmt::format("{}{}{}", name, number, savePoint);
+        TStringView name = filePath().empty() ? "Untitled" : TPath::basename(filePath());
+        std::ostringstream os;
+        os << name;
+        if (fileNumber.number > 1)
+            os << " (" << fileNumber.number << ')';
+        if (!inSavePoint)
+            os << '*';
+        title = os.str();
     }
     return title.c_str();
 }

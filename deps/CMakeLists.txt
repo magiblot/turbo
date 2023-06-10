@@ -18,12 +18,6 @@ function(turbo_find_library name header)
     target_include_directories(${name} INTERFACE ${${name}_INCLUDE})
 endfunction()
 
-if (TURBO_USE_SYSTEM_DEPS)
-    turbo_find_library(fmt "fmt/core.h")
-else()
-    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/fmt" EXCLUDE_FROM_ALL)
-endif()
-
 set(TV_OPTIMIZE_BUILD ${TURBO_OPTIMIZE_BUILD})
 if (TURBO_USE_SYSTEM_TVISION)
     find_package(tvision CONFIG REQUIRED)

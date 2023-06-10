@@ -1,7 +1,6 @@
 #define Uses_MsgBox
 #include <tvision/tv.h>
 
-#include <fmt/core.h>
 #include <turbo/editstates.h>
 #include <turbo/scintilla.h>
 #include <turbo/scintilla/internals.h>
@@ -61,8 +60,8 @@ void WrapState::setState(bool enable, TScintilla &scintilla, TFuncView<bool(int)
 
 bool WrapState::defConfirmWrap(int width)
 {
-    auto &&text = fmt::format("This document is quite large and the longest of its lines is at least {} characters long.\nAre you sure you want to enable line wrapping?", width);
-    return messageBox(text, mfInformation | mfYesButton | mfNoButton) == cmYes;
+    return cmYes == messageBox( mfInformation | mfYesButton | mfNoButton,
+                                "This document is quite large and the longest of its lines is at least %d characters long.\nAre you sure you want to enable line wrapping?", width );
 }
 
 /////////////////////////////////////////////////////////////////////////

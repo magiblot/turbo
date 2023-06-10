@@ -4,8 +4,6 @@
 #include "editor.h"
 #include "editwindow.h"
 
-#include <fmt/core.h>
-
 void TurboEditor::onFilePathSet() noexcept
 {
     bool noLastLanguage = !language;
@@ -19,7 +17,8 @@ ushort TurboFileDialogs::confirmSaveUntitled(turbo::FileEditor &editor) noexcept
     if (auto *window = (EditorWindow *) editor.parent)
     {
         auto *title = window->formatTitle(EditorWindow::tfNoSavePoint);
-        return messageBox(fmt::format("Save '{}'?", title), mfConfirmation | mfYesNoCancel);
+        return messageBox( mfConfirmation | mfYesNoCancel,
+                           "Save '%s'?", title );
     }
     return super::confirmSaveUntitled(editor);
 }

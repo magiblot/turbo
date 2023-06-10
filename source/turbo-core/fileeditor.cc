@@ -4,9 +4,9 @@
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
 
-#include <fmt/core.h>
 #include <memory>
 #include <fstream>
+#include <sstream>
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
@@ -342,8 +342,12 @@ static bool canOverwrite(FileDialogs &dlgs, const char *path) noexcept
 void ShowAllDialogs::getSaveAsPath(FileEditor &editor, TFuncView<bool (const char *)> accept) noexcept
 {
     char path[MAXPATH];
-    auto &&title = editor.filePath.empty() ? "Save untitled file" : fmt::format("Save file '{}' as", TPath::basename(editor.filePath));
-    openFileDialog("*.*", title, "~N~ame", fdOKButton, 0, [&] (TView *dialog) {
+    std::ostringstream os;
+    if (editor.filePath.empty())
+        os << "Save untitled file";
+    else
+        os << "Save file '" << TPath::basename(editor.filePath) << "' as";
+    openFileDialog("*.*", os.str(), "~N~ame", fdOKButton, 0, [&] (TView *dialog) {
         dialog->getData(path);
         fexpand(path);
         return canOverwrite(*this, path) && accept(path);
@@ -353,8 +357,9 @@ void ShowAllDialogs::getSaveAsPath(FileEditor &editor, TFuncView<bool (const cha
 void ShowAllDialogs::getRenamePath(FileEditor &editor, TFuncView<bool (const char *)> accept) noexcept
 {
     char path[MAXPATH];
-    auto &&title = fmt::format("Rename file '{}'", TPath::basename(editor.filePath));
-    openFileDialog("*.*", title, "~N~ame", fdOKButton, 0, [&] (TView *dialog) {
+    std::ostringstream os;
+    os << "Rename file '" << TPath::basename(editor.filePath) << "'";
+    openFileDialog("*.*", os.str(), "~N~ame", fdOKButton, 0, [&] (TView *dialog) {
         dialog->getData(path);
         fexpand(path);
         // Don't do anything if renaming to the same file. If the user needed to
