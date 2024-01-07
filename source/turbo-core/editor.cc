@@ -31,6 +31,7 @@ Editor::Editor(TScintilla &aScintilla) noexcept :
     // Indentation
     call(scintilla, SCI_SETUSETABS, false, 0U);
     call(scintilla, SCI_SETINDENT, 4, 0U);
+    call(scintilla, SCI_SETTABWIDTH, 4, 0U);
     call(scintilla, SCI_SETTABINDENTS, true, 0U);
     call(scintilla, SCI_SETBACKSPACEUNINDENTS, true, 0U);
 

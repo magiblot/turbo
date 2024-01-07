@@ -36,7 +36,7 @@ TScintilla::TScintilla()
                 reprs.SetRepresentation(c, r);
             }
         }
-        reprs.SetRepresentation("\t", "»        ");
+        reprs.SetRepresentation("\t", "»");
     }
     // Do not use padding for control characters.
     vs.ctrlCharPadding = 0;
