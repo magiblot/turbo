@@ -35,15 +35,10 @@ void EditorView::handleEvent(TEvent &ev)
             if (ev.keyDown.keyCode == kbIns)
                 setState(sfCursorIns, !getState(sfCursorIns));
             if (ev.keyDown.controlKeyState & kbPaste)
-            {
                 handlePaste(ev);
-                editor->redraw(); // partialRedraw() is broken for this action.
-            }
             else
-            {
                 handleKeyDown(scintilla, ev.keyDown);
-                editor->partialRedraw();
-            }
+            editor->redraw(); // partialRedraw() is broken for this action.
             clearEvent(ev);
             break;
         case evMouseDown:
