@@ -175,6 +175,15 @@ if (TURBO_BUILD_TESTS)
         ${GTEST}
         ${GTEST_MAIN}
     )
+
+    if (NOT WIN32)
+        find_library(PTHREAD pthread REQUIRED)
+        tv_message(STATUS "Found 'pthread': ${PTHREAD}")
+        target_link_libraries(${TURBO}-test PRIVATE
+            ${PTHREAD}
+        )
+    endif()
+
     add_custom_command(
         OUTPUT ${TURBO}-test-passed
         COMMAND ${TURBO}-test
