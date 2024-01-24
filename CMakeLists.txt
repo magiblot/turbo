@@ -182,7 +182,10 @@ if (TURBO_BUILD_TESTS)
         DEPENDS ${TURBO}-test
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
-    add_custom_target(${TURBO}-run-test ALL DEPENDS ${TURBO}-test-passed)
+    add_custom_target(${TURBO}-test-run ALL DEPENDS ${TURBO}-test-passed)
+    if (NOT TURBO_USE_SYSTEM_TVISION)
+        add_dependencies(${TURBO}-test-run tvision-test-run)
+    endif()
 endif()
 
 # Examples

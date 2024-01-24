@@ -20,14 +20,14 @@ jobs:
           deb http://us.archive.ubuntu.com/ubuntu/ bionic universe
         EOF
         sudo apt -y update
-        sudo apt -y install libncursesw5-dev g++-7
+        sudo apt -y install libncursesw5-dev g++-7 libgtest-dev
 
     - name: Configure CMake
       shell: bash
       env:
         CC: gcc-7
         CXX: g++-7
-      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTURBO_OPTIMIZE_BUILD=OFF
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DTURBO_OPTIMIZE_BUILD=OFF -DTURBO_BUILD_TESTS=ON
 
     - name: Build
       shell: bash
