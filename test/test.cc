@@ -10,9 +10,11 @@ TextState TextState::decode(std::string_view input)
 {
     size_t caret = input.find(chCaret);
     if (caret == std::string_view::npos)
-        throw std::runtime_error((std::ostringstream()
-            << "Input text does not have a caret: '" << input << "'"
-        ).str());
+    {
+        std::ostringstream os;
+        os << "Input text does not have a caret: '" << input << "'";
+        throw std::runtime_error(os.str());
+    }
     size_t anchor = input.find(chAnchor);
     if (anchor == std::string_view::npos)
         anchor = caret;
