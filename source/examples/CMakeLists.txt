@@ -23,4 +23,5 @@ if (TURBO_BUILD_EXAMPLES OR MASTER_PROJECT)
     endfunction()
 
     add_example_generic(demo-with-custom-editor-window)
+    add_example_generic(demo-pascal-editor)
 endif()
