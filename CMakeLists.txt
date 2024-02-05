@@ -16,6 +16,8 @@ endif()
 
 project (turbo)
 
+set(TURBO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
 # Target 'scintilla'
 
 # These two could be built in one single target, but we want to enable Unity Build
@@ -189,7 +191,7 @@ if (TURBO_BUILD_TESTS)
         COMMAND ${TURBO}-test
         COMMAND ${CMAKE_COMMAND} -E touch ${TURBO}-test-passed
         DEPENDS ${TURBO}-test
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        WORKING_DIRECTORY ${TURBO_BINARY_DIR}
     )
     add_custom_target(${TURBO}-test-run ALL DEPENDS ${TURBO}-test-passed)
     if (NOT TURBO_USE_SYSTEM_TVISION)
