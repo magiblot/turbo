@@ -19,7 +19,6 @@ BasicEditorWindow::BasicEditorWindow(const TRect &bounds, Editor &aEditor) :
     TWindow(bounds, nullptr, wnNoNumber),
     editor(aEditor)
 {
-    ((BasicEditorFrame *) frame)->setScintilla(&aEditor.scintilla);
     options |= ofTileable | ofFirstClick;
     setState(sfShadow, False);
 

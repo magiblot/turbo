@@ -4,6 +4,7 @@
 #include <tvision/tv.h>
 
 #include <turbo/editor.h>
+#include "icmds.h"
 
 namespace turbo {
 
@@ -119,6 +120,11 @@ void EditorView::handleEvent(TEvent &ev)
             {
                 editor->partialRedraw();
                 clearEvent(ev);
+            }
+            else if (isInternalMessage(ev.message, InternalCommands::cmGetEditor))
+            {
+                clearEvent(ev);
+                ev.message.infoPtr = editor;
             }
             break;
     }

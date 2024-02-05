@@ -3,25 +3,28 @@
 
 #define Uses_TFrame
 #include <tvision/tv.h>
-#include <turbo/scintilla.h>
 
 namespace turbo {
 
+class Editor;
+
+// Window frame with a cursor position indicator in the bottom left border.
+// For the indicator to be shown and updated, an 'EditorView' must be inserted
+// in the same window, and 'frame->drawView()' must be invoked manually when
+// the editor changes (e.g. when it emits a SCN_PAINTED notification).
+
 class BasicEditorFrame : public TFrame
 {
-    TScintilla *scintilla {nullptr};
-
 public:
 
-    BasicEditorFrame(const TRect &bounds);
-    void draw() override;
-    void drawIndicator();
+    enum { indicatorWidth = 16 };
 
-    // * 'aScintilla': non-owning. Lifetime must exceed that of 'this'.
-    void setScintilla(TScintilla *aScintilla)
-    {
-        scintilla = aScintilla;
-    }
+    BasicEditorFrame(const TRect &bounds) noexcept;
+    void draw() override;
+
+private:
+
+    void drawIndicator(Editor &);
 };
 
 } // namespace turbo
