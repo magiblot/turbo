@@ -96,7 +96,6 @@ class FileEditor : public Editor
     inline void setFilePath(Path &&path);
     void beforeSave() noexcept;
     void afterSave() noexcept;
-    void setLanguage(const Language *lang) noexcept;
 
 public:
 
@@ -112,6 +111,7 @@ public:
     // Called when 'filePath' is set. The default implementation calls
     // 'setLanguage'.
     virtual void onFilePathSet() noexcept;
+    void setLanguage(const Language *lang) noexcept;
 };
 
 inline FileEditor::FileEditor(TScintilla &aScintilla, std::string aFilePath) noexcept :

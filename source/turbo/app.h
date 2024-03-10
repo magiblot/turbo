@@ -14,6 +14,8 @@
 struct EditorWindow;
 class TClockView;
 
+extern TCommandSet allCmUseLanguages;
+
 struct TurboApp : public TApplication, EditorWindowParent
 {
 

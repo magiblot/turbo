@@ -31,6 +31,7 @@ using namespace Scintilla;
 using namespace std::literals;
 
 TurboApp* TurboApp::app = 0;
+TCommandSet allCmUseLanguages;
 
 int main(int argc, const char *argv[])
 {
@@ -49,14 +50,18 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     argc(argc),
     argv(argv)
 {
+    // Create the CommandSet for all commands used to select a highlight language. (This lets them all be disabled at once)
+    for (int i = 0; (i < turbo::Language::COUNT) && i < (cmUseLanguageMax - cmUseLanguage); i++)
+        allCmUseLanguages += (cmUseLanguage + i);
+
     TCommandSet ts;
+    ts += allCmUseLanguages;
     ts += cmSave;
     ts += cmSaveAs;
     ts += cmRename;
     ts += cmOpenRecent;
     ts += cmToggleWrap;
     ts += cmToggleLineNums;
-    ts += cmSetLanguage;
     ts += cmFind;
     ts += cmReplace;
     ts += cmGoToLine;
@@ -118,6 +123,14 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
 {
     r.b.y = r.a.y+1;
 
+    // Dynamically generate the list of programming languages, each with its own associated cmUseLanguageXXX code
+    TMenuItem *langList = NULL;
+    for (int i = 0; (i < turbo::Language::COUNT) && i < (cmUseLanguageMax - cmUseLanguage); i++)
+    {
+        TMenuItem *item = new TMenuItem( turbo::languages[i].name, cmUseLanguage + i, kbNoKey, hcNoContext);
+        langList = (langList == NULL) ? item : &(*langList + *item);
+    }
+
     return new TMenuBar( r,
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
@@ -164,9 +177,9 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Toggle Line ~N~umbers", cmToggleLineNums, kbF8, hcNoContext, "F8" ) +
             *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" ) +
             *new TMenuItem( "Toggle Auto ~I~ndent", cmToggleIndent, kbNoKey, hcNoContext ) +
-            *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext )
-            );
-
+            *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext ) +
+            *new TMenuItem( "Document ~L~anguage", kbNoKey, new TMenu(*langList))
+        );
 }
 
 TStatusLine *TurboApp::initStatusLine( TRect r )
