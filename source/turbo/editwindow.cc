@@ -32,6 +32,7 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     enabledCmds += cmSaveAs;
     enabledCmds += cmToggleWrap;
     enabledCmds += cmToggleLineNums;
+    enabledCmds += cmSetLanguage;
     enabledCmds += cmFind;
     enabledCmds += cmReplace;
     enabledCmds += cmGoToLine;
@@ -99,6 +100,8 @@ void EditorWindow::handleEvent(TEvent &ev)
                     break;
                 case cmToggleIndent:
                     editor.autoIndent.toggle();
+                    break;
+                case cmSetLanguage:
                     break;
                 case cmCloseEditor:
                     ev.message.command = cmClose;

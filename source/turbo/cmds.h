@@ -10,6 +10,7 @@ enum : ushort
     cmToggleLineNums,
     cmSearchPrev,
     cmToggleIndent,
+    cmSetLanguage,
     cmTreeNext,
     cmTreePrev,
     cmCloseEditor,

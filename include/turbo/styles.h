@@ -9,6 +9,7 @@ namespace turbo {
 
 struct Language
 {
+    TStringView name {};
     TStringView lineComment {};
     TStringView blockCommentOpen {};
     TStringView blockCommentClose {};
@@ -23,40 +24,45 @@ struct Language
         return !blockCommentOpen.empty() && !blockCommentClose.empty();
     }
 
-    static const Language
-        CPP,
-        Makefile,
+    enum {
+        Ada = 0,
         Asm,
-        JavaScript,
-        Rust,
-        Python,
         Bash,
-        Diff,
-        JSON,
-        HTML,
-        XML,
-        VB,
-        Perl,
-        Batch,
-        LaTex,
-        Lua,
-        Ada,
-        Lisp,
-        Ruby,
-        Tcl,
-        VBScript,
-        MATLAB,
-        CSS,
-        YAML,
-        Erlang,
-        Smalltalk,
-        Markdown,
-        Properties,
-        CSharp,
         Basic,
+        Batch,
+        CPP,
+        CSS,
+        CSharp,
+        Diff,
+        Erlang,
+        HTML,
+        JSON,
+        JavaScript,
+        LaTex,
+        Lisp,
+        Lua,
+        MATLAB,
+        Makefile,
+        Markdown,
         Pascal,
-        SQL;
+        Perl,
+        Properties,
+        Python,
+        Ruby,
+        Rust,
+        SQL,
+        Smalltalk,
+        Tcl,
+        VB,
+        VBScript,
+        XML,
+        YAML,
+
+        COUNT
+    };
 };
+
+extern const Language languages[Language::COUNT];    // Array of Language structs that should be indexed with the Language::* enum.
 
 enum TextStyle : uchar
 {

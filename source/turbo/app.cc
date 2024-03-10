@@ -1,6 +1,7 @@
 #define Uses_TApplication
 #define Uses_TDeskTop
 #define Uses_TKeys
+#define Uses_TMenu
 #define Uses_TMenuBar
 #define Uses_TMenuItem
 #define Uses_TStatusDef
@@ -24,6 +25,7 @@
 #include "doctree.h"
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
+#include <turbo/styles.h>
 
 using namespace Scintilla;
 using namespace std::literals;
@@ -54,6 +56,7 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     ts += cmOpenRecent;
     ts += cmToggleWrap;
     ts += cmToggleLineNums;
+    ts += cmSetLanguage;
     ts += cmFind;
     ts += cmReplace;
     ts += cmGoToLine;
@@ -114,6 +117,7 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
 TMenuBar *TurboApp::initMenuBar(TRect r)
 {
     r.b.y = r.a.y+1;
+
     return new TMenuBar( r,
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
