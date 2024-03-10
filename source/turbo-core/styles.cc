@@ -33,6 +33,7 @@ const Language languages[] = {
     /* Language::MATLAB     */ {"MATLAB",      "%"},
     /* Language::Makefile   */ {"Makefile",    "#"},
     /* Language::Markdown   */ {"Markdown"     },
+    /* Language::NuShell    */ {"NuShell",     "#"},
     /* Language::Pascal     */ {"Pascal",      "//", "{", "}"},
     /* Language::Perl       */ {"Perl",        "#"},
     /* Language::Properties */ {"Properties",  "#"},
@@ -130,6 +131,7 @@ static const const_unordered_map<std::string_view, const Language *> ext2lang = 
     {".cls",                        &languages[Language::Basic]},
     {".pas",                        &languages[Language::Pascal]},
     {".sql",                        &languages[Language::SQL]},
+    {".nu",                         &languages[Language::NuShell]},
 };
 
 const Language *detectFileLanguage(const char *filePath)
@@ -426,6 +428,17 @@ constexpr LexerSettings::KeywordMapping keywordsRust[] =
     {1,
 "bool u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64 usize isize char str Pair "
 "Box box String List"
+    },
+};
+
+constexpr LexerSettings::KeywordMapping keywordsNuShell[] =
+{
+    {0,
+"let const mut def return if else while loop for in break continue match try catch "    // Commands do not go here, only actual builtins
+    },
+    {1,
+"int bool float any string filesize duration datetime "
+"Infinity null true false"
     },
 };
 
@@ -917,6 +930,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&languages[Language::Asm], {SCLEX_ASM, stylesAsm, nullptr, nullptr}},
     {&languages[Language::JavaScript], {SCLEX_CPP, stylesC, keywordsJavaScript, propertiesC}},
     {&languages[Language::Rust], {SCLEX_RUST, stylesRust, keywordsRust, nullptr}},
+    {&languages[Language::NuShell], {SCLEX_RUST, stylesRust, keywordsNuShell, nullptr}},
     {&languages[Language::Python], {SCLEX_PYTHON, stylesPython, keywordsPython, propertiesPython}},
     {&languages[Language::Bash], {SCLEX_BASH, stylesBash, keywordsBash, nullptr}},
     {&languages[Language::Ruby], {SCLEX_RUBY, stylesRuby, keywordsRuby, nullptr}},

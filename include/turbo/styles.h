@@ -44,6 +44,7 @@ struct Language
         MATLAB,
         Makefile,
         Markdown,
+        NuShell,
         Pascal,
         Perl,
         Properties,
