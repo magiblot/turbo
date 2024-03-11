@@ -144,6 +144,7 @@ if (TURBO_BUILD_APP)
     target_link_libraries(${TURBO} PRIVATE
         ${TURBO}-core
     )
+    target_link_libraries(${TURBO} PRIVATE -ltomlcpp)
     install(TARGETS ${TURBO} RUNTIME DESTINATION bin)
 
     if (WIN32)

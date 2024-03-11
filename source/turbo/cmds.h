@@ -21,6 +21,9 @@ enum : ushort
     cmGoToLine,
     cmReplaceOne,
     cmReplaceAll,
+
+    cmUseLanguage = 200,
+    cmUseLanguageMax = 400      // Support for selecting 200 languages. The command for selecting language ABC is (cmUseLanguage + turbo::Language::ABC)
 };
 
 // Commands that cannot be deactivated.

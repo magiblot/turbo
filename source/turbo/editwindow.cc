@@ -28,6 +28,7 @@ EditorWindow::EditorWindow( const TRect &bounds, TurboEditor &aEditor,
     searchState {searchSettings}
 {
     // Commands that always get enabled when focusing the editor.
+    enabledCmds += allCmUseLanguages;
     enabledCmds += cmSave;
     enabledCmds += cmSaveAs;
     enabledCmds += cmToggleWrap;
@@ -89,17 +90,6 @@ void EditorWindow::handleEvent(TEvent &ev)
                 case cmRename:
                     editor.rename(dlgs);
                     break;
-                case cmToggleWrap:
-                    editor.wrapping.toggle(editor.scintilla);
-                    editor.redraw();
-                    break;
-                case cmToggleLineNums:
-                    editor.lineNumbers.toggle();
-                    editor.redraw();
-                    break;
-                case cmToggleIndent:
-                    editor.autoIndent.toggle();
-                    break;
                 case cmCloseEditor:
                     ev.message.command = cmClose;
                     handled = false;
@@ -160,6 +150,15 @@ void EditorWindow::handleEvent(TEvent &ev)
                 default:
                     handled = false;
             }
+            
+            if (cmUseLanguage <= ev.message.command && ev.message.command < cmUseLanguageMax)
+            {
+                int lang_no = ev.message.command - cmUseLanguage;
+                this->getEditor().setLanguage(&turbo::languages[lang_no]);
+                editor.redraw();
+                handled = true;
+            }
+
             break;
         default:
             handled = false;
