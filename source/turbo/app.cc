@@ -9,12 +9,14 @@
 #define Uses_TStatusLine
 #define Uses_TSubMenu
 #define Uses_TWindow
+#define Uses_TButton
 #define Uses_TFrame
 #define Uses_TFileDialog
 #define Uses_TIndicator
 #define Uses_TStaticText
 #define Uses_TParamText
 #define Uses_TScreen
+#define Uses_MsgBox
 #include <tvision/tv.h>
 
 #include "app.h"
@@ -26,6 +28,13 @@
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
 #include <turbo/styles.h>
+#include <toml.h>
+#include <tomlcpp.hpp>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+std::string config_path = "/.config/turbo.toml";
 
 using namespace Scintilla;
 using namespace std::literals;
@@ -35,9 +44,12 @@ TCommandSet allCmUseLanguages;
 
 int main(int argc, const char *argv[])
 {
+    config_path.insert(0, getenv("HOME"));
+
     TurboApp app(argc, argv);
     TurboApp::app = &app;
     app.run();
+    app.saveConfig();
     app.shutDown();
     TurboApp::app = 0;
 }
@@ -117,6 +129,8 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
         if (deskTop->size.x - docTree->size.x < 82)
             docTree->hide();
     }
+
+    loadConfig();
 }
 
 TMenuBar *TurboApp::initMenuBar(TRect r)
@@ -287,6 +301,7 @@ void TurboApp::handleEvent(TEvent &event)
                 break;
         }
     }
+
     if (handled)
         clearEvent(event);
 }
@@ -492,4 +507,55 @@ void TurboApp::removeEditor(EditorWindow &w) noexcept
 const char *TurboApp::getFileDialogDir() noexcept
 {
     return config.mostRecentDir.c_str();
+}
+
+#define ERRLEN 100
+
+void TurboApp::loadConfig()
+{
+    std::string errmsg;
+
+    // Return if config file doesn;t exist
+    FILE *f = fopen(config_path.c_str(), "r");
+    if (!f) return; // Config file doesn't exist yet. Keep defaults
+    fclose(f);
+
+    // Any remaining errors will be parse errors
+    auto res = toml::parseFile(config_path);
+    if (res.table) {
+        bool ok;
+
+        auto editor = res.table->getTable("Editor");
+        if (editor) {
+            std::tie(ok, config.lineNumbers) = editor->getBool("lineNumbers");
+            std::tie(ok, config.autoIndent)  = editor->getBool("autoIndent");
+            std::tie(ok, config.wrapping)    = editor->getBool("wrapping");
+        }
+
+        auto state = res.table->getTable("State");
+        if (state) {
+            std::tie(ok, config.mostRecentDir) = state->getBool("mostRecentDir");
+        }
+
+        return;
+    }
+
+    messageBox( mfError | mfOKButton, "Error loading config:\n%s", res.errmsg.c_str());
+}
+
+void TurboApp::saveConfig()
+{
+    // https://github.com/cktan/tomlc99/issues/91
+
+    FILE *out = fopen(config_path.c_str(), "w");
+
+    fprintf(out, "[Editor]\n");
+    fprintf(out, "lineNumbers = %s\n", config.lineNumbers ? "true" : "false");
+    fprintf(out, "autoIndent = %s\n", config.autoIndent ? "true" : "false");
+    fprintf(out, "wrapping = %s\n", config.wrapping ? "true" : "false");
+    fprintf(out, "\n");
+    fprintf(out, "[State]\n");
+    fprintf(out, "mostRecentDir = \"%s\"\n", config.mostRecentDir.c_str());
+
+    fclose(out);
 }

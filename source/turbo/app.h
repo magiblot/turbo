@@ -56,12 +56,16 @@ struct TurboApp : public TApplication, EditorWindowParent
     const char *getFileDialogDir() noexcept override;
 
     struct Config {
+        // These are the defaults to be used if no config file exists yet.
         bool lineNumbers = true;
         bool autoIndent = true;
         bool wrapping = false;
 
         std::string mostRecentDir;
     } config;
+
+    void loadConfig();
+    void saveConfig();
 };
 
 #endif
