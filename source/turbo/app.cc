@@ -258,6 +258,30 @@ void TurboApp::handleEvent(TEvent &event)
                 if (docTree)
                     docTree->tree->focusPrev();
                 break;
+
+            case cmToggleWrap:
+                config.wrapping = !config.wrapping;
+                MRUlist.forEach([&] (auto *win) {
+                    TurboEditor &editor = win->getEditor();
+                    editor.wrapping.setState(config.wrapping, editor.scintilla);
+                    editor.redraw();
+                });
+                break;
+            case cmToggleLineNums:
+                config.lineNumbers = !config.lineNumbers;
+                MRUlist.forEach([&] (auto *win) {
+                    win->getEditor().lineNumbers.setState(config.lineNumbers);
+                    win->getEditor().redraw();
+                });
+                break;
+            case cmToggleIndent:
+                config.autoIndent = !config.autoIndent;
+                MRUlist.forEach([&] (auto *win) {
+                    win->getEditor().autoIndent.setState(config.autoIndent);
+                    win->getEditor().redraw();
+                });
+                break;
+
             default:
                 handled = false;
                 break;
@@ -353,7 +377,12 @@ void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)
 {
     TRect r = newEditorBounds();
     auto &counter = fileCount[TPath::basename(path)];
+
     auto &editor = *new TurboEditor(scintilla, path);
+    editor.lineNumbers.setState(config.lineNumbers);    // Configure with defaults
+    editor.autoIndent.setState(config.autoIndent);
+    editor.wrapping.setState(config.wrapping, editor.scintilla);
+
     EditorWindow &w = *new EditorWindow(r, editor, counter, searchSettings, *this);
     if (docTree)
         docTree->tree->addEditor(&w);
@@ -425,7 +454,7 @@ void TurboApp::handleFocus(EditorWindow &w) noexcept
         docTree->tree->focusEditor(&w);
     // We keep track of the most recent directory for file dialogs.
     if (!w.filePath().empty())
-        mostRecentDir = TPath::dirname(w.filePath());
+        config.mostRecentDir = TPath::dirname(w.filePath());
 }
 
 void TurboApp::handleTitleChange(EditorWindow &w) noexcept
@@ -442,7 +471,7 @@ void TurboApp::handleTitleChange(EditorWindow &w) noexcept
         }
     }
     if (!w.filePath().empty() && w.state & sfActive)
-        mostRecentDir = TPath::dirname(w.filePath());
+        config.mostRecentDir = TPath::dirname(w.filePath());
 }
 
 void TurboApp::removeEditor(EditorWindow &w) noexcept
@@ -462,5 +491,5 @@ void TurboApp::removeEditor(EditorWindow &w) noexcept
 
 const char *TurboApp::getFileDialogDir() noexcept
 {
-    return mostRecentDir.c_str();
+    return config.mostRecentDir.c_str();
 }

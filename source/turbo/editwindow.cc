@@ -90,17 +90,6 @@ void EditorWindow::handleEvent(TEvent &ev)
                 case cmRename:
                     editor.rename(dlgs);
                     break;
-                case cmToggleWrap:
-                    editor.wrapping.toggle(editor.scintilla);
-                    editor.redraw();
-                    break;
-                case cmToggleLineNums:
-                    editor.lineNumbers.toggle();
-                    editor.redraw();
-                    break;
-                case cmToggleIndent:
-                    editor.autoIndent.toggle();
-                    break;
                 case cmCloseEditor:
                     ev.message.command = cmClose;
                     handled = false;

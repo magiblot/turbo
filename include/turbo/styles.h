@@ -10,7 +10,7 @@ namespace turbo {
 struct Language
 {
     TStringView name {};
-    TStringView lineComment {};
+    TStringView lineComment {};     // These are used by the editor to toggle comments on lines
     TStringView blockCommentOpen {};
     TStringView blockCommentClose {};
 
