@@ -14,19 +14,19 @@
 struct EditorWindow;
 class TClockView;
 
+extern TCommandSet allCmUseLanguages;
+
 struct TurboApp : public TApplication, EditorWindowParent
 {
-
     FileCounter fileCount;
     list_head<EditorWindow> MRUlist;
     TClockView *clock;
-    DocumentTreeWindow *docTree;
+    DocumentTreeWindow *docTree;    // Never null once the app has been initialized
     TCommandSet editorCmds;
     bool argsParsed {false};
     int argc;
     const char **argv;
     turbo::SearchSettings searchSettings;
-    std::string mostRecentDir;
 
     static TurboApp *app;
 
@@ -55,6 +55,17 @@ struct TurboApp : public TApplication, EditorWindowParent
     void removeEditor(EditorWindow &w) noexcept override;
     const char *getFileDialogDir() noexcept override;
 
+    struct Config {
+        // These are the defaults to be used if no config file exists yet.
+        bool lineNumbers = true;
+        bool autoIndent = true;
+        bool wrapping = false;
+
+        std::string mostRecentDir;
+    } config;
+
+    void loadConfig();
+    void saveConfig();
 };
 
 #endif

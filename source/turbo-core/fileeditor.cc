@@ -243,16 +243,16 @@ void FileEditor::afterSave() noexcept
     call(scintilla, SCI_SETSAVEPOINT, 0U, 0U);
 }
 
-void FileEditor::detectLanguage() noexcept
+void FileEditor::setLanguage(const Language *language) noexcept
 {
-    language = detectFileLanguage(filePath.c_str());
+    this->language = language;
     lexer = findBuiltInLexer(language);
     applyTheming(lexer, scheme, scintilla);
 }
 
 void FileEditor::onFilePathSet() noexcept
 {
-    detectLanguage();
+    setLanguage(detectFileLanguage(filePath.c_str()));
 }
 
 ShowAllDialogs showAllDialogs;

@@ -46,7 +46,6 @@ class Editor : protected TScintillaParent
     bool drawLock {false}; // To avoid recursive draws.
     bool reflowLock {false}; // When true, text stops flowing on resize.
 
-    void drawViews() noexcept;
     void updateMarginWidth() noexcept;
 
 protected:
