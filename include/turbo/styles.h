@@ -55,7 +55,8 @@ struct Language
         CSharp,
         Basic,
         Pascal,
-        SQL;
+        SQL,
+        Go;
 };
 
 enum TextStyle : uchar
