@@ -335,17 +335,17 @@ constexpr LexerSettings::StyleMapping stylesHTML[] =
     { SCE_HJ_SYMBOLS, sCtrlChar },
     { SCE_HJ_REGEX, sMisc },
     // PHP
-{ SCE_HPHP_COMPLEX_VARIABLE, sKeyword1 },
-{ SCE_HPHP_DEFAULT, sNormal },
-{ SCE_HPHP_HSTRING, sStringLiteral },
-{ SCE_HPHP_SIMPLESTRING, sCharLiteral },
-{ SCE_HPHP_WORD, sKeyword2 },
-{ SCE_HPHP_NUMBER, sNumberLiteral },
-{ SCE_HPHP_VARIABLE, sKeyword1 },
-{ SCE_HPHP_COMMENT, sComment },
-{ SCE_HPHP_COMMENTLINE, sComment },
-{ SCE_HPHP_HSTRING_VARIABLE, sKeyword1 },
-{ SCE_HPHP_OPERATOR, sCtrlChar }
+    { SCE_HPHP_COMPLEX_VARIABLE, sKeyword1 },
+    { SCE_HPHP_DEFAULT, sNormal },
+    { SCE_HPHP_HSTRING, sStringLiteral },
+    { SCE_HPHP_SIMPLESTRING, sCharLiteral },
+    { SCE_HPHP_WORD, sKeyword2 },
+    { SCE_HPHP_NUMBER, sNumberLiteral },
+    { SCE_HPHP_VARIABLE, sKeyword1 },
+    { SCE_HPHP_COMMENT, sComment },
+    { SCE_HPHP_COMMENTLINE, sComment },
+    { SCE_HPHP_HSTRING_VARIABLE, sKeyword1 },
+    { SCE_HPHP_OPERATOR, sCtrlChar }
 };
 
 constexpr LexerSettings::KeywordMapping keywordsHTML[] =
