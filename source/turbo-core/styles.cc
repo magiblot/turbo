@@ -43,7 +43,8 @@ constexpr Language
     Language::CSharp {"//", "/*", "*/"},
     Language::Basic {"'"},
     Language::Pascal {"//", "{", "}"},
-    Language::SQL {"--", "/*", "*/"};
+    Language::SQL {"--", "/*", "*/"},
+    Language::Go {"//", "/*", "*/"};
 
 static const const_unordered_map<std::string_view, const Language *> mime2lang = {
     {"text/x-c++",                  &Language::CPP},
@@ -127,6 +128,8 @@ static const const_unordered_map<std::string_view, const Language *> ext2lang = 
     {".cls",                        &Language::Basic},
     {".pas",                        &Language::Pascal},
     {".sql",                        &Language::SQL},
+    {".go",                         &Language::Go},
+    {".php",                        &Language::HTML},
 };
 
 const Language *detectFileLanguage(const char *filePath)
@@ -330,7 +333,19 @@ constexpr LexerSettings::StyleMapping stylesHTML[] =
     { SCE_HJ_DOUBLESTRING, sStringLiteral },
     { SCE_HJ_SINGLESTRING, sCharLiteral },
     { SCE_HJ_SYMBOLS, sCtrlChar },
-    { SCE_HJ_REGEX, sMisc }
+    { SCE_HJ_REGEX, sMisc },
+    // PHP
+{ SCE_HPHP_COMPLEX_VARIABLE, sKeyword1 },
+{ SCE_HPHP_DEFAULT, sNormal },
+{ SCE_HPHP_HSTRING, sStringLiteral },
+{ SCE_HPHP_SIMPLESTRING, sCharLiteral },
+{ SCE_HPHP_WORD, sKeyword2 },
+{ SCE_HPHP_NUMBER, sNumberLiteral },
+{ SCE_HPHP_VARIABLE, sKeyword1 },
+{ SCE_HPHP_COMMENT, sComment },
+{ SCE_HPHP_COMMENTLINE, sComment },
+{ SCE_HPHP_HSTRING_VARIABLE, sKeyword1 },
+{ SCE_HPHP_OPERATOR, sCtrlChar }
 };
 
 constexpr LexerSettings::KeywordMapping keywordsHTML[] =
@@ -368,7 +383,100 @@ constexpr LexerSettings::KeywordMapping keywordsHTML[] =
 " "
     },
     {4, // PHP
-" "
+// Keywords
+"__halt_compiler abstract and array as break callable case catch class "
+"clone const continue declare default die do echo else elseif "
+"empty enddeclare endfor endforeach endif endswitch endwhile eval exit extends "
+"final finally fn for foreach function global goto if implements "
+"include include_once instanceof insteadof interface isset list match namespace new "
+"or print private protected public readonly require require_once return static "
+"switch throw trait try unset use var while xor yield "
+"from __CLASS__ __DIR__ __FILE__ __FUNCTION__ __LINE__ __METHOD__ __NAMESPACE__ __TRAIT__ "
+
+// Builtins
+"abs acos acosh addcslashes addslashes array_change_key_case array_chunk array_column array_combine "
+"array_count_values array_diff array_diff_assoc array_diff_key array_diff_uassoc array_diff_ukey "
+"array_fill array_fill_keys array_filter array_flip array_intersect array_intersect_assoc "
+"array_intersect_key array_intersect_uassoc array_intersect_ukey array_is_list array_key_exists "
+"array_key_first array_key_last array_keys array_map array_merge array_merge_recursive array_multisort "
+"array_pad array_pop array_product array_push array_rand array_reduce array_replace array_replace_recursive "
+"array_reverse array_search array_shift array_slice array_splice array_sum array_udiff array_udiff_assoc "
+"array_udiff_uassoc array_uintersect array_uintersect_assoc array_uintersect_uassoc array_unique "
+"array_unshift array_values array_walk array_walk_recursive arsort asin asinh asort assert "
+"assert_options atan atan2 atanh base64_decode base64_encode base_convert basename bin2hex "
+"bindec boolval call_user_func call_user_func_array ceil chdir checkdate chgrp chmod chown chr "
+"chroot chunk_split class_implements class_parents class_uses clearstatcache closedir closelog "
+"compact config_get_hash connection_aborted connection_status constant convert_uudecode "
+"convert_uuencode copy cos cosh count count_chars crc32 crypt current date date_add date_create "
+"date_create_from_format date_create_immutable date_create_immutable_from_format date_date_set "
+"date_default_timezone_get date_default_timezone_set date_diff date_format date_get_last_errors "
+"date_interval_create_from_date_string date_interval_format date_isodate_set date_modify "
+"date_offset_get date_parse date_parse_from_format date_sub date_sun_info date_sunrise date_sunset "
+"date_time_set date_timestamp_get date_timestamp_set date_timezone_get date_timezone_set "
+"debug_zval_dump decbin dechex decoct deg2rad dir dirname disk_free_space disk_total_space "
+"dl dns_check_record dns_get_mx dns_get_record end error_clear_last error_get_last error_log "
+"escapeshellarg escapeshellcmd exec exp explode expm1 extract fclose fdatasync fdiv feof fflush "
+"fgetc fgetcsv fgets file file_get_contents file_put_contents filter_has_var filter_id filter_input "
+"filter_input_array filter_list filter_var filter_var_array floatval flock floor flush fmod "
+"fnmatch fopen forward_static_call forward_static_call_array fpassthru fprintf fputcsv fread "
+"fscanf fseek fsockopen fstat fsync ftell ftok ftruncate fwrite get_browser get_cfg_var get_current_user "
+"getcwd getdate get_debug_type getenv get_headers gethostbyaddr gethostbyname gethostbynamel "
+"gethostname get_html_translation_table getimagesize getimagesizefromstring get_include_path "
+"getlastmod get_meta_tags getmygid getmyinode getmypid getmyuid getopt getprotobyname getprotobynumber "
+"getrusage getservbyname getservbyport gettimeofday gettype glob gmdate gmmktime gmstrftime "
+"hash hash_algos hash_copy hash_equals hash_file hash_final hash_hkdf hash_hmac hash_hmac_algos "
+"hash_hmac_file hash_init hash_pbkdf2 hash_update hash_update_file hash_update_stream header "
+"header_remove headers_list headers_sent hebrev hex2bin hexdec highlight_file highlight_string "
+"hrtime htmlentities html_entity_decode htmlspecialchars htmlspecialchars_decode http_build_query "
+"http_response_code hypot idate ignore_user_abort image_type_to_extension image_type_to_mime_type "
+"implode in_array inet_ntop inet_pton ini_get ini_get_all ini_parse_quantity ini_restore ini_set "
+"intdiv intval ip2long iptcembed iptcparse is_array is_bool is_callable is_countable is_finite "
+"is_float is_infinite is_int is_iterable is_nan is_null is_numeric is_object is_resource is_scalar "
+"is_string is_uploaded_file iterator_apply iterator_count iterator_to_array json_decode "
+"json_encode json_last_error json_last_error_msg json_validate key krsort ksort lcfirst lcg_value "
+"lchgrp lchown levenshtein link linkinfo localeconv localtime log log10 log1p long2ip ltrim mail "
+"max md5 md5_file memory_get_peak_usage memory_get_usage memory_reset_peak_usage metaphone "
+"mhash mhash_count mhash_get_block_size mhash_get_hash_name mhash_keygen_s2k microtime min "
+"mkdir mktime move_uploaded_file mt_getrandmax mt_rand mt_srand natcasesort natsort net_get_interfaces "
+"next nl2br nl_langinfo number_format octdec opendir openlog ord pack parse_ini_file parse_ini_string "
+"parse_str parse_url passthru password_algos password_get_info password_hash password_needs_rehash "
+"password_verify pathinfo pclose pdo_drivers pfsockopen phpcredits phpinfo php_ini_loaded_file "
+"php_ini_scanned_files php_sapi_name php_strip_whitespace php_uname phpversion pi popen pow "
+"preg_filter preg_grep preg_last_error preg_last_error_msg preg_match preg_match_all preg_quote "
+"preg_replace preg_replace_callback preg_replace_callback_array preg_split prev printf print_r "
+"proc_close proc_get_status proc_nice proc_open proc_terminate putenv quoted_printable_decode "
+"quoted_printable_encode quotemeta rad2deg rand random_bytes random_int range rawurldecode "
+"rawurlencode readdir readfile readlink realpath realpath_cache_get realpath_cache_size register_shutdown_function "
+"register_tick_function rename reset rewind rewinddir rmdir round rsort rtrim sapi_windows_vt100_support "
+"scandir serialize session_abort session_cache_expire session_cache_limiter session_create_id "
+"session_decode session_destroy session_encode session_gc session_get_cookie_params session_id "
+"session_module_name session_name session_regenerate_id session_register_shutdown session_reset "
+"session_save_path session_set_cookie_params session_set_save_handler session_start session_status "
+"session_unset session_write_close setcookie set_include_path setlocale setrawcookie settype "
+"sha1 sha1_file shell_exec shuffle similar_text sin sinh sleep sort soundex spl_autoload spl_autoload_call "
+"spl_autoload_extensions spl_autoload_functions spl_autoload_register spl_autoload_unregister "
+"spl_classes spl_object_hash spl_object_id sprintf sqrt sscanf strcoll str_contains strcspn "
+"str_decrement stream_bucket_append stream_bucket_make_writeable stream_bucket_new stream_bucket_prepend "
+"stream_context_create stream_context_get_default stream_context_get_options stream_context_get_params "
+"stream_context_set_default stream_context_set_option stream_context_set_options stream_context_set_params "
+"stream_copy_to_stream stream_filter_append stream_filter_prepend stream_filter_register "
+"stream_filter_remove stream_get_contents stream_get_filters stream_get_line stream_get_meta_data "
+"stream_get_transports stream_get_wrappers stream_isatty stream_is_local stream_resolve_include_path "
+"stream_select stream_set_blocking stream_set_chunk_size stream_set_read_buffer stream_set_timeout "
+"stream_set_write_buffer stream_socket_accept stream_socket_client stream_socket_enable_crypto "
+"stream_socket_get_name stream_socket_pair stream_socket_recvfrom stream_socket_sendto "
+"stream_socket_server stream_socket_shutdown stream_supports_lock str_ends_with strftime "
+"str_getcsv str_increment stripcslashes stripos stripslashes strip_tags str_ireplace stristr "
+"strnatcasecmp strnatcmp str_pad strpbrk strpos strptime strrchr str_repeat str_replace strrev "
+"strripos str_rot13 strrpos str_shuffle str_split strspn str_starts_with strstr strtok strtolower "
+"strtotime strtoupper strtr strval str_word_count substr substr_compare substr_count substr_replace "
+"symlink sys_getloadavg sys_get_temp_dir syslog system tan tanh tempnam time time_nanosleep "
+"time_sleep_until timezone_abbreviations_list timezone_identifiers_list timezone_location_get "
+"timezone_name_from_abbr timezone_name_get timezone_offset_get timezone_open timezone_transitions_get "
+"timezone_version_get tmpfile touch trim uasort ucfirst ucwords uksort umask uniqid unlink unpack "
+"unregister_tick_function unserialize urldecode urlencode usleep usort utf8_decode utf8_encode "
+"var_dump var_export version_compare vfprintf vprintf vsprintf wordwrap "
+
     },
     {5, // SGML (DTD)
 "DOCTYPE ELEMENT ATTLIST ENTITY PCDATA CDATA EMPTY SHORTREF USEMAP NOTATION IMPLIED "
@@ -907,6 +1015,27 @@ constexpr LexerSettings::PropertyMapping propertiesSQL[] =
     {"lexer.sql.numbersign.comment", "1"},
 };
 
+
+constexpr LexerSettings::KeywordMapping keywordsGo[] =
+{
+    {0,
+	"break default func interface select "
+	"case defer go map struct "
+	"chan else goto package switch "
+	"const fallthrough if range type "
+	"continue for import return var "
+    },
+    {1,
+"bool uint8 uint16 uint32 uint64 int8 int16 int32 int64 float32 float64 "
+"complex64 complex128 byte rune uint int uintptr "
+"string struct "
+    },
+    {3,
+"std"
+    },
+};
+
+
 constexpr struct { const Language *language; LexerSettings lexer; } builtInLexers[] =
 {
     {&Language::CPP, {SCLEX_CPP, stylesC, keywordsC, propertiesC}},
@@ -927,6 +1056,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::Pascal, {SCLEX_PASCAL, stylesPascal, keywordsPascal, nullptr}},
     {&Language::LaTex, {SCLEX_LATEX, stylesTeX, nullptr, nullptr}},
     {&Language::SQL, {SCLEX_SQL, stylesSQL, keywordsSQL, propertiesSQL}},
+    {&Language::Go, {SCLEX_CPP, stylesC, keywordsGo, propertiesC}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)
