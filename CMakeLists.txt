@@ -7,6 +7,8 @@ option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the sub
 option(TURBO_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
 option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the core library" ON)
 
+include(GNUInstallDirs)
+
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
     cmake_policy(SET CMP0091 NEW)
     if (TURBO_USE_STATIC_RTL)
@@ -113,16 +115,16 @@ target_link_libraries(${TURBO}-core PUBLIC
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13.0")
     install(TARGETS ${TURBO}-core
         EXPORT ${TURBO}-config
-        ARCHIVE DESTINATION lib
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         COMPONENT library
     )
     install(EXPORT ${TURBO}-config
-        DESTINATION lib/cmake/${TURBO}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${TURBO}
         NAMESPACE ${TURBO}::
         FILE ${TURBO}-config.cmake
         COMPONENT library
     )
-    install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/turbo" DESTINATION include)
+    install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/include/turbo" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
     install(FILES "${CMAKE_CURRENT_LIST_DIR}/doc/turbo.1" DESTINATION share/man/man1)
 endif()
 
@@ -144,7 +146,7 @@ if (TURBO_BUILD_APP)
     target_link_libraries(${TURBO} PRIVATE
         ${TURBO}-core
     )
-    install(TARGETS ${TURBO} RUNTIME DESTINATION bin)
+    install(TARGETS ${TURBO} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
     if (WIN32)
         file(GLOB_RECURSE TURBO_RC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.rc")
