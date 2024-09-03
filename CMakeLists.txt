@@ -7,8 +7,6 @@ option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the sub
 option(TURBO_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
 option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the core library" ON)
 
-include(GNUInstallDirs)
-
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
     cmake_policy(SET CMP0091 NEW)
     if (TURBO_USE_STATIC_RTL)
@@ -19,6 +17,8 @@ endif()
 project (turbo)
 
 set(TURBO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+include(GNUInstallDirs)
 
 # Target 'scintilla'
 
