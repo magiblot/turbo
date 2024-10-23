@@ -10,7 +10,7 @@ jobs:
     name: Linux (GCC 7)
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
@@ -37,7 +37,7 @@ jobs:
     name: Windows (MSVC) (Win32)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
@@ -50,7 +50,7 @@ jobs:
       run: cmake --build . --config $BUILD_TYPE -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: turbo-x86
         path: |
@@ -60,7 +60,7 @@ jobs:
     name: Windows (MSVC) (x64)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
@@ -73,7 +73,7 @@ jobs:
       run: cmake --build . --config $BUILD_TYPE -- -p:UseMultiToolTask=true -p:CL_MPcount=$(nproc)
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: turbo-x64
         path: |
@@ -83,7 +83,7 @@ jobs:
     name: Windows (MinGW)
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
@@ -99,7 +99,7 @@ jobs:
     name: MacOS (Clang)
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
