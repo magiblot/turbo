@@ -8,7 +8,7 @@ env:
 jobs:
   build-linux-gcc:
     name: Linux (GCC 7)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
       with:
@@ -16,11 +16,14 @@ jobs:
 
     - name: Install Dependencies
       run: |
+        # Add legacy repositories required by g++-7
         sudo tee --append /etc/apt/sources.list << EOF
           deb http://us.archive.ubuntu.com/ubuntu/ bionic universe
+          deb http://us.archive.ubuntu.com/ubuntu/ bionic main
         EOF
-        sudo apt -y update
-        sudo apt -y install libncursesw5-dev g++-7 libgtest-dev
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
+        sudo apt-get -y update
+        sudo apt-get -y install g++-7 libgtest-dev
 
     - name: Configure CMake
       shell: bash
