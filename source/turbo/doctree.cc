@@ -4,6 +4,10 @@
 #include <utility>
 #include <cassert>
 #include <turbo/tpath.h>
+
+#define Uses_TProgram
+#include <tvision/tv.h>
+
 using Node = DocumentTreeView::Node;
 
 Node::Node(Node *parent, std::string_view p) noexcept :
@@ -255,5 +259,5 @@ DocumentTreeWindow::~DocumentTreeWindow()
 
 void DocumentTreeWindow::close()
 {
-    message(TurboApp::app, evCommand, cmToggleTree, 0);
+    message(TProgram::application, evCommand, cmToggleTree, 0);
 }

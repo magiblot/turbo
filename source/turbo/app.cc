@@ -28,17 +28,6 @@
 using namespace Scintilla;
 using namespace std::literals;
 
-TurboApp* TurboApp::app = 0;
-
-int main(int argc, const char *argv[])
-{
-    TurboApp app(argc, argv);
-    TurboApp::app = &app;
-    app.run();
-    app.shutDown();
-    TurboApp::app = 0;
-}
-
 TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     TProgInit( &TurboApp::initStatusLine,
                &TurboApp::initMenuBar,
