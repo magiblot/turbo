@@ -28,7 +28,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     turbo::SearchSettings searchSettings;
     std::string mostRecentDir;
 
-    TurboApp(int argc=0, const char *argv[]=0) noexcept;
+    TurboApp(int argc, const char **argv) noexcept;
     static TMenuBar* initMenuBar(TRect r);
     static TStatusLine* initStatusLine(TRect r);
 
