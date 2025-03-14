@@ -151,6 +151,11 @@ if (TURBO_BUILD_APP)
     if (WIN32)
         file(GLOB_RECURSE TURBO_RC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.rc")
         target_sources(${TURBO} PRIVATE ${TURBO_RC})
+
+        if (MSVC)
+            # Wildcard argument expansion
+            set_target_properties(${TURBO} PROPERTIES LINK_FLAGS wsetargv.obj)
+        endif()
     elseif (APPLE)
         add_custom_command(TARGET ${TURBO} POST_BUILD COMMAND
             # Script from https://github.com/mklement0/fileicon
