@@ -16,6 +16,10 @@ int main(int argc, const char *argv[])
 
 #else
 
+// Use Turbo Vision's windows.h, which omits several unneeded or unwanted
+// definitions.
+#include <tvision/compat/windows/windows.h>
+
 static const char *convertToUtf8(const wchar_t *wstr) {
     int bytes = WideCharToMultiByte(
         /*CodePage*/ CP_UTF8,
