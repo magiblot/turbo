@@ -7,7 +7,7 @@ static void runTurbo(int argc, const char **argv)
     app.shutDown();
 }
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) || !defined(_MSC_VER)
 
 int main(int argc, const char *argv[])
 {
