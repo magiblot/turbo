@@ -128,7 +128,7 @@ void updateBraces(const ColorScheme *scheme, TScintilla &scintilla);
 // Toggles comment in selected text.
 void toggleComment(TScintilla &scintilla, const Language *language);
 
-void stripTrailingSpaces(TScintilla &scintilla);
+void stripTrailingSpaces(TScintilla &scintilla, const Language *language);
 void ensureNewlineAtEnd(TScintilla &scintilla);
 
 } // namespace turbo

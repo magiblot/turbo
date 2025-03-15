@@ -232,7 +232,7 @@ void FileEditor::beforeSave() noexcept
     if (!inSavePoint() && !call(scintilla, SCI_CANREDO, 0U, 0U))
     {
         call(scintilla, SCI_BEGINUNDOACTION, 0U, 0U);
-        stripTrailingSpaces(scintilla);
+        stripTrailingSpaces(scintilla, language);
         ensureNewlineAtEnd(scintilla);
         call(scintilla, SCI_ENDUNDOACTION, 0U, 0U);
     }

@@ -592,20 +592,36 @@ void updateBraces(const ColorScheme *aScheme, TScintilla &scintilla)
         call(scintilla, SCI_BRACEHIGHLIGHT, -1, -1);
 }
 
-void stripTrailingSpaces(TScintilla &scintilla)
+static void keepSpecialTrailingSpaces( const Language *language,
+                                       Sci::Position &whitespaceStart,
+                                       Sci::Position lineEnd )
+{
+    // In Markdown, two trailing whitespaces behave as a line break, so keep them.
+    if (language == &Language::Markdown)
+    {
+        if (whitespaceStart + 2 <= lineEnd)
+            whitespaceStart += 2;
+    }
+}
+
+void stripTrailingSpaces(TScintilla &scintilla, const Language *language)
 {
     Sci::Line lineCount = call(scintilla, SCI_GETLINECOUNT, 0U, 0U);
     for (Sci::Line line = 0; line < lineCount; ++line) {
         Sci::Position lineStart = call(scintilla, SCI_POSITIONFROMLINE, line, 0U);
         Sci::Position lineEnd = call(scintilla, SCI_GETLINEENDPOSITION, line, 0U);
-        Sci::Position i;
-        for (i = lineEnd - 1; i >= lineStart; --i) {
-            char ch = call(scintilla, SCI_GETCHARAT, i, 0U);
+        Sci::Position whitespaceStart = lineEnd;
+        while (whitespaceStart > lineStart)
+        {
+            char ch = call(scintilla, SCI_GETCHARAT, whitespaceStart - 1, 0U);
             if (ch != ' ' && ch != '\t')
                 break;
+            --whitespaceStart;
         }
-        if (i != lineEnd - 1) { // Not first iteration, trailing whitespace.
-            call(scintilla, SCI_SETTARGETRANGE, i + 1, lineEnd);
+        if (whitespaceStart < lineEnd)
+        {
+            keepSpecialTrailingSpaces(language, whitespaceStart, lineEnd);
+            call(scintilla, SCI_SETTARGETRANGE, whitespaceStart, lineEnd);
             call(scintilla, SCI_REPLACETARGET, 0, (sptr_t) "");
         }
     }
