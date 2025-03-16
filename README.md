@@ -151,7 +151,7 @@ Below is a TO-DO list of features I would like to implement in Turbo:
 - [ ] Persistent configuration.
 - [ ] Keybinding customization.
 - [ ] Color scheme customization.
-- [x] Syntax highlighting for some languages (C/C++, Rust, Python, JavaScript, Make, Bash, Ruby, JSON, YAML, HTML, INI).
+- [x] Syntax highlighting for some languages (C/C++, Rust, Python, JavaScript, Make, Bash, Ruby, JSON, YAML, HTML, INI, Go, PHP).
 - [ ] Syntax highlighting for the rest of [languages supported by Scintilla](https://github.com/RaiKoHoff/scintilla/blob/master/include/SciLexer.h).
 - [x] Comment toggling.
 - [x] Brace match highlighting.

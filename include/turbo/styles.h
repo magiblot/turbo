@@ -56,7 +56,8 @@ struct Language
         Basic,
         Pascal,
         SQL,
-        Go;
+        Go,
+        PHP;
 };
 
 enum TextStyle : uchar

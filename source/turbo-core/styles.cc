@@ -44,7 +44,8 @@ constexpr Language
     Language::Basic {"'"},
     Language::Pascal {"//", "{", "}"},
     Language::SQL {"--", "/*", "*/"},
-    Language::Go {"//", "/*", "*/"};
+    Language::Go {"//", "/*", "*/"},
+    Language::PHP {"//", "/*", "*/"};
 
 static const const_unordered_map<std::string_view, const Language *> mime2lang = {
     {"text/x-c++",                  &Language::CPP},
@@ -55,6 +56,7 @@ static const const_unordered_map<std::string_view, const Language *> mime2lang =
     {"text/x-makefile",             &Language::Makefile},
     {"text/x-diff",                 &Language::Diff},
     {"text/html",                   &Language::HTML},
+    {"text/x-php",                  &Language::PHP},
 };
 
 static const const_unordered_map<std::string_view, const Language *> ext2lang = {
@@ -129,7 +131,7 @@ static const const_unordered_map<std::string_view, const Language *> ext2lang = 
     {".pas",                        &Language::Pascal},
     {".sql",                        &Language::SQL},
     {".go",                         &Language::Go},
-    {".php",                        &Language::HTML},
+    {".php",                        &Language::PHP},
 };
 
 const Language *detectFileLanguage(const char *filePath)
@@ -345,7 +347,7 @@ constexpr LexerSettings::StyleMapping stylesHTML[] =
     { SCE_HPHP_COMMENT, sComment },
     { SCE_HPHP_COMMENTLINE, sComment },
     { SCE_HPHP_HSTRING_VARIABLE, sKeyword1 },
-    { SCE_HPHP_OPERATOR, sCtrlChar }
+    { SCE_HPHP_OPERATOR, sOperator }
 };
 
 constexpr LexerSettings::KeywordMapping keywordsHTML[] =
@@ -1019,11 +1021,11 @@ constexpr LexerSettings::PropertyMapping propertiesSQL[] =
 constexpr LexerSettings::KeywordMapping keywordsGo[] =
 {
     {0,
-	"break default func interface select "
-	"case defer go map struct "
-	"chan else goto package switch "
-	"const fallthrough if range type "
-	"continue for import return var "
+"break default func interface select "
+"case defer go map struct "
+"chan else goto package switch "
+"const fallthrough if range type "
+"continue for import return var "
     },
     {1,
 "bool uint8 uint16 uint32 uint64 int8 int16 int32 int64 float32 float64 "
@@ -1057,6 +1059,7 @@ constexpr struct { const Language *language; LexerSettings lexer; } builtInLexer
     {&Language::LaTex, {SCLEX_LATEX, stylesTeX, nullptr, nullptr}},
     {&Language::SQL, {SCLEX_SQL, stylesSQL, keywordsSQL, propertiesSQL}},
     {&Language::Go, {SCLEX_CPP, stylesC, keywordsGo, propertiesC}},
+    {&Language::PHP, {SCLEX_HTML, stylesHTML, keywordsHTML, propertiesHTML}},
 };
 
 TColorAttr coalesce(TColorAttr from, TColorAttr into)
