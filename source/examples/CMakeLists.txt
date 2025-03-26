@@ -1,7 +1,7 @@
 # This file can be built either individually or as part of Turbo's
 # build hierarchy.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.5...3.30)
 project(turbo-examples)
 
 set(MASTER_PROJECT FALSE)

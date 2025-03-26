@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required (VERSION 3.5...3.30)
 
 option(TURBO_BUILD_APP "Build main editor application" ON)
 option(TURBO_BUILD_TESTS "Build and run tests" OFF)
