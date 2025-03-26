@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 env:
   BUILD_TYPE: MinSizeRel
+  TURBO_COMMIT_SHA: ${{ github.sha }}
 
 jobs:
   build-linux-gcc:

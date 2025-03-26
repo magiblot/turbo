@@ -6,6 +6,7 @@ option(TURBO_BUILD_EXAMPLES "Build example apps" OFF)
 option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
 option(TURBO_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
 option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the core library" ON)
+set(TURBO_COMMIT_SHA $ENV{TURBO_COMMIT_SHA} CACHE STRING "Commit SHA to be displayed in the 'About' dialog")
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
     cmake_policy(SET CMP0091 NEW)
@@ -147,6 +148,11 @@ if (TURBO_BUILD_APP)
         ${TURBO}-core
     )
     install(TARGETS ${TURBO} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    if (NOT "${TURBO_COMMIT_SHA}" STREQUAL "")
+        string(SUBSTRING "${TURBO_COMMIT_SHA}" 0 8 TURBO_COMMIT_SHORT_SHA)
+        target_compile_definitions(${TURBO} PRIVATE TURBO_VERSION_STRING="${TURBO_COMMIT_SHORT_SHA}")
+    endif()
 
     if (WIN32)
         file(GLOB_RECURSE TURBO_RC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.rc")

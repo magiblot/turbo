@@ -35,6 +35,7 @@ enum : ushort
     cmSearchIncr,
     cmFindReplaceBox,
     cmClearReplace,
+    cmAbout,
 };
 
 #endif // TURBO_CMDS_H
