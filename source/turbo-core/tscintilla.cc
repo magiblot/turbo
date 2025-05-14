@@ -63,6 +63,7 @@ TScintilla::TScintilla()
     WndProc(SCI_ASSIGNCMDKEY, SCK_DOWN | ((SCMOD_SHIFT | SCMOD_CTRL) << 16), SCI_MOVESELECTEDLINESDOWN);
     WndProc(SCI_ASSIGNCMDKEY, SCK_DOWN | ((SCMOD_SHIFT | SCMOD_ALT) << 16), SCI_MOVESELECTEDLINESDOWN);
     WndProc(SCI_ASSIGNCMDKEY, SCK_BACK | ((SCMOD_ALT) << 16), SCI_DELWORDLEFT);
+    WndProc(SCI_ASSIGNCMDKEY, SCK_DELETE | ((SCMOD_ALT) << 16), SCI_DELWORDRIGHT);
 
     // Home/End keys should respect line wrapping.
     WndProc(SCI_ASSIGNCMDKEY, SCK_HOME | (SCI_NORM << 16), SCI_VCHOMEWRAP);
@@ -70,8 +71,10 @@ TScintilla::TScintilla()
     WndProc(SCI_ASSIGNCMDKEY, SCK_END | (SCI_NORM << 16), SCI_LINEENDWRAP);
     WndProc(SCI_ASSIGNCMDKEY, SCK_END | (SCI_SHIFT << 16), SCI_LINEENDWRAPEXTEND);
 
-    // Delete current line without altering the clipboard.
-    WndProc(SCI_ASSIGNCMDKEY, 'L' | (SCMOD_CTRL << 16), SCI_LINEDELETE);
+    // Reassign 'delete line' from Ctrl+Shift+L (which will most likely not work)
+    // into Ctrl+K.
+    WndProc(SCI_ASSIGNCMDKEY, 'L' | ((SCMOD_SHIFT | SCMOD_CTRL) << 16), SCI_LINEDELETE);
+    WndProc(SCI_ASSIGNCMDKEY, 'K' | (SCMOD_CTRL << 16), SCI_LINEDELETE);
 }
 
 void TScintilla::SetVerticalScrollPos()
