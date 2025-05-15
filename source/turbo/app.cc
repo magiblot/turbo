@@ -18,6 +18,7 @@
 #include <tvision/tv.h>
 
 #include "app.h"
+#include "help.h"
 #include "apputils.h"
 #include "editwindow.h"
 #include "widgets.h"
@@ -27,7 +28,6 @@
 #include <turbo/tpath.h>
 
 using namespace Scintilla;
-using namespace std::literals;
 
 TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     TProgInit( &TurboApp::initStatusLine,
@@ -152,6 +152,8 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Toggle Auto ~I~ndent", cmToggleIndent, kbNoKey, hcNoContext ) +
             *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext ) +
         *new TSubMenu( "~H~elp", kbAltH ) +
+            *new TMenuItem( "~K~eyboard shortcurs", cmHelp, kbF1, hcNoContext, "F1" ) +
+            newLine() +
             *new TMenuItem( "~A~bout...", cmAbout, kbNoKey, hcNoContext )
             );
 
@@ -233,7 +235,12 @@ void TurboApp::handleEvent(TEvent &event)
                 if (docTree)
                     docTree->tree->focusPrev();
                 break;
-            case cmAbout: aboutDlg(); break;
+            case cmAbout:
+                TurboHelp::executeAboutDialog(*deskTop);
+                break;
+            case cmHelp:
+                TurboHelp::showOrFocusHelpWindow(*deskTop);
+                break;
             default:
                 handled = false;
                 break;
@@ -391,31 +398,6 @@ void TurboApp::toggleTreeView()
         win->setState(sfExposed, True);
     });
     deskTop->redraw();
-}
-
-void TurboApp::aboutDlg() noexcept
-{
-    TDialog *aboutBox = new TDialog(TRect(0, 0, 39, 12), "About");
-
-    aboutBox->insert(
-      new TStaticText(TRect(2, 2, 37, 8),
-        "\003Turbo"
-#ifdef TURBO_VERSION_STRING
-        " (build " TURBO_VERSION_STRING ")"
-#endif
-        "\n\n"
-        "\003A text editor based on Scintilla and Turbo Vision\n\n"
-        "\003https://github.com/magiblot/turbo"
-        )
-      );
-
-    aboutBox->insert(
-        new TButton(TRect(14, 9, 26, 11), "OK", cmOK, bfDefault)
-    );
-
-    aboutBox->options |= ofCentered;
-
-    executeDialog(aboutBox);
 }
 
 void TurboApp::handleFocus(EditorWindow &w) noexcept

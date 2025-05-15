@@ -48,8 +48,6 @@ struct TurboApp : public TApplication, EditorWindowParent
     void showEditorList(TEvent *ev);
     void toggleTreeView();
 
-    void aboutDlg() noexcept;
-
     void handleFocus(EditorWindow &w) noexcept override;
     void handleTitleChange(EditorWindow &w) noexcept override;
     void removeEditor(EditorWindow &w) noexcept override;
