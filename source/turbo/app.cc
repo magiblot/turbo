@@ -41,7 +41,6 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     ts += cmSave;
     ts += cmSaveAs;
     ts += cmRename;
-    ts += cmOpenRecent;
     ts += cmToggleWrap;
     ts += cmToggleLineNums;
     ts += cmFind;
@@ -108,7 +107,6 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
             *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
-            *new TMenuItem( "Open R~e~cent...", cmOpenRecent, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "~S~ave", cmSave, kbCtrlS, hcNoContext, "Ctrl-S" ) +
             *new TMenuItem( "S~a~ve As...", cmSaveAs, kbNoKey, hcNoContext ) +
