@@ -28,7 +28,7 @@ TScintilla::TScintilla()
     reprs.Clear();
     {
         constexpr int ranges[][2] = {{0, ' '}, {0x7F, 0x100}};
-        for (auto [beg, end] : ranges) {
+        for (auto &[beg, end] : ranges) {
             for (int i = beg; i < end; ++i) {
                 char c[2] = {(char) i};
                 char r[8] = {};
