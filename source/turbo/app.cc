@@ -347,11 +347,11 @@ void TurboApp::showEditorList(TEvent *ev)
 {
     EditorListModel model {MRUlist};
     TRect r {0, 0, 0, 0};
-    r.b.x = min(max(maxWidth(model) + 6, 40), deskTop->size.x - 10);
+    r.b.x = min(max(ListModel::maxItemCStrLen(model) + 4, 40), deskTop->size.x - 10);
     r.b.y = min(max(model.size() + 2, 6), deskTop->size.y - 4);
     r.move((deskTop->size.x - r.b.x) / 2,
            (deskTop->size.y - r.b.y) / 4);
-    ListWindow *lw = new ListWindow(r, "Buffer List", model, ListViewCreator<EditorListView>());
+    ListWindow *lw = &ListWindow::create<EditorListView>(r, "Buffer List", model, lvScrollBars);
     if (ev)
         lw->putEvent(*ev);
     if (deskTop->execView(lw) == cmOK)

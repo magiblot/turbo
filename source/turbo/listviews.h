@@ -13,91 +13,111 @@ class ListModel
 public:
     virtual size_t size() const noexcept = 0;
     virtual void *at(size_t i) const noexcept = 0;
-    virtual TStringView getText(void *) const noexcept = 0;
+    virtual std::string getText(void *item) const noexcept = 0;
+
+    static size_t maxItemCStrLen(const ListModel &model) noexcept;
 };
 
-size_t maxWidth(const ListModel &model) noexcept;
-
-class ListView;
+/* ---------------------------------------------------------------------- */
+/*      class ListWindow                                                  */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Frame passive                                               */
+/*        2 = Frame active                                                */
+/*        3 = Frame icon                                                  */
+/*        4 = ScrollBar page area                                         */
+/*        5 = ScrollBar controls                                          */
+/*        6 = ListView normal                                             */
+/*        7 = ListView focused                                            */
+/*        8 = ListView normal (alternative)                               */
+/*        9 = ListView focused (alternative)                              */
+/* ---------------------------------------------------------------------- */
 
 enum ListViewFlags : uint8_t
 {
-    lvNoScrollBars = 0x01,
+    lvScrollBars = 0x01,
     lvSelectSingleClick = 0x02,
 };
 
-template <class Viewer>
-class ListViewCreator
-{
-    ushort listViewFlags;
-
-public:
-
-    ListViewCreator(ushort aListViewFlags = 0) noexcept :
-        listViewFlags(aListViewFlags)
-    {
-    }
-
-    ListView *operator()(TRect, TWindow *, const ListModel &) noexcept;
-};
+class ListView;
 
 class ListWindow : public TWindow
 {
-    ListView *viewer;
-
 public:
 
-    static const TPoint minSize;
-
-    // The lifetime of 'aList' must exceed that of 'this'.
-    // The lifetime of 'createListViewer' must exceed that of the constructor invocation.
-    ListWindow( const TRect &bounds, const char *title, const ListModel &model,
-                TFuncView<ListView *(TRect, TWindow *, const ListModel &)> createListViewer = ListViewCreator<ListView>() );
-
-    void shutDown() override;
-    void handleEvent(TEvent& event) override;
-    TPalette &getPalette() const override;
-    void sizeLimits(TPoint &min, TPoint &max) override;
+    // 'ListViewT' must be 'ListView' or a subclass of it, and its constructor
+    // must have the same parameters as those in 'ListView'.
+    // The lifetime of 'model' must exceed that of the returned object.
+    template <class ListViewT = ListView>
+    static ListWindow &create( const TRect &bounds, TStringView title,
+                               const ListModel &model, ushort listViewFlags ) noexcept;
 
     void *getCurrent() const noexcept;
     short getCurrentIndex() const noexcept;
     void setCurrentIndex(short i) noexcept;
+
+    void shutDown() override;
+    void handleEvent(TEvent& event) override;
+    TColorAttr mapColor(uchar index) override;
+    void sizeLimits(TPoint &min, TPoint &max) override;
+
+private:
+
+    using ListViewCreator = TFuncView<ListView &( const TRect &,
+                                                  TScrollBar *, TScrollBar *,
+                                                  const ListModel &, ushort )>;
+
+    ListView *listView;
+
+    static const TPoint minSize;
+
+    ListWindow( const TRect &bounds, TStringView title, const ListModel &model,
+                ushort listViewFlags, ListViewCreator createListView ) noexcept;
 };
 
-struct MouseEventType;
+template <class ListViewT>
+inline ListWindow &ListWindow::create( const TRect &bounds, TStringView title,
+                                       const ListModel &model, ushort listViewFlags ) noexcept
+{
+    auto creator = [] ( const TRect &bounds,
+                        TScrollBar *hScrollBar, TScrollBar *vScrollBar,
+                        const ListModel &model, ushort listViewFlags ) -> ListView &
+    {
+        return *new ListViewT(bounds, hScrollBar, vScrollBar, model, listViewFlags);
+    };
+    return *new ListWindow(bounds, title, model, listViewFlags, creator);
+}
+
+/* ---------------------------------------------------------------------- */
+/*      class ListView                                                    */
+/*                                                                        */
+/*      Palette layout                                                    */
+/*        1 = Active                                                      */
+/*        2 = Focused                                                     */
+/*        3 = Active (alternative)                                        */
+/*        4 = Focused (alternative)                                       */
+/* ---------------------------------------------------------------------- */
 
 class ListView : public TListViewer
 {
-    const ListModel &model;
-    ushort flags;
-
 public:
 
-    // The lifetime of 'aList' must exceed that of 'this'.
+    // The lifetime of 'model' must exceed that of 'this'.
+    // Takes ownership over 'hScrollBar' and 'vScrollBar'.
     ListView( const TRect& bounds, TScrollBar *hScrollBar, TScrollBar *vScrollBar,
               const ListModel &model, ushort flags );
 
     void *getCurrent() noexcept;
 
-    void getText(char *dest, short item, short maxLen) override;
     void handleEvent(TEvent& ev) override;
-
+    void draw() override;
     TPalette &getPalette() const override;
-};
 
-template <class Viewer>
-inline ListView *ListViewCreator<Viewer>::operator()(TRect r, TWindow *win, const ListModel &model) noexcept
-{
-    r.grow(-1, -1);
-    TScrollBar *hScrollBar = nullptr, *vScrollBar = nullptr;
-    if (!(listViewFlags & lvNoScrollBars))
-    {
-        hScrollBar = win->standardScrollBar(sbHorizontal | sbHandleKeyboard);
-        vScrollBar = win->standardScrollBar(sbVertical | sbHandleKeyboard);
-    }
-    auto *viewer = new Viewer(r, hScrollBar, vScrollBar, model, listViewFlags);
-    return static_cast<ListView *>(viewer);
-}
+private:
+
+    const ListModel &model;
+    ushort flags;
+};
 
 class EditorListView : public ListView
 {
@@ -121,22 +141,9 @@ public:
     {
     }
 
-    size_t size() const noexcept override
-    {
-        return list.size();
-    }
-
-    void *at(size_t i) const noexcept override
-    {
-        return list.at(i)->self;
-    }
-
-    TStringView getText(void *item) const noexcept override
-    {
-        if (auto *wnd = (EditorWindow *) item)
-            return wnd->title;
-        return "";
-    }
+    size_t size() const noexcept override;
+    void *at(size_t i) const noexcept override;
+    std::string getText(void *item) const noexcept override;
 };
 
 template <class T>
@@ -166,14 +173,14 @@ public:
 
     void *at(size_t i) const noexcept override
     {
-        return (void *) &list[i];
+        return (i < list.size()) ? (void *) &list[i] : nullptr;
     }
 
-    TStringView getText(void *item) const noexcept override
+    std::string getText(void *item) const noexcept override
     {
         if (auto *entry = (const SpanListModelEntry<T> *) item)
             return entry->text;
-        return "";
+        return {};
     }
 };
 

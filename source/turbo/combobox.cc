@@ -19,7 +19,7 @@ ComboBox::ComboBox(const TRect &bounds, const ListModel &aModel) noexcept :
 
 int ComboBox::calcBodySize() noexcept
 {
-    int textAreaSize = maxWidth(model) + 2;
+    int textAreaSize = ListModel::maxItemCStrLen(model) + 2;
     int iconSize = cstrlen(icon);
     return min(size.x, textAreaSize + iconSize);
 }
@@ -39,7 +39,7 @@ void ComboBox::draw()
         b.moveCStr(0, icon, iconColors, bodySize, iconSize - bodySize);
     if (bodySize > iconSize)
     {
-        TStringView text = model.getText(model.at(currentIndex));
+        std::string text = model.getText(model.at(currentIndex));
         int textWidth = strwidth(text);
 
         TColorAttr textColor = getColor((state & sfFocused) ? 2 : 1);
@@ -97,14 +97,14 @@ void ComboBox::showPopup(int indexOffset) noexcept
 {
     TGroup *app = TProgram::application;
     TPoint globalOrigin = owner->makeGlobal(origin);
-    int popupWidth = maxWidth(model) + 4;
+    int popupWidth = ListModel::maxItemCStrLen(model) + 4;
     int popupHeight = model.size() + 2;
     int spaceBelow = app->size.y - globalOrigin.y - 1;
     bool above = spaceBelow < popupHeight && spaceBelow < globalOrigin.y;
     TPoint popupOrigin {globalOrigin.x - 1, globalOrigin.y + (above ? -popupHeight : 1)};
     TRect r {popupOrigin.x, popupOrigin.y, popupOrigin.x + popupWidth, popupOrigin.y + popupHeight};
 
-    auto *popup = new ListWindow(r, nullptr, model, ListViewCreator<ListView>(lvNoScrollBars | lvSelectSingleClick));
+    auto *popup = &ListWindow::create(r, nullptr, model, lvSelectSingleClick);
     popup->flags = 0;
     popup->state &= ~sfShadow;
     popup->growMode = (growMode & ~gfGrowHiX) | gfGrowLoY | gfGrowHiY;

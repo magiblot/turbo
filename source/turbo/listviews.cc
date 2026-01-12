@@ -4,64 +4,89 @@
 #include <tvision/tv.h>
 
 #include "listviews.h"
+#include <turbo/tpath.h>
 
-size_t maxWidth(const ListModel &model) noexcept
+/////////////////////////////////////////////////////////////////////////
+// ListModel
+
+size_t ListModel::maxItemCStrLen(const ListModel &model) noexcept
 {
-    size_t width = 0, elems = model.size();
+    size_t maxWidth = 0, elems = model.size();
     for (size_t i = 0; i < elems; ++i)
     {
-        size_t w = cstrlen(model.getText(model.at(i)));
-        if (w > width)
-            width = w;
+        std::string text = model.getText(model.at(i));
+        size_t width = (size_t) cstrlen(text);
+        if (width > maxWidth)
+            maxWidth = width;
     }
-    return width;
+    return maxWidth;
 }
 
-#define cpListWindow "\x32\x32\x34\x37\x36\x32\x33"
+/////////////////////////////////////////////////////////////////////////
+// ListWindow
 
 const TPoint ListWindow::minSize = {5, 3};
 
-ListWindow::ListWindow( const TRect &bounds, const char *aTitle, const ListModel &aModel,
-                        TFuncView<ListView *(TRect, TWindow *, const ListModel &)> createListViewer ) :
+ListWindow::ListWindow( const TRect &bounds, TStringView aTitle, const ListModel &model,
+                        ushort listViewFlags, ListViewCreator createListView ) noexcept :
     TWindowInit(&initFrame),
     TWindow(bounds, aTitle, wnNoNumber)
 {
     flags = wfClose | wfMove;
-    viewer = createListViewer(getExtent(), this, aModel);
-    viewer->growMode = gfGrowHiX | gfGrowHiY;
-    insert(viewer);
+
+    TScrollBar *hScrollBar = nullptr, *vScrollBar = nullptr;
+    if (listViewFlags & lvScrollBars)
+    {
+        hScrollBar = standardScrollBar(sbHorizontal | sbHandleKeyboard);
+        vScrollBar = standardScrollBar(sbVertical | sbHandleKeyboard);
+    }
+    listView = &createListView( getExtent().grow(-1, -1), hScrollBar,
+                                vScrollBar, model, listViewFlags );
+    listView->growMode = gfGrowHiX | gfGrowHiY;
+    insert(listView);
 }
 
 void ListWindow::shutDown()
 {
-    viewer = nullptr;
+    listView = nullptr;
     TWindow::shutDown();
 }
 
-TPalette &ListWindow::getPalette() const
+TColorAttr ListWindow::mapColor(uchar index)
 {
-    static TPalette palette(cpListWindow, sizeof(cpListWindow) - 1);
-    return palette;
+    switch (index)
+    {
+        case 1: return '\x1F';
+        case 2: return '\x1F';
+        case 3: return '\x1A';
+        case 4: return '\x31';
+        case 5: return '\x72';
+        case 6: return '\x1F';
+        case 7: return '\x2F';
+        case 8: return '\x1B';
+        case 9: return '\x2B';
+        default: return errorAttr;
+    }
 }
 
 void* ListWindow::getCurrent() const noexcept
 {
-    if (viewer)
-        return viewer->getCurrent();
+    if (listView)
+        return listView->getCurrent();
     return nullptr;
 }
 
 short ListWindow::getCurrentIndex() const noexcept
 {
-    if (viewer)
-        return viewer->focused;
+    if (listView)
+        return listView->focused;
     return 0;
 }
 
 void ListWindow::setCurrentIndex(short i) noexcept
 {
-    if (viewer)
-        viewer->focusItemNum(i);
+    if (listView)
+        listView->focusItemNum(i);
 }
 
 void ListWindow::handleEvent(TEvent& event)
@@ -80,7 +105,10 @@ void ListWindow::sizeLimits(TPoint &min, TPoint &max)
     min = minSize;
 }
 
-#define cpListViewer "\x06\x06\x07\x06\x06"
+/////////////////////////////////////////////////////////////////////////
+// ListView
+
+#define cpListView "\x06\x07\x08\x09"
 
 ListView::ListView( const TRect& bounds, TScrollBar *aHScrollBar,
                     TScrollBar *aVScrollBar, const ListModel &aModel,
@@ -93,19 +121,13 @@ ListView::ListView( const TRect& bounds, TScrollBar *aHScrollBar,
     if (range > 1)
         focusItem(1);
     if (hScrollBar)
-        hScrollBar->setRange(0, maxWidth(model) - size.x + 3);
+        hScrollBar->setRange(0, ListModel::maxItemCStrLen(model) - size.x + 2);
 }
 
 TPalette &ListView::getPalette() const
 {
-    static TPalette palette(cpListViewer, sizeof(cpListViewer) - 1);
+    static TPalette palette(cpListView, sizeof(cpListView) - 1);
     return palette;
-}
-
-void ListView::getText(char *dest, short item, short maxChars)
-{
-    TStringView text = model.getText(model.at(item));
-    strnzcpy(dest, text, maxChars + 1);
 }
 
 void *ListView::getCurrent() noexcept
@@ -171,6 +193,56 @@ void ListView::handleEvent(TEvent &event)
         TListViewer::handleEvent(event);
 }
 
+void ListView::draw()
+{
+    TDrawBuffer b;
+
+    TAttrPair normalColors = getColor(0x0301);
+    TAttrPair focusedColors = getColor(0x0402);
+
+    int indent = (hScrollBar) ? hScrollBar->value : 0;
+
+    bool focusedVis = false;
+    for (int i = 0; i < size.y; ++i)
+    {
+        int item = i + topItem;
+
+        TAttrPair colors = normalColors;
+        uchar scOff = 4;
+        if (focused == item && range > 0)
+        {
+            colors = focusedColors;
+            setCursor(1, i);
+            scOff = 0;
+            focusedVis = true;
+        }
+
+        b.moveChar(0, ' ', colors, size.x);
+        if (item < range)
+        {
+            std::string text = model.getText(model.at(item));
+            text.insert(text.begin(), ' ');
+            b.moveCStr(0, text, colors, size.x, indent);
+
+            if (showMarkers)
+            {
+                b.putChar(0, specialChars[scOff] );
+                b.putChar(size.x - 1, specialChars[scOff + 1]);
+            }
+        }
+        else if (i == 0)
+            b.moveStr(1, "<empty>", getColor(1));
+
+        writeLine(0, i, size.x, 1, b);
+    }
+
+    if (!focusedVis)
+        setCursor(-1, -1);
+}
+
+/////////////////////////////////////////////////////////////////////////
+// EditorListView
+
 #include "cmds.h"
 
 static int mod(int a, int b)
@@ -195,5 +267,33 @@ void EditorListView::handleEvent(TEvent &ev)
     }
     else
         ListView::handleEvent(ev);
+}
 
+/////////////////////////////////////////////////////////////////////////
+// EditorListModel
+
+size_t EditorListModel::size() const noexcept
+{
+    return list.size();
+}
+
+void *EditorListModel::at(size_t i) const noexcept
+{
+    return (i < list.size()) ? list.at(i)->self : nullptr;
+}
+
+std::string EditorListModel::getText(void *item) const noexcept
+{
+    std::string text;
+    if (auto *wnd = (EditorWindow *) item)
+    {
+        text.append(wnd->title);
+        if (!wnd->filePath().empty())
+        {
+            text.append("  ~");
+            text.append(TPath::dirname(wnd->filePath()));
+            text.append("~");
+        }
+    }
+    return text;
 }
