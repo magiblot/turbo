@@ -1,6 +1,7 @@
 #define Uses_TApplication
 #define Uses_TDeskTop
 #define Uses_TKeys
+#define Uses_TMenu
 #define Uses_TMenuBar
 #define Uses_TMenuItem
 #define Uses_TStatusDef
@@ -8,12 +9,14 @@
 #define Uses_TStatusLine
 #define Uses_TSubMenu
 #define Uses_TWindow
+#define Uses_TButton
 #define Uses_TFrame
 #define Uses_TFileDialog
 #define Uses_TIndicator
 #define Uses_TStaticText
 #define Uses_TParamText
 #define Uses_TScreen
+#define Uses_MsgBox
 #define Uses_TButton
 #include <tvision/tv.h>
 
@@ -26,8 +29,20 @@
 #include "doctree.h"
 #include <turbo/fileeditor.h>
 #include <turbo/tpath.h>
+#include <turbo/styles.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#ifdef TURBO_USE_CFGFILE
+#include <toml.h>
+#include <tomlcpp.hpp>
+#endif
 
 using namespace Scintilla;
+using namespace std::literals;
+
+TCommandSet allCmUseLanguages;
 
 TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     TProgInit( &TurboApp::initStatusLine,
@@ -37,7 +52,12 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
     argc(argc),
     argv(argv)
 {
+    // Create the CommandSet for all commands used to select a highlight language. (This lets them all be disabled at once)
+    for (int i = 0; (i < turbo::Language::COUNT) && i < (cmUseLanguageMax - cmUseLanguage); i++)
+        allCmUseLanguages += (cmUseLanguage + i);
+
     TCommandSet ts;
+    ts += allCmUseLanguages;
     ts += cmSave;
     ts += cmSaveAs;
     ts += cmRename;
@@ -98,11 +118,30 @@ TurboApp::TurboApp(int argc, const char *argv[]) noexcept :
         if (deskTop->size.x - docTree->size.x < 82)
             docTree->hide();
     }
+
+    if (char *cfgdir = getenv("XDG_CONFIG_HOME"))
+        config_path += cfgdir;
+    else {
+        config_path += getenv("HOME");
+        config_path += "/.config";
+    }
+    config_path += "/turbo.toml";
+
+    loadConfig();
 }
 
 TMenuBar *TurboApp::initMenuBar(TRect r)
 {
     r.b.y = r.a.y+1;
+
+    // Dynamically generate the list of programming languages, each with its own associated cmUseLanguageXXX code
+    TMenuItem *langList = NULL;
+    for (int i = 0; (i < turbo::Language::COUNT) && i < (cmUseLanguageMax - cmUseLanguage); i++)
+    {
+        TMenuItem *item = new TMenuItem( turbo::languages[i].name, cmUseLanguage + i, kbNoKey, hcNoContext);
+        langList = (langList == NULL) ? item : &(*langList + *item);
+    }
+
     return new TMenuBar( r,
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
@@ -149,11 +188,12 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
             *new TMenuItem( "Toggle Line ~W~rapping", cmToggleWrap, kbF9, hcNoContext, "F9" ) +
             *new TMenuItem( "Toggle Auto ~I~ndent", cmToggleIndent, kbNoKey, hcNoContext ) +
             *new TMenuItem( "Toggle Document ~T~ree View", cmToggleTree, kbNoKey, hcNoContext ) +
+            *new TMenuItem( "Document ~L~anguage", kbNoKey, new TMenu(*langList)) +
         *new TSubMenu( "~H~elp", kbAltH ) +
             *new TMenuItem( "~K~eyboard shortcurs", cmHelp, kbF1, hcNoContext, "F1" ) +
             newLine() +
             *new TMenuItem( "~A~bout...", cmAbout, kbNoKey, hcNoContext )
-            );
+        );
 
 }
 
@@ -233,6 +273,30 @@ void TurboApp::handleEvent(TEvent &event)
                 if (docTree)
                     docTree->tree->focusPrev();
                 break;
+
+            case cmToggleWrap:
+                config.wrapping = !config.wrapping;
+                MRUlist.forEach([&] (auto *win) {
+                    TurboEditor &editor = win->getEditor();
+                    editor.wrapping.setState(config.wrapping, editor.scintilla);
+                    editor.redraw();
+                });
+                break;
+            case cmToggleLineNums:
+                config.lineNumbers = !config.lineNumbers;
+                MRUlist.forEach([&] (auto *win) {
+                    win->getEditor().lineNumbers.setState(config.lineNumbers);
+                    win->getEditor().redraw();
+                });
+                break;
+            case cmToggleIndent:
+                config.autoIndent = !config.autoIndent;
+                MRUlist.forEach([&] (auto *win) {
+                    win->getEditor().autoIndent.setState(config.autoIndent);
+                    win->getEditor().redraw();
+                });
+                break;
+
             case cmAbout:
                 TurboHelp::executeAboutDialog(*deskTop);
                 break;
@@ -244,6 +308,7 @@ void TurboApp::handleEvent(TEvent &event)
                 break;
         }
     }
+
     if (handled)
         clearEvent(event);
 }
@@ -334,7 +399,12 @@ void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)
 {
     TRect r = newEditorBounds();
     auto &counter = fileCount[TPath::basename(path)];
+
     auto &editor = *new TurboEditor(scintilla, path);
+    editor.lineNumbers.setState(config.lineNumbers);    // Configure with defaults
+    editor.autoIndent.setState(config.autoIndent);
+    editor.wrapping.setState(config.wrapping, editor.scintilla);
+
     EditorWindow &w = *new EditorWindow(r, editor, counter, searchSettings, *this);
     if (docTree)
         docTree->tree->addEditor(&w);
@@ -406,7 +476,7 @@ void TurboApp::handleFocus(EditorWindow &w) noexcept
         docTree->tree->focusEditor(&w);
     // We keep track of the most recent directory for file dialogs.
     if (!w.filePath().empty())
-        mostRecentDir = TPath::dirname(w.filePath());
+        config.mostRecentDir = TPath::dirname(w.filePath());
 }
 
 void TurboApp::handleTitleChange(EditorWindow &w) noexcept
@@ -423,7 +493,7 @@ void TurboApp::handleTitleChange(EditorWindow &w) noexcept
         }
     }
     if (!w.filePath().empty() && w.state & sfActive)
-        mostRecentDir = TPath::dirname(w.filePath());
+        config.mostRecentDir = TPath::dirname(w.filePath());
 }
 
 void TurboApp::removeEditor(EditorWindow &w) noexcept
@@ -443,5 +513,58 @@ void TurboApp::removeEditor(EditorWindow &w) noexcept
 
 const char *TurboApp::getFileDialogDir() noexcept
 {
-    return mostRecentDir.c_str();
+    return config.mostRecentDir.c_str();
+}
+
+void TurboApp::loadConfig()
+{
+#ifdef TURBO_USE_CFGFILE
+    std::string errmsg;
+
+    // Return if config file doesn;t exist
+    FILE *f = fopen(config_path.c_str(), "r");
+    if (!f) return; // config file doesnt exist yet
+    fclose(f);
+
+    // Any remaining errors will be parse errors
+    auto res = toml::parseFile(config_path);
+    if (res.table) {
+        bool ok;
+
+        auto editor = res.table->getTable("Editor");
+        if (editor) {
+            std::tie(ok, config.lineNumbers) = editor->getBool("lineNumbers");
+            std::tie(ok, config.autoIndent)  = editor->getBool("autoIndent");
+            std::tie(ok, config.wrapping)    = editor->getBool("wrapping");
+        }
+
+        auto state = res.table->getTable("State");
+        if (state) {
+            std::tie(ok, config.mostRecentDir) = state->getBool("mostRecentDir");
+        }
+
+        return;
+    }
+
+    messageBox( mfError | mfOKButton, "Error loading config:\n%s", res.errmsg.c_str());
+#endif
+}
+
+void TurboApp::saveConfig()
+{
+#ifdef TURBO_USE_CFGFILE
+    // https://github.com/cktan/tomlc99/issues/91
+
+    FILE *out = fopen(config_path.c_str(), "w");
+
+    fprintf(out, "[Editor]\n");
+    fprintf(out, "lineNumbers = %s\n", config.lineNumbers ? "true" : "false");
+    fprintf(out, "autoIndent = %s\n", config.autoIndent ? "true" : "false");
+    fprintf(out, "wrapping = %s\n", config.wrapping ? "true" : "false");
+    fprintf(out, "\n");
+    fprintf(out, "[State]\n");
+    fprintf(out, "mostRecentDir = \"%s\"\n", config.mostRecentDir.c_str());
+
+    fclose(out);
+#endif
 }

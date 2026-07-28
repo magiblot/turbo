@@ -4,6 +4,7 @@ static void runTurbo(int argc, const char **argv)
 {
     TurboApp app(argc, argv);
     app.run();
+    app.saveConfig();
     app.shutDown();
 }
 

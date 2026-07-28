@@ -58,7 +58,7 @@ public:
 
     void shutDown() override;
     void handleEvent(TEvent& event) override;
-    TColorAttr mapColor(uchar index) override;
+    TColorAttr mapColor(uchar index) noexcept override;
     void sizeLimits(TPoint &min, TPoint &max) override;
 
 private:

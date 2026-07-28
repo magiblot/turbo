@@ -6,6 +6,7 @@ option(TURBO_BUILD_EXAMPLES "Build example apps" OFF)
 option(TURBO_USE_SYSTEM_TVISION "Use system-wide Turbo Vision instead of the submodule" OFF)
 option(TURBO_USE_STATIC_RTL "Link against the static version of the runtime library (MSVC only)" OFF)
 option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the core library" ON)
+option(TURBO_USE_CFGFILE "Save settings to a config file" ON)
 set(TURBO_COMMIT_SHA $ENV{TURBO_COMMIT_SHA} CACHE STRING "Commit SHA to be displayed in the 'About' dialog")
 
 if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.15.0")
@@ -141,12 +142,19 @@ endif()
 
 if (TURBO_BUILD_APP)
     file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/source/${TURBO}/*.cc")
+
     add_executable(${TURBO} ${TURBO_SRC})
     target_compile_features(${TURBO} PRIVATE cxx_std_17)
     turbo_set_warnings(${TURBO})
     target_link_libraries(${TURBO} PRIVATE
         ${TURBO}-core
     )
+
+    if (TURBO_USE_CFGFILE)
+        target_compile_definitions(${TURBO} PRIVATE TURBO_USE_CFGFILE)
+        target_link_libraries(${TURBO} PRIVATE -ltomlcpp)
+    endif()
+
     install(TARGETS ${TURBO} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
     if (NOT "${TURBO_COMMIT_SHA}" STREQUAL "")

@@ -597,7 +597,7 @@ static void keepSpecialTrailingSpaces( const Language *language,
                                        Sci::Position lineEnd )
 {
     // In Markdown, two trailing whitespaces behave as a line break, so keep them.
-    if (language == &Language::Markdown)
+    if (language == &turbo::languages[Language::Markdown])
     {
         if (whitespaceStart + 2 <= lineEnd)
             whitespaceStart += 2;

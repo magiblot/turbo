@@ -26,6 +26,7 @@ Then, make sure the following dependencies are installed:
 * CMake.
 * A compiler supporting C++17.
 * `libncursesw` (note the 'w') (Unix only).
+* [`libtomlcpp`](https://github.com/cktan/tomlcpp/) (for saving editor config in `~/.config/turbo.toml`)
 
 Additionally, you may also want to install these optional dependencies:
 

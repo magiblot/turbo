@@ -4,3 +4,6 @@
 [submodule "deps/fmt"]
 	path = deps/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "deps/tomlinc"]
+	path = deps/tomlinc
+	url = https://github.com/giobauermeister/tomlinc

@@ -52,7 +52,7 @@ void ListWindow::shutDown()
     TWindow::shutDown();
 }
 
-TColorAttr ListWindow::mapColor(uchar index)
+TColorAttr ListWindow::mapColor(uchar index) noexcept 
 {
     switch (index)
     {
