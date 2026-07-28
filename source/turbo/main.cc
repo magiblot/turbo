@@ -1,8 +1,35 @@
 #include "app.h"
 
+#include <turbo/scintilla.h>
+
+#if !defined(_WIN32) || !defined(_MSC_VER)
+#   include <unistd.h>
+#   include <iostream>
+#   include <sstream>
+#   include <string>
+#endif
+
 static void runTurbo(int argc, const char **argv)
 {
     TurboApp app(argc, argv);
+
+#if !defined(_WIN32) || !defined(_MSC_VER)
+    /* Read piped data */
+
+    if (isatty(STDIN_FILENO)) {
+        /* stdin is a terminal (interactive) */
+    } else {
+        /* stdin is a pipe */
+        std::ostringstream ss;
+        ss << std::cin.rdbuf();
+
+        turbo::TScintilla &sc = app.createScintilla();
+        turbo::insertPasteStream(sc, ss.str());
+
+        app.addEditor(sc, "");
+    }
+#endif
+
     app.run();
     app.shutDown();
 }
