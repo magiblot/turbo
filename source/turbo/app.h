@@ -11,11 +11,15 @@
 #include "editwindow.h"
 #include "cmds.h"
 
+#include <deque>
+
 struct EditorWindow;
 class TClockView;
 
 struct TurboApp : public TApplication, EditorWindowParent
 {
+
+    static constexpr size_t maxRecentFiles = 20;
 
     FileCounter fileCount;
     list_head<EditorWindow> MRUlist;
@@ -27,6 +31,7 @@ struct TurboApp : public TApplication, EditorWindowParent
     const char **argv;
     turbo::SearchSettings searchSettings;
     std::string mostRecentDir;
+    std::deque<std::string> recentFiles;
 
     TurboApp(int argc, const char **argv) noexcept;
     static TMenuBar* initMenuBar(TRect r);
@@ -41,6 +46,8 @@ struct TurboApp : public TApplication, EditorWindowParent
     void fileNew();
     void fileOpen();
     void fileOpenOrNew(const char *path);
+    void showRecentFiles();
+    void addRecentFile(const std::string &path);
     void closeAll();
     TRect newEditorBounds() const;
     turbo::TScintilla &createScintilla() noexcept;

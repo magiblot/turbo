@@ -130,6 +130,9 @@ public:
 #include "apputils.h"
 #include "editwindow.h"
 
+#include <deque>
+#include <string>
+
 class EditorListModel : public ListModel
 {
     mutable list_head_iterator<EditorWindow> list;
@@ -138,6 +141,23 @@ public:
 
     EditorListModel(list_head<EditorWindow> &aList) :
         list(&aList)
+    {
+    }
+
+    size_t size() const noexcept override;
+    void *at(size_t i) const noexcept override;
+    std::string getText(void *item) const noexcept override;
+};
+
+class RecentFilesListModel : public ListModel
+{
+    const std::deque<std::string> &list;
+
+public:
+
+    // The lifetime of 'aList' must exceed that of 'this'.
+    RecentFilesListModel(const std::deque<std::string> &aList) noexcept :
+        list(aList)
     {
     }
 

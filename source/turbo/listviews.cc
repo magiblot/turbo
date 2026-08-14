@@ -297,3 +297,23 @@ std::string EditorListModel::getText(void *item) const noexcept
     }
     return text;
 }
+
+/////////////////////////////////////////////////////////////////////////
+// RecentFilesListModel
+
+size_t RecentFilesListModel::size() const noexcept
+{
+    return list.size();
+}
+
+void *RecentFilesListModel::at(size_t i) const noexcept
+{
+    return (i < list.size()) ? (void *) &list[i] : nullptr;
+}
+
+std::string RecentFilesListModel::getText(void *item) const noexcept
+{
+    if (auto *path = (const std::string *) item)
+        return *path;
+    return {};
+}

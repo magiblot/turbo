@@ -144,7 +144,7 @@ Below is a TO-DO list of features I would like to implement in Turbo:
 - [x] Find as you type.
 - [x] Replace.
 - [x] Go to line.
-- [ ] List of recently opened files.
+- [x] List of recently opened files.
 - [x] Remove trailing whitespaces on save.
 - [x] Ensure newline at end of file.
 - [ ] Detect open files modified on disk.

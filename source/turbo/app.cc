@@ -107,6 +107,7 @@ TMenuBar *TurboApp::initMenuBar(TRect r)
         *new TSubMenu( "~F~ile", kbAltF, hcNoContext ) +
             *new TMenuItem( "~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N" ) +
             *new TMenuItem( "~O~pen", cmOpen, kbCtrlO, hcNoContext, "Ctrl-O" ) +
+            *new TMenuItem( "Open ~R~ecent...", cmOpenRecent, kbNoKey, hcNoContext ) +
             newLine() +
             *new TMenuItem( "~S~ave", cmSave, kbCtrlS, hcNoContext, "Ctrl-S" ) +
             *new TMenuItem( "S~a~ve As...", cmSaveAs, kbNoKey, hcNoContext ) +
@@ -219,6 +220,7 @@ void TurboApp::handleEvent(TEvent &event)
         switch (event.message.command) {
             case cmNew: fileNew(); break;
             case cmOpen: fileOpen(); break;
+            case cmOpenRecent: showRecentFiles(); break;
             case cmEditorNext:
             case cmEditorPrev:
                 showEditorList(&event);
@@ -294,6 +296,39 @@ void TurboApp::fileOpenOrNew(const char *path)
         addEditor(scintilla, abspath);
 }
 
+void TurboApp::addRecentFile(const std::string &path)
+{
+    // Remove duplicates, then prepend.
+    for (auto it = recentFiles.begin(); it != recentFiles.end(); ++it)
+    {
+        if (*it == path)
+        {
+            recentFiles.erase(it);
+            break;
+        }
+    }
+    recentFiles.push_front(path);
+    if (recentFiles.size() > maxRecentFiles)
+        recentFiles.pop_back();
+}
+
+void TurboApp::showRecentFiles()
+{
+    if (recentFiles.empty())
+        return;
+    RecentFilesListModel model {recentFiles};
+    TRect r {0, 0, 0, 0};
+    r.b.x = min(max(ListModel::maxItemCStrLen(model) + 4, 40), deskTop->size.x - 10);
+    r.b.y = min(max((int) model.size() + 2, 6), deskTop->size.y - 4);
+    r.move((deskTop->size.x - r.b.x) / 2,
+           (deskTop->size.y - r.b.y) / 4);
+    ListWindow *lw = &ListWindow::create(r, "Recent Files", model, lvScrollBars | lvSelectSingleClick);
+    if (deskTop->execView(lw) == cmOK)
+        if (auto *path = (const std::string *) lw->getCurrent())
+            fileOpenOrNew(path->c_str());
+    destroy(lw);
+}
+
 void TurboApp::closeAll()
 {
     while (!MRUlist.empty()) {
@@ -341,6 +376,8 @@ void TurboApp::addEditor(turbo::TScintilla &scintilla, const char *path)
     w.listHead.insert_after(&MRUlist);
     deskTop->insert(&w);
     enableCommands(editorCmds);
+    if (path && path[0])
+        addRecentFile(path);
 }
 
 void TurboApp::showEditorList(TEvent *ev)
@@ -428,6 +465,8 @@ void TurboApp::handleTitleChange(EditorWindow &w) noexcept
 
 void TurboApp::removeEditor(EditorWindow &w) noexcept
 {
+    if (!w.filePath().empty())
+        addRecentFile(w.filePath());
     w.listHead.remove();
     if (MRUlist.empty())
         disableCommands(editorCmds);
