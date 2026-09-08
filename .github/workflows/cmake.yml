@@ -99,9 +99,18 @@ jobs:
       shell: bash
       run: cmake --build . -j$(nproc)
 
-  build-macos-clang:
-    name: MacOS (Clang)
-    runs-on: macos-latest
+  build-macos:
+    name: MacOS (Clang) (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: macos-16
+          arch: x64
+          artifact: turbo-macos-x64
+        - os: macos-16
+          arch: arm64
+          artifact: turbo-macos-arm64
     steps:
     - uses: actions/checkout@v7
       with:
@@ -115,3 +124,9 @@ jobs:
       shell: bash
       run: cmake --build . -j$(sysctl -n hw.logicalcpu)
 
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ matrix.artifact }}
+        path: |
+          turbo
